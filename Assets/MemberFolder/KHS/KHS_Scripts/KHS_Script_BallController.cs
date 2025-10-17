@@ -27,10 +27,12 @@ public class KHS_Script_BallController : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ResetController.OnReset += KHS_BallReset;
+        KHS_Script_GameOverController.GameoverEvt += KHS_BallReset;
     }
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
+        KHS_Script_GameOverController.GameoverEvt -= KHS_BallReset;
     }
 
     private void KHS_BallReset()

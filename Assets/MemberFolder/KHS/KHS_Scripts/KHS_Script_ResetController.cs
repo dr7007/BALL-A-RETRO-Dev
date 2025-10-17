@@ -10,6 +10,7 @@ public class KHS_Script_ResetController : MonoBehaviour
     {
         if(Input.GetKeyDown(KeyCode.R))
         {
+            Debug.LogError("Reset!");
             OnReset.Invoke();
         }
     }

@@ -26,10 +26,12 @@ public class KHS_Script_CloseObjController : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ResetController.OnReset += CloseObjReset;
+        KHS_Script_GameOverController.GameoverEvt += CloseObjReset;
     }
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= CloseObjReset;
+        KHS_Script_GameOverController.GameoverEvt -= CloseObjReset;
     }
 
     private void CloseObjReset()
