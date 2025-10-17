@@ -5,8 +5,8 @@ public class YJ_Script_FlipperController : MonoBehaviour
 {
     [Header("플리퍼 세팅")]
     [SerializeField] private YJ_Script_Flipper[] flippers; // 여러 플리퍼를 관리할 배열
-    [SerializeField] private float flipperSpeed = 500f; // 플리퍼 속도
-    [SerializeField] private float impactForceMultiplier = 50f; // 충격량 계수
+    [SerializeField] private float flipperSpeed = 800f; // 플리퍼 속도
+    [SerializeField] private float impactForceMultiplier = 80f; // 충격량 계수
 
     private void Start()
     {
