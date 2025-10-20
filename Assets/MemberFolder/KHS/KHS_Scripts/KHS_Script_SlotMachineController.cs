@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class KHS_Script_SlotMachineController : MonoBehaviour
@@ -20,9 +21,18 @@ public class KHS_Script_SlotMachineController : MonoBehaviour
             scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
     }
 
-    private void OnTriggerEnter(Collider _collider)
+    private void OnEnable()
     {
-        if(_collider.CompareTag("Ball") && isSMActive)
+        KHS_Script_DumpManager.OnBallTrigger += BallDumpFunc;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_DumpManager.OnBallTrigger -= BallDumpFunc;
+    }
+
+    private void BallDumpFunc(Collider _collider)
+    {
+        if (isSMActive)
         {
             Rigidbody ballRb = _collider.GetComponent<Rigidbody>();
             if (ballRb != null)

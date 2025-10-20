@@ -1,10 +1,20 @@
+using System;
 using UnityEngine;
 
 public class KHS_Script_BumpController : MonoBehaviour
 {
     public float bounceForce = 2f;
 
-    private void OnCollisionEnter(Collision collision)
+    private void OnEnable()
+    {
+        KHS_Script_DumpManager.OnBallCollision += OnBallCollision;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_DumpManager.OnBallCollision -= OnBallCollision;
+    }
+
+    private void OnBallCollision(Collision collision)
     {
         Rigidbody ballRb = collision.collider.GetComponent<Rigidbody>();
         if (ballRb != null)
