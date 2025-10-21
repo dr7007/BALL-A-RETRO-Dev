@@ -1,17 +1,32 @@
+using System.Collections;
+using UnityEngine;
+using UnityEngine.SceneManagement;
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
 #endif
 
-using UnityEngine;
-using UnityEngine.SceneManagement;
-
 namespace PSH
 {
+    /// <summary>
+    /// 씬 로딩을 전담하며, 로딩 UI를 관리합니다.
+    /// </summary>
     public class PSH_Script_SceneLoader : MonoBehaviour
     {
+        [Tooltip("씬 로딩 시 활성화할 UI 패널")]
+        [SerializeField] private GameObject loadingPanel;
+
+        [Tooltip("로딩 UI를 최소한 보여줄 시간 (초)")]
+        [SerializeField] private float minLoadingTime = 2.0f;
+
+        private Coroutine currentLoadingCoroutine = null;
+
         private void Awake()
         {
             DontDestroyOnLoad(gameObject);
+            if (loadingPanel != null)
+            {
+                loadingPanel.SetActive(false);
+            }
         }
 
         private void OnEnable()
@@ -25,44 +40,77 @@ namespace PSH
         }
 
 
-        public void LoadSceneByName(string sceneName)
+        public void LoadSceneAsyncByName(string sceneName)
         {
-            SceneManager.LoadScene(sceneName);
+            if (currentLoadingCoroutine != null)
+            {
+                StopCoroutine(currentLoadingCoroutine);
+            }
+            currentLoadingCoroutine = StartCoroutine(LoadSceneCoroutine(sceneName));
         }
 
-/// <summary>
-        /// [에디터 전용] 씬 에셋의 경로를 이용해 씬을 로드합니다. Build Settings에 없어도 됩니다.
-        /// </summary>
-        public void LoadSceneByPath_EditorOnly(string scenePath)
+
+        public void LoadSceneByPath_Editor(string scenePath)
         {
-// 이 코드는 유니티 에디터 안에서만 컴파일되고 실행됩니다.
 #if UNITY_EDITOR
-            if (string.IsNullOrEmpty(scenePath))
+            if (currentLoadingCoroutine != null)
             {
-                Debug.LogError("로드할 씬의 경로가 비어있습니다!");
-                return;
+                StopCoroutine(currentLoadingCoroutine);
             }
-            Debug.Log($"[에디터 전용] 경로로 씬을 로드합니다: {scenePath}");
-            // 플레이 모드에서 지정된 경로의 씬을 로드하는 에디터 전용 함수
-            EditorSceneManager.LoadSceneInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Single));
+            currentLoadingCoroutine = StartCoroutine(LoadSceneCoroutine_Editor(scenePath));
 #else
-            // 에디터가 아닌 환경(빌드된 게임)에서는 이 코드가 실행됩니다.
-            Debug.LogError("이 기능은 유니티 에디터에서만 사용할 수 있습니다! Build Settings를 확인하세요.");
+            Debug.LogError("이 기능은 유니티 에디터에서만 사용할 수 있습니다!");
 #endif
         }
+
+        private IEnumerator LoadSceneCoroutine(string sceneName)
+        {
+            float startTime = Time.time;
+            if (loadingPanel != null) loadingPanel.SetActive(true);
+            else Debug.LogWarning("SceneLoader에 Loading Panel이 할당되지 않았습니다.");
+
+            AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
+            while (!asyncLoad.isDone)
+            {
+                yield return null;
+            }
+
+            float elapsedTime = Time.time - startTime;
+            if (elapsedTime < minLoadingTime)
+            {
+                yield return new WaitForSeconds(minLoadingTime - elapsedTime);
+            }
+            // 씬 로드가 완료되면 OnSceneLoaded 이벤트가 나머지(패널 숨기기 등)를 처리합니다.
+        }
+
+#if UNITY_EDITOR
+        private IEnumerator LoadSceneCoroutine_Editor(string scenePath)
+        {
+            float startTime = Time.time;
+            if (loadingPanel != null) loadingPanel.SetActive(true);
+            else Debug.LogWarning("SceneLoader에 Loading Panel이 할당되지 않았습니다.");
+
+            yield return null; 
+            
+            float elapsedTime = Time.time - startTime;
+            if (elapsedTime < minLoadingTime)
+            {
+                yield return new WaitForSeconds(minLoadingTime - elapsedTime);
+            }
+            
+            EditorSceneManager.LoadSceneInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Single));
+        }
+#endif
+
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
-
-            if (scene.name.Contains("Game"))
+            Debug.Log($"'{scene.name}' 씬 로드가 완료되었습니다.");
+            if (loadingPanel != null)
             {
-                Cursor.lockState = CursorLockMode.None;
-                Cursor.visible = true;
+                loadingPanel.SetActive(false);
             }
-            // 다른 씬이 로드되었을 경우
-            else
-            {
-                Debug.Log(scene.name + " 씬이 로드되었습니다.");
-            }
+            currentLoadingCoroutine = null;
         }
     }
 }
+
