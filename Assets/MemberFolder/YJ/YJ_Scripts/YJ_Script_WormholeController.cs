@@ -16,7 +16,7 @@ public class YJ_Script_WormholeController : MonoBehaviour
     [SerializeField] private int activationCount = -1;
 
     // 내부 상태 변수
-    private bool isWormholeActive = true; // 웜홀이 공을 받아들일 수 있는 상태인지 확인
+    public bool isActivated = true; // 웜홀이 공을 받아들일 수 있는 상태인지 확인
     private Transform spawnPoint;
 
 
@@ -44,7 +44,7 @@ public class YJ_Script_WormholeController : MonoBehaviour
         bool isUsable = (activationCount > 0 || activationCount == -1);
 
         // 들어온 것이 "Ball" 태그를 가진 오브젝트이고, 웜홀이 현재 활성 상태라면
-        if (other.CompareTag("Ball") && isWormholeActive && isUsable)
+        if (other.CompareTag("Ball") && isActivated && isUsable)
         {
             // 출구가 지정되지 않았다면 경고를 출력하고 종료
             if (exitWormhole == null)
@@ -71,8 +71,8 @@ public class YJ_Script_WormholeController : MonoBehaviour
     private IEnumerator TeleportCoroutine(Rigidbody rb)
     {
         // 1. 입구와 출구 웜홀을 모두 비활성화하여 중복 작동 방지
-        isWormholeActive = false;
-        exitWormhole.isWormholeActive = false; // 출구에서 바로 다시 들어가는 현상 방지
+        isActivated = false;
+        exitWormhole.isActivated = false; // 출구에서 바로 다시 들어가는 현상 방지
 
         // 2. 입사각(속도 벡터)을 기억하고 공을 물리적으로 고정 후 숨김
         Vector3 incomingVelocity = rb.linearVelocity;
@@ -92,9 +92,9 @@ public class YJ_Script_WormholeController : MonoBehaviour
 
         // 6. 짧은 시간 후 출구 웜홀을 재활성화 (공이 완전히 벗어날 시간 확보)
         yield return new WaitForSeconds(0.5f);
-        exitWormhole.isWormholeActive = true;
+        exitWormhole.isActivated = true;
 
         // 입구 웜홀을 재활성화
-        isWormholeActive = true;
+        isActivated = true;
     }
 }

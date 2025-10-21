@@ -9,7 +9,8 @@ public class YJ_LightSwitchController : MonoBehaviour
     }
 
     [Header("동작 설정")]
-    [SerializeField] private SwitchMode mode = SwitchMode.Once; // 기본값은 '한 번만'
+    [SerializeField] private SwitchMode mode = SwitchMode.Once; // 기본값: 'Once'
+                                                                // 충돌 판정이 필요한 오브젝트면 'Toggle'로 둘 것
 
     [Header("설정")]
     [SerializeField] private Material offMaterial; // 불이 꺼졌을 때 머티리얼
@@ -28,11 +29,29 @@ public class YJ_LightSwitchController : MonoBehaviour
         Deactivate();
     }
 
+    // 트리거 오브젝트용 작동 루틴
     private void OnTriggerEnter(Collider other)
     {
-        // 공이 아니면 무시
-        if (!other.CompareTag("Ball")) return;
+        // 닿은 오브젝트 태그가 공이면 실행
+        if (other.CompareTag("Ball"))
+        {
+            ProcessHit();
+        }
+    }
 
+    // 충돌 오브젝트용 작동 루틴
+    private void OnCollisionEnter(Collision collision)
+    {
+        // 닿은 오브젝트 태그가 공이면 실행
+        if (collision.gameObject.CompareTag("Ball"))
+        {
+            ProcessHit();
+        }
+    }
+
+    // 스위치를 '처리'하는 공통 로직
+    private void ProcessHit()
+    {
         // 모드에 따라 다르게 동작
         if (mode == SwitchMode.Once)
         {
