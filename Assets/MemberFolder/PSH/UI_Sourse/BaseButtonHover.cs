@@ -7,33 +7,34 @@ using System.Collections;
 [RequireComponent(typeof(RectTransform), typeof(Image))]
 public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
-    [Header("ÇÊ¼ö ¿¬°á: ¹öÆ° ÅØ½ºÆ®")]
+    [Header("í•„ìˆ˜ ì—°ê²°: ë²„íŠ¼ í…ìŠ¤íŠ¸")]
     [SerializeField] protected TextMeshProUGUI buttonText;
 
-    [Header("°íÁ¤ ¼³Á¤")]
+    [Header("ê³ ì • ì„¤ì •")]
     [SerializeField] private float hoverScale = 1.1f;
+    [SerializeField] private float scaleDuration = 0.2f; 
     [SerializeField] protected Color textHoverColor = Color.cyan;
 
     protected RectTransform rectTransform;
     protected Image buttonImage;
-
+    
     private Vector3 originalScale;
     private Color originalTextColor;
-    private float originalImageAlpha; // ¾ËÆÄ °ª¸¸ µû·Î ÀúÀå
-
-    // --- ÄÚ·çÆ¾ ¾ÈÀü ÀåÄ¡ ---
+    private float originalImageAlpha;
+    
+    // --- Coroutine Safe ---
     private Coroutine fadeCoroutine;
+    private Coroutine scaleCoroutine; 
 
     protected virtual void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
         buttonImage = GetComponent<Image>();
 
-        originalScale = rectTransform.localScale;
-
+        originalScale = rectTransform.localScale; 
         if (buttonImage != null)
         {
-            originalImageAlpha = buttonImage.color.a; // ¿øº» ¾ËÆÄ ÀúÀå
+            originalImageAlpha = buttonImage.color.a;
         }
 
         if (buttonText != null)
@@ -42,18 +43,17 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
         else
         {
-            Debug.LogWarning("ButtonText°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.", this.gameObject);
+            Debug.LogWarning("ButtonTextê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.", this.gameObject);
         }
     }
 
-    // --- ¸¶¿ì½º È£¹ö ÀÌº¥Æ® ---
+    // --- ë§ˆìš°ìŠ¤ í˜¸ë²„ ì´ë²¤íŠ¸ ---
 
     public virtual void OnPointerEnter(PointerEventData eventData)
     {
-        // 1. (°íÁ¤) ½ºÄÉÀÏ Å°¿ì±â
-        rectTransform.localScale = originalScale * hoverScale;
+        
+        StartScaleTween(originalScale * hoverScale, scaleDuration); 
 
-        // 2. (°íÁ¤) TMP ÅØ½ºÆ® ÇÏÀÌ¶óÀÌÆ®
         if (buttonText != null)
         {
             buttonText.color = textHoverColor;
@@ -62,40 +62,47 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public virtual void OnPointerExit(PointerEventData eventData)
     {
-        // 1. (°íÁ¤) ½ºÄÉÀÏ º¹¿ø
-        rectTransform.localScale = originalScale;
+        // 1. (ê³ ì •) ìŠ¤ì¼€ì¼ ë³µì› (ì½”ë£¨í‹´ìœ¼ë¡œ ë³€ê²½)
+        // rectTransform.localScale = originalScale; // <--- ì´ ì½”ë“œê°€
+        StartScaleTween(originalScale, scaleDuration); // <--- ì´ë ‡ê²Œ ë³€ê²½ë¨
 
-        // 2. (°íÁ¤) TMP ÅØ½ºÆ® º¹¿ø
+        // 2. (ê³ ì •) TMP í…ìŠ¤íŠ¸ ë³µì›
         if (buttonText != null)
         {
             buttonText.color = originalTextColor;
         }
     }
 
-    /// <summary>
-    /// (¾ÈÀü ÀåÄ¡ 1) ¿ÀºêÁ§Æ®°¡ ºñÈ°¼ºÈ­µÉ ¶§ »óÅÂ¸¦ °­Á¦ ¿øº¹
-    /// </summary>
     protected virtual void OnDisable()
     {
-        // ÄÚ·çÆ¾ÀÌ ½ÇÇà ÁßÀÏ ¼ö ÀÖÀ¸¹Ç·Î È®½ÇÇÏ°Ô ÁßÁö
+        // í˜ì´ë“œ ì½”ë£¨í‹´ ì¤‘ì§€
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
             fadeCoroutine = null;
         }
+        
+        // <--- ì¶”ê°€ë¨: ìŠ¤ì¼€ì¼ ì½”ë£¨í‹´ ì¤‘ì§€ ---
+        if (scaleCoroutine != null)
+        {
+            StopCoroutine(scaleCoroutine);
+            scaleCoroutine = null;
+        }
+        // <--- ì—¬ê¸°ê¹Œì§€ ---
 
-        // È£¹ö »óÅÂ¿¡¼­ ºñÈ°¼ºÈ­µÉ °æ¿ì¸¦ ´ëºñÇØ °ª ¿øº¹
+        // <--- ë³€ê²½ë¨: ìŠ¤ì¼€ì¼ ì¦‰ì‹œ ì›ë³µ ---
         if (rectTransform != null)
         {
-            rectTransform.localScale = originalScale;
+            rectTransform.localScale = originalScale; 
         }
+        // <--- ì—¬ê¸°ê¹Œì§€ ---
+
         if (buttonText != null)
         {
             buttonText.color = originalTextColor;
         }
         if (buttonImage != null)
         {
-            // ÆäÀÌµå°¡ ÁøÇà ÁßÀÌ¾ú¾îµµ ¿øº» ¾ËÆÄ·Î Áï½Ã º¹±¸
             Color color = buttonImage.color;
             color.a = originalImageAlpha;
             buttonImage.color = color;
@@ -103,30 +110,14 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
     }
 
 
-    // --- ¼±ÅÃÀû ±â´É (ÀÚ½ÄÀÌ È£ÃâÇØ¼­ »ç¿ë) ---
-
-    /// <summary>
-    /// ¹öÆ° ÀÌ¹ÌÁö¸¦ ÁöÁ¤ÇÑ ¾ËÆÄ°ªÀ¸·Î ÆäÀÌµåÇÕ´Ï´Ù. (¾ÈÀü ÀåÄ¡ Àû¿ëµÊ)
-    /// </summary>
     protected void StartImageFade(float targetAlpha, float duration)
     {
-        if (buttonImage == null) return;
+        if (buttonImage == null || !this.gameObject.activeInHierarchy) return;
 
-        // (¾ÈÀü ÀåÄ¡ 2)
-        // ¿ÀºêÁ§Æ®°¡ ºñÈ°¼ºÈ­ »óÅÂ¸é ÄÚ·çÆ¾À» ½ÃÀÛÇÏÁö ¾ÊÀ½ (¿¡·¯ ¹æÁö)
-        if (!this.gameObject.activeInHierarchy)
-        {
-            return;
-        }
-
-        // (¾ÈÀü ÀåÄ¡ 3)
-        // ÀÌÀü¿¡ ½ÇÇà ÁßÀÎ ÆäÀÌµå°¡ ÀÖ´Ù¸é È®½ÇÇÏ°Ô ÁßÁöÇÏ°í ÂüÁ¶¸¦ ºñ¿ò
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
         }
-
-        // »õ ÆäÀÌµå ÄÚ·çÆ¾ ½ÃÀÛ
         fadeCoroutine = StartCoroutine(FadeCoroutine(targetAlpha, duration));
     }
 
@@ -136,14 +127,12 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
         Color color = buttonImage.color;
         float time = 0f;
 
-        // (¾ÈÀü ÀåÄ¡ 4)
-        // durationÀÌ 0 ÀÌÇÏ¸é Áï½Ã ¿Ï·á (0À¸·Î ³ª´©±â ¹æÁö)
         if (duration <= 0f)
         {
             color.a = targetAlpha;
             buttonImage.color = color;
-            fadeCoroutine = null; // (¾ÈÀü ÀåÄ¡ 5)
-            yield break; // ÄÚ·çÆ¾ Áï½Ã Á¾·á
+            fadeCoroutine = null;
+            yield break;
         }
 
         while (time < duration)
@@ -151,17 +140,56 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
             color.a = alpha;
             buttonImage.color = color;
-
             time += Time.deltaTime;
             yield return null;
         }
 
-        // Á¤È®ÇÏ°Ô ¸ñÇ¥ ¾ËÆÄ °ªÀ¸·Î ¼³Á¤
         color.a = targetAlpha;
         buttonImage.color = color;
-
-        // (¾ÈÀü ÀåÄ¡ 5)
-        // ÄÚ·çÆ¾ÀÌ Á¤»óÀûÀ¸·Î ¿Ï·áµÇ¸é ÂüÁ¶¸¦ null·Î ºñ¿öÁÜ
         fadeCoroutine = null;
+    }
+
+    // --- (ë‚´ë¶€) ìŠ¤ì¼€ì¼ íŠ¸ìœ„ë‹ ê¸°ëŠ¥ (ì¶”ê°€ë¨) ---
+
+    /// <summary>
+    /// ë²„íŠ¼ ìŠ¤ì¼€ì¼ì„ ë¶€ë“œëŸ½ê²Œ ë³€ê²½í•©ë‹ˆë‹¤. (ì•ˆì „ ì¥ì¹˜ ì ìš©)
+    /// </summary>
+    private void StartScaleTween(Vector3 targetScale, float duration)
+    {
+        if (rectTransform == null || !this.gameObject.activeInHierarchy) return;
+
+        if (scaleCoroutine != null)
+        {
+            StopCoroutine(scaleCoroutine);
+        }
+        scaleCoroutine = StartCoroutine(ScaleCoroutine(targetScale, duration));
+    }
+
+    private IEnumerator ScaleCoroutine(Vector3 targetScale, float duration)
+    {
+        Vector3 startScale = rectTransform.localScale;
+        float time = 0f;
+
+        if (duration <= 0f)
+        {
+            rectTransform.localScale = targetScale;
+            scaleCoroutine = null;
+            yield break;
+        }
+
+        while (time < duration)
+        {
+            // Vector3.Lerpë¥¼ ì‚¬ìš©í•´ startScaleì—ì„œ targetScaleë¡œ ë¶€ë“œëŸ½ê²Œ ë³´ê°„
+            // Mathf.SmoothStepì„ ì‚¬ìš©í•´ ì¢€ ë” ë¶€ë“œëŸ¬ìš´ Ease In/Out íš¨ê³¼ ì ìš©
+            float t = Mathf.SmoothStep(0.0f, 1.0f, time / duration);
+            rectTransform.localScale = Vector3.Lerp(startScale, targetScale, t);
+            
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        // ì •í™•í•˜ê²Œ ëª©í‘œ ê°’ìœ¼ë¡œ ì„¤ì •
+        rectTransform.localScale = targetScale;
+        scaleCoroutine = null; // ì°¸ì¡° ë¹„ìš°ê¸°
     }
 }
