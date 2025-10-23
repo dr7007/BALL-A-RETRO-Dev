@@ -6,8 +6,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     [Header("스코어 정보")]
     [Tooltip("현재 스코어 정보를 표시합니다")]
-    [SerializeField]
-    private int curScore = 0;
+    public int curScore = 0;
 
     [Header("볼 관련 정보")]
     [Tooltip("추후 점수 계산에 사용할 볼의 정보를 저장하기 위함")]
@@ -30,16 +29,28 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ResetController.OnReset += ScoreReset;
+        KHS_Script_BallController.GameOverEvt += GameOver;
         KHS_Script_DumpManager.OnBallTrigger += BallTrigger;
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
+        KHS_Script_DumpManager.OnScore += AddScore;
     }
 
 
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= ScoreReset;
+        KHS_Script_BallController.GameOverEvt -= GameOver;
         KHS_Script_DumpManager.OnBallTrigger -= BallTrigger;
         KHS_Script_DumpManager.OnBallCollision -= BallCollision;
+        KHS_Script_DumpManager.OnScore -= AddScore;
+    }
+
+    private void GameOver()
+    {
+        Debug.LogError("게임오버!!!");
+        Debug.LogWarning($"최종 스코어 : {curScore}");
+        curScore = 0;
+        numOfBounce = 0;
     }
 
     private void FliperBallCollision()
@@ -57,13 +68,13 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void BallTrigger(Collider _other)
     {
-        Debug.Log($"볼 튕긴(Trigger) 횟수 증가 : {numOfBounce}");
         numOfBounce++;
+        Debug.Log($"볼 튕긴(Trigger) 횟수 증가 : {numOfBounce}");
     }
     private void BallCollision(Collision collision)
     {
-        Debug.Log($"볼 튕긴(Collision) 횟수 증가 : {numOfBounce}");
         numOfBounce++;
+        Debug.Log($"볼 튕긴(Collision) 횟수 증가 : {numOfBounce}");
     }
 
     private void ScoreReset()
