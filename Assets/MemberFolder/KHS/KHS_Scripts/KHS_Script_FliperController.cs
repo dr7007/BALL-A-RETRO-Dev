@@ -6,9 +6,8 @@ public class KHS_Script_FliperController : MonoBehaviour
     [Header("플리퍼 세팅")]
     [SerializeField] private YJ_Script_Flipper[] flippers; // 여러 플리퍼를 관리할 배열
     [SerializeField] private float flipperSpeed = 800f; // 플리퍼 속도
-    
-    public float impactForceMultiplier = 80f; // 충격량 계수
 
+    public float impactForceMultiplier = 80f; // 충격량 계수
 
     private void Start()
     {
