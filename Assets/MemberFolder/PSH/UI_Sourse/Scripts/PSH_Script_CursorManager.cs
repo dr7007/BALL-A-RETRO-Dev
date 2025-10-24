@@ -25,7 +25,6 @@ public class PSH_Script_CursorManager : MonoBehaviour
 
     private void Start()
     {
-
         SetDefaultCursor();
     }
 
