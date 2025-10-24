@@ -6,8 +6,7 @@ public class KHS_Script_UIToBall : MonoBehaviour
 {
     [SerializeField]
     private TextMeshProUGUI currentBallCountUI = null;
-    private int BallCount = 0;
-    private KHS_Script_BallController scoreManager = null;
+    private int ballCount = 0;
     private bool isOver = false;
 
     private void OnEnable()
@@ -22,14 +21,6 @@ public class KHS_Script_UIToBall : MonoBehaviour
 
     void Start()
     {
-        isOver = false;
-        currentScore = -100;
-        scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
-        if(scoreManager != null)
-        {
-            currentScore = scoreManager.curScore;
-        }
-        currentScoreUI = GetComponent<TextMeshProUGUI>();
     }
 
     // Update is called once per frame
@@ -38,8 +29,6 @@ public class KHS_Script_UIToBall : MonoBehaviour
         if (!isOver)
         {
             // To Do : 현재는 구현의 편의성을 위해 FixedUpdate에서 갱신하지만, 추후에는 점수 업데이트 이벤트나 점수 변화 이벤트에 따라 갱신하도록 최적화 필요
-            currentScore = scoreManager.curScore;
-            currentScoreUI.text = "" + currentScore;
         }
     }
     private void GameOverUI()
