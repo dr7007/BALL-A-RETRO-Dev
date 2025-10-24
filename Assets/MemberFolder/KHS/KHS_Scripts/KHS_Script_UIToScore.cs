@@ -12,11 +12,13 @@ public class KHS_Script_UIToScore : MonoBehaviour
 
     private void OnEnable()
     {
-        KHS_Script_BallController.GameOverEvt += GameOverUI;
+        KHS_Script_ScoreManager.OnGameOver += GameOverUI;
+        KHS_Script_ScoreManager.OnGameClear += GameOverUI;
     }
     private void OnDisable()
     {
-        KHS_Script_BallController.GameOverEvt -= GameOverUI;
+        KHS_Script_ScoreManager.OnGameOver -= GameOverUI;
+        KHS_Script_ScoreManager.OnGameClear -= GameOverUI;
     }
 
 
@@ -37,7 +39,7 @@ public class KHS_Script_UIToScore : MonoBehaviour
     {
         if (!isOver)
         {
-            // To Do : ÇöÀç´Â ±¸ÇöÀÇ ÆíÀÇ¼ºÀ» À§ÇØ FixedUpdate¿¡¼­ °»½ÅÇÏÁö¸¸, ÃßÈÄ¿¡´Â Á¡¼ö ¾÷µ¥ÀÌÆ® ÀÌº¥Æ®³ª Á¡¼ö º¯È­ ÀÌº¥Æ®¿¡ µû¶ó °»½ÅÇÏµµ·Ï ÃÖÀûÈ­ ÇÊ¿ä
+            // To Do : í˜„ì¬ëŠ” êµ¬í˜„ì˜ í¸ì˜ì„±ì„ ìœ„í•´ FixedUpdateì—ì„œ ê°±ì‹ í•˜ì§€ë§Œ, ì¶”í›„ì—ëŠ” ì ìˆ˜ ì—…ë°ì´íŠ¸ ì´ë²¤íŠ¸ë‚˜ ì ìˆ˜ ë³€í™” ì´ë²¤íŠ¸ì— ë”°ë¼ ê°±ì‹ í•˜ë„ë¡ ìµœì í™” í•„ìš”
             currentScore = scoreManager.curScore;
             currentScoreUI.text = "" + currentScore;
         }

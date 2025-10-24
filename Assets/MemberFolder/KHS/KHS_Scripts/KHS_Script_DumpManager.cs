@@ -32,11 +32,11 @@ public class KHS_Script_DumpManager : MonoBehaviour
         Rigidbody ballRb = _collision.gameObject.GetComponent<Rigidbody>();
         if (ballRb != null)
         {
-            // Ãæµ¹ ÁöÁ¡ÀÇ ¹İ´ë ¹æÇâÀ¸·Î ÈûÀ» ½Ç¾î Æ¨°Ü³¿
+            // ì¶©ëŒ ì§€ì ì˜ ë°˜ëŒ€ ë°©í–¥ìœ¼ë¡œ í˜ì„ ì‹¤ì–´ íŠ•ê²¨ëƒ„
             Vector3 direction = _collision.contacts[0].normal;
             ballRb.AddForce(-direction * bounceForce, ForceMode.Impulse);
 
-            // ¿©±â¿¡ »ç¿îµå Àç»ı, ÆÄÆ¼Å¬ È¿°ú µî Ãß°¡ °¡´É
+            // ì—¬ê¸°ì— ì‚¬ìš´ë“œ ì¬ìƒ, íŒŒí‹°í´ íš¨ê³¼ ë“± ì¶”ê°€ ê°€ëŠ¥
             OnScore.Invoke(bumpScore);
         }
     }

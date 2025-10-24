@@ -44,7 +44,7 @@ public class KHS_Script_BallController : MonoBehaviour
 
     private void KHS_GameOverBall()
     {
-        BallCount--;
+        --BallCount;
         if (BallCount <= 0)
         {
             gameObject.SetActive(false);

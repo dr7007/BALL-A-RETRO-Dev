@@ -3,13 +3,17 @@ using UnityEngine;
 
 public class KHS_Script_ScoreManager : MonoBehaviour
 {
+    public static event Action OnGameOver;
+    public static event Action OnGameClear;
 
-    [Header("½ºÄÚ¾î Á¤º¸")]
-    [Tooltip("ÇöÀç ½ºÄÚ¾î Á¤º¸¸¦ Ç¥½ÃÇÕ´Ï´Ù")]
+    [Header("ìŠ¤ì½”ì–´ ì •ë³´")]
+    [Tooltip("í˜„ì¬ ìŠ¤ì½”ì–´ ì •ë³´ë¥¼ í‘œì‹œí•©ë‹ˆë‹¤")]
     public int curScore = 0;
+    [Tooltip("ëª©í‘œ ìŠ¤ì½”ì–´ ì •ë³´ë¥¼ í‘œì‹œí•©ë‹ˆë‹¤")]
+    public int targetScore = 5000;
 
-    [Header("º¼ °ü·Ã Á¤º¸")]
-    [Tooltip("ÃßÈÄ Á¡¼ö °è»ê¿¡ »ç¿ëÇÒ º¼ÀÇ Á¤º¸¸¦ ÀúÀåÇÏ±â À§ÇÔ")]
+    [Header("ë³¼ ê´€ë ¨ ì •ë³´")]
+    [Tooltip("ì¶”í›„ ì ìˆ˜ ê³„ì‚°ì— ì‚¬ìš©í•  ë³¼ì˜ ì •ë³´ë¥¼ ì €ì¥í•˜ê¸° ìœ„í•¨")]
     [SerializeField]
     private int numOfBounce = 0;
 
@@ -29,7 +33,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ResetController.OnReset += ScoreReset;
-        KHS_Script_BallController.GameOverEvt += GameOver;
+        KHS_Script_BallController.GameOverEvt += GameResultJudge;
         KHS_Script_DumpManager.OnBallTrigger += BallTrigger;
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
         KHS_Script_DumpManager.OnScore += AddScore;
@@ -39,49 +43,53 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= ScoreReset;
-        KHS_Script_BallController.GameOverEvt -= GameOver;
+        KHS_Script_BallController.GameOverEvt -= GameResultJudge;
         KHS_Script_DumpManager.OnBallTrigger -= BallTrigger;
         KHS_Script_DumpManager.OnBallCollision -= BallCollision;
         KHS_Script_DumpManager.OnScore -= AddScore;
     }
 
-    private void GameOver()
+    private void GameResultJudge()
     {
-        Debug.LogError("°ÔÀÓ¿À¹ö!!!");
-        Debug.LogWarning($"ÃÖÁ¾ ½ºÄÚ¾î : {curScore}");
+        Debug.LogError("ê²Œì„ì¢…ë£Œ ê²°ê³¼ íŒì •ì¤‘!!!");
+        Debug.LogWarning($"ìµœì¢… ìŠ¤ì½”ì–´ : {curScore}");
+        if (curScore >= targetScore)
+            OnGameClear.Invoke();
+        else
+            OnGameOver.Invoke();
         curScore = 0;
         numOfBounce = 0;
     }
 
     private void FliperBallCollision()
     {
-        Debug.LogWarning($"ÇÃ¸®ÆÛ Ãæµ¹! Æ¨±ä È½¼ö ÃÊ±âÈ­! ÀÌ¹ø¿¡ Æ¨±äÈ½¼ö {numOfBounce}");
+        Debug.LogWarning($"í”Œë¦¬í¼ ì¶©ëŒ! íŠ•ê¸´ íšŸìˆ˜ ì´ˆê¸°í™”! ì´ë²ˆì— íŠ•ê¸´íšŸìˆ˜ {numOfBounce}");
         numOfBounce = 0;
     }
 
     public void AddScore(int value)
     {
         curScore += value;
-        Debug.LogWarning($"ÇöÀç ½ºÄÚ¾î: {curScore} (+{value})");
+        Debug.LogWarning($"í˜„ì¬ ìŠ¤ì½”ì–´: {curScore} (+{value})");
     }
 
 
     private void BallTrigger(Collider _other)
     {
         numOfBounce++;
-        Debug.Log($"º¼ Æ¨±ä(Trigger) È½¼ö Áõ°¡ : {numOfBounce}");
+        Debug.Log($"ë³¼ íŠ•ê¸´(Trigger) íšŸìˆ˜ ì¦ê°€ : {numOfBounce}");
     }
     private void BallCollision(Collision collision)
     {
         numOfBounce++;
-        Debug.Log($"º¼ Æ¨±ä(Collision) È½¼ö Áõ°¡ : {numOfBounce}");
+        Debug.Log($"ë³¼ íŠ•ê¸´(Collision) íšŸìˆ˜ ì¦ê°€ : {numOfBounce}");
     }
 
     private void ScoreReset()
     {
-        Debug.LogWarning($"¸®¼Â Àü ¸¶Áö¸· ½ºÄÚ¾î Ç¥±â : {curScore}");
+        Debug.LogWarning($"ë¦¬ì…‹ ì „ ë§ˆì§€ë§‰ ìŠ¤ì½”ì–´ í‘œê¸° : {curScore}");
         curScore = 0;
-        Debug.LogWarning($"¸®¼Â Àü ¸¶Áö¸· Æ¨±è ¼ö Ç¥±â : {numOfBounce}");
+        Debug.LogWarning($"ë¦¬ì…‹ ì „ ë§ˆì§€ë§‰ íŠ•ê¹€ ìˆ˜ í‘œê¸° : {numOfBounce}");
         numOfBounce = 0;
     }
 }
