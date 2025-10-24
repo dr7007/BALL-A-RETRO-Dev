@@ -5,7 +5,7 @@ using TMPro;
 using System.Collections;
 
 [RequireComponent(typeof(RectTransform), typeof(Image))]
-public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
 {
     [Header("필수 연결: 버튼 텍스트")]
     [SerializeField] protected TextMeshProUGUI buttonText;
@@ -58,12 +58,15 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
         {
             buttonText.color = textHoverColor;
         }
+        if (PSH_Script_CursorManager.Instance != null)
+        {
+            PSH_Script_CursorManager.Instance.SetHandCursor();
+        }
+
     }
 
     public virtual void OnPointerExit(PointerEventData eventData)
     {
-        // 1. (고정) 스케일 복원 (코루틴으로 변경)
-        // rectTransform.localScale = originalScale; // <--- 이 코드가
         StartScaleTween(originalScale, scaleDuration); // <--- 이렇게 변경됨
 
         // 2. (고정) TMP 텍스트 복원
@@ -71,31 +74,31 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
         {
             buttonText.color = originalTextColor;
         }
+        if (PSH_Script_CursorManager.Instance != null)
+        {
+            PSH_Script_CursorManager.Instance.SetDefaultCursor();
+        }
     }
 
     protected virtual void OnDisable()
     {
-        // 페이드 코루틴 중지
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
             fadeCoroutine = null;
         }
         
-        // <--- 추가됨: 스케일 코루틴 중지 ---
+
         if (scaleCoroutine != null)
         {
             StopCoroutine(scaleCoroutine);
             scaleCoroutine = null;
         }
-        // <--- 여기까지 ---
 
-        // <--- 변경됨: 스케일 즉시 원복 ---
         if (rectTransform != null)
         {
             rectTransform.localScale = originalScale; 
         }
-        // <--- 여기까지 ---
 
         if (buttonText != null)
         {
@@ -149,10 +152,9 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
         fadeCoroutine = null;
     }
 
-    // --- (내부) 스케일 트위닝 기능 (추가됨) ---
 
     /// <summary>
-    /// 버튼 스케일을 부드럽게 변경합니다. (안전 장치 적용)
+    /// 버튼 스케일을 부드럽게 변경
     /// </summary>
     private void StartScaleTween(Vector3 targetScale, float duration)
     {
@@ -179,16 +181,12 @@ public class BaseButtonHover : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         while (time < duration)
         {
-            // Vector3.Lerp를 사용해 startScale에서 targetScale로 부드럽게 보간
-            // Mathf.SmoothStep을 사용해 좀 더 부드러운 Ease In/Out 효과 적용
             float t = Mathf.SmoothStep(0.0f, 1.0f, time / duration);
             rectTransform.localScale = Vector3.Lerp(startScale, targetScale, t);
             
             time += Time.deltaTime;
             yield return null;
         }
-
-        // 정확하게 목표 값으로 설정
         rectTransform.localScale = targetScale;
         scaleCoroutine = null; // 참조 비우기
     }

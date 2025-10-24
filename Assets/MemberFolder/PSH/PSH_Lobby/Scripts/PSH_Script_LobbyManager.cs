@@ -15,11 +15,28 @@ namespace PSH
 
         [Header("Build Settings")]
         [Tooltip("빌드 버전에서 로드할 게임 씬의 이름")]
-
-
         [SerializeField] private string sceneNameForBuild = "";
 
+        [Header("Manager Prefabs")]
+        [Tooltip("게임 시작 시 생성할 CursorManager 프리팹")]
+        [SerializeField] private GameObject cursorManagerPrefab;
+
         private PSH_Script_SceneLoader sceneLoader;
+
+        private void Awake()
+        {
+            if (PSH_Script_CursorManager.Instance == null)
+            {
+                if (cursorManagerPrefab != null)
+                {
+                    Instantiate(cursorManagerPrefab);
+                }
+                else
+                {
+                    Debug.LogError("CursorManager 프리팹이 LobbyUIManager에 할당되지 않았습니다!");
+                }
+            }
+        }
 
         private void Start()
         {
