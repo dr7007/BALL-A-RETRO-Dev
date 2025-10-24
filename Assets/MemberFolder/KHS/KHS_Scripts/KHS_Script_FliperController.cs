@@ -3,28 +3,29 @@ using UnityEngine;
 
 public class KHS_Script_FliperController : MonoBehaviour
 {
-    [Header("ÇÃ¸®ÆÛ ¼¼ÆÃ")]
-    [SerializeField] private YJ_Script_Flipper[] flippers; // ¿©·¯ ÇÃ¸®ÆÛ¸¦ °ü¸®ÇÒ ¹è¿­
-    [SerializeField] private float flipperSpeed = 800f; // ÇÃ¸®ÆÛ ¼Óµµ
+    // ìœ ë‹ˆì½”ë“œ ë³€ê²½ í›„ í…ŒìŠ¤íŠ¸ìš©
+    [Header("í”Œë¦¬í¼ ì„¸íŒ…")]
+    [SerializeField] private YJ_Script_Flipper[] flippers; // ì—¬ëŸ¬ í”Œë¦¬í¼ë¥¼ ê´€ë¦¬í•  ë°°ì—´
+    [SerializeField] private float flipperSpeed = 800f; // í”Œë¦¬í¼ ì†ë„
 
-    public float impactForceMultiplier = 80f; // Ãæ°İ·® °è¼ö
-
+    public float impactForceMultiplier = 80f; // ì¶©ê²©ëŸ‰ ê³„ìˆ˜
+    
     private void Start()
     {
-        // °¢ ÇÃ¸®ÆÛÀÇ ÃÊ±â È¸Àü°ª°ú ÀÛµ¿½Ã È¸Àü°ªÀ» °è»êÇÏ°í ÀúÀå
+        // ê° í”Œë¦¬í¼ì˜ ì´ˆê¸° íšŒì „ê°’ê³¼ ì‘ë™ì‹œ íšŒì „ê°’ì„ ê³„ì‚°í•˜ê³  ì €ì¥
         foreach (var flipper in flippers)
         {
             if (flipper.rigidbody != null)
             {
-                flipper.restRotation = flipper.rigidbody.rotation;  // ÇÃ¸®ÆÛ ¸ØÃá »óÅÂÀÇ È¸Àü°ª ÀúÀå
-                flipper.activeRotation = flipper.restRotation * Quaternion.Euler(0, flipper.flipperAngle, 0);   // ÇÃ¸®ÆÛ ÀÛµ¿½ÃÀÇ È¸Àü°ª ÀúÀå
+                flipper.restRotation = flipper.rigidbody.rotation;  // í”Œë¦¬í¼ ë©ˆì¶˜ ìƒíƒœì˜ íšŒì „ê°’ ì €ì¥
+                flipper.activeRotation = flipper.restRotation * Quaternion.Euler(0, flipper.flipperAngle, 0);   // í”Œë¦¬í¼ ì‘ë™ì‹œì˜ íšŒì „ê°’ ì €ì¥
             }
         }
     }
 
     private void Update()
     {
-        // ÁöÁ¤ÇÑ Å° ÀÔ·ÂÀ» °¨Áö
+        // ì§€ì •í•œ í‚¤ ì…ë ¥ì„ ê°ì§€
         foreach (var flipper in flippers)
         {
             if (flipper.rigidbody != null)
@@ -41,16 +42,16 @@ public class KHS_Script_FliperController : MonoBehaviour
         }
     }
 
-    private void FixedUpdate()  // ÇÃ¸®ÆÛ È¸Àü Ã³¸®
+    private void FixedUpdate()  // í”Œë¦¬í¼ íšŒì „ ì²˜ë¦¬
     {
         foreach (var flipper in flippers)
         {
             if (flipper.rigidbody != null)
             {
-                // isPressed »óÅÂ¿¡ µû¶ó È¸Àü°ªÀ» ÁöÁ¤
+                // isPressed ìƒíƒœì— ë”°ë¼ íšŒì „ê°’ì„ ì§€ì •
                 Quaternion targetRotation = flipper.isPressed ? flipper.activeRotation : flipper.restRotation;
 
-                // ÇÃ¸®ÆÛ È¸Àü
+                // í”Œë¦¬í¼ íšŒì „
                 flipper.rigidbody.MoveRotation(
                     Quaternion.RotateTowards(
                         flipper.rigidbody.rotation,

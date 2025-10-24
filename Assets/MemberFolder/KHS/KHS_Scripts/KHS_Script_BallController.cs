@@ -18,7 +18,6 @@ public class KHS_Script_BallController : MonoBehaviour
     private Vector3 initBallPos = Vector3.zero;
     void Start()
     {
-        BallCount = 3;
         initBallPos = transform.position;
         GravDirection = GetComponentInParent<Transform>().forward * -1;
         rigidBody = GetComponentInChildren<Rigidbody>();
@@ -59,5 +58,10 @@ public class KHS_Script_BallController : MonoBehaviour
         transform.position = initBallPos;
         rigidBody.angularVelocity = Vector3.zero;
         rigidBody.linearVelocity = Vector3.zero;
+    }
+
+    public int BallCountResponse()
+    {
+        return BallCount;
     }
 }
