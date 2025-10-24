@@ -19,6 +19,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
 
     // 내부 상태 변수
     private bool isBallCaptured = false;
+    public bool isActivated = false;
 
     // 에디터에서 중력 범위를 하늘색 선으로 표시
     private void OnDrawGizmosSelected()
@@ -31,7 +32,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     private void OnTriggerStay(Collider other)
     {
         // 공이 "Ball" 태그를 가졌고, 아직 붙잡힌 상태가 아니라면 중력장 효과를 적용
-        if (other.CompareTag("Ball") && !isBallCaptured)
+        if (other.CompareTag("Ball") && isActivated && !isBallCaptured)
         {
             Rigidbody ballRigidbody = other.GetComponent<Rigidbody>();
             if (ballRigidbody == null) return;
