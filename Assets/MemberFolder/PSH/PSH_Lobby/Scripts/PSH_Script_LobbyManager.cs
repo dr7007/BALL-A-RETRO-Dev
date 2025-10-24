@@ -1,17 +1,11 @@
 using UnityEngine;
-#if UNITY_EDITOR
-using UnityEditor;
-using UnityEditor.SceneManagement;
-#endif
-
+// UnityEditor 관련 using 문 제거
 
 namespace PSH
 {
     public class PSH_Script_LobbyUIManager : MonoBehaviour
     {
-        [Header("Editor Settings")]
-        [Tooltip("에디터에서 테스트할 대상 게임 씬 에셋")]
-        [SerializeField] private SceneAsset targetScene;
+        // --- [Editor Settings] 및 targetScene 변수 제거 ---
 
         [Header("Build Settings")]
         [Tooltip("빌드 버전에서 로드할 게임 씬의 이름")]
@@ -48,7 +42,6 @@ namespace PSH
             }
         }
 
-
         public void OnClick_StartGame()
         {
             if (sceneLoader == null)
@@ -57,23 +50,15 @@ namespace PSH
                 return;
             }
 
-#if UNITY_EDITOR
-            if (targetScene == null)
-            {
-                Debug.LogError("인스펙터에서 Target Scene을 설정해주세요!");
-                return;
-            }
-            string scenePath = AssetDatabase.GetAssetPath(targetScene);
-            sceneLoader.LoadSceneByPath_Editor(scenePath);
-#else
-            // --- 빌드 전용 로직 ---
+            // --- #if UNITY_EDITOR 로직 제거 ---
+
+            // --- 항상 빌드 전용 로직을 사용하도록 수정 ---
             if (string.IsNullOrEmpty(sceneNameForBuild))
             {
                 Debug.LogError("인스펙터에서 Scene Name For Build를 설정해주세요!");
                 return;
             }
             sceneLoader.LoadSceneAsyncByName(sceneNameForBuild);
-#endif
         }
 
         public void OnClick_QuitGame()
@@ -81,5 +66,8 @@ namespace PSH
             Debug.Log("Game Quit");
             Application.Quit();
         }
+
+        // --- #if UNITY_EDITOR 및 OnValidate() 함수 제거 ---
     }
 }
+
