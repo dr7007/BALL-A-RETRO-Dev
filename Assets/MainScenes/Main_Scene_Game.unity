@@ -4722,6 +4722,10 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1738729399763439272, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 50abb7144d2a8f94196d71603c866c1d, type: 2}
     - target: {fileID: 2500944382715511952, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
       propertyPath: m_Name
       value: Pinball_Body (1)
@@ -4730,10 +4734,26 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3268461496744921666, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 50abb7144d2a8f94196d71603c866c1d, type: 2}
+    - target: {fileID: 3500425064742306573, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 50abb7144d2a8f94196d71603c866c1d, type: 2}
+    - target: {fileID: 4029260663749355931, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 50abb7144d2a8f94196d71603c866c1d, type: 2}
     - target: {fileID: 4876795002927655659, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
       propertyPath: m_IsActive
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4973609037879591922, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: a2adf88d4c987f34183d469eca9e547e, type: 2}
     - target: {fileID: 7557138027847203614, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -10532,8 +10552,16 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 1670479126539840009, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+      propertyPath: m_Color.a
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 1789865557165862563, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
       propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 2512009107933865199, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+      propertyPath: m_Color.a
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4231377960008927525, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
@@ -19748,7 +19776,7 @@ Transform:
   m_GameObject: {fileID: 1887404851}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: 0, y: 1.14, z: -5.67}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
