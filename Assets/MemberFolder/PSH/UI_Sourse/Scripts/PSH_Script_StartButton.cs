@@ -3,7 +3,7 @@ using UnityEngine.UI;
 using UnityEngine.EventSystems;
 using UnityEngine.Events;
 
-public class StartButton : BaseButtonHover, IPointerClickHandler
+public class PSH_Script_StartButton : PSH_Script_BaseButtonHover, IPointerClickHandler
 {
     public UnityEvent onClick; 
 
