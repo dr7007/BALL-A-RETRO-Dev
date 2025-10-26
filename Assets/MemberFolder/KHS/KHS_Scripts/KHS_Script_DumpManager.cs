@@ -14,6 +14,26 @@ public class KHS_Script_DumpManager : MonoBehaviour
     public float bounceForce = 2f;
     public int bumpScore = 0;
 
+    private void OnEnable()
+    {
+        KHS_Script_BallOutController.BallOutEvt += DumpReset;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_BallOutController.BallOutEvt -= DumpReset;
+    }
+
+    private void DumpReset()
+    {
+        Target _target = GetComponent<Target>();
+        if (_target)
+        {
+            _target.Activate_Object();
+        }
+        else
+            return;
+    }
+
     private void OnTriggerEnter(Collider _collider)
     {
         //if(_collider.CompareTag("Ball"))
