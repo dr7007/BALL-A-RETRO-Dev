@@ -21,7 +21,12 @@ public class KHS_Script_ResetController : MonoBehaviour
     {
         if(isClear)
         {
-            if(Input.anyKeyDown)
+            if (Input.GetKeyDown(KeyCode.R))
+            {
+                Debug.LogError("Reset!");
+                SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
+            }
+            else if (Input.anyKeyDown)
             {
                 Debug.LogError("Go to Lobby");
                 SceneManager.LoadScene(lobbySceneName, LoadSceneMode.Single);
