@@ -7,14 +7,14 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: S_BuildingNeon_SpriteLit
-  m_Shader: {fileID: -6465566751694194690, guid: 5c364804924ea4d47b14106802ca5b8a, type: 3}
+  m_Name: TintSolid
+  m_Shader: {fileID: -6465566751694194690, guid: 01c6688f9599dd947a1f9656be4be85b, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 4
-  m_EnableInstancingVariants: 1
+  m_EnableInstancingVariants: 0
   m_DoubleSidedGI: 0
   m_CustomRenderQueue: -1
   stringTagMap: {}
@@ -23,24 +23,12 @@ Material:
   m_SavedProperties:
     serializedVersion: 3
     m_TexEnvs:
-    - _:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
     - _MainTex:
         m_Texture: {fileID: 2800000, guid: 097e9c9a0df215343962c239ce476317, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
-    - _ProgressTexture:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ProgressTexture_1:
-        m_Texture: {fileID: 0}
-        m_Scale: {x: 1, y: 1}
-        m_Offset: {x: 0, y: 0}
-    - _ProgressTexture_2:
-        m_Texture: {fileID: 2800000, guid: d6c012ba69fcef446bb3074c5d66ad3f, type: 3}
+    - _MainTex_1:
+        m_Texture: {fileID: 2800000, guid: e51b66c9a68fdfa40a00d73e04026e3b, type: 3}
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     - unity_Lightmaps:
@@ -56,21 +44,13 @@ Material:
         m_Scale: {x: 1, y: 1}
         m_Offset: {x: 0, y: 0}
     m_Ints: []
-    m_Floats:
-    - _: 0
-    - _Haedthickness: 0.001
-    - _Progress: 0
-    - _ProgressTexture: 0
-    - _Progress_1: 0
-    - _Progress_2: -0.22
-    - _Segments_2: 4
+    m_Floats: []
     m_Colors:
-    - _: {r: 0, g: 0, b: 0, a: 0}
-    - _HeadClor: {r: 0, g: 0, b: 0, a: 0}
-    - _HeadColor: {r: 0, g: 0.7265539, b: 1, a: 0}
+    - _Color: {r: 0.13207549, g: 1, b: 0.17291899, a: 1}
+    - _Tint: {r: 0.22939962, g: 0, b: 1, a: 0.23921569}
   m_BuildTextureStacks: []
   m_AllowLocking: 1
---- !u!114 &1584027542706130051
+--- !u!114 &8696354502430238130
 MonoBehaviour:
   m_ObjectHideFlags: 11
   m_CorrespondingSourceObject: {fileID: 0}
