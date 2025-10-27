@@ -17365,6 +17365,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas_GameScene
       objectReference: {fileID: 0}
+    - target: {fileID: 6717272742300421831, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 8628655171902526926, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -32527,6 +32531,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Pinball_Body
       objectReference: {fileID: 0}
+    - target: {fileID: 2500944382715511952, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 2737442377530726064, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
       propertyPath: m_IsActive
       value: 0
@@ -32548,7 +32556,11 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
-    m_RemovedGameObjects: []
+    m_RemovedGameObjects:
+    - {fileID: 1500056142924247709, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+    - {fileID: 7557138027847203614, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+    - {fileID: 2737442377530726064, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
+    - {fileID: 7596152212540701546, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 1168368722593549671, guid: 127cb636d3eeeff40a45256c6ef40b78, type: 3}
       insertIndex: 0
@@ -38326,6 +38338,71 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2146623492}
   m_Mesh: {fileID: 4300000, guid: 66c389372c3759643bed5e9b30f98919, type: 3}
+--- !u!1001 &5573493326949803616
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 0}
+    m_Modifications:
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 538949048618853540, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1274355550256357775, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_Name
+      value: Pinball_ColLong_Origin
+      objectReference: {fileID: 0}
+    - target: {fileID: 6078499457280300121, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_Name
+      value: pinballMat_ColLong_Body
+      objectReference: {fileID: 0}
+    - target: {fileID: 6078499457280300121, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: ea8ee3cdaaf4e404593e0fe860142f65, type: 3}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0
@@ -38339,3 +38416,4 @@ SceneRoots:
   - {fileID: 1868856382}
   - {fileID: 128029556}
   - {fileID: 1010847756}
+  - {fileID: 5573493326949803616}
