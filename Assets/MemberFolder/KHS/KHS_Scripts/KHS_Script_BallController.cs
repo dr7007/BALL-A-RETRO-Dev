@@ -27,6 +27,10 @@ public class KHS_Script_BallController : MonoBehaviour
     void FixedUpdate()
     {
         rigidBody.AddForce(Gravity * GravDirection);
+        if (Input.GetKeyDown(KeyCode.Q))
+        {
+            rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
+        }
     }
 
     private void OnEnable()
