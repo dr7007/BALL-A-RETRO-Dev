@@ -13,6 +13,7 @@ public class KHS_Script_DumpManager : MonoBehaviour
     public static event Action<int> OnScore;
     public float bounceForce = 2f;
     public int bumpScore = 0;
+    public float waitTime = 4.5f;
 
     private void OnEnable()
     {
@@ -62,7 +63,7 @@ public class KHS_Script_DumpManager : MonoBehaviour
     }
     private IEnumerator ReleaseBall(Collider col)
     {
-        yield return new WaitForSeconds(4.5f);
+        yield return new WaitForSeconds(waitTime);
         triggeredBalls.Remove(col);
     }
 }

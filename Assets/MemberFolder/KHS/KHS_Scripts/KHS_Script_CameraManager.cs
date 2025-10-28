@@ -22,6 +22,17 @@ public class KHS_Script_CameraManager : MonoBehaviour
         }
     }
 
+    private void OnEnable()
+    {
+        KHS_Script_PortalController.portalEvt += SubCamOn;
+        KHS_Script_PlincoFunction.ReturnPortalEvt += MainCamOn;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_PortalController.portalEvt -= SubCamOn;
+        KHS_Script_PlincoFunction.ReturnPortalEvt -= MainCamOn;
+    }
+
     public void MainCamOn()
     {
         isMain = true;

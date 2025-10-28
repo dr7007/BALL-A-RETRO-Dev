@@ -27,7 +27,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void OnEnable()
@@ -72,7 +72,11 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         curScore += value;
         Debug.LogWarning($"현재 스코어: {curScore} (+{value})");
     }
-
+    public void MultiplyScore(int value)
+    {
+        curScore *= value;
+        Debug.LogWarning($"현재 스코어: {curScore} (*{value})");
+    }
 
     private void BallTrigger(Collider _other)
     {

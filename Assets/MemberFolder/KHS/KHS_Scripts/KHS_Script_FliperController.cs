@@ -33,10 +33,12 @@ public class KHS_Script_FliperController : MonoBehaviour
                 if (Input.GetKeyDown(flipper.inputKey))
                 {
                     flipper.isPressed = true;
+                    flipper.invisibleCollider.isTrigger = false;
                 }
                 if (Input.GetKeyUp(flipper.inputKey))
                 {
                     flipper.isPressed = false;
+                    flipper.invisibleCollider.isTrigger = true;
                 }
             }
         }

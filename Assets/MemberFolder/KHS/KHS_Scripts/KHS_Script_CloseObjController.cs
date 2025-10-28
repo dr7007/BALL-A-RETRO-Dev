@@ -7,11 +7,14 @@ public class KHS_Script_CloseObjController : MonoBehaviour
     [SerializeField]
     private bool ballStart = false;
     private BoxCollider boxcollider = null;
+    [SerializeField]
+    private BoxCollider stuckPreventCollider = null;
 
     void Start()
     {
         boxcollider = GetComponent<BoxCollider>();
         boxcollider.isTrigger = true;
+        stuckPreventCollider.isTrigger = true;
         ballStart = false;
     }
 
@@ -21,6 +24,7 @@ public class KHS_Script_CloseObjController : MonoBehaviour
         {
             ballStart = true;
             boxcollider.isTrigger = false;
+            stuckPreventCollider.isTrigger = false;
         }
     }
     private void OnEnable()
@@ -38,5 +42,6 @@ public class KHS_Script_CloseObjController : MonoBehaviour
     {
         ballStart = false;
         boxcollider.isTrigger = true;
+        stuckPreventCollider.isTrigger = true;
     }
 }
