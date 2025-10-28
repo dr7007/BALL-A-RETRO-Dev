@@ -17,7 +17,7 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
     [SerializeField] private Vector2 randomSpeedRange = new Vector2(10f, 30f);
 
     [Tooltip("방출 각도 범위")]
-    [SerializeField] private float randomAngleRange = 180f;
+    [SerializeField] private float randomAngleRange = 360f;
 
 
     private KHS_Script_ScoreManager scoreManager;
