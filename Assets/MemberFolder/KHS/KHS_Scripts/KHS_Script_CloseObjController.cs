@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 
 public class KHS_Script_CloseObjController : MonoBehaviour
@@ -22,9 +23,7 @@ public class KHS_Script_CloseObjController : MonoBehaviour
     {
         if (_collider.CompareTag("Ball"))
         {
-            ballStart = true;
-            boxcollider.isTrigger = false;
-            stuckPreventCollider.isTrigger = false;
+            StartCoroutine(CloseObjectDelayCoroutine());
         }
     }
     private void OnEnable()
@@ -43,5 +42,13 @@ public class KHS_Script_CloseObjController : MonoBehaviour
         ballStart = false;
         boxcollider.isTrigger = true;
         stuckPreventCollider.isTrigger = true;
+    }
+
+    private IEnumerator CloseObjectDelayCoroutine()
+    {
+        yield return new WaitForSeconds(0.5f);
+        ballStart = true;
+        boxcollider.isTrigger = false;
+        stuckPreventCollider.isTrigger = false;
     }
 }
