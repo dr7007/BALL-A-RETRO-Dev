@@ -358,6 +358,18 @@ MonoBehaviour:
           m_StringArgument: 
           m_BoolArgument: 0
         m_CallState: 2
+      - m_Target: {fileID: 898444982}
+        m_TargetAssemblyTypeName: CJS_Script_NicknameSetter, Assembly-CSharp
+        m_MethodName: OnClickSet
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   useFadeEffect: 1
   hoverAlpha: 0.7
   fadeDuration: 0.2
@@ -1231,7 +1243,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbf21f832bb66f241922900a27803316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneNameForBuild: Main_Scene_Game
+  sceneNameForBuild: CJS_Scene_Game
   cursorManagerPrefab: {fileID: 519272316604641727, guid: 1dfdab57b8a090e48808c7039d7af741, type: 3}
 --- !u!1 &1269270510
 GameObject:
