@@ -1,29 +1,32 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class CJS_Script_LeaderboardList : MonoBehaviour
 {
+    [SerializeField] private Transform content;    
     [SerializeField] private GameObject itemPrefab;
 
-    private Transform content;  // 동적
-
-    void Start()
+    void Awake()
     {
-        // 동적으로 content를 할당
-        content = GameObject.Find("LeaderboardContent")?.transform;
-
         if (content == null)
         {
-            Debug.LogError("LeaderboardContent가 씬에 존재하지 않거나 잘못된 이름입니다.");
-            return;
+            var sr = GetComponentInChildren<ScrollRect>(true);
+            if (sr != null) content = sr.content;
         }
+        if (content == null)
+        {
+            // 이름으로 최후 탐색
+            var rects = GetComponentsInChildren<RectTransform>(true);
+            foreach (var r in rects) if (r.name == "Content") { content = r; break; }
+        }
+        if (content == null) Debug.LogError("[LeaderboardList] Content not set.", this);
+        if (itemPrefab == null) Debug.LogError("[LeaderboardList] itemPrefab not set.", this);
     }
 
     public void Clear()
     {
-        // content가 null일 경우 처리를 추가
         if (content == null) return;
-
         for (int i = content.childCount - 1; i >= 0; i--)
             Destroy(content.GetChild(i).gameObject);
     }
@@ -31,12 +34,11 @@ public class CJS_Script_LeaderboardList : MonoBehaviour
     public void Populate(ScoreRow[] rows)
     {
         Clear();
-        if (rows == null || content == null) return;
+        if (rows == null || content == null || itemPrefab == null) return;
 
         for (int i = 0; i < rows.Length; i++)
         {
             var go = Instantiate(itemPrefab, content);
-            // 프리팹의 자식
             var rankText = go.transform.Find("RankText")?.GetComponent<TMP_Text>();
             var nameText = go.transform.Find("NameText")?.GetComponent<TMP_Text>();
             var scoreText = go.transform.Find("ScoreText")?.GetComponent<TMP_Text>();
