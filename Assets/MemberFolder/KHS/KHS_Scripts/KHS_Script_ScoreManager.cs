@@ -6,6 +6,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public static event Action OnGameOver;
     public static event Action OnGameClear;
 
+    public static event Action<int> OnGameOverWithScore;
+    public static event Action<int> OnGameClearWithScore;
+
     [Header("스코어 정보")]
     [Tooltip("현재 스코어 정보를 표시합니다")]
     public int curScore = 0;
@@ -17,6 +20,12 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [SerializeField]
     private int numOfBounce = 0;
 
+    [Header("결과 연동(추가)")]
+    [SerializeField] private CJS_Script_GameOverUI gameOverUI;               
+    [SerializeField] private CJS_Script_PinballRankingService rankingService;
+    [SerializeField] private string gameMode = "Classic";
+    [SerializeField] private int level = 1;
+
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
@@ -27,7 +36,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        
+
     }
 
     private void OnEnable()
@@ -57,6 +66,28 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             OnGameClear.Invoke();
         else
             OnGameOver.Invoke();
+
+        int finalScore = curScore;
+
+        // 점수 포함 이벤트 방송
+        if (curScore >= targetScore)
+            OnGameClearWithScore?.Invoke(finalScore);
+        else
+            OnGameOverWithScore?.Invoke(finalScore);
+
+        // GameOver UI에 표시(Show 호출 시 AutoSubmitOnShow가 체크되어 있으면 서버 제출+TOP10 갱신까지 자동 수행)
+        if (gameOverUI != null)
+        {
+            gameOverUI.Show(finalScore);
+        }
+        else if (rankingService != null)
+        {
+            rankingService.SubmitScore(finalScore, gameMode, level,
+                onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
+                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
+            );
+        }
+
         curScore = 0;
         numOfBounce = 0;
     }
