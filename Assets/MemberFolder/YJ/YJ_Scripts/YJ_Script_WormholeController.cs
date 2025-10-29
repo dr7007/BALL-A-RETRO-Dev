@@ -15,6 +15,10 @@ public class YJ_Script_WormholeController : MonoBehaviour
     [Tooltip("웜홀을 사용할 수 있는 횟수, -1로 설정하면 무제한")]
     [SerializeField] private int activationCount = -1;
 
+    [Header("출구로 나온 공에 적용할 가속도")]
+    [Tooltip("가본값: 1(들어간 속도 그대로 사출)")]
+    [SerializeField] private float acceleration = 1f;
+
     // 내부 상태 변수
     public bool isActivated = true; // 웜홀이 공을 받아들일 수 있는 상태인지 확인
     private Transform spawnPoint;
@@ -88,7 +92,7 @@ public class YJ_Script_WormholeController : MonoBehaviour
 
         // 5. 물리 효과를 다시 활성화하고, 기억해둔 입사각(속도)을 그대로 적용
         rb.isKinematic = false;
-        rb.linearVelocity = incomingVelocity;
+        rb.linearVelocity = incomingVelocity * acceleration;
 
         // 6. 짧은 시간 후 출구 웜홀을 재활성화 (공이 완전히 벗어날 시간 확보)
         yield return new WaitForSeconds(0.5f);
