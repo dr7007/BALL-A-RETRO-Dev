@@ -119,11 +119,6 @@ NavMeshSettings:
     debug:
       m_Flags: 0
   m_NavMeshData: {fileID: 0}
---- !u!1 &230966555 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 9080330437019930444, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-  m_PrefabInstance: {fileID: 1222802125}
-  m_PrefabAsset: {fileID: 0}
 --- !u!1 &993644990
 GameObject:
   m_ObjectHideFlags: 0
@@ -390,34 +385,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_fontAsset
-      value: 
-      objectReference: {fileID: 11400000, guid: 7e88077b6c139f64ebe5b4fb14869bb9, type: 2}
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_fontColor.b
-      value: 0.43137255
-      objectReference: {fileID: 0}
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_fontColor.g
-      value: 0.98039216
-      objectReference: {fileID: 0}
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_fontColor.r
-      value: 0.15686275
-      objectReference: {fileID: 0}
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_sharedMaterial
-      value: 
-      objectReference: {fileID: 283407435441528316, guid: 7e88077b6c139f64ebe5b4fb14869bb9, type: 2}
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_fontColor32.rgba
-      value: 4285463080
-      objectReference: {fileID: 0}
-    - target: {fileID: 189975687507271719, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_hasFontAssetChanged
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 738233916448099516, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
       propertyPath: m_Pivot.x
       value: 0
@@ -497,30 +464,6 @@ PrefabInstance:
     - target: {fileID: 738233916448099516, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1831304603079200450, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: panelRoot
-      value: 
-      objectReference: {fileID: 230966555}
-    - target: {fileID: 2772671698223097958, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_AnchorMax.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2772671698223097958, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_AnchorMin.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2772671698223097958, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_AnchoredPosition.x
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2772671698223097958, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_AnchoredPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3021160858570612962, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
-      propertyPath: m_SizeDelta.x
-      value: 600
       objectReference: {fileID: 0}
     - target: {fileID: 8242741680735216672, guid: 02d46c8e101d1114a96208fffa1f4a2d, type: 3}
       propertyPath: m_Name
