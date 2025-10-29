@@ -27,6 +27,7 @@ namespace PSH
             {
                 loadingPanel.SetActive(false);
             }
+            if (loadingPanel == null) return;
         }
 
         // OnEnable/OnDisable 및 OnSceneLoaded는 이제 UI를 직접 제어하지 않습니다.
