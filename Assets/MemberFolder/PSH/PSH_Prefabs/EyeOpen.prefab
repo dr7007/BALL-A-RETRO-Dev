@@ -9,6 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3862312010837120666}
+  - component: {fileID: 346272839224653591}
   m_Layer: 0
   m_Name: EyeOpen
   m_TagString: Untagged
@@ -32,6 +33,21 @@ Transform:
   - {fileID: 6531445037154981999}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &346272839224653591
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 824149490361185564}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8282769cb7ea9c84686a0efed9a7fe1e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  planeRenderer: {fileID: 8588205985379589757}
+  animationDuration: 2
+  smoothnessPropertyName: _smoothEyeClosed
 --- !u!1 &976222292172840312
 GameObject:
   m_ObjectHideFlags: 0
@@ -60,9 +76,9 @@ Transform:
   m_GameObject: {fileID: 976222292172840312}
   serializedVersion: 2
   m_LocalRotation: {x: -0.7071068, y: 0, z: 0, w: 0.7071068}
-  m_LocalPosition: {x: 0, y: 3.6, z: 81.9}
-  m_LocalScale: {x: 22, y: 0, z: 12}
-  m_ConstrainProportionsScale: 0
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 0.41, y: 0, z: 0.24599999}
+  m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 3862312010837120666}
   m_LocalEulerAnglesHint: {x: -90, y: 0, z: 0}
@@ -136,7 +152,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
