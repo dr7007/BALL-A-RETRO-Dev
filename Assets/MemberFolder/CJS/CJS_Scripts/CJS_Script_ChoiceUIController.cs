@@ -5,9 +5,6 @@ using UnityEngine.UI;
 using TMPro;
 using UnityEngine.EventSystems;
 
-/// <summary>
-/// 패널 열고/닫고, 카드 생성/리롤/스킵/선택 처리
-/// </summary>
 public class CJS_Script_ChoiceUIController : MonoBehaviour
 {
     [Header("Refs")]
@@ -33,7 +30,6 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     void OnValidate()
     {
-        // 인터페이스 캐스팅 미리 점검
         if (rollerBehaviour != null && !(rollerBehaviour is CJS_IChoiceRoller))
             Debug.LogWarning("rollerBehaviour는 CJS_IChoiceRoller를 구현해야 합니다.", this);
     }
@@ -55,12 +51,20 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         roller = rollerBehaviour as CJS_IChoiceRoller;
         if (panelRoot != null) panelRoot.SetActive(false);
         usedReroll = 0;
-        isOpen = false;
+        isOpen = false;   
         busy = false;
-        UpdateRerollUI();
+
+        SetChoiceButtonsVisible(false);
+        UpdateRerollUI();              
     }
 
-    /// <summary>패널 열기(외부 호출)</summary>
+    private void SetChoiceButtonsVisible(bool visible)
+    {
+        if (btnSkip) btnSkip.gameObject.SetActive(visible);
+        if (btnReroll) btnReroll.gameObject.SetActive(visible);
+        if (txtRerollInfo) txtRerollInfo.gameObject.SetActive(visible);
+    }
+
     public void ShowChoices()
     {
         if (isOpen) return;
@@ -69,13 +73,19 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
             Debug.LogError("CJS_IChoiceRoller가 연결되지 않았습니다.", this);
             return;
         }
+        if (cardPrefab == null || content == null)
+        {
+            Debug.LogError("cardPrefab 또는 content가 연결되지 않았습니다.", this);
+            return;
+        }
 
-        isOpen = true;
+        isOpen = true; 
         usedReroll = 0;
 
         if (panelRoot != null) panelRoot.SetActive(true);
         Time.timeScale = 0f;
 
+        SetChoiceButtonsVisible(true); 
         UpdateRerollUI();
         RefreshCards();
 
@@ -86,7 +96,6 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         }
     }
 
-    /// <summary>패널 닫기</summary>
     public void Hide()
     {
         if (!isOpen) return;
@@ -95,18 +104,28 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         Time.timeScale = 1f;
 
         ClearCards();
+
+        SetChoiceButtonsVisible(false);
         if (panelRoot != null) panelRoot.SetActive(false);
+
+        UpdateRerollUI();
     }
 
     private void RefreshCards()
     {
         ClearCards();
 
-        List<CJS_ChoiceData> picks = roller.Roll3();
+        Dictionary<CJS_ChoiceData, float> chanceMap;
+        List<CJS_ChoiceData> picks = roller.Roll3(out chanceMap);
+
         for (int i = 0; i < picks.Count; i++)
         {
             var card = Instantiate(cardPrefab, content);
-            card.Bind(picks[i], OnPickCard);
+            float chance = 0f;
+            if (chanceMap != null && chanceMap.TryGetValue(picks[i], out float p))
+                chance = p;
+
+            card.BindWithChance(picks[i], OnPickCard, chance);
             liveCards.Add(card);
         }
     }
@@ -157,7 +176,11 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     {
         if (txtRerollInfo != null)
             txtRerollInfo.text = "새로고침: " + Mathf.Max(0, maxReroll - usedReroll) + "회";
+
         if (btnReroll != null)
-            btnReroll.interactable = usedReroll < maxReroll;
+            btnReroll.interactable = isOpen && (usedReroll < maxReroll);
+
+        if (btnSkip != null)
+            btnSkip.interactable = isOpen;
     }
 }

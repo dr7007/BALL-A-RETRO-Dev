@@ -284,6 +284,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b8ef062896476ca4eb361a301d3edd65, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  allChoices: []
+  previewPercents: []
+  seed: 0
 --- !u!1 &1052182341
 GameObject:
   m_ObjectHideFlags: 0
@@ -595,6 +598,18 @@ PrefabInstance:
     - target: {fileID: 6768834217064321423, guid: 2a1b22d7cc65371499a1cffb8a041c86, type: 3}
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8421015349439894150, guid: 2a1b22d7cc65371499a1cffb8a041c86, type: 3}
+      propertyPath: m_Name
+      value: Open
+      objectReference: {fileID: 0}
+    - target: {fileID: 8771830896750414187, guid: 2a1b22d7cc65371499a1cffb8a041c86, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 9219878522297605795, guid: 2a1b22d7cc65371499a1cffb8a041c86, type: 3}
+      propertyPath: m_IsActive
+      value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
