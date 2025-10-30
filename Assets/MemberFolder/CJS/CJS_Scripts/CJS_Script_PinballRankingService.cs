@@ -17,7 +17,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     void Awake()
     {
         Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
-        DontDestroyOnLoad(gameObject); // 씬 이동해도 유지
+        DontDestroyOnLoad(gameObject); 
     }
 
     public void SetNicknameAndStart(string nick)
