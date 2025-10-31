@@ -101,4 +101,9 @@ public class YJ_Script_WormholeController : MonoBehaviour
         // 입구 웜홀을 재활성화
         isActivated = true;
     }
+
+    public void SetActivated(bool value)
+    {
+        isActivated = value;
+    }
 }

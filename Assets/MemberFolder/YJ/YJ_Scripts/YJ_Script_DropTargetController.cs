@@ -2,81 +2,94 @@ using UnityEngine;
 
 public class YJ_Script_DropTargetController : MonoBehaviour
 {
-    [Header("드롭 타겟")]
-    [SerializeField]
-    private bool b_Drop_Target = true;           // 체크 시 드롭타겟, 체크 해제 시 고정 타겟
+    [Header("사운드 (개별 설정)")]
+    public AudioClip Sfx_Hit;                   // 타격음 지정
 
-    private bool b_MoveObject = false;
-    private float target = 0;
+    // 매니저가 설정해줄 변수들
+    private float ActivatePosY;
+    private float DesactivatePosY;
+    private float MoveSpeed;
+    private YJ_Script_DropTargetManager manager; // 부모 오브젝트에 부착된 매니저
 
-    [Header("타겟 활성화/비활성화 시 로컬 포지션")]
-    [SerializeField]
-    private float ActivatePosY = .11f;      // 타겟 활성화 시 Y축 값
-    [SerializeField]
-    private float DesactivatePosY = -.25f;  // 타겟 비활성화 시 Y축 값
-    [SerializeField]
-    private float MoveSpeed = 5;            // speed to reach the target
-
-    [Header("사운드")]
-    public AudioClip Sfx_Hit;               // Sound when the target is hit
+    // 내부 변수
     private AudioSource sound_;
+    private bool b_MoveObject = false;
+    private float target_y = 0;
+    private bool b_IsDesactivated = false; // 나의 현재 상태
 
-
-    private void Start()
+    private void Awake()
     {
-        if (transform.localPosition.y == ActivatePosY)
-        {
-            target = ActivatePosY;
-        }
+        sound_ = GetComponent<AudioSource>();
+    }
 
+    // 부모 매니저가 호출하여 나를 초기화하는 함수
+    public void Initialize(YJ_Script_DropTargetManager mgr, float activeY, float desactiveY, float speed)
+    {
+        manager = mgr;
+        ActivatePosY = activeY;
+        DesactivatePosY = desactiveY;
+        MoveSpeed = speed;
+
+        // 시작 위치에 따라 초기 상태 설정
+        if (Mathf.Abs(transform.localPosition.y - ActivatePosY) < 0.01f)
+        {
+            target_y = ActivatePosY;
+            b_IsDesactivated = false;
+        }
         else
         {
-            target = DesactivatePosY;
+            target_y = DesactivatePosY;
+            b_IsDesactivated = true;
         }
-
-        sound_ = GetComponent<AudioSource>();
     }
 
     private void Update()
     {
-        // 
         if (b_MoveObject)
         {
-            float YPos = Mathf.MoveTowards(transform.localPosition.y, target, MoveSpeed * Time.deltaTime);
+            float YPos = Mathf.MoveTowards(transform.localPosition.y, target_y, MoveSpeed * Time.deltaTime);
+            transform.localPosition = new Vector3(transform.localPosition.x, YPos, transform.localPosition.z);
 
-            transform.localPosition = new Vector3(
-                transform.localPosition.x,
-                YPos,
-                transform.localPosition.z
-            );
-
-            if (transform.localPosition.y == target)
+            if (transform.localPosition.y == target_y)
             {
                 b_MoveObject = false;
             }
         }
     }
 
-    void OnCollisionEnter(Collision _collision)
+    private void OnCollisionEnter(Collision _collision)
     {
-        if (_collision.gameObject.name == "Ball")
-        {	
-            if (b_Drop_Target)
-                Desactivate_Object();		
-
-            if (!sound_.isPlaying && Sfx_Hit) sound_.PlayOneShot(Sfx_Hit, 1);
+        if (_collision.gameObject.CompareTag("Ball") && !b_MoveObject)
+        {
+            // 내가 판단하지 않고, 즉시 매니저에게 "맞았다"고 보고
+            manager.HandleTargetHit(this);
         }
     }
 
+    // --- 매니저가 나를 제어하는 함수들 ---
+
     public void Desactivate_Object()
-    {   // 타겟 비활성화
-        target = DesactivatePosY;
+    {
+        target_y = DesactivatePosY;
         b_MoveObject = true;
+        b_IsDesactivated = true; // 나의 상태를 '비활성'으로 기록
     }
 
     public void Activate_Object()
-    {   // 타겟 활성화
-        target = ActivatePosY;
+    {
+        target_y = ActivatePosY;
         b_MoveObject = true;
+        b_IsDesactivated = false; // 나의 상태를 '활성'으로 기록
+    }
+
+    public void PlayHitSound()
+    {
+        if (!sound_.isPlaying && Sfx_Hit)
+            sound_.PlayOneShot(Sfx_Hit, 1);
+    }
+
+    public bool IsDesactivated()
+    {
+        return b_IsDesactivated;
     }
 }

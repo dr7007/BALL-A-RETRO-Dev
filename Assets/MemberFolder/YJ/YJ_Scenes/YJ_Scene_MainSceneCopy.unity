@@ -3264,14 +3264,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 149894425}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
-  Sfx_Hit: {fileID: 0}
+  Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &153250580
 GameObject:
   m_ObjectHideFlags: 0
@@ -5052,14 +5048,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 212791006}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
-  Sfx_Hit: {fileID: 0}
+  Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &216742267
 GameObject:
   m_ObjectHideFlags: 0
@@ -12370,6 +12362,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 527978730}
+  - component: {fileID: 527978731}
   m_Layer: 0
   m_Name: DropTarget_A
   m_TagString: Untagged
@@ -12396,6 +12389,28 @@ Transform:
   - {fileID: 1125766706}
   m_Father: {fileID: 1478083441}
   m_LocalEulerAnglesHint: {x: 0, y: -78.564, z: 0}
+--- !u!114 &527978731
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 527978729}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 488ea549d7bf536478c97de02471ec39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDropTargets: 1
+  ActivatePosY: 0.015
+  DesactivatePosY: -0.03
+  MoveSpeed: 5
+  OnAllTargetsDeactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTargetsActivated:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &531919929
 GameObject:
   m_ObjectHideFlags: 0
@@ -29594,6 +29609,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1214466832}
+  - component: {fileID: 1214466833}
   m_Layer: 0
   m_Name: DropTarget_B
   m_TagString: Untagged
@@ -29620,6 +29636,28 @@ Transform:
   - {fileID: 144669052}
   m_Father: {fileID: 1478083441}
   m_LocalEulerAnglesHint: {x: 0, y: -125, z: 0}
+--- !u!114 &1214466833
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1214466831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 488ea549d7bf536478c97de02471ec39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDropTargets: 1
+  ActivatePosY: 0.015
+  DesactivatePosY: -0.03
+  MoveSpeed: 5
+  OnAllTargetsDeactivated:
+    m_PersistentCalls:
+      m_Calls: []
+  OnTargetsActivated:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!64 &1219938314
 MeshCollider:
   m_ObjectHideFlags: 0
@@ -35625,14 +35663,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1475378672}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
-  Sfx_Hit: {fileID: 0}
+  Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &1478083440
 GameObject:
   m_ObjectHideFlags: 0
@@ -36053,14 +36087,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 1510722989}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
-  Sfx_Hit: {fileID: 0}
+  Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &1515403375
 GameObject:
   m_ObjectHideFlags: 0
@@ -40885,8 +40915,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1671403592}
+  - component: {fileID: 1671403593}
   m_Layer: 0
-  m_Name: DropTarget_C
+  m_Name: DropTarget_C(Blackhole)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -40911,6 +40942,52 @@ Transform:
   - {fileID: 550735330}
   m_Father: {fileID: 1478083441}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1671403593
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1671403591}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 488ea549d7bf536478c97de02471ec39, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  isDropTargets: 1
+  ActivatePosY: 0.015
+  DesactivatePosY: -0.03
+  MoveSpeed: 5
+  OnAllTargetsDeactivated:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 199001805952012207}
+        m_TargetAssemblyTypeName: YJ_Script_BlackholeController, Assembly-CSharp
+        m_MethodName: SetActivated
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 1
+        m_CallState: 2
+  OnTargetsActivated:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 199001805952012207}
+        m_TargetAssemblyTypeName: YJ_Script_BlackholeController, Assembly-CSharp
+        m_MethodName: SetActivated
+        m_Mode: 6
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
 --- !u!1 &1671906342
 GameObject:
   m_ObjectHideFlags: 0
@@ -41297,13 +41374,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1685734831}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
   Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &1693180232
 GameObject:
@@ -46584,13 +46657,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 1867686081}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
   Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &1876878096
 GameObject:
@@ -52221,14 +52290,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2096737371}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
-  Sfx_Hit: {fileID: 0}
+  Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &2101689261
 GameObject:
   m_ObjectHideFlags: 0
@@ -52970,13 +53035,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 2106207715}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
   Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &2106662959
 GameObject:
@@ -54073,14 +54134,10 @@ MonoBehaviour:
   m_GameObject: {fileID: 2137180194}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4ac02b4104457f541aee75d525a647fa, type: 3}
+  m_Script: {fileID: 11500000, guid: fc373564f5040954984a88f57ed0f443, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  b_Drop_Target: 1
-  ActivatePosY: 0.11
-  DesactivatePosY: -0.25
-  MoveSpeed: 5
-  Sfx_Hit: {fileID: 0}
+  Sfx_Hit: {fileID: 8300000, guid: d08f084df19de4a08a555236c22b8896, type: 3}
 --- !u!1 &2139742138
 GameObject:
   m_ObjectHideFlags: 0
@@ -66324,6 +66381,7 @@ GameObject:
   - component: {fileID: 7100145293917009508}
   - component: {fileID: 3495282481475479634}
   - component: {fileID: 3184624528606164589}
+  - component: {fileID: 7100145293917009509}
   m_Layer: 0
   m_Name: Gate_zl
   m_TagString: Untagged
@@ -96201,6 +96259,21 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1672840165403079402}
   m_Mesh: {fileID: 4300000, guid: 5fc4eba2f2bb742e09571d4e74032842, type: 3}
+--- !u!114 &7100145293917009509
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1672840165403079402}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9102e0dd52cbf0047b5e3f75bed0e0c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  bounceForce: 2
+  bumpScore: 0
+  waitTime: 4.5
 --- !u!4 &7101876717793793060
 Transform:
   m_ObjectHideFlags: 0
