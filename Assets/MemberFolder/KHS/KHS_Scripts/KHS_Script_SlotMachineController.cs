@@ -4,19 +4,20 @@ using UnityEngine;
 
 public class KHS_Script_SlotMachineController : MonoBehaviour
 {
-    [Header("½½·Ô¸Ó½Å ·ê·¿Á¤º¸")]
-    [Tooltip("½½·Ô¸Ó½ÅÀÇ ÇöÀç ¹è¿­")]
+    [Header("ìŠ¬ë¡¯ë¨¸ì‹  ë£°ë ›ì •ë³´")]
+    [Tooltip("ìŠ¬ë¡¯ë¨¸ì‹ ì˜ í˜„ì¬ ë°°ì—´")]
     [SerializeField] private int[] numberLists = new int[3];
+    [SerializeField] private GameObject[] gameObjects = new GameObject[3];
 
-    [Header("½ºÄÚ¾î ¸Å´ÏÀú ÂüÁ¶")]
-    [SerializeField] private KHS_Script_ScoreManager scoreManager; // Á¡¼ö ¸Å´ÏÀú
+    [Header("ìŠ¤ì½”ì–´ ë§¤ë‹ˆì € ì°¸ì¡°")]
+    [SerializeField] private KHS_Script_ScoreManager scoreManager; // ì ìˆ˜ ë§¤ë‹ˆì €
 
-    // ³»ºÎ »óÅÂ º¯¼ö
-    private bool isSMActive = true; // ½½·Ô¸Ó½ÅÀÌ °øÀ» ¹Ş¾ÆµéÀÏ ¼ö ÀÖ´Â »óÅÂÀÎÁö È®ÀÎ
+    // ë‚´ë¶€ ìƒíƒœ ë³€ìˆ˜
+    private bool isSMActive = true; // ìŠ¬ë¡¯ë¨¸ì‹ ì´ ê³µì„ ë°›ì•„ë“¤ì¼ ìˆ˜ ìˆëŠ” ìƒíƒœì¸ì§€ í™•ì¸
 
     private void Awake()
     {
-        // ¿¡µğÅÍ¿¡¼­ Á÷Á¢ ¿¬°á ¾È µÆÀ» °æ¿ì ÀÚµ¿ Å½»ö
+        // ì—ë””í„°ì—ì„œ ì§ì ‘ ì—°ê²° ì•ˆ ëì„ ê²½ìš° ìë™ íƒìƒ‰
         if (scoreManager == null)
             scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
     }
@@ -46,58 +47,58 @@ public class KHS_Script_SlotMachineController : MonoBehaviour
     {
         isSMActive = false;
 
-        // 1. ÀÔ»ç°¢(¼Óµµ º¤ÅÍ)À» ±â¾ïÇÏ°í °øÀ» ¹°¸®ÀûÀ¸·Î °íÁ¤ ÈÄ ¼û±è
+        // 1. ì…ì‚¬ê°(ì†ë„ ë²¡í„°)ì„ ê¸°ì–µí•˜ê³  ê³µì„ ë¬¼ë¦¬ì ìœ¼ë¡œ ê³ ì • í›„ ìˆ¨ê¹€
         Vector3 incomingVelocity = _rb.linearVelocity;
         _rb.isKinematic = true;
         _rb.gameObject.SetActive(false);
 
 
-        // 2. ½½·Ô¸Ó½Å °á°ú°¡ ³ª¿Ã ¶§±îÁö ´ë±â ¹× ¿¬Ãâ
-        float spinDuration = 4.0f; // ½½·Ô È¸Àü ÃÑ ½Ã°£
+        // 2. ìŠ¬ë¡¯ë¨¸ì‹  ê²°ê³¼ê°€ ë‚˜ì˜¬ ë•Œê¹Œì§€ ëŒ€ê¸° ë° ì—°ì¶œ
+        float spinDuration = 4.0f; // ìŠ¬ë¡¯ íšŒì „ ì´ ì‹œê°„
         float elapsed = 0f;
 
         while (elapsed < spinDuration)
         {
             for (int i = 0; i < numberLists.Length; i++)
             {
-                numberLists[i] = Random.Range(1,4); // 1~4 ¹üÀ§
+                numberLists[i] = Random.Range(1,4); // 1~4 ë²”ìœ„
             }
 
-            // µğ¹ö±×¿ëÀ¸·Î È¸Àü Áß »óÅÂ Ãâ·Â (¼±ÅÃ»çÇ×)
+            // ë””ë²„ê·¸ìš©ìœ¼ë¡œ íšŒì „ ì¤‘ ìƒíƒœ ì¶œë ¥ (ì„ íƒì‚¬í•­)
             Debug.Log($"Spinning... {numberLists[0]} {numberLists[1]} {numberLists[2]}");
 
             elapsed += 0.5f;
             yield return new WaitForSeconds(0.5f);
         }
 
-        // ÃÖÁ¾ °á°ú È®Á¤
+        // ìµœì¢… ê²°ê³¼ í™•ì •
         for (int i = 0; i < numberLists.Length; i++)
         {
             numberLists[i] = Random.Range(1, 4);
         }
 
-        // °á°ú Ãâ·Â
-        Debug.LogWarning($"½½·Ô¸Ó½Å °á°ú: {numberLists[0]} | {numberLists[1]} | {numberLists[2]}");
+        // ê²°ê³¼ ì¶œë ¥
+        Debug.LogWarning($"ìŠ¬ë¡¯ë¨¸ì‹  ê²°ê³¼: {numberLists[0]} | {numberLists[1]} | {numberLists[2]}");
 
-        // 3. Á¡¼ö °è»ê ¹× Àü´Ş
+        // 3. ì ìˆ˜ ê³„ì‚° ë° ì „ë‹¬
         int score = CalculateSlotScore(numberLists[0], numberLists[1], numberLists[2]);
         if (scoreManager != null)
         {
             scoreManager.AddScore(score);
-            Debug.Log($"¢º È¹µæ Á¡¼ö: {score}");
+            Debug.Log($"â–¶ íšë“ ì ìˆ˜: {score}");
         }
         else
         {
-            Debug.LogError("ScoreManager¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù!");
+            Debug.LogError("ScoreManagerë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤!");
         }
 
 
-        // 4. °øÀÇ ¸ğ½À°ú ¹°¸® È¿°ú¸¦ ´Ù½Ã È°¼ºÈ­ÇÏ°í, ¹İ»çº¤ÅÍ ¹æÇâÀ¸·Î ¹ß»ç
+        // 4. ê³µì˜ ëª¨ìŠµê³¼ ë¬¼ë¦¬ íš¨ê³¼ë¥¼ ë‹¤ì‹œ í™œì„±í™”í•˜ê³ , ë°˜ì‚¬ë²¡í„° ë°©í–¥ìœ¼ë¡œ ë°œì‚¬
         _rb.gameObject.SetActive(true);
         _rb.isKinematic = false;
         _rb.linearVelocity = - incomingVelocity;
 
-        // 5. ÂªÀº ½Ã°£ ÈÄ ½½·Ô¸Ó½ÅÀ» ´Ù½Ã È°¼ºÈ­ (°øÀÌ ¿ÏÀüÈ÷ ¹ş¾î³¯ ½Ã°£ È®º¸)
+        // 5. ì§§ì€ ì‹œê°„ í›„ ìŠ¬ë¡¯ë¨¸ì‹ ì„ ë‹¤ì‹œ í™œì„±í™” (ê³µì´ ì™„ì „íˆ ë²—ì–´ë‚  ì‹œê°„ í™•ë³´)
         yield return new WaitForSeconds(0.5f);
         isSMActive = true;
 
