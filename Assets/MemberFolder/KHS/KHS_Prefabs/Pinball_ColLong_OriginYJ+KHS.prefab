@@ -1735,10 +1735,9 @@ GameObject:
   - component: {fileID: 3620911356861799527}
   - component: {fileID: 8004451419587924103}
   - component: {fileID: 3235670839095105379}
-  - component: {fileID: 6718656262219331982}
   - component: {fileID: 1347241262676779120}
   - component: {fileID: 7971620257971024688}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: sc_Spinner
   m_TagString: spinner
   m_Icon: {fileID: 0}
@@ -1830,21 +1829,6 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   Sfx_Hit: {fileID: 8300000, guid: 235806c3e92b14fe9bb0a29707d93f49, type: 3}
---- !u!114 &6718656262219331982
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 292074611197004812}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d2c5adc9b7d094408ea291fc78d5510, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Sfx_Hit: {fileID: 0}
-  obj_Led: {fileID: 3669687883779806591}
-  isBlink: 0
 --- !u!59 &1347241262676779120
 HingeJoint:
   m_ObjectHideFlags: 0
@@ -2639,7 +2623,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1420637785450460686}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: p_Spinner_Metal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3043,7 +3027,7 @@ GameObject:
   - component: {fileID: 953400082197133585}
   - component: {fileID: 4135100494934597243}
   - component: {fileID: 1996086885482941604}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Target_Sticker_01
   m_TagString: NoCombineMesh
   m_Icon: {fileID: 0}
@@ -5622,6 +5606,7 @@ GameObject:
   - component: {fileID: 897583227964282326}
   - component: {fileID: 2561927649327141721}
   - component: {fileID: 4387271289796117457}
+  - component: {fileID: 6799721325504641981}
   m_Layer: 0
   m_Name: Trigger_Spinner
   m_TagString: Untagged
@@ -5638,7 +5623,7 @@ Transform:
   m_GameObject: {fileID: 845268368145089327}
   serializedVersion: 2
   m_LocalRotation: {x: 0.012446563, y: 0.71306384, z: 0.012233922, w: -0.70088196}
-  m_LocalPosition: {x: 0.0016995718, y: 0.018000208, z: -0.0004999934}
+  m_LocalPosition: {x: -0.0058, y: 0.0183, z: -0.0019}
   m_LocalScale: {x: 0.034546677, y: 0.028133933, z: 0.005782851}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -5700,6 +5685,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   additiveSpeed: 3
+--- !u!114 &6799721325504641981
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 845268368145089327}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d2c5adc9b7d094408ea291fc78d5510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Sfx_Hit: {fileID: 0}
+  obj_Led: {fileID: 3669687883779806591}
+  isBlink: 0
 --- !u!1 &850336384517508466
 GameObject:
   m_ObjectHideFlags: 0
@@ -6038,7 +6038,7 @@ GameObject:
   - component: {fileID: 5398610916814932058}
   - component: {fileID: 8301331071624296935}
   - component: {fileID: 47437930953285340}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Metal_Top_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -7767,6 +7767,7 @@ MonoBehaviour:
   exitWormhole: {fileID: 4050557163523082657}
   waitTime: 2
   activationCount: -1
+  acceleration: 1
   isActivated: 1
 --- !u!1 &1071612560803201566
 GameObject:
@@ -15694,7 +15695,7 @@ GameObject:
   - component: {fileID: 6390219241750103197}
   - component: {fileID: 8808591402504332527}
   - component: {fileID: 4693354548432864461}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: Spinner_Target
   m_TagString: NoCombineMesh
   m_Icon: {fileID: 0}
@@ -18456,7 +18457,7 @@ GameObject:
   - component: {fileID: 8477562172086580381}
   - component: {fileID: 657703699321011499}
   - component: {fileID: 7121054352277677935}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Metal_Side_Left_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -20568,11 +20569,10 @@ GameObject:
   - component: {fileID: 6217492741957255557}
   - component: {fileID: 3084058224701378102}
   - component: {fileID: 1508217062348884700}
-  - component: {fileID: 3011167349871700209}
   - component: {fileID: 6829904259466558291}
   - component: {fileID: 3766977613335696567}
   - component: {fileID: 5541409608623674497}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: sc_Spinner
   m_TagString: spinner
   m_Icon: {fileID: 0}
@@ -20651,21 +20651,6 @@ Rigidbody:
   m_Interpolate: 0
   m_Constraints: 0
   m_CollisionDetection: 0
---- !u!114 &3011167349871700209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2948333629874532079}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 6d2c5adc9b7d094408ea291fc78d5510, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Sfx_Hit: {fileID: 0}
-  obj_Led: {fileID: 9068293340188861464}
-  isBlink: 0
 --- !u!114 &6829904259466558291
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23387,7 +23372,7 @@ GameObject:
   - component: {fileID: 859546248814626689}
   - component: {fileID: 6453163885573275855}
   - component: {fileID: 8229203768842203506}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Metal_Side_Left_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -27944,6 +27929,7 @@ MonoBehaviour:
   exitWormhole: {fileID: 5820741333856485470}
   waitTime: 2
   activationCount: -1
+  acceleration: 1
   isActivated: 1
 --- !u!1 &3942650568586828233
 GameObject:
@@ -28975,7 +28961,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5370096963623203255}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: p_Spinner_Metal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -29841,7 +29827,7 @@ GameObject:
   - component: {fileID: 3315455730212248155}
   - component: {fileID: 8953569239481052225}
   - component: {fileID: 4607323479366222508}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Metal_Side_Right_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -33596,7 +33582,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5073303598724774505}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: p_Spinner_Metal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41012,7 +40998,7 @@ GameObject:
   - component: {fileID: 1482959014927431157}
   - component: {fileID: 6154509927954644629}
   - component: {fileID: 6253005556808187292}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Screw_A_02_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41098,7 +41084,7 @@ GameObject:
   - component: {fileID: 9005661569520091626}
   - component: {fileID: 5583389175883568933}
   - component: {fileID: 4563525102518852983}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Screw_A_02_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -41500,6 +41486,7 @@ GameObject:
   - component: {fileID: 7819552809043903027}
   - component: {fileID: 1101477872275689036}
   - component: {fileID: 3544881438187280173}
+  - component: {fileID: 3308805419293489813}
   m_Layer: 0
   m_Name: Trigger_Spinner
   m_TagString: Untagged
@@ -41516,7 +41503,7 @@ Transform:
   m_GameObject: {fileID: 5810860176127881507}
   serializedVersion: 2
   m_LocalRotation: {x: 0.012446563, y: 0.71306384, z: 0.012233922, w: -0.70088196}
-  m_LocalPosition: {x: 0.0016995718, y: 0.018000208, z: -0.0004999934}
+  m_LocalPosition: {x: -0.0096, y: 0.0184, z: 0.0012}
   m_LocalScale: {x: 0.034546677, y: 0.028133933, z: 0.005782851}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -41578,6 +41565,21 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rb: {fileID: 0}
   additiveSpeed: 3
+--- !u!114 &3308805419293489813
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5810860176127881507}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6d2c5adc9b7d094408ea291fc78d5510, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Sfx_Hit: {fileID: 0}
+  obj_Led: {fileID: 9068293340188861464}
+  isBlink: 0
 --- !u!1 &5907951232948027387
 GameObject:
   m_ObjectHideFlags: 0
@@ -45897,7 +45899,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3830725778941000905}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0_p_Spinner_Sticker_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46054,7 +46056,7 @@ GameObject:
   - component: {fileID: 8000103890773032778}
   - component: {fileID: 491501079272313828}
   - component: {fileID: 8882828740763390176}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Screw_A_01_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46620,7 +46622,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4857273690769295174}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: p_Spinner_Metal
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46652,7 +46654,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4018694080630163809}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: 0_p_Spinner_Sticker_01
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -46674,7 +46676,6 @@ Transform:
   m_Children:
   - {fileID: 6984943265834412953}
   - {fileID: 9122659997991349294}
-  - {fileID: 4828978660163743145}
   - {fileID: 5073303598724774505}
   m_Father: {fileID: 814980986101634260}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
@@ -48762,7 +48763,7 @@ GameObject:
   - component: {fileID: 4105143008626789085}
   - component: {fileID: 2510724590142840259}
   - component: {fileID: 2873408162091595132}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Metal_Top_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -49881,7 +49882,7 @@ GameObject:
   - component: {fileID: 468364772478502887}
   - component: {fileID: 104742969081841251}
   - component: {fileID: 1291356553258823764}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Target_Sticker_01
   m_TagString: NoCombineMesh
   m_Icon: {fileID: 0}
@@ -51531,6 +51532,7 @@ MonoBehaviour:
   exitWormhole: {fileID: 7905849617327692586}
   waitTime: 2
   activationCount: -1
+  acceleration: 1
   isActivated: 1
 --- !u!1 &7448553331686676041
 GameObject:
@@ -52551,7 +52553,7 @@ GameObject:
   - component: {fileID: 6969711183968100513}
   - component: {fileID: 7887621578067331675}
   - component: {fileID: 4639057366802769885}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Screw_A_01_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -54596,7 +54598,7 @@ GameObject:
   - component: {fileID: 324826091449686230}
   - component: {fileID: 2789360623871187730}
   - component: {fileID: 7225902847903678893}
-  m_Layer: 2
+  m_Layer: 10
   m_Name: Spinner_Target
   m_TagString: NoCombineMesh
   m_Icon: {fileID: 0}
@@ -58536,7 +58538,7 @@ GameObject:
   - component: {fileID: 1344202308682023846}
   - component: {fileID: 832956034669060269}
   - component: {fileID: 106121717299800857}
-  m_Layer: 0
+  m_Layer: 10
   m_Name: Spinner_Metal_Side_Right_zl
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -59853,185 +59855,6 @@ Transform:
   - {fileID: 2711135913733835518}
   m_Father: {fileID: 4933140014799481611}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!1 &8778642270577779813
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 4828978660163743145}
-  - component: {fileID: 8793481111352695827}
-  - component: {fileID: 4702878178737039981}
-  - component: {fileID: 6807768385410689759}
-  - component: {fileID: 6612072696484972994}
-  m_Layer: 0
-  m_Name: 0_sc_Trigger_Lap_Count
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &4828978660163743145
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8778642270577779813}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0.097640455, y: -0.71326387, z: -0.10025307, w: 0.68678266}
-  m_LocalPosition: {x: 0.006899925, y: 0.048900194, z: 0.010000007}
-  m_LocalScale: {x: 0.010458171, y: 0.0056534293, z: 0.009075821}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 4018694080630163809}
-  m_LocalEulerAnglesHint: {x: -16.088999, y: -92.1805, z: 0.094399996}
---- !u!33 &8793481111352695827
-MeshFilter:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8778642270577779813}
-  m_Mesh: {fileID: 10202, guid: 0000000000000000e000000000000000, type: 0}
---- !u!65 &4702878178737039981
-BoxCollider:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8778642270577779813}
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_IsTrigger: 1
-  m_ProvidesContacts: 0
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Size: {x: 1, y: 1, z: 1}
-  m_Center: {x: 0, y: 0, z: 0}
---- !u!82 &6807768385410689759
-AudioSource:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8778642270577779813}
-  m_Enabled: 1
-  serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
-  m_audioClip: {fileID: 0}
-  m_Resource: {fileID: 0}
-  m_PlayOnAwake: 0
-  m_Volume: 1
-  m_Pitch: 1
-  Loop: 0
-  Mute: 0
-  Spatialize: 0
-  SpatializePostEffects: 0
-  Priority: 128
-  DopplerLevel: 1
-  MinDistance: 1
-  MaxDistance: 500
-  Pan2D: 0
-  rolloffMode: 0
-  BypassEffects: 0
-  BypassListenerEffects: 0
-  BypassReverbZones: 0
-  rolloffCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    - serializedVersion: 3
-      time: 1
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 4
-  panLevelCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  spreadCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 0
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
-  reverbZoneMixCustomCurve:
-    serializedVersion: 2
-    m_Curve:
-    - serializedVersion: 3
-      time: 0
-      value: 1
-      inSlope: 0
-      outSlope: 0
-      tangentMode: 0
-      weightedMode: 0
-      inWeight: 0.33333334
-      outWeight: 0.33333334
-    m_PreInfinity: 2
-    m_PostInfinity: 2
-    m_RotationOrder: 0
---- !u!114 &6612072696484972994
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8778642270577779813}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 430da21bafae549b6b22f3af5ab95a5e, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  index: 1
-  Parent_Manager:
-  - {fileID: 3148223103869982368}
-  functionToCall: Counter
-  Sfx_Rotation: {fileID: 8300000, guid: d79ea20e9ca914dacbc6cd4473aaa2dc, type: 3}
-  Points: 1000
 --- !u!1 &8799390425061329748
 GameObject:
   m_ObjectHideFlags: 0
