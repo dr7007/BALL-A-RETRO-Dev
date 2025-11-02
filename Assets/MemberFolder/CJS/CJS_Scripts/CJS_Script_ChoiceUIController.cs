@@ -31,7 +31,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     void OnValidate()
     {
         if (rollerBehaviour != null && !(rollerBehaviour is CJS_IChoiceRoller))
-            Debug.LogWarning("rollerBehaviour는 CJS_IChoiceRoller를 구현해야 합니다.", this);
+            Debug.LogWarning("CJS_Script_ChoiceUIController: rollerBehaviour는 CJS_IChoiceRoller를 구현해야 합니다.", this);
     }
 
     void OnEnable()
@@ -51,11 +51,11 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         roller = rollerBehaviour as CJS_IChoiceRoller;
         if (panelRoot != null) panelRoot.SetActive(false);
         usedReroll = 0;
-        isOpen = false;   
+        isOpen = false;
         busy = false;
 
         SetChoiceButtonsVisible(false);
-        UpdateRerollUI();              
+        UpdateRerollUI();
     }
 
     private void SetChoiceButtonsVisible(bool visible)
@@ -79,13 +79,13 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
             return;
         }
 
-        isOpen = true; 
+        isOpen = true;
         usedReroll = 0;
 
         if (panelRoot != null) panelRoot.SetActive(true);
         Time.timeScale = 0f;
 
-        SetChoiceButtonsVisible(true); 
+        SetChoiceButtonsVisible(true);
         UpdateRerollUI();
         RefreshCards();
 
