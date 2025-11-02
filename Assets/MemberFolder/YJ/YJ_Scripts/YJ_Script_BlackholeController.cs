@@ -53,6 +53,12 @@ public class YJ_Script_BlackholeController : MonoBehaviour
         }
     }
 
+    public void SetActivated(bool value)
+    {
+        isActivated = value;
+    }
+
+
     // 공에 중력과 공전력을 가하는 함수
     private void BlackholeGravity(Rigidbody rb)
     {
@@ -99,7 +105,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
         Vector3 launchDirection = new Vector3(randomCircle.x, 0, randomCircle.y);
         rb.AddForce(launchDirection * launchForce, ForceMode.Impulse);
 
-        // 6. 블랙홀 자기 자신을 비활성화하여 공을 다시 붙잡지 않도록 함
-        gameObject.SetActive(false);
+        isActivated = false;
+        isBallCaptured = false;
     }
 }

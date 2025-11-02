@@ -26,7 +26,7 @@ public class KHS_Script_DumpManager : MonoBehaviour
 
     private void DumpReset()
     {
-        Target _target = GetComponent<Target>();
+        YJ_Script_DropTargetController _target = GetComponent<YJ_Script_DropTargetController>();
         if (_target)
         {
             _target.Activate_Object();
