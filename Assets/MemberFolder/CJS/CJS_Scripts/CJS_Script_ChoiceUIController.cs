@@ -15,6 +15,9 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     [SerializeField] private Transform content;                  // 카드가 생성될 Grid 부모
     [SerializeField] private CJS_Script_ChoiceCard cardPrefab;   // 카드 프리팹(루트에 Button)
 
+    [SerializeField] private GameObject gameUICanvasGo;           // 모니터 클릭 편의를 위한 작업 - KHS
+    [SerializeField] private KHS_Script_CameraManager camManager; // 위와 동일한 이유 
+
     [Header("Buttons")]
     [SerializeField] private Button btnReroll;
     [SerializeField] private TMP_Text txtRerollInfo;
@@ -121,6 +124,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         for (int i = 0; i < picks.Count; i++)
         {
             var card = Instantiate(cardPrefab, content);
+            card.GetComponent<Button>().onClick.AddListener(gameUIFuncInsert);
             float chance = 0f;
             if (chanceMap != null && chanceMap.TryGetValue(picks[i], out float p))
                 chance = p;
@@ -175,12 +179,17 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private void UpdateRerollUI()
     {
         if (txtRerollInfo != null)
-            txtRerollInfo.text = "새로고침: " + Mathf.Max(0, maxReroll - usedReroll) + "회";
+            txtRerollInfo.text = Mathf.Max(0, maxReroll - usedReroll) + "회";
 
         if (btnReroll != null)
             btnReroll.interactable = isOpen && (usedReroll < maxReroll);
 
         if (btnSkip != null)
             btnSkip.interactable = isOpen;
+    }
+    private void gameUIFuncInsert()
+    {
+        gameUICanvasGo.SetActive(true);
+        camManager.MonitorOff();
     }
 }

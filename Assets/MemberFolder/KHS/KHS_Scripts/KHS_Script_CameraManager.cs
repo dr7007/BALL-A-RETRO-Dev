@@ -45,4 +45,14 @@ public class KHS_Script_CameraManager : MonoBehaviour
         cameraGos[0].SetActive(false);
         cameraGos[1].SetActive(true);
     }
+    public void MonitorOn()
+    {
+        cameraGos[0].SetActive(false);
+        cameraGos[2].SetActive(true);
+    }
+    public void MonitorOff()
+    {
+        cameraGos[0].SetActive(true);
+        cameraGos[2].SetActive(false);
+    }
 }
