@@ -9,6 +9,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public static event Action<int> OnGameOverWithScore;
     public static event Action<int> OnGameClearWithScore;
 
+    public static event Action<int> OnScoreGained; // 이펙트
+
     [Header("스코어 정보")]
     [Tooltip("현재 스코어 정보를 표시합니다")]
     public int curScore = 0;
@@ -17,26 +19,24 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     [Header("볼 관련 정보")]
     [Tooltip("추후 점수 계산에 사용할 볼의 정보를 저장하기 위함")]
-    [SerializeField]
-    private int numOfBounce = 0;
+    [SerializeField] private int numOfBounce = 0;
 
-    [Header("결과 연동(추가)")]
-    [SerializeField] private CJS_Script_GameOverUI gameOverUI;               
+    [Header("결과 연동")]
+    [SerializeField] private CJS_Script_GameOverUI gameOverUI;
     [SerializeField] private CJS_Script_PinballRankingService rankingService;
     [SerializeField] private string gameMode = "Classic";
     [SerializeField] private int level = 1;
 
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
+    [Header("FX (Camera Shake)")]
+    [Tooltip("카메라넣는곳")]
+    [SerializeField] private CJS_Script_CameraShaker cameraShaker;
+    [Tooltip("카메라쉐이크기능쓸지말지")]
+    [SerializeField] private bool shakeOnScore = true;
+
     void Start()
     {
         curScore = 0;
         numOfBounce = 0;
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
     }
 
     private void OnEnable()
@@ -47,7 +47,6 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
         KHS_Script_DumpManager.OnScore += AddScore;
     }
-
 
     private void OnDisable()
     {
@@ -63,9 +62,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         Debug.LogError("게임종료 결과 판정중!!!");
         Debug.LogWarning($"최종 스코어 : {curScore}");
         if (curScore >= targetScore)
-            OnGameClear.Invoke();
+            OnGameClear?.Invoke();
         else
-            OnGameOver.Invoke();
+            OnGameOver?.Invoke();
 
         int finalScore = curScore;
 
@@ -75,7 +74,6 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         else
             OnGameOverWithScore?.Invoke(finalScore);
 
-        // GameOver UI에 표시(Show 호출 시 AutoSubmitOnShow가 체크되어 있으면 서버 제출+TOP10 갱신까지 자동 수행)
         if (gameOverUI != null)
         {
             gameOverUI.Show(finalScore);
@@ -100,13 +98,31 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     public void AddScore(int value)
     {
+        // value는 '이번에 얻은 점수(델타)'
         curScore += value;
         Debug.LogWarning($"현재 스코어: {curScore} (+{value})");
+
+        // 델타 방송 (다른 시스템에서 필요 시 사용)
+        OnScoreGained?.Invoke(value);
+
+        // 카메라 쉐이크
+        if (shakeOnScore && cameraShaker != null && value > 0)
+            cameraShaker.OnScored(value);
     }
+
     public void MultiplyScore(int value)
     {
+        // 곱셈이므로 '실제 증가분'을 계산해 쉐이크 강도에 반영
+        int before = curScore;
         curScore *= value;
+        int delta = Mathf.Max(0, curScore - before);
+
         Debug.LogWarning($"현재 스코어: {curScore} (*{value})");
+
+        OnScoreGained?.Invoke(delta);
+
+        if (shakeOnScore && cameraShaker != null && delta > 0)
+            cameraShaker.OnScored(delta);
     }
 
     private void BallTrigger(Collider _other)
@@ -114,6 +130,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         numOfBounce++;
         Debug.Log($"볼 튕긴(Trigger) 횟수 증가 : {numOfBounce}");
     }
+
     private void BallCollision(Collision collision)
     {
         numOfBounce++;
