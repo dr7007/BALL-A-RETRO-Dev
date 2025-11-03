@@ -1,5 +1,6 @@
 using System.Collections;
 using UnityEngine;
+using System; // [수정] Action (이벤트)를 사용하기 위해 추가
 
 public class YJ_Script_WormholeController : MonoBehaviour
 {
@@ -19,38 +20,63 @@ public class YJ_Script_WormholeController : MonoBehaviour
     [Tooltip("가본값: 1(들어간 속도 그대로 사출)")]
     [SerializeField] private float acceleration = 1f;
 
-    // 내부 상태 변수
-    public bool isActivated = true; // 웜홀이 공을 받아들일 수 있는 상태인지 확인
+    // --- [수정] 상태 변수를 프로퍼티로 변경 ---
+
+    /// <summary>
+    /// 웜홀의 활성화 상태가 변경될 때 호출되는 이벤트입니다.
+    /// (bool: 새로운 활성화 상태)
+    /// </summary>
+    public event Action<bool> OnActivationChanged;
+
+    // 웜홀의 실제 활성화 상태를 저장하는 내부 변수 (Backing Field)
+    private bool _isActivated = true;
+
+    /// <summary>
+    /// 웜홀이 공을 받아들일 수 있는 상태인지 확인하고 설정합니다.
+    /// 상태가 변경될 때 OnActivationChanged 이벤트가 호출됩니다.
+    /// </summary>
+    public bool isActivated
+    {
+        get { return _isActivated; }
+        private set
+        {
+            if (_isActivated != value)
+            {
+                // ▼▼▼ 이 Debug.Log 라인을 추가하세요 ▼▼▼
+                Debug.Log($"[YJ_Script] {this.gameObject.name}의 isActivated 상태 변경: {value}", this.gameObject);
+
+                _isActivated = value;
+                OnActivationChanged?.Invoke(_isActivated);
+            }
+        }
+    }
+    // --- [수정] 끝 ---
+
+
     private Transform spawnPoint;
 
 
     private void Start()
     {
-        // 다른 웜홀에 들어간 공이 나올 위치(이 웜홀의 위치)
         spawnPoint = GetComponent<Transform>();
     }
 
-    // 에디터에서 입구와 출구의 연결을 시각적으로 보여주는 선을 그립니다.
     private void OnDrawGizmos()
     {
         if (exitWormhole != null)
         {
-            // 잔여 사용 횟수가 0이면 회색으로 표시
             Gizmos.color = (activationCount == 0) ? Color.gray : Color.cyan;
             Gizmos.DrawLine(transform.position, exitWormhole.transform.position);
         }
     }
 
-    // 트리거 안으로 다른 Collider가 들어오는 순간 호출
     private void OnTriggerEnter(Collider other)
     {
-        // 웜홀 사용 횟수가 0보다 크거나 무제한인지 확인
         bool isUsable = (activationCount > 0 || activationCount == -1);
 
-        // 들어온 것이 "Ball" 태그를 가진 오브젝트이고, 웜홀이 현재 활성 상태라면
+        // [수정] public bool isActivated 변수 대신 프로퍼티(isActivated)를 사용
         if (other.CompareTag("Ball") && isActivated && isUsable)
         {
-            // 출구가 지정되지 않았다면 경고를 출력하고 종료
             if (exitWormhole == null)
             {
                 Debug.LogError("출구 웜홀이 지정되지 않았습니다!", this.gameObject);
@@ -60,7 +86,6 @@ public class YJ_Script_WormholeController : MonoBehaviour
             Rigidbody ballRigidbody = other.GetComponent<Rigidbody>();
             if (ballRigidbody != null)
             {
-                // 사용 횟수가 무제한이 아니면 카운터를 1씩 차감
                 if (activationCount > 0)
                 {
                     activationCount--;
@@ -71,39 +96,40 @@ public class YJ_Script_WormholeController : MonoBehaviour
         }
     }
 
-    // 텔레포트, 대기, 사출을 순서대로 진행하는 코루틴
     private IEnumerator TeleportCoroutine(Rigidbody rb)
     {
-        // 1. 입구와 출구 웜홀을 모두 비활성화하여 중복 작동 방지
-        isActivated = false;
-        exitWormhole.isActivated = false; // 출구에서 바로 다시 들어가는 현상 방지
+        // [수정] 프로퍼티의 set 접근자를 호출 (이벤트가 발생함)
+        this.isActivated = false;
+        exitWormhole.isActivated = false;
 
-        // 2. 입사각(속도 벡터)을 기억하고 공을 물리적으로 고정 후 숨김
         Vector3 incomingVelocity = rb.linearVelocity;
         rb.isKinematic = true;
         rb.gameObject.SetActive(false);
 
-        // 3. 설정된 시간 동안 대기
         yield return new WaitForSeconds(waitTime);
 
-        // 4. 출구 웜홀의 스폰 위치로 공을 이동시키고 다시 보이게 함
         rb.transform.position = exitWormhole.spawnPoint.position;
         rb.gameObject.SetActive(true);
 
-        // 5. 물리 효과를 다시 활성화하고, 기억해둔 입사각(속도)을 그대로 적용
         rb.isKinematic = false;
         rb.linearVelocity = incomingVelocity * acceleration;
 
-        // 6. 짧은 시간 후 출구 웜홀을 재활성화 (공이 완전히 벗어날 시간 확보)
         yield return new WaitForSeconds(0.5f);
+
+        // [수정] 프로퍼티의 set 접근자를 호출 (이벤트가 발생함)
         exitWormhole.isActivated = true;
 
-        // 입구 웜홀을 재활성화
-        isActivated = true;
+        // [수정] 프로퍼티의 set 접근자를 호출 (이벤트가 발생함)
+        this.isActivated = true;
     }
 
+    /// <summary>
+    /// 웜홀의 활성화 상태를 외부에서 변경합니다.
+    /// </summary>
+    /// <param name="value">설정할 활성화 상태</param>
     public void SetActivated(bool value)
     {
-        isActivated = value;
+        // [수정] 프로퍼티의 set 접근자를 호출 (이벤트가 발생함)
+        this.isActivated = value;
     }
 }
