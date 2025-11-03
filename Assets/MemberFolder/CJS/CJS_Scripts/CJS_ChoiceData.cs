@@ -10,5 +10,9 @@ public class CJS_ChoiceData
 
     [Header("확률/등장 제어")]
     [Min(0f)] public float weight = 1f;
-    public bool isEnabled = true;      
+    public bool isEnabled = true;
+
+    [Header("동작 참조 함수 인덱스")]
+    public int funcIdx = 0; 
+    public KHS_Script_RogueLikeManager roguelike;
 }

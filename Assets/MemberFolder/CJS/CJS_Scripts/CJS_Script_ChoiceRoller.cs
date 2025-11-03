@@ -27,6 +27,10 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             allChoices.Add(new CJS_ChoiceData { name = "속도 +5%", description = "볼 속도 5% 증가", rarity = "Rare", weight = 2.5f, isEnabled = true });
             allChoices.Add(new CJS_ChoiceData { name = "전설 효과", description = "강력한 전설 효과", rarity = "Legendary", weight = 0.5f, isEnabled = true });
         }
+        foreach (var choice in allChoices)
+        {
+            choice.roguelike = GetComponent<KHS_Script_RogueLikeManager>();
+        }
     }
 
     void OnValidate()
@@ -110,6 +114,7 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     public void PushPicked(CJS_ChoiceData picked)
     {
         if (picked == null) return;
+        picked.roguelike.MatchingFunc(picked.funcIdx);
         Debug.Log("[ChoiceRoller] Picked: " + picked.name);
     }
 
