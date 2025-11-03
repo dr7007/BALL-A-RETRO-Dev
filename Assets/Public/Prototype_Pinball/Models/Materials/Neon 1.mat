@@ -7,16 +7,16 @@ Material:
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  m_Name: Neon
+  m_Name: Neon 1
   m_Shader: {fileID: 4800000, guid: a5e1047f27bee462089b2bc3104f90fd, type: 3}
   m_Parent: {fileID: 0}
   m_ModifiedSerializedProperties: 0
   m_ValidKeywords: []
   m_InvalidKeywords: []
   m_LightmapFlags: 1
-  m_EnableInstancingVariants: 0
-  m_DoubleSidedGI: 0
-  m_CustomRenderQueue: 2900
+  m_EnableInstancingVariants: 1
+  m_DoubleSidedGI: 1
+  m_CustomRenderQueue: 3000
   stringTagMap: {}
   disabledShaderPasses:
   - MOTIONVECTORS
@@ -119,10 +119,10 @@ Material:
     - _ZWrite: 1
     m_Colors:
     - _BaseColor: {r: 0, g: 1, b: 0.40361214, a: 1}
-    - _Base_Color: {r: 1, g: 0.80716705, b: 0, a: 1}
+    - _Base_Color: {r: 0.08334541, g: 0, b: 1, a: 1}
     - _Color: {r: 0, g: 1, b: 0.4036121, a: 1}
     - _EmissionColor: {r: 0, g: 3.9999995, b: 0.59999937, a: 0}
-    - _Emission_Color: {r: 0, g: 5.3403134, b: 0.24344666, a: 0}
+    - _Emission_Color: {r: 1.2146596, g: 5.160736, b: 7.999999, a: 0.6862745}
     - _Emission_Strength_Min_Max: {r: 0.5, g: 1, b: 0, a: 0}
     - _SpecColor: {r: 0.19999996, g: 0.19999996, b: 0.19999996, a: 1}
   m_BuildTextureStacks: []
