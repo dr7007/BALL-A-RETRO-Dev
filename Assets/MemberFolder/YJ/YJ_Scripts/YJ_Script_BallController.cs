@@ -11,7 +11,7 @@ public class YJ_Script_BallController : MonoBehaviour
     private RigidbodyConstraints defaultConstraints;
     [Header("핀볼 테이블의 기본 Y 높이")]
     [SerializeField]
-    private float playfieldYLevel = 0f;
+    private float playfieldYLevel = 0.25f;
     [SerializeField]
     private float Gravity = 9.8f;
     [SerializeField]
@@ -67,14 +67,13 @@ public class YJ_Script_BallController : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
+        bool isFalling = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) == 0;
+
+        if (!isFalling) return;
+
         if (collision.gameObject.CompareTag("Playfield"))
         {
-            bool isFalling = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) == 0;
-
-            if (isFalling)
-            {
-                Enter2DMode();
-            }
+            Enter2DMode(playfieldYLevel);
         }
     }
 
@@ -120,7 +119,7 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         transform.parent = originParent; // 부모-자식 관계 복원
         rigidBody.isKinematic = false;  // 물리 엔진 다시 켜기
-        Enter2DMode(); // 2D 모드 복귀 함수 호출
+        Enter2DMode(playfieldYLevel); // 2D 모드 복귀 함수 호출
         Debug.Log("2D 모드로 즉시 복귀 (해제됨)");
     }
 
@@ -135,7 +134,7 @@ public class YJ_Script_BallController : MonoBehaviour
         Debug.Log("3D 낙하 모드로 해제됨 (Y축 고정 해제)");
     }
 
-    public void Enter2DMode()
+    public void Enter2DMode(float targetYLevel)
     {
         if (rigidBody.isKinematic)
         {
@@ -144,15 +143,19 @@ public class YJ_Script_BallController : MonoBehaviour
 
         // Y축 다시 고정
         rigidBody.constraints = defaultConstraints;
-        // Y축 위치를 테이블 높이로 '스냅'
-        SnapToPlayfield();
-        Debug.Log("2D 모드 복귀 (Y축 잠김, Z축 중력 활성화)");
+
+        // 'targetYLevel'을 Snap 함수로 전달
+        SnapToPlayfield(targetYLevel);
+        Debug.Log($"2D 모드 복귀 (Y축 잠김, Y 높이: {targetYLevel})");
     }
 
-    private void SnapToPlayfield()
+    private void SnapToPlayfield(float targetYLevel)
     {
         Vector3 snappedPosition = transform.position;
-        snappedPosition.y = playfieldYLevel;
+
+        // 하드코딩된 'playfieldYLevel' 대신 'targetYLevel' 사용
+        snappedPosition.y = targetYLevel;
+
         transform.position = snappedPosition;
 
         // Y축 속도도 0으로 (낙하 속도 제거)

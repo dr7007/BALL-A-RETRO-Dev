@@ -39,6 +39,14 @@ public class YJ_Script_PlatformWallCloser : MonoBehaviour
                 targetObjectToEnable.SetActive(true);
                 Debug.Log(targetObjectToEnable.name + "이(가) 활성화되었습니다.");
             }
+
+            YJ_Script_BallController ballController = other.GetComponent<YJ_Script_BallController>();
+
+            if (ballController != null)
+            {
+                float platformYLevel = other.transform.position.y;
+                ballController.Enter2DMode(platformYLevel);
+            }
         }
     }
 }
