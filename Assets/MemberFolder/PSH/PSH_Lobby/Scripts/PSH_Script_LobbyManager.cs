@@ -18,7 +18,7 @@ namespace PSH
         [Header("InpuEmain Prefabs")]
         [Tooltip("메일 입력창 프리팹")]
         [SerializeField] private GameObject inputEmailPrefab;
-
+        [SerializeField] private GameObject RnakingPanel;
 
 
         private PSH_Script_SceneLoader sceneLoader;
@@ -77,6 +77,10 @@ namespace PSH
                 return;
             }
             sceneLoader.LoadSceneAsyncByName(sceneNameForBuild);
+        }
+        public void OnClick_RankingPanelOpen()
+        {
+            RnakingPanel.SetActive(true);
         }
 
         public void OnClick_QuitGame()
