@@ -3,7 +3,7 @@ using UnityEngine.EventSystems;
 using TMPro;
 using System.Collections;
 using System.Collections.Generic;
-// using PSH; // ³×ÀÓ½ºÆäÀÌ½º°¡ PSHÀÌ¹Ç·Î PSH usingÀº ºÒÇÊ¿ä
+// using PSH; // ë„¤ì„ìŠ¤í˜ì´ìŠ¤ê°€ PSHì´ë¯€ë¡œ PSH usingì€ ë¶ˆí•„ìš”
 using UnityEngine.Video;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
@@ -11,15 +11,15 @@ using UnityEngine.SceneManagement;
 
 namespace PSH
 {
-    // KHS_Script_ResetController.cs ÆÄÀÏÀº ÀÌ ½ºÅ©¸³Æ®¿Í Á÷Á¢ÀûÀÎ °ü·ÃÀÌ ¾ø¾î ¼öÁ¤ÇÏÁö ¾Ê¾Ò½À´Ï´Ù.
-    // ÀÌ ½ºÅ©¸³Æ®´Â PSH_Script_DialogueUI.cs¸¦ ¼öÁ¤ÇÑ ¹öÀüÀÔ´Ï´Ù.
+    // KHS_Script_ResetController.cs íŒŒì¼ì€ ì´ ìŠ¤í¬ë¦½íŠ¸ì™€ ì§ì ‘ì ì¸ ê´€ë ¨ì´ ì—†ì–´ ìˆ˜ì •í•˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.
+    // ì´ ìŠ¤í¬ë¦½íŠ¸ëŠ” PSH_Script_DialogueUI.csë¥¼ ìˆ˜ì •í•œ ë²„ì „ì…ë‹ˆë‹¤.
 
     public class PSH_Script_DialogueUI : MonoBehaviour, IPointerClickHandler
     {
         public static PSH_Script_DialogueUI Instance { get; private set; }
 
         [Header("UI")]
-        [SerializeField] GameObject panelRoot;            // ´ë»ç UI ·çÆ®
+        [SerializeField] GameObject panelRoot;            // ëŒ€ì‚¬ UI ë£¨íŠ¸
         [SerializeField] TMP_Text dialogueText;
 
         [Header("Data")]
@@ -28,14 +28,14 @@ namespace PSH
         [SerializeField] private string lobbySceneName = "PSH_Scene_Lobby";
         [SerializeField] private PSH_Script_SceneLoader sceneLoader;
 
-        // ³»ºÎ »óÅÂ
+        // ë‚´ë¶€ ìƒíƒœ
         private List<string> currentLines = new();
         private int idx = -1;
         private bool isTyping = false;
         private Coroutine typingCo;
         private string currentCutsceneId;
 
-        // [Ãß°¡] ½Ã°£ÀÌ ¸ØÃß±â ÀüÀÇ ¿ø·¡ TimeScaleÀ» ÀúÀåÇÏ±â À§ÇÑ º¯¼ö
+        // [ì¶”ê°€] ì‹œê°„ì´ ë©ˆì¶”ê¸° ì „ì˜ ì›ë˜ TimeScaleì„ ì €ì¥í•˜ê¸° ìœ„í•œ ë³€ìˆ˜
         private float originalTimeScale = 1.0f;
 
 
@@ -48,25 +48,25 @@ namespace PSH
             }
             Instance = this;
 
-            // ½ÃÀÛÇÒ ¶§´Â ²¨Á®ÀÖµµ·Ï È®½ÇÇÏ°Ô Ã³¸®
+            // ì‹œì‘í•  ë•ŒëŠ” êº¼ì ¸ìˆë„ë¡ í™•ì‹¤í•˜ê²Œ ì²˜ë¦¬
             if (panelRoot) panelRoot.SetActive(false);
         }
 
         private void OnEnable()
         {
-            // TODO: (ÀÌÀü Á¦¾È) Á¡¼ö ÀÌº¥Æ® ±¸µ¶
+            // TODO: (ì´ì „ ì œì•ˆ) ì ìˆ˜ ì´ë²¤íŠ¸ êµ¬ë…
             // ScoreManager.OnScoreUpdated += HandleScoreUpdated;
         }
 
         private void OnDisable()
         {
-            // TODO: (ÀÌÀü Á¦¾È) Á¡¼ö ÀÌº¥Æ® ±¸µ¶ ÇØÁö
+            // TODO: (ì´ì „ ì œì•ˆ) ì ìˆ˜ ì´ë²¤íŠ¸ êµ¬ë… í•´ì§€
             // ScoreManager.OnScoreUpdated -= HandleScoreUpdated;
         }
 
-        // [¼öÁ¤] Start()¿¡¼­ ¹Ù·Î Play¸¦ È£ÃâÇÏ¸é ´« ¶ß´Â ¾Ö´Ï¸ŞÀÌ¼ÇÀ» ±â´Ù¸± ¼ö ¾ø½À´Ï´Ù.
-        // ÀÌ ÇÔ¼ö´Â GameSceneManager °°Àº ´Ù¸¥ ½ºÅ©¸³Æ®°¡
-        // '´« ¶ß´Â ¾Ö´Ï¸ŞÀÌ¼Ç'ÀÌ ³¡³­ ÈÄ È£ÃâÇØ¾ß ÇÕ´Ï´Ù.
+        // [ìˆ˜ì •] Start()ì—ì„œ ë°”ë¡œ Playë¥¼ í˜¸ì¶œí•˜ë©´ ëˆˆ ëœ¨ëŠ” ì• ë‹ˆë©”ì´ì…˜ì„ ê¸°ë‹¤ë¦´ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.
+        // ì´ í•¨ìˆ˜ëŠ” GameSceneManager ê°™ì€ ë‹¤ë¥¸ ìŠ¤í¬ë¦½íŠ¸ê°€
+        // 'ëˆˆ ëœ¨ëŠ” ì• ë‹ˆë©”ì´ì…˜'ì´ ëë‚œ í›„ í˜¸ì¶œí•´ì•¼ í•©ë‹ˆë‹¤.
         // public void Start()
         // {
         //     Play("Intro");
@@ -76,18 +76,18 @@ namespace PSH
         {
             Debug.Log($"--- Play('{cutsceneId}') ---");
 
-            // [Ãß°¡] ´ëÈ­°¡ ½ÃÀÛµÉ ¶§ ÆĞ³ÎÀ» ÄÑ°í ½Ã°£À» ¸ØÃä´Ï´Ù.
+            // [ì¶”ê°€] ëŒ€í™”ê°€ ì‹œì‘ë  ë•Œ íŒ¨ë„ì„ ì¼œê³  ì‹œê°„ì„ ë©ˆì¶¥ë‹ˆë‹¤.
             if (panelRoot) panelRoot.SetActive(true);
-            originalTimeScale = Time.timeScale; // ¿ø·¡ ½Ã°£ ÀúÀå
-            Time.timeScale = 0f; // ½Ã°£ Á¤Áö
+            originalTimeScale = Time.timeScale; // ì›ë˜ ì‹œê°„ ì €ì¥
+            Time.timeScale = 0f; // ì‹œê°„ ì •ì§€
 
             currentCutsceneId = cutsceneId;
             currentLines = LoadLines(cutsceneId);
 
             if (currentLines.Count == 0)
             {
-                Debug.LogError($"### Play ½ÇÆĞ: '{cutsceneId}' ¼½¼Ç ´ë»ç¸¦ Ã£À» ¼ö ¾øÀ½ ###");
-                EndDialogue(); // ´ë»ç°¡ ¾øÀ¸¸é ¹Ù·Î Á¾·á
+                Debug.LogError($"### Play ì‹¤íŒ¨: '{cutsceneId}' ì„¹ì…˜ ëŒ€ì‚¬ë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŒ ###");
+                EndDialogue(); // ëŒ€ì‚¬ê°€ ì—†ìœ¼ë©´ ë°”ë¡œ ì¢…ë£Œ
                 return;
             }
 
@@ -97,21 +97,21 @@ namespace PSH
 
         public void Update()
         {
-            // '¾Æ¹« Å°' (Å°º¸µå ¶Ç´Â ¸¶¿ì½º Å¬¸¯)°¡ ´­·È´ÂÁö È®ÀÎ
-            // ´ëÈ­°¡ ÁøÇà ÁßÀÏ ¶§¸¸(idx != -1) ÀÔ·ÂÀ» ¹Şµµ·Ï ¼öÁ¤
+            // 'ì•„ë¬´ í‚¤' (í‚¤ë³´ë“œ ë˜ëŠ” ë§ˆìš°ìŠ¤ í´ë¦­)ê°€ ëˆŒë ¸ëŠ”ì§€ í™•ì¸
+            // ëŒ€í™”ê°€ ì§„í–‰ ì¤‘ì¼ ë•Œë§Œ(idx != -1) ì…ë ¥ì„ ë°›ë„ë¡ ìˆ˜ì •
             if (idx != -1 && Input.anyKeyDown)
             {
-                // ·ÎµåµÈ ´ë»ç°¡ ¾øÀ¸¸é ¹«½Ã
+                // ë¡œë“œëœ ëŒ€ì‚¬ê°€ ì—†ìœ¼ë©´ ë¬´ì‹œ
                 if (currentLines.Count == 0) return;
 
-                // 1. Å¸ÀÌÇÎ ÁßÀÏ ¶§ -> Å¸ÀÌÇÎ ½ºÅµ
+                // 1. íƒ€ì´í•‘ ì¤‘ì¼ ë•Œ -> íƒ€ì´í•‘ ìŠ¤í‚µ
                 if (isTyping)
                 {
                     StopCoroutine(typingCo);
                     dialogueText.text = currentLines[idx];
                     isTyping = false;
                 }
-                // 2. Å¸ÀÌÇÎÀÌ ³¡³µÀ» ¶§ -> ´ÙÀ½ ´ë»ç·Î
+                // 2. íƒ€ì´í•‘ì´ ëë‚¬ì„ ë•Œ -> ë‹¤ìŒ ëŒ€ì‚¬ë¡œ
                 else
                 {
                     idx++;
@@ -121,7 +121,7 @@ namespace PSH
                     }
                     else
                     {
-                        // ´ëÈ­°¡ ¸ğµÎ ³¡³²
+                        // ëŒ€í™”ê°€ ëª¨ë‘ ëë‚¨
                         EndDialogue();
                     }
                 }
@@ -130,7 +130,7 @@ namespace PSH
 
         public void OnPointerClick(PointerEventData _)
         {
-            // ´ëÈ­°¡ ÁøÇà ÁßÀÏ ¶§¸¸(idx != -1) ÀÔ·ÂÀ» ¹Şµµ·Ï ¼öÁ¤
+            // ëŒ€í™”ê°€ ì§„í–‰ ì¤‘ì¼ ë•Œë§Œ(idx != -1) ì…ë ¥ì„ ë°›ë„ë¡ ìˆ˜ì •
             if (idx == -1 || currentLines.Count == 0) return;
 
             if (isTyping)
@@ -148,28 +148,29 @@ namespace PSH
             }
             else
             {
-                // ´ëÈ­°¡ ¸ğµÎ ³¡³²
+                // ëŒ€í™”ê°€ ëª¨ë‘ ëë‚¨
                 EndDialogue();
             }
         }
 
-        // [Ãß°¡] ´ëÈ­ Á¾·á Ã³¸®¸¦ À§ÇÑ ÇïÆÛ ÇÔ¼ö
+        // [ì¶”ê°€] ëŒ€í™” ì¢…ë£Œ ì²˜ë¦¬ë¥¼ ìœ„í•œ í—¬í¼ í•¨ìˆ˜
         private void EndDialogue()
         {
-            Debug.Log("´ëÈ­ ³¡");
+            Debug.Log("ëŒ€í™” ë");
 
-            // [Ãß°¡] ½Ã°£À» ¿ø·¡´ë·Î µÇµ¹¸³´Ï´Ù.
+            // [ì¶”ê°€] ì‹œê°„ì„ ì›ë˜ëŒ€ë¡œ ë˜ëŒë¦½ë‹ˆë‹¤.
             Time.timeScale = originalTimeScale;
 
-            // [Ãß°¡] ÆĞ³ÎÀ» ´İ½À´Ï´Ù.
+            // [ì¶”ê°€] íŒ¨ë„ì„ ë‹«ìŠµë‹ˆë‹¤.
+            transform.GetChild(0).gameObject.SetActive(false);
             if (panelRoot) panelRoot.SetActive(false);
 
-            // »óÅÂ ÃÊ±âÈ­
+            // ìƒíƒœ ì´ˆê¸°í™”
             currentLines.Clear();
             idx = -1;
             currentCutsceneId = null;
 
-            // (ÇÊ¿ä½Ã ÀÌ°÷¿¡ ¾À ÀÌµ¿ µî ´ÙÀ½ ·ÎÁ÷ Ãß°¡)
+            // (í•„ìš”ì‹œ ì´ê³³ì— ì”¬ ì´ë™ ë“± ë‹¤ìŒ ë¡œì§ ì¶”ê°€)
             // if (currentCutsceneId == "Intro")
             // {
             //     GameManager.Instance.ChangeState(GameState.Playing);
@@ -181,8 +182,8 @@ namespace PSH
         }
 
 
-        // --- (LoadLines, StartTyping, TypeRoutine µî ³ª¸ÓÁö ÇÔ¼ö´Â º¯°æ ¾øÀ½) ---
-        // ... (ÀÌÇÏ »ı·«) ...
+        // --- (LoadLines, StartTyping, TypeRoutine ë“± ë‚˜ë¨¸ì§€ í•¨ìˆ˜ëŠ” ë³€ê²½ ì—†ìŒ) ---
+        // ... (ì´í•˜ ìƒëµ) ...
 
         private List<string> LoadLines(string id)
         {
@@ -190,7 +191,7 @@ namespace PSH
             TextAsset ta = Resources.Load<TextAsset>(csvFileName);
             if (ta == null)
             {
-                Debug.LogError($"### LoadLines ½ÇÆĞ: Resources/{csvFileName}.csv ¾øÀ½ ###");
+                Debug.LogError($"### LoadLines ì‹¤íŒ¨: Resources/{csvFileName}.csv ì—†ìŒ ###");
                 return result;
             }
 
@@ -224,7 +225,7 @@ namespace PSH
             foreach (char c in text.Replace("\r", ""))
             {
                 dialogueText.text += c;
-                // `Time.timeScale`¿¡ ¿µÇâÀ» ¹ŞÁö ¾Ê´Â `WaitForSecondsRealtime` (¾ÆÁÖ Àß ÇÏ¼Ì½À´Ï´Ù!)
+                // `Time.timeScale`ì— ì˜í–¥ì„ ë°›ì§€ ì•ŠëŠ” `WaitForSecondsRealtime` (ì•„ì£¼ ì˜ í•˜ì…¨ìŠµë‹ˆë‹¤!)
                 yield return new WaitForSecondsRealtime(charInterval);
             }
             isTyping = false;
@@ -242,11 +243,11 @@ namespace PSH
             if (canvasObject != null)
             {
                 canvasObject.SetActive(false);
-                Debug.Log("Canvas_GameScene ºñÈ°¼ºÈ­");
+                Debug.Log("Canvas_GameScene ë¹„í™œì„±í™”");
             }
             else
             {
-                Debug.LogWarning("'Canvas_GameScene' ¿ÀºêÁ§Æ®¸¦ Ã£Áö ¸øÇÔ");
+                Debug.LogWarning("'Canvas_GameScene' ì˜¤ë¸Œì íŠ¸ë¥¼ ì°¾ì§€ ëª»í•¨");
             }
         }
 
@@ -260,13 +261,13 @@ namespace PSH
 
             if (!string.IsNullOrEmpty(lobbySceneName))
             {
-                Debug.LogWarning("[DialogueUI] SceneLoader null ¡æ SceneManager.LoadScene Æú¹é");
-                // [¼öÁ¤] ResetController¸¦ º¸´Ï ºñµ¿±â°¡ ¾Æ´Ñ µ¿±â ·Îµå¸¦ »ç¿ëÇÏ½Ã´Â °Í °°¾Æ ¸ÂÃä´Ï´Ù.
+                Debug.LogWarning("[DialogueUI] SceneLoader null â†’ SceneManager.LoadScene í´ë°±");
+                // [ìˆ˜ì •] ResetControllerë¥¼ ë³´ë‹ˆ ë¹„ë™ê¸°ê°€ ì•„ë‹Œ ë™ê¸° ë¡œë“œë¥¼ ì‚¬ìš©í•˜ì‹œëŠ” ê²ƒ ê°™ì•„ ë§ì¶¥ë‹ˆë‹¤.
                 SceneManager.LoadScene(lobbySceneName);
             }
             else
             {
-                Debug.LogError("[DialogueUI] lobbySceneName ºñ¾îÀÖÀ½. ÀÎ½ºÆåÅÍ È®ÀÎ ÇÊ¿ä");
+                Debug.LogError("[DialogueUI] lobbySceneName ë¹„ì–´ìˆìŒ. ì¸ìŠ¤í™í„° í™•ì¸ í•„ìš”");
             }
         }
     }

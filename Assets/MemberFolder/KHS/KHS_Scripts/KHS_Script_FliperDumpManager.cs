@@ -28,7 +28,7 @@ public class KHS_Script_FliperDumpManager : MonoBehaviour
     private void OnCollisionExit(Collision _collision)
     {
         if (!_collision.gameObject.CompareTag("Ball")) return;
-
+        Debug.Log("OffCollision 판정");
         OffFliperCollision?.Invoke(_collision);
     }
 
