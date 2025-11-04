@@ -3,6 +3,12 @@ using UnityEngine;
 
 public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 {
+    public enum ChanceDisplayMode
+    {
+        NormalizedPool, // ★ 인스펙터와 동일: 전체 풀 기준 정규화(권장)
+        PerDraw         // 각 뽑기 시점의 남은 풀 기준(기존 표시 방식)
+    }
+
     [Header("Prototype Data (DB 전 임시 목록)")]
     public List<CJS_ChoiceData> allChoices = new List<CJS_ChoiceData>();
 
@@ -10,8 +16,11 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     [SerializeField, Tooltip("현재 가중치 기준 정규화된 확률(%) 미리보기")]
     private List<string> previewPercents = new List<string>();
 
+    [Header("Display/Draw Settings")]
+    [SerializeField] private ChanceDisplayMode displayMode = ChanceDisplayMode.NormalizedPool;
+
     [Header("Random")]
-    [SerializeField] private int seed = 0; 
+    [SerializeField] private int seed = 0;
     private System.Random rnd;
 
     void Awake()
@@ -27,98 +36,100 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             allChoices.Add(new CJS_ChoiceData { name = "속도 +5%", description = "볼 속도 5% 증가", rarity = "Rare", weight = 2.5f, isEnabled = true });
             allChoices.Add(new CJS_ChoiceData { name = "전설 효과", description = "강력한 전설 효과", rarity = "Legendary", weight = 0.5f, isEnabled = true });
         }
+
+        // 선택지 효과용 매니저 주입(있으면)
+        var rl = GetComponent<KHS_Script_RogueLikeManager>();
         foreach (var choice in allChoices)
         {
-            choice.roguelike = GetComponent<KHS_Script_RogueLikeManager>();
+            if (choice != null) choice.roguelike = rl;
         }
     }
 
     void OnValidate()
     {
-        RebuildPreviewPercents();
+        // 인스펙터 미리보기도 실제 풀과 동일한 기준(활성+가중치>0)으로 계산
+        var pool = BuildPoolFromAllChoices();
+        var map = ComputeNormalizedPercentMap(pool);
+        RebuildPreviewPercents(pool, map);
     }
 
-    private void RebuildPreviewPercents()
-    {
-        previewPercents ??= new List<string>();
-        previewPercents.Clear();
-
-        float sum = 0f;
-        for (int i = 0; i < allChoices.Count; i++)
-        {
-            var c = allChoices[i];
-            if (c != null && c.isEnabled && c.weight > 0f) sum += c.weight;
-        }
-
-        if (sum <= 0f)
-        {
-            for (int i = 0; i < allChoices.Count; i++)
-                previewPercents.Add($"{SafeName(allChoices[i])}: 0.0%");
-            return;
-        }
-
-        for (int i = 0; i < allChoices.Count; i++)
-        {
-            var c = allChoices[i];
-            float p = (c != null && c.isEnabled && c.weight > 0f) ? (c.weight / sum * 100f) : 0f;
-            previewPercents.Add($"{SafeName(c)}: {p:0.0}%");
-        }
-    }
-
-    private static string SafeName(CJS_ChoiceData c) => c == null ? "(null)" : c.name;
+    // ─────────────────────────────────────────────────────────────────────────────
 
     public List<CJS_ChoiceData> Roll3(out Dictionary<CJS_ChoiceData, float> rollChances)
     {
+        // 1) 실제 추첨 풀 구성(활성 + weight>0). 하나도 없으면 활성만 허용
+        var pool = BuildPoolFromAllChoices();
+
+        // 2) "인스펙터와 동일한" 표시 확률 테이블(전체 풀 기준 정규화) 미리 계산
+        var normalizedMap = ComputeNormalizedPercentMap(pool);
+
+        // 3) 비복원 가중치 추첨(로직 동일). 다만 UI에 넘길 확률은 displayMode에 따라 선택
         rollChances = new Dictionary<CJS_ChoiceData, float>();
-        var pool = BuildPool();
         var result = new List<CJS_ChoiceData>(capacity: 3);
 
-        for (int i = 0; i < 3 && pool.Count > 0; i++)
+        // 작업용 리스트(제거용)
+        var work = new List<CJS_ChoiceData>(pool);
+
+        for (int i = 0; i < 3 && work.Count > 0; i++)
         {
-            float sum = SumWeights(pool);
+            float sum = SumWeights(work);
+            CJS_ChoiceData picked;
+
             if (sum <= 0f)
             {
-                int idx = rnd.Next(0, pool.Count);
-                var pickedFallback = pool[idx];
-                result.Add(pickedFallback);
-                rollChances[pickedFallback] = 0f; 
-                pool.RemoveAt(idx);
-                continue;
+                // 모든 weight가 0이거나 음수인 비정상 케이스: 균등 랜덤 폴백
+                int idx = rnd.Next(0, work.Count);
+                picked = work[idx];
             }
-
-            // 누적분포로 1개 추첨
-            double ticket = rnd.NextDouble() * sum;
-            float acc = 0f;
-            CJS_ChoiceData picked = null;
-            for (int k = 0; k < pool.Count; k++)
+            else
             {
-                acc += Mathf.Max(0f, pool[k].weight);
-                if (ticket <= acc)
+                // 누적 분포 표본추출
+                double ticket = rnd.NextDouble() * sum;
+                float acc = 0f;
+                picked = work[0];
+                for (int k = 0; k < work.Count; k++)
                 {
-                    picked = pool[k];
-                    break;
+                    acc += Mathf.Max(0f, work[k].weight);
+                    if (ticket <= acc)
+                    {
+                        picked = work[k];
+                        break;
+                    }
                 }
             }
-            picked ??= pool[pool.Count - 1];
-
-            float chancePercent = (Mathf.Max(0f, picked.weight) / sum) * 100f;
 
             result.Add(picked);
-            rollChances[picked] = chancePercent;
 
-            pool.Remove(picked);
+            float displayPercent = 0f;
+            if (displayMode == ChanceDisplayMode.PerDraw)
+            {
+                float localSum = Mathf.Max(0.00001f, sum);
+                displayPercent = Mathf.Max(0f, picked.weight) / localSum * 100f;
+            }
+            else // NormalizedPool
+            {
+                if (!normalizedMap.TryGetValue(picked, out displayPercent))
+                    displayPercent = 0f;
+            }
+            rollChances[picked] = displayPercent;
+
+            work.Remove(picked);
         }
+
         return result;
     }
 
     public void PushPicked(CJS_ChoiceData picked)
     {
         if (picked == null) return;
-        picked.roguelike.MatchingFunc(picked.funcIdx);
+        picked.roguelike?.MatchingFunc(picked.funcIdx);
         Debug.Log("[ChoiceRoller] Picked: " + picked.name);
     }
 
-    private List<CJS_ChoiceData> BuildPool()
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 내부 유틸
+
+    private List<CJS_ChoiceData> BuildPoolFromAllChoices()
     {
         var pool = new List<CJS_ChoiceData>();
         for (int i = 0; i < allChoices.Count; i++)
@@ -129,11 +140,14 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             if (c.weight <= 0f) continue;
             pool.Add(c);
         }
+
         if (pool.Count == 0)
         {
             for (int i = 0; i < allChoices.Count; i++)
-                if (allChoices[i] != null && allChoices[i].isEnabled)
-                    pool.Add(allChoices[i]);
+            {
+                var c = allChoices[i];
+                if (c != null && c.isEnabled) pool.Add(c);
+            }
         }
         return pool;
     }
@@ -145,4 +159,57 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             s += Mathf.Max(0f, list[i].weight);
         return s;
     }
+
+    private static Dictionary<CJS_ChoiceData, float> ComputeNormalizedPercentMap(List<CJS_ChoiceData> pool)
+    {
+        var map = new Dictionary<CJS_ChoiceData, float>(pool.Count);
+        float sum = 0f;
+        for (int i = 0; i < pool.Count; i++)
+            sum += Mathf.Max(0f, pool[i].weight);
+
+        if (sum <= 0f)
+        {
+            for (int i = 0; i < pool.Count; i++) map[pool[i]] = 0f;
+            return map;
+        }
+
+        for (int i = 0; i < pool.Count; i++)
+        {
+            var c = pool[i];
+            float p = Mathf.Max(0f, c.weight) / sum * 100f;
+            map[c] = p;
+        }
+        return map;
+    }
+
+    private void RebuildPreviewPercents(List<CJS_ChoiceData> pool, Dictionary<CJS_ChoiceData, float> normalizedMap)
+    {
+        previewPercents ??= new List<string>();
+        previewPercents.Clear();
+
+        if (pool.Count == 0)
+        {
+            for (int i = 0; i < allChoices.Count; i++)
+                previewPercents.Add($"{SafeName(allChoices[i])}: 0.0%");
+            return;
+        }
+
+        //
+        for (int i = 0; i < allChoices.Count; i++)
+        {
+            var c = allChoices[i];
+            if (c == null)
+            {
+                previewPercents.Add("(null): 0.0%");
+                continue;
+            }
+
+            if (normalizedMap.TryGetValue(c, out float p))
+                previewPercents.Add($"{c.name}: {p:0.0}%");
+            else
+                previewPercents.Add($"{c.name}: 0.0%");
+        }
+    }
+
+    private static string SafeName(CJS_ChoiceData c) => c == null ? "(null)" : c.name;
 }
