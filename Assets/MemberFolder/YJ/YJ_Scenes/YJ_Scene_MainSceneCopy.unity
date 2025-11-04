@@ -1138,6 +1138,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &149894429
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -2270,6 +2271,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &212791010
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -3381,6 +3383,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 4323217668912742, guid: 8d5fabb17c3af44cc9ceb78a05022374, type: 3}
       insertIndex: 8
       addedObject: {fileID: 821915798}
+    - targetCorrespondingSourceObject: {fileID: 4323217668912742, guid: 8d5fabb17c3af44cc9ceb78a05022374, type: 3}
+      insertIndex: 9
+      addedObject: {fileID: 769594438}
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 8d5fabb17c3af44cc9ceb78a05022374, type: 3}
 --- !u!4 &304015388 stripped
@@ -6390,7 +6395,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!4 &657070063
 Transform:
   m_ObjectHideFlags: 0
@@ -6400,7 +6405,7 @@ Transform:
   m_GameObject: {fileID: 657070062}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.797, y: 0.25, z: 3.097}
+  m_LocalPosition: {x: -2.797, y: 0.25, z: 1.36}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -7372,6 +7377,128 @@ Transform:
   - {fileID: 1939761481}
   m_Father: {fileID: 180181910}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &769594437
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 769594438}
+  - component: {fileID: 769594441}
+  - component: {fileID: 769594440}
+  - component: {fileID: 769594439}
+  - component: {fileID: 769594442}
+  m_Layer: 6
+  m_Name: Platform_2F_LowerWall_C_Trigger
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 4294967295
+  m_IsActive: 1
+--- !u!4 &769594438
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769594437}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0.098, y: 0.04996538, z: -0.0058000027}
+  m_LocalScale: {x: 1, y: 1, z: 0.25}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 304015388}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &769594439
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769594437}
+  m_Material: {fileID: 13400000, guid: 0164bce7e5ae44382b5c71fc671cf368, type: 2}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.005041782, y: 0.028877217, z: 0.20122279}
+  m_Center: {x: -0.0000009536743, y: 0, z: 0.000000029802322}
+--- !u!23 &769594440
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769594437}
+  m_Enabled: 0
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: 1cec3787107c7764aa31acee2a86c739, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 10
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 0
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &769594441
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769594437}
+  m_Mesh: {fileID: 4300000, guid: 5a699f530b114c34385953ccd88a1230, type: 3}
+--- !u!114 &769594442
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 769594437}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 66ea071fa8be497479df7a57df83872f, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  targetObjectToEnable: {fileID: 821915797}
 --- !u!1 &785436898
 GameObject:
   m_ObjectHideFlags: 0
@@ -7499,7 +7626,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 4294967295
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &821915798
 Transform:
   m_ObjectHideFlags: 0
@@ -7530,7 +7657,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 1
+  m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -8842,6 +8969,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!114 &995083140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -24050,6 +24178,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &1475378676
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -24491,6 +24620,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &1510722993
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -26486,6 +26616,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &1685734835
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -28288,6 +28419,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!114 &1844027217
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -28540,6 +28672,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &1867686085
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -36067,6 +36200,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &2096737375
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -36418,6 +36552,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &2106207719
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -36843,6 +36978,7 @@ MonoBehaviour:
   bounceForce: 1
   bumpScore: 250
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &2137180198
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -37856,6 +37992,7 @@ MonoBehaviour:
   bounceForce: 1.7
   bumpScore: 300
   waitTime: 4.5
+  isSpecial: 0
 --- !u!4 &85417701690056050
 Transform:
   m_ObjectHideFlags: 0
@@ -41503,6 +41640,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!33 &444139558620132767
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -54233,6 +54371,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 80
   waitTime: 4.5
+  isSpecial: 0
 --- !u!33 &1469979162811223914
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -62936,6 +63075,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!4 &2450805840061510777
 Transform:
   m_ObjectHideFlags: 0
@@ -71205,6 +71345,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 80
   waitTime: 4.5
+  isSpecial: 0
 --- !u!108 &3279255182946750441
 Light:
   m_ObjectHideFlags: 0
@@ -77282,6 +77423,7 @@ MonoBehaviour:
   bounceForce: 1.7
   bumpScore: 300
   waitTime: 4.5
+  isSpecial: 0
 --- !u!4 &3941084066295123753
 Transform:
   m_ObjectHideFlags: 0
@@ -79516,6 +79658,7 @@ MonoBehaviour:
     isPressed: 0
   flipperSpeed: 800
   impactForceMultiplier: 5
+  fliper_Count: 10
 --- !u!33 &4209340651044580836
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -79875,6 +80018,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!4 &4242640431662632699
 Transform:
   m_ObjectHideFlags: 0
@@ -82643,6 +82787,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 80
   waitTime: 4.5
+  isSpecial: 0
 --- !u!23 &4613210408629315467
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -89560,6 +89705,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 1000
   waitTime: 4.5
+  isSpecial: 0
 --- !u!1 &5221914024620156265
 GameObject:
   m_ObjectHideFlags: 0
@@ -90330,6 +90476,7 @@ MonoBehaviour:
   bounceForce: 1.7
   bumpScore: 300
   waitTime: 4.5
+  isSpecial: 0
 --- !u!33 &5299854602421773167
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -97763,6 +97910,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!23 &6047846417088956337
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -98357,6 +98505,7 @@ MonoBehaviour:
   bounceForce: 3
   bumpScore: 0
   waitTime: 4.5
+  isSpecial: 0
 --- !u!23 &6116797305612382768
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -104073,6 +104222,7 @@ MonoBehaviour:
   bounceForce: 3
   bumpScore: 0
   waitTime: 4.5
+  isSpecial: 0
 --- !u!33 &6412744694369870216
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -105557,6 +105707,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 5000
   waitTime: 4.5
+  isSpecial: 0
 --- !u!1 &6622835713512767853
 GameObject:
   m_ObjectHideFlags: 0
@@ -108458,6 +108609,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!33 &6984512034655320541
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -109236,6 +109388,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 0
   waitTime: 4.5
+  isSpecial: 0
 --- !u!4 &7101876717793793060
 Transform:
   m_ObjectHideFlags: 0
@@ -113915,6 +114068,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!33 &7651050523210425274
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -114083,6 +114237,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 500
   waitTime: 4.5
+  isSpecial: 0
 --- !u!23 &7661628986521556180
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -122326,6 +122481,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!23 &8584137245358482854
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -122888,7 +123044,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!54 &8639633386768464641
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -127853,6 +128009,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 200
   waitTime: 4.5
+  isSpecial: 0
 --- !u!23 &9192049434896889509
 MeshRenderer:
   m_ObjectHideFlags: 0
