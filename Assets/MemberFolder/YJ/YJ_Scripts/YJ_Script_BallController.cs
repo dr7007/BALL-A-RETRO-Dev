@@ -9,7 +9,9 @@ public class YJ_Script_BallController : MonoBehaviour
     [SerializeField]
     private Rigidbody rigidBody = null;
     private RigidbodyConstraints defaultConstraints;
-    private float playfieldYLevel = 0f; // 핀볼 테이블의 기본 Y 높이
+    [Header("핀볼 테이블의 기본 Y 높이")]
+    [SerializeField]
+    private float playfieldYLevel = 0f;
     [SerializeField]
     private float Gravity = 9.8f;
     [SerializeField]
@@ -18,8 +20,8 @@ public class YJ_Script_BallController : MonoBehaviour
     private int BallCount = 0;
 
     private Vector3 initBallPos = Vector3.zero;
-
     private Transform originParent;
+
     void Start()
     {
         initBallPos = transform.position;
@@ -61,6 +63,19 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Playfield"))
+        {
+            bool isFalling = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) == 0;
+
+            if (isFalling)
+            {
+                Enter2DMode();
+            }
+        }
     }
 
     private void KHS_GameOverBall()
@@ -105,10 +120,7 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         transform.parent = originParent; // 부모-자식 관계 복원
         rigidBody.isKinematic = false;  // 물리 엔진 다시 켜기
-
-        // Y축 고정 모드로 복귀
-        SnapToPlayfield();
-
+        Enter2DMode(); // 2D 모드 복귀 함수 호출
         Debug.Log("2D 모드로 즉시 복귀 (해제됨)");
     }
 
@@ -123,6 +135,20 @@ public class YJ_Script_BallController : MonoBehaviour
         Debug.Log("3D 낙하 모드로 해제됨 (Y축 고정 해제)");
     }
 
+    public void Enter2DMode()
+    {
+        if (rigidBody.isKinematic)
+        {
+            rigidBody.isKinematic = false;
+        }
+
+        // Y축 다시 고정
+        rigidBody.constraints = defaultConstraints;
+        // Y축 위치를 테이블 높이로 '스냅'
+        SnapToPlayfield();
+        Debug.Log("2D 모드 복귀 (Y축 잠김, Z축 중력 활성화)");
+    }
+
     private void SnapToPlayfield()
     {
         Vector3 snappedPosition = transform.position;
@@ -133,28 +159,5 @@ public class YJ_Script_BallController : MonoBehaviour
         Vector3 flatVelocity = rigidBody.linearVelocity;
         flatVelocity.y = 0;
         rigidBody.linearVelocity = flatVelocity;
-    }
-
-    public void CaptureForRoulette()
-    {
-        // 물리 엔진 정지 (Y축 고정은 이미 풀려있음)
-        rigidBody.isKinematic = true;
-        rigidBody.linearVelocity = Vector3.zero;
-        rigidBody.angularVelocity = Vector3.zero;
-        Debug.Log("룰렛에 캡처됨 (Kinematic On)");
-    }
-
-    public void Enter2DModeAndRelease(Vector3 exitForce)
-    {
-        // 물리 엔진 다시 켜기
-        rigidBody.isKinematic = false;
-        // 2D 모드 제약조건 복원 (Y축 고정)
-        rigidBody.constraints = defaultConstraints;
-        // Y축 위치 강제 조정
-        SnapToPlayfield();
-
-        // 룰렛이 계산한 힘으로 튕겨냄
-        rigidBody.AddForce(exitForce, ForceMode.Impulse);
-        Debug.Log("룰렛에서 해제, 2D 모드 복귀");
     }
 }
