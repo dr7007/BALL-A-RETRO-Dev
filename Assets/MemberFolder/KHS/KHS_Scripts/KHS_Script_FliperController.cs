@@ -52,16 +52,20 @@ public class KHS_Script_FliperController : MonoBehaviour
         {
             if (flipper.rigidbody != null && fliper_Count > 0)
             {
-                if (Input.GetKeyDown(flipper.inputKey))
+                if (fliper_Count > 0)
                 {
-                    if(isCollision)
+                    if (Input.GetKeyDown(flipper.inputKey))
                     {
-                        fliper_Count--;
+                        flipper.isPressed = true;
+                        flipper.invisibleCollider.isTrigger = false;
                     }
-                    flipper.isPressed = true;
-                    flipper.invisibleCollider.isTrigger = false;
+                    if (Input.GetKeyUp(flipper.inputKey))
+                    {
+                        flipper.isPressed = false;
+                        flipper.invisibleCollider.isTrigger = true;
+                    }
                 }
-                if (Input.GetKeyUp(flipper.inputKey))
+                else
                 {
                     flipper.isPressed = false;
                     flipper.invisibleCollider.isTrigger = true;

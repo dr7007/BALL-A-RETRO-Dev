@@ -19499,6 +19499,7 @@ MonoBehaviour:
   - {fileID: 1934742411}
   - {fileID: 1709823096}
   - {fileID: 129492877}
+  goEnable: {fileID: 0}
 --- !u!1 &921312058
 GameObject:
   m_ObjectHideFlags: 0
@@ -40605,41 +40606,9 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0.727
       objectReference: {fileID: 0}
-    - target: {fileID: 1287544325985700526, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 2.58
-      objectReference: {fileID: 0}
-    - target: {fileID: 1287544325985700526, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 1287544325985700526, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1.23
-      objectReference: {fileID: 0}
     - target: {fileID: 5930995075282441532, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
       propertyPath: m_Name
       value: AccelRail_NewVersion
-      objectReference: {fileID: 0}
-    - target: {fileID: 6121678049243054983, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: maxSpeed
-      value: 150
-      objectReference: {fileID: 0}
-    - target: {fileID: 6121678049243054983, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: railMode
-      value: 1
-      objectReference: {fileID: 0}
-    - target: {fileID: 6121678049243054983, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: centeringForce
-      value: 5
-      objectReference: {fileID: 0}
-    - target: {fileID: 6121678049243054983, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: curveResolution
-      value: 10
-      objectReference: {fileID: 0}
-    - target: {fileID: 6121678049243054983, guid: 9d4e22c994fe7b04783bf20409d38b7f, type: 3}
-      propertyPath: accelerationForce
-      value: 300
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -69187,7 +69156,7 @@ Transform:
   m_GameObject: {fileID: 9062516040570039571}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.283, y: 0.25, z: -3.07}
+  m_LocalPosition: {x: 3.322, y: 0.25, z: -3.026}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -70700,7 +70669,7 @@ MonoBehaviour:
     isPressed: 0
   flipperSpeed: 800
   impactForceMultiplier: 5
-  fliper_Count: 10
+  fliper_Count: 3
 --- !u!33 &3497739626077167483
 MeshFilter:
   m_ObjectHideFlags: 0
@@ -75180,6 +75149,7 @@ MonoBehaviour:
   - {fileID: 469051812871635883}
   - {fileID: 3171739285570011978}
   - {fileID: 8140928500391632243}
+  goEnable: {fileID: 0}
 --- !u!1 &4437458906817114786
 GameObject:
   m_ObjectHideFlags: 0
