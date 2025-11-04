@@ -1589,6 +1589,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 1000
   waitTime: 4.5
+  isSpecial: 0
 --- !u!136 &110520738
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -3602,6 +3603,7 @@ MonoBehaviour:
   bounceForce: 1.7
   bumpScore: 300
   waitTime: 4.5
+  isSpecial: 0
 --- !u!114 &211063226
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9122,6 +9124,7 @@ MonoBehaviour:
   bounceForce: 1.7
   bumpScore: 300
   waitTime: 4.5
+  isSpecial: 0
 --- !u!114 &495565301
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -20965,6 +20968,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 500
   waitTime: 4.5
+  isSpecial: 0
 --- !u!136 &1121884398
 CapsuleCollider:
   m_ObjectHideFlags: 0
@@ -21828,6 +21832,10 @@ PrefabInstance:
       propertyPath: 'm_Materials.Array.data[1]'
       value: 
       objectReference: {fileID: 2100000, guid: 821d2bc37d93d624391ae44db41e93e4, type: 2}
+    - target: {fileID: 3241771834179836123, guid: c9291d9abacfba04baed1903a2043fc9, type: 3}
+      propertyPath: 'm_Materials.Array.data[0]'
+      value: 
+      objectReference: {fileID: 2100000, guid: 14d0db46cd62eb04bbadf687e1526937, type: 2}
     - target: {fileID: 3346592914658930427, guid: c9291d9abacfba04baed1903a2043fc9, type: 3}
       propertyPath: exitPortal
       value: 
@@ -24146,6 +24154,7 @@ MonoBehaviour:
   bounceForce: 1.7
   bumpScore: 300
   waitTime: 4.5
+  isSpecial: 0
 --- !u!114 &1312978568
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -27139,6 +27148,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 80
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &1475130503
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -28583,6 +28593,7 @@ MonoBehaviour:
   bounceForce: 2
   bumpScore: 80
   waitTime: 4.5
+  isSpecial: 0
 --- !u!65 &1554709446
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -30202,6 +30213,7 @@ MonoBehaviour:
   bounceForce: 3
   bumpScore: 0
   waitTime: 4.5
+  isSpecial: 0
 --- !u!114 &1639980407
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -37173,6 +37185,7 @@ MonoBehaviour:
   bounceForce: 3
   bumpScore: 0
   waitTime: 4.5
+  isSpecial: 0
 --- !u!82 &2113371954
 AudioSource:
   m_ObjectHideFlags: 0
