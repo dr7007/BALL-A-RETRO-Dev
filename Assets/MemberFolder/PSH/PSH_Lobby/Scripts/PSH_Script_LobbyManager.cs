@@ -44,6 +44,10 @@ namespace PSH
             {
                 Debug.LogError("inputEmailPrefab 프리팹이 LobbyUIManager에 할당되지 않았습니다!");
             }
+            if (RnakingPanel != null)
+            {
+                RnakingPanel.SetActive(false);
+            }
         }
 
         private void Start()
@@ -81,6 +85,10 @@ namespace PSH
         public void OnClick_RankingPanelOpen()
         {
             RnakingPanel.SetActive(true);
+        }
+        public void OnClick_RankingPanelClose()
+        {
+            RnakingPanel.SetActive(false);
         }
 
         public void OnClick_QuitGame()
