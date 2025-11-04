@@ -17833,6 +17833,10 @@ PrefabInstance:
       propertyPath: 'cameraGos.Array.data[2]'
       value: 
       objectReference: {fileID: 1985947774}
+    - target: {fileID: 876646254109240466, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -17876,6 +17880,10 @@ PrefabInstance:
     - target: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_Name
       value: CameraHolder
+      objectReference: {fileID: 0}
+    - target: {fileID: 4350278360868229976, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_RenderPostProcessing
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8813813386238103888, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_IsActive
@@ -44840,7 +44848,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -71790,6 +71798,7 @@ MonoBehaviour:
     isPressed: 0
   flipperSpeed: 800
   impactForceMultiplier: 5
+  fliper_Count: 10
 --- !u!33 &3497739626077167483
 MeshFilter:
   m_ObjectHideFlags: 0
