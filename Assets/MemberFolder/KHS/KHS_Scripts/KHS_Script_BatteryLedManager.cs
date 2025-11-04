@@ -7,7 +7,7 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
     private KHS_Script_ScoreManager scoreManager;
 
     [Header("연결")]
-    [Tooltip("5개가 켜졌을 때 활성화할 뚜껑 오브젝트")]
+    [Tooltip("5개가 켜졌을 때 활성화할 오브젝트")]
     [SerializeField]
     private GameObject goEnable; // 인스펙터에서 뚜껑 오브젝트를 연결해주세요.
 
@@ -61,7 +61,7 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
             if (goEnable != null)
             {
                 goEnable.SetActive(true);
-                Debug.Log("드롭홀 뚜껑이 열립니다!");
+                Debug.Log("오브젝트가 활성화 되었습니다!");
             }
 
             foreach (var  receiver in receivers)
