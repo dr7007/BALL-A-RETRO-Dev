@@ -180,12 +180,14 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     [Header("FX (Camera Shake)")]
     [Tooltip("카메라넣는곳")]
+    [SerializeField] private KHS_Script_CameraManager camHolder;
     [SerializeField] private CJS_Script_CameraShaker cameraShaker;
     [Tooltip("카메라쉐이크기능쓸지말지")]
     [SerializeField] private bool shakeOnScore = true;
 
     void Start()
     {
+        ChangingMainCam();
         curScore = 0;
         numOfBounce = 0;
     }
@@ -198,6 +200,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
         KHS_Script_DumpManager.OnScore += AddScore; // 기존: 위치정보 없음
         // 위치를 알고 호출할 수 있으면 DumpManager에서 AddScoreAt(value, worldPos) 호출 권장
+        KHS_Script_PortalController.portalEvt += ChangingSubCam;
+        KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
     }
 
     private void OnDisable()
@@ -207,6 +211,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_DumpManager.OnBallTrigger -= BallTrigger;
         KHS_Script_DumpManager.OnBallCollision -= BallCollision;
         KHS_Script_DumpManager.OnScore -= AddScore;
+
+        KHS_Script_PortalController.portalEvt -= ChangingSubCam;
+        KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
     }
 
     private void GameResultJudge()
@@ -305,5 +312,15 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         curScore = 0;
         Debug.LogWarning($"리셋 전 마지막 튕김 수 표기 : {numOfBounce}");
         numOfBounce = 0;
+    }
+
+    private void ChangingSubCam()
+    {
+        cameraShaker = camHolder.cameraGos[1].GetComponent<CJS_Script_CameraShaker>();
+    }
+
+    private void ChangingMainCam()
+    {
+        cameraShaker = camHolder.cameraGos[0].GetComponent<CJS_Script_CameraShaker>();
     }
 }

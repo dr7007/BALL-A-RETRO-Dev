@@ -15,6 +15,8 @@ public class KHS_Script_DumpManager : MonoBehaviour
     public int bumpScore = 0;
     public float waitTime = 4.5f;
 
+    public bool isSpecial = false;
+
     private void OnEnable()
     {
         KHS_Script_BallOutController.BallOutEvt += DumpReset;
@@ -59,6 +61,10 @@ public class KHS_Script_DumpManager : MonoBehaviour
 
             // 여기에 사운드 재생, 파티클 효과 등 추가 가능
             OnScore.Invoke(bumpScore);
+            if(isSpecial)
+            {
+                bumpScore += 5;
+            }
         }
     }
     private IEnumerator ReleaseBall(Collider col)

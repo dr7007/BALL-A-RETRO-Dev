@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using UnityEngine;
 
 public class KHS_Script_FliperDumpManager : MonoBehaviour
 {
     public static event Action<Collision> OnFliperCollision;
+    public static event Action<Collision> OffFliperCollision;
 
     [SerializeField] private KHS_Script_FliperController flipperController;
     [SerializeField] private Rigidbody flipperRigidbody;
@@ -23,6 +24,12 @@ public class KHS_Script_FliperDumpManager : MonoBehaviour
 
         OnFliperCollision?.Invoke(_collision);
 
+    }
+    private void OnCollisionExit(Collision _collision)
+    {
+        if (!_collision.gameObject.CompareTag("Ball")) return;
+
+        OffFliperCollision?.Invoke(_collision);
     }
 
     private void OnEnable() { OnFliperCollision += OnFliperShot; }

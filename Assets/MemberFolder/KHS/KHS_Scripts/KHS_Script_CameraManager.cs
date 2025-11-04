@@ -2,8 +2,7 @@ using UnityEngine;
 
 public class KHS_Script_CameraManager : MonoBehaviour
 {
-    [SerializeField]
-    private GameObject[] cameraGos;
+    public GameObject[] cameraGos;
 
     private bool isMain = true;
 

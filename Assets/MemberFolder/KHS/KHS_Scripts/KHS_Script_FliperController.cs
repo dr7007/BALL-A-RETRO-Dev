@@ -8,8 +8,30 @@ public class KHS_Script_FliperController : MonoBehaviour
     [SerializeField] private YJ_Script_Flipper[] flippers; // 여러 플리퍼를 관리할 배열
     [SerializeField] private float flipperSpeed = 800f; // 플리퍼 속도
 
+    private bool isCollision = false;
     public float impactForceMultiplier = 80f; // 충격량 계수
-    
+    public int fliper_Count = 10;
+
+    private void OnEnable()
+    {
+        KHS_Script_FliperDumpManager.OnFliperCollision += OnFliper;
+        KHS_Script_FliperDumpManager.OffFliperCollision += OffFliper;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_FliperDumpManager.OnFliperCollision -= OnFliper;
+        KHS_Script_FliperDumpManager.OffFliperCollision -= OffFliper;
+    }
+
+    private void OffFliper(Collision collision)
+    {
+        isCollision = false;
+    }
+    private void OnFliper(Collision collision)
+    {
+        isCollision = true;
+    }
+
     private void Start()
     {
         // 각 플리퍼의 초기 회전값과 작동시 회전값을 계산하고 저장
@@ -28,10 +50,14 @@ public class KHS_Script_FliperController : MonoBehaviour
         // 지정한 키 입력을 감지
         foreach (var flipper in flippers)
         {
-            if (flipper.rigidbody != null)
+            if (flipper.rigidbody != null && fliper_Count > 0)
             {
                 if (Input.GetKeyDown(flipper.inputKey))
                 {
+                    if(isCollision)
+                    {
+                        fliper_Count--;
+                    }
                     flipper.isPressed = true;
                     flipper.invisibleCollider.isTrigger = false;
                 }

@@ -77,4 +77,9 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
         // 최종 적용
         rb.linearVelocity = randomDir.normalized * randomSpeed;
     }
+
+    public void AddScoreMulti(int _multi)
+    {
+        scoreMulti += _multi;
+    }
 }

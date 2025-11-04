@@ -7,7 +7,7 @@ public class KHS_Script_BallOutController : MonoBehaviour
 
     private void OnCollisionEnter(Collision _collision)
     {
-        if (_collision.gameObject.name == "Ball")
+        if (_collision.collider.CompareTag("Ball"))
         {
             Debug.LogError("BallOut!");
             BallOutEvt?.Invoke();
