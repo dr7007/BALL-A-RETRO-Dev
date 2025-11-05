@@ -14,7 +14,7 @@ public class YJ_Script_PacManExit : MonoBehaviour
                 ball.SetControlMode(YJ_Script_BallController.ControlMode.Pinball);
 
                 // 2. (선택) 핀볼 모드로 돌아갈 때 Y축 고정을 풀고 낙하
-                // ball.ReleaseForFalling(); 
+                ball.ReleaseForFalling(); 
 
                 // 3. (선택) 핀볼 모드로 돌아가 1층으로 즉시 이동
                 // (BallController에 public float playfieldYLevel 변수가 있어야 함)
