@@ -1,10 +1,13 @@
 // RailEntrance.cs (레일 입구의 'Is Trigger'가 켜진 콜라이더에 부착)
 
+using System;
 using UnityEngine;
 using UnityEngine.Playables; // Timeline을 제어하기 위해 필요
 
 public class YJ_Script_RailEntrance : MonoBehaviour
 {
+    public static event Action RailEndEvt;
+
     [Header("연결")]
     [Tooltip("애니메이션될 'RailMover' 오브젝트의 Transform")]
     public Transform railMover; // 2단계에서 만든 'RailMover' 연결
@@ -15,6 +18,10 @@ public class YJ_Script_RailEntrance : MonoBehaviour
     [Header("설정")]
     [Tooltip("한 번 작동하면 비활성화")]
     public bool oneTimeUse = true;
+
+    [Header("카메라 설정")]
+    [Tooltip("2층 레이어 관리를 위한 카메라")]
+    public Camera mainCam;
 
     private YJ_Script_BallController capturedBall = null; // 어떤 공을 태웠는지 기억
 
@@ -29,6 +36,7 @@ public class YJ_Script_RailEntrance : MonoBehaviour
                 capturedBall = ball; // 공을 기억
                 ball.CaptureAndParent(railMover);
 
+                mainCam.cullingMask |= (1 << LayerMask.NameToLayer("2F"));   // mainCam의 cullingMask에 2F 레이어 추가
                 // 2. Timeline 애니메이션 재생
                 railTimeline.Play();
 
@@ -55,6 +63,8 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
             // 6. 이벤트 리스너 해제 (중요)
             railTimeline.stopped -= OnRailRideEnd;
+
+            RailEndEvt.Invoke();
         }
     }
 }

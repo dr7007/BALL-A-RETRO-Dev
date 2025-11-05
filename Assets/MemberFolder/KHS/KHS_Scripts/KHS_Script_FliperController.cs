@@ -3,6 +3,8 @@ using UnityEngine;
 
 public class KHS_Script_FliperController : MonoBehaviour
 {
+    public static event Action FliperCountChangeEvt;
+
     // 유니코드 변경 후 테스트용
     [Header("플리퍼 세팅")]
     [SerializeField] private YJ_Script_Flipper[] flippers; // 여러 플리퍼를 관리할 배열
@@ -11,30 +13,40 @@ public class KHS_Script_FliperController : MonoBehaviour
     private bool isCollision = false;
     public float impactForceMultiplier = 80f; // 충격량 계수
     public int fliper_Count = 10;
+    private int fliper_Inital = -1;
 
     private void OnEnable()
     {
         KHS_Script_FliperDumpManager.OnFliperCollision += OnFliper;
         KHS_Script_FliperDumpManager.OffFliperCollision += OffFliper;
+        KHS_Script_BallOutController.BallOutEvt += FliperCountReset;
     }
     private void OnDisable()
     {
         KHS_Script_FliperDumpManager.OnFliperCollision -= OnFliper;
         KHS_Script_FliperDumpManager.OffFliperCollision -= OffFliper;
+        KHS_Script_BallOutController.BallOutEvt -= FliperCountReset;
     }
 
     private void OffFliper(Collision collision)
     {
         fliper_Count--;
+        FliperCountChangeEvt.Invoke();
         isCollision = false;
     }
     private void OnFliper(Collision collision)
     {
         isCollision = true;
     }
+    private void FliperCountReset()
+    {
+        fliper_Count = fliper_Inital;
+        FliperCountChangeEvt.Invoke();
+    }
 
     private void Start()
     {
+        fliper_Inital = fliper_Count;
         // 각 플리퍼의 초기 회전값과 작동시 회전값을 계산하고 저장
         foreach (var flipper in flippers)
         {

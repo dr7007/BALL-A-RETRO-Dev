@@ -15,7 +15,14 @@ public class KHS_Script_BallController : MonoBehaviour
     [SerializeField]
     private int BallCount = 0;
 
+    private bool isEnable = true;
+
     private Vector3 initBallPos = Vector3.zero;
+
+    private void Awake()
+    {
+        isEnable = true;
+    }
     void Start()
     {
         initBallPos = transform.position;
@@ -26,7 +33,8 @@ public class KHS_Script_BallController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        rigidBody.AddForce(Gravity * GravDirection);
+        if(isEnable)
+            rigidBody.AddForce(Gravity * GravDirection);
         if (Input.GetKeyDown(KeyCode.Q))
         {
             rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
@@ -37,6 +45,8 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt += KHS_GameOverBall;
+        YJ_Script_RailEntrance.RailEndEvt += KHS_TemperalDisable;
+        KHS_Script_FirstFloorContact.FirstContactEvt += KHS_TemperalDisableNot;
     }
 
 
@@ -44,6 +54,8 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
+        YJ_Script_RailEntrance.RailEndEvt -= KHS_TemperalDisable;
+        KHS_Script_FirstFloorContact.FirstContactEvt -= KHS_TemperalDisableNot;
     }
 
     private void KHS_GameOverBall()
@@ -67,5 +79,14 @@ public class KHS_Script_BallController : MonoBehaviour
     public int BallCountResponse()
     {
         return BallCount;
+    }
+    private void KHS_TemperalDisable()
+    {
+        isEnable = false;
+    }
+
+    private void KHS_TemperalDisableNot()
+    {
+        isEnable = true;
     }
 }
