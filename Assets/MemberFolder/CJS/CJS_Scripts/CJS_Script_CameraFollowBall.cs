@@ -17,28 +17,28 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     public bool returnOnBallOutOrGameEnd = true;
     public FollowSpace followSpace = FollowSpace.CameraAxesOffset;
 
-    [Tooltip("Ä«¸Ş¶óÃà ±âÁØ ¿ÀÇÁ¼Â (Right, Up, Forward)")]
+    [Tooltip("ì¹´ë©”ë¼ì¶• ê¸°ì¤€ ì˜¤í”„ì…‹ (Right, Up, Forward)")]
     public Vector3 camAxesOffset = new Vector3(0f, 0.9f, -1.8f);
-    [Tooltip("¿ùµå ÁÂÇ¥ ¿ÀÇÁ¼Â")]
+    [Tooltip("ì›”ë“œ ì¢Œí‘œ ì˜¤í”„ì…‹")]
     public Vector3 worldOffset = new Vector3(0f, 1.2f, -1.6f);
 
     [Header("Axis Locks / Mode")]
-    public bool lockXY = true;            // X,Y °íÁ¤
-    public bool lockRotation = true;      // È¸Àü °íÁ¤
+    public bool lockXY = true;            // X,Y ê³ ì •
+    public bool lockRotation = true;      // íšŒì „ ê³ ì •
     public ZAxisMode zMode = ZAxisMode.WorldZ;
 
     [Header("Bounds")]
-    [Tooltip("Z ÇÏÇÑ¼±À» Àû¿ëÇÒÁö")]
+    [Tooltip("Z í•˜í•œì„ ì„ ì ìš©í• ì§€")]
     public bool useMinZClamp = true;
-    [Tooltip("WorldZ ¸ğµåÀÏ ¶§ »ç¿ëÇÒ ÃÖ¼Ò Z(ÀÌ °ªº¸´Ù ÀÛ¾ÆÁöÁö ¾ÊÀ½)")]
+    [Tooltip("WorldZ ëª¨ë“œì¼ ë•Œ ì‚¬ìš©í•  ìµœì†Œ Z(ì´ ê°’ë³´ë‹¤ ì‘ì•„ì§€ì§€ ì•ŠìŒ)")]
     public float minWorldZ = -2.3f;
-    [Tooltip("LocalZ ¸ğµåÀÏ ¶§ »ç¿ëÇÒ ÃÖ¼Ò Z")]
+    [Tooltip("LocalZ ëª¨ë“œì¼ ë•Œ ì‚¬ìš©í•  ìµœì†Œ Z")]
     public float minLocalZ = -2.3f;
 
     [Header("Smoothing")]
     [Min(0f)] public float positionSmoothTimeZ = 0.15f;
     [Min(0f)] public float lookAtLerpSpeed = 6f;
-    public bool lookAtBall = false;       // È¸Àü °íÁ¤ÀÌ ±âº»ÀÌ¹Ç·Î false
+    public bool lookAtBall = false;       // íšŒì „ ê³ ì •ì´ ê¸°ë³¸ì´ë¯€ë¡œ false
 
     [Header("Zoom (FOV)")]
     public float zoomFOV = 45f;
@@ -67,7 +67,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     void OnEnable()
     {
         KHS_Script_PlungerController.OnBallLaunched += HandleLaunched;
-
+        KHS_Script_CameraManager.CameraChangeEvt += ChangeCameraFunc;
         if (returnOnBallOutOrGameEnd)
         {
             KHS_Script_BallOutController.BallOutEvt += ReturnToDefault;
@@ -78,7 +78,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     void OnDisable()
     {
         KHS_Script_PlungerController.OnBallLaunched -= HandleLaunched;
-
+        KHS_Script_CameraManager.CameraChangeEvt -= ChangeCameraFunc;
         if (returnOnBallOutOrGameEnd)
         {
             KHS_Script_BallOutController.BallOutEvt -= ReturnToDefault;
@@ -96,10 +96,10 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         if (zMode == ZAxisMode.WorldZ)
         {
             float targetZ = desiredWorld.z;
-            if (useMinZClamp) targetZ = Mathf.Max(targetZ, minWorldZ);             // ¡Ú ¿ùµåZ ÇÏÇÑ
+            if (useMinZClamp) targetZ = Mathf.Max(targetZ, minWorldZ);             // â˜… ì›”ë“œZ í•˜í•œ
             float newZ = Mathf.SmoothDamp(transform.position.z, targetZ, ref _velZ, positionSmoothTimeZ);
 
-            if (useMinZClamp) newZ = Mathf.Max(newZ, minWorldZ);                   // ¡Ú º¸°£°ªµµ Å¬·¥ÇÁ
+            if (useMinZClamp) newZ = Mathf.Max(newZ, minWorldZ);                   // â˜… ë³´ê°„ê°’ë„ í´ë¨í”„
             transform.position = new Vector3(
                 lockXY ? _defaultPos.x : transform.position.x,
                 lockXY ? _defaultPos.y : transform.position.y,
@@ -110,12 +110,12 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         {
             Vector3 desiredLocal = transform.parent ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
             float targetLZ = desiredLocal.z;
-            if (useMinZClamp) targetLZ = Mathf.Max(targetLZ, minLocalZ);           // ¡Ú ·ÎÄÃZ ÇÏÇÑ
+            if (useMinZClamp) targetLZ = Mathf.Max(targetLZ, minLocalZ);           // â˜… ë¡œì»¬Z í•˜í•œ
             float newLZ = Mathf.SmoothDamp(transform.localPosition.z, targetLZ, ref _velZ, positionSmoothTimeZ);
             if (useMinZClamp) newLZ = Mathf.Max(newLZ, minLocalZ);
 
             transform.localPosition = new Vector3(
-                transform.localPosition.x,  // lockXY=true¶óµµ ·ÎÄÃX/Y´Â À¯Áö(ÀÌ¹Ì °íÁ¤ È¿°ú)
+                transform.localPosition.x,  // lockXY=trueë¼ë„ ë¡œì»¬X/YëŠ” ìœ ì§€(ì´ë¯¸ ê³ ì • íš¨ê³¼)
                 transform.localPosition.y,
                 newLZ
             );
@@ -132,7 +132,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         }
     }
 
-    // ¦¡¦¡ Helpers ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ Helpers â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private void HandleLaunched()
     {
         if (!followOnLaunch) return;
@@ -151,14 +151,14 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         if (zMode == ZAxisMode.WorldZ)
         {
             float snapZ = Mathf.Lerp(transform.position.z, desiredWorld.z, firstSnapFactor);
-            if (useMinZClamp) snapZ = Mathf.Max(snapZ, minWorldZ);                 // ¡Ú ½º³À ½Ã Å¬·¥ÇÁ
+            if (useMinZClamp) snapZ = Mathf.Max(snapZ, minWorldZ);                 // â˜… ìŠ¤ëƒ… ì‹œ í´ë¨í”„
             transform.position = new Vector3(_defaultPos.x, _defaultPos.y, snapZ);
         }
         else
         {
             Vector3 desiredLocal = transform.parent ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
             float snapLZ = Mathf.Lerp(transform.localPosition.z, desiredLocal.z, firstSnapFactor);
-            if (useMinZClamp) snapLZ = Mathf.Max(snapLZ, minLocalZ);               // ¡Ú ½º³À ½Ã Å¬·¥ÇÁ
+            if (useMinZClamp) snapLZ = Mathf.Max(snapLZ, minLocalZ);               // â˜… ìŠ¤ëƒ… ì‹œ í´ë¨í”„
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, snapLZ);
         }
 
@@ -176,7 +176,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         if (zMode == ZAxisMode.WorldZ)
         {
             float targetZ = _defaultPos.z;
-            if (useMinZClamp) targetZ = Mathf.Max(targetZ, minWorldZ);             // ¡Ú º¹±Í ¸ñÇ¥µµ Å¬·¥ÇÁ
+            if (useMinZClamp) targetZ = Mathf.Max(targetZ, minWorldZ);             // â˜… ë³µê·€ ëª©í‘œë„ í´ë¨í”„
             StartCoroutine(CoReturnZ_World(targetZ, zoomOutTime));
             if (lockXY) transform.position = new Vector3(_defaultPos.x, _defaultPos.y, transform.position.z);
         }
@@ -200,7 +200,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
             elapsed += Time.deltaTime;
             float s = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / t));
             float z = Mathf.Lerp(startZ, targetZ, s);
-            if (useMinZClamp) z = Mathf.Max(z, minWorldZ);                          // ¡Ú
+            if (useMinZClamp) z = Mathf.Max(z, minWorldZ);                          // â˜…
             transform.position = new Vector3(_defaultPos.x, _defaultPos.y, z);
             yield return null;
         }
@@ -212,7 +212,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     {
         float startZ = transform.localPosition.z;
         float targetLZ = transform.parent ? transform.parent.InverseTransformPoint(defWorld).z : defWorld.z;
-        if (useMinZClamp) targetLZ = Mathf.Max(targetLZ, minLocalZ);                // ¡Ú
+        if (useMinZClamp) targetLZ = Mathf.Max(targetLZ, minLocalZ);                // â˜…
 
         float elapsed = 0f;
         while (elapsed < t)
@@ -220,7 +220,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
             elapsed += Time.deltaTime;
             float s = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / t));
             float z = Mathf.Lerp(startZ, targetLZ, s);
-            if (useMinZClamp) z = Mathf.Max(z, minLocalZ);                          // ¡Ú
+            if (useMinZClamp) z = Mathf.Max(z, minLocalZ);                          // â˜…
             transform.localPosition = new Vector3(keepX, keepY, z);
             yield return null;
         }
@@ -289,5 +289,10 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
             var bc = FindAnyObjectByType<KHS_Script_BallController>();
             if (bc != null) ball = bc.transform;
         }
+    }
+    private void ChangeCameraFunc(Camera _cam)
+    {
+        cam = _cam;
+        StartFollow();
     }
 }
