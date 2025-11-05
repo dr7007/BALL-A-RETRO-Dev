@@ -5,7 +5,7 @@ using UnityEngine;
 public class CJS_Script_CameraFollowBall : MonoBehaviour
 {
     public enum FollowSpace { CameraAxesOffset, WorldSpaceOffset }
-    public enum ZAxisMode { WorldZ, LocalZ }  
+    public enum ZAxisMode { WorldZ, LocalZ }
 
     [Header("Targets")]
     public Transform ball;
@@ -23,17 +23,22 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     public Vector3 worldOffset = new Vector3(0f, 1.2f, -1.6f);
 
     [Header("Axis Locks / Mode")]
-    [Tooltip("포지션 X,Y를 고정(변경하지 않음)")]
-    public bool lockXY = true;  
-    [Tooltip("회전(X,Y,Z)을 고정(변경하지 않음)")]
-    public bool lockRotation = true;    
-    [Tooltip("Z만 변경 시, 월드Z로 움직일지(기본) 로컬Z로 움직일지")]
-    public ZAxisMode zMode = ZAxisMode.WorldZ; 
+    public bool lockXY = true;            // X,Y 고정
+    public bool lockRotation = true;      // 회전 고정
+    public ZAxisMode zMode = ZAxisMode.WorldZ;
+
+    [Header("Bounds")]
+    [Tooltip("Z 하한선을 적용할지")]
+    public bool useMinZClamp = true;
+    [Tooltip("WorldZ 모드일 때 사용할 최소 Z(이 값보다 작아지지 않음)")]
+    public float minWorldZ = -2.3f;
+    [Tooltip("LocalZ 모드일 때 사용할 최소 Z")]
+    public float minLocalZ = -2.3f;
 
     [Header("Smoothing")]
     [Min(0f)] public float positionSmoothTimeZ = 0.15f;
-    [Min(0f)] public float lookAtLerpSpeed = 6f;       
-    public bool lookAtBall = false;                    
+    [Min(0f)] public float lookAtLerpSpeed = 6f;
+    public bool lookAtBall = false;       // 회전 고정이 기본이므로 false
 
     [Header("Zoom (FOV)")]
     public float zoomFOV = 45f;
@@ -86,48 +91,37 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     {
         if (!_following || ball == null) return;
 
-        // 1) 목표 위치 계산(전체 3D 위치)
         Vector3 desiredWorld = ComputeDesiredWorldPosition();
 
-        // 2) Z만 보간하여 적용
         if (zMode == ZAxisMode.WorldZ)
         {
             float targetZ = desiredWorld.z;
+            if (useMinZClamp) targetZ = Mathf.Max(targetZ, minWorldZ);             // ★ 월드Z 하한
             float newZ = Mathf.SmoothDamp(transform.position.z, targetZ, ref _velZ, positionSmoothTimeZ);
 
-            if (lockXY)
-            {
-                // X,Y는 초기값(기본 포즈) 유지
-                transform.position = new Vector3(_defaultPos.x, _defaultPos.y, newZ);
-            }
-            else
-            {
-                // X,Y는 현 위치 유지
-                transform.position = new Vector3(transform.position.x, transform.position.y, newZ);
-            }
+            if (useMinZClamp) newZ = Mathf.Max(newZ, minWorldZ);                   // ★ 보간값도 클램프
+            transform.position = new Vector3(
+                lockXY ? _defaultPos.x : transform.position.x,
+                lockXY ? _defaultPos.y : transform.position.y,
+                newZ
+            );
         }
         else // LocalZ
         {
-            Vector3 desiredLocal = transform.parent
-                ? transform.parent.InverseTransformPoint(desiredWorld)
-                : desiredWorld; // 부모가 없으면 world==local
-
+            Vector3 desiredLocal = transform.parent ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
             float targetLZ = desiredLocal.z;
-            Vector3 lp = transform.localPosition;
-            float newLZ = Mathf.SmoothDamp(lp.z, targetLZ, ref _velZ, positionSmoothTimeZ);
+            if (useMinZClamp) targetLZ = Mathf.Max(targetLZ, minLocalZ);           // ★ 로컬Z 하한
+            float newLZ = Mathf.SmoothDamp(transform.localPosition.z, targetLZ, ref _velZ, positionSmoothTimeZ);
+            if (useMinZClamp) newLZ = Mathf.Max(newLZ, minLocalZ);
 
-            if (lockXY)
-                transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, newLZ);
-            else
-                transform.localPosition = new Vector3(desiredLocal.x, desiredLocal.y, newLZ);
+            transform.localPosition = new Vector3(
+                transform.localPosition.x,  // lockXY=true라도 로컬X/Y는 유지(이미 고정 효과)
+                transform.localPosition.y,
+                newLZ
+            );
         }
 
-        // 3) 회전 잠금/옵션
-        if (lockRotation)
-        {
-            // 고정 유지: 아무것도 하지 않음
-        }
-        else if (lookAtBall)
+        if (!lockRotation && lookAtBall)
         {
             Vector3 dir = (ball.position - transform.position);
             if (dir.sqrMagnitude > 0.0001f)
@@ -143,7 +137,6 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     {
         if (!followOnLaunch) return;
         if (ball == null) TryFindBall();
-
         StartFollow();
     }
 
@@ -153,27 +146,23 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
 
         SaveDefaultPose();
 
-        // 시작 스냅: Z만 보정
         Vector3 desiredWorld = ComputeDesiredWorldPosition();
 
         if (zMode == ZAxisMode.WorldZ)
         {
             float snapZ = Mathf.Lerp(transform.position.z, desiredWorld.z, firstSnapFactor);
+            if (useMinZClamp) snapZ = Mathf.Max(snapZ, minWorldZ);                 // ★ 스냅 시 클램프
             transform.position = new Vector3(_defaultPos.x, _defaultPos.y, snapZ);
         }
         else
         {
-            Vector3 desiredLocal = transform.parent
-                ? transform.parent.InverseTransformPoint(desiredWorld)
-                : desiredWorld;
-
+            Vector3 desiredLocal = transform.parent ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
             float snapLZ = Mathf.Lerp(transform.localPosition.z, desiredLocal.z, firstSnapFactor);
+            if (useMinZClamp) snapLZ = Mathf.Max(snapLZ, minLocalZ);               // ★ 스냅 시 클램프
             transform.localPosition = new Vector3(transform.localPosition.x, transform.localPosition.y, snapLZ);
         }
 
-        // FOV 줌인
         if (cam != null) StartCoroutine(CoZoom(cam.fieldOfView, zoomFOV, zoomInTime));
-
         _following = true;
     }
 
@@ -184,22 +173,21 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         _following = false;
         StopAllCoroutines();
 
-        // 위치 복귀: Z만 복구
         if (zMode == ZAxisMode.WorldZ)
         {
-            StartCoroutine(CoReturnZ_World(_defaultPos.z, zoomOutTime));
-            if (lockXY) { transform.position = new Vector3(_defaultPos.x, _defaultPos.y, transform.position.z); }
+            float targetZ = _defaultPos.z;
+            if (useMinZClamp) targetZ = Mathf.Max(targetZ, minWorldZ);             // ★ 복귀 목표도 클램프
+            StartCoroutine(CoReturnZ_World(targetZ, zoomOutTime));
+            if (lockXY) transform.position = new Vector3(_defaultPos.x, _defaultPos.y, transform.position.z);
         }
         else
         {
             StartCoroutine(CoReturnZ_Local(transform.localPosition.x, transform.localPosition.y, _defaultPos, zoomOutTime));
         }
 
-        // 회전은 잠금 상태면 그대로, 잠금 해제 상태라면 기본 회전으로
         if (!lockRotation)
             StartCoroutine(CoReturnRot(_defaultRot, zoomOutTime));
 
-        // FOV 복귀
         if (cam != null) StartCoroutine(CoZoom(cam.fieldOfView, _defaultFOV, zoomOutTime));
     }
 
@@ -212,23 +200,19 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
             elapsed += Time.deltaTime;
             float s = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / t));
             float z = Mathf.Lerp(startZ, targetZ, s);
-
-            if (lockXY)
-                transform.position = new Vector3(_defaultPos.x, _defaultPos.y, z);
-            else
-                transform.position = new Vector3(transform.position.x, transform.position.y, z);
-
+            if (useMinZClamp) z = Mathf.Max(z, minWorldZ);                          // ★
+            transform.position = new Vector3(_defaultPos.x, _defaultPos.y, z);
             yield return null;
         }
-        transform.position = new Vector3(_defaultPos.x, _defaultPos.y, targetZ);
+        float fin = useMinZClamp ? Mathf.Max(targetZ, minWorldZ) : targetZ;
+        transform.position = new Vector3(_defaultPos.x, _defaultPos.y, fin);
     }
 
     private IEnumerator CoReturnZ_Local(float keepX, float keepY, Vector3 defWorld, float t)
     {
         float startZ = transform.localPosition.z;
-        float targetLZ = transform.parent
-            ? transform.parent.InverseTransformPoint(defWorld).z
-            : defWorld.z;
+        float targetLZ = transform.parent ? transform.parent.InverseTransformPoint(defWorld).z : defWorld.z;
+        if (useMinZClamp) targetLZ = Mathf.Max(targetLZ, minLocalZ);                // ★
 
         float elapsed = 0f;
         while (elapsed < t)
@@ -236,6 +220,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
             elapsed += Time.deltaTime;
             float s = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / t));
             float z = Mathf.Lerp(startZ, targetLZ, s);
+            if (useMinZClamp) z = Mathf.Max(z, minLocalZ);                          // ★
             transform.localPosition = new Vector3(keepX, keepY, z);
             yield return null;
         }
@@ -275,7 +260,6 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         if (followSpace == FollowSpace.WorldSpaceOffset)
             return ball.position + worldOffset;
 
-        // CameraAxesOffset → 현재 카메라축 기준
         Transform ax = transform;
         return ball.position
              + ax.right * camAxesOffset.x

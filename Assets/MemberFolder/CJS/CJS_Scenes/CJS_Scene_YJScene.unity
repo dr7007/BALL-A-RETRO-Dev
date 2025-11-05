@@ -11436,6 +11436,9 @@ MonoBehaviour:
   lockXY: 1
   lockRotation: 1
   zMode: 0
+  useMinZClamp: 1
+  minWorldZ: -3
+  minLocalZ: -3
   positionSmoothTimeZ: 0.15
   lookAtLerpSpeed: 6
   lookAtBall: 1
@@ -19648,6 +19651,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 977884043408662568, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: field of view
+      value: 50
+      objectReference: {fileID: 0}
     - target: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.14
@@ -19689,12 +19696,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0.29
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.y
       value: 3.47
       objectReference: {fileID: 0}
     - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: -1.85
+      value: -2.31
       objectReference: {fileID: 0}
     - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalRotation.w
