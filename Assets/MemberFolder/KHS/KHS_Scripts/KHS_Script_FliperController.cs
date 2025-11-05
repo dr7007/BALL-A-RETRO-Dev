@@ -25,6 +25,7 @@ public class KHS_Script_FliperController : MonoBehaviour
 
     private void OffFliper(Collision collision)
     {
+        fliper_Count--;
         isCollision = false;
     }
     private void OnFliper(Collision collision)
@@ -52,12 +53,8 @@ public class KHS_Script_FliperController : MonoBehaviour
         {
             if (flipper.rigidbody != null && fliper_Count > 0)
             {
-                if (Input.GetKeyDown(flipper.inputKey))
+                if (Input.GetKey(flipper.inputKey))
                 {
-                    if(isCollision)
-                    {
-                        fliper_Count--;
-                    }
                     flipper.isPressed = true;
                     flipper.invisibleCollider.isTrigger = false;
                 }
@@ -66,6 +63,11 @@ public class KHS_Script_FliperController : MonoBehaviour
                     flipper.isPressed = false;
                     flipper.invisibleCollider.isTrigger = true;
                 }
+            }
+            else
+            {
+                flipper.isPressed = false;
+                flipper.invisibleCollider.isTrigger = true;
             }
         }
     }
