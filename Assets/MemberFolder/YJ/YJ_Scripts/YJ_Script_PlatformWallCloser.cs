@@ -7,6 +7,8 @@ public class YJ_Script_PlatformWallCloser : MonoBehaviour
     [SerializeField]
     private GameObject targetObjectToEnable;
 
+    private Collider triggerCollider;
+
     private void OnEnable()
     {
         KHS_Script_BallOutController.BallOutEvt += ResetObject;
@@ -19,6 +21,12 @@ public class YJ_Script_PlatformWallCloser : MonoBehaviour
 
     private void Start()
     {
+        triggerCollider = GetComponent<Collider>();
+        if (triggerCollider == null || !triggerCollider.isTrigger)
+        {
+            Debug.LogError("YJ_Script_PlatformWallCloser에 'Is Trigger'가 켜진 Collider가 없습니다!");
+        }
+
         ResetObject();
     }
 
@@ -27,6 +35,11 @@ public class YJ_Script_PlatformWallCloser : MonoBehaviour
         if (targetObjectToEnable != null)
         {
             targetObjectToEnable.SetActive(false);
+        }
+
+        if (triggerCollider != null)
+        {
+            triggerCollider.enabled = true;
         }
     }
 
@@ -38,6 +51,21 @@ public class YJ_Script_PlatformWallCloser : MonoBehaviour
             {
                 targetObjectToEnable.SetActive(true);
                 Debug.Log(targetObjectToEnable.name + "이(가) 활성화되었습니다.");
+            }
+
+            YJ_Script_BallController ballController = other.GetComponent<YJ_Script_BallController>();
+
+            if (ballController != null)
+            {
+                float platformYLevel = other.transform.position.y;
+                ballController.Enter2DMode(platformYLevel);
+
+                ballController.SetControlMode(YJ_Script_BallController.ControlMode.PacMan);
+
+                if (triggerCollider != null)
+                {
+                    triggerCollider.enabled = false;
+                }
             }
         }
     }
