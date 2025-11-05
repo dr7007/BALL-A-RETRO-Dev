@@ -11408,6 +11408,118 @@ Transform:
   - {fileID: 1543267996}
   m_Father: {fileID: 615809261}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1 &483060282 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+  m_PrefabInstance: {fileID: 862828783}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &483060283
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 483060282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9084dbaa740fa824a92045432f917c67, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ball: {fileID: 2755562474721363591}
+  ballTag: Ball
+  cam: {fileID: 522316738}
+  followOnLaunch: 1
+  returnOnBallOutOrGameEnd: 1
+  followSpace: 1
+  camAxesOffset: {x: 0, y: 1.5, z: -1.8}
+  worldOffset: {x: 0, y: 1.5, z: -1.6}
+  lockXY: 1
+  lockRotation: 1
+  zMode: 0
+  positionSmoothTimeZ: 0.15
+  lookAtLerpSpeed: 6
+  lookAtBall: 1
+  zoomFOV: 50
+  zoomInTime: 0.25
+  zoomOutTime: 0.35
+  firstSnapFactor: 0.35
+--- !u!4 &483060285 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+  m_PrefabInstance: {fileID: 862828783}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &483060286
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 483060282}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 7b486bc5688f9634ca6f56a3c4b84f08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  target: {fileID: 483060285}
+  baseDuration: 0.25
+  frequency: 30
+  globalIntensity: 1
+  useUnscaledTime: 0
+  amplitudeMode: 0
+  amplitudePerUnit: 0.08
+  scoreUnit: 100
+  minAmplitude: 0.02
+  maxAmplitude: 1.2
+  curveMaxScore: 2000
+  amplitudeCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 1
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  falloff:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 1
+      inSlope: 0
+      outSlope: -3
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    - serializedVersion: 3
+      time: 1
+      value: 0
+      inSlope: 0
+      outSlope: 0
+      tangentMode: 0
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  accumulate: 1
 --- !u!1 &494293914
 GameObject:
   m_ObjectHideFlags: 0
@@ -12264,6 +12376,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 522278370}
   m_Mesh: {fileID: 4300000, guid: fc199bf2d87b54c2cba923c970bcbebd, type: 3}
+--- !u!20 &522316738 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 977884043408662568, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+  m_PrefabInstance: {fileID: 862828783}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &522367355
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -19533,15 +19650,15 @@ PrefabInstance:
     m_Modifications:
     - target: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.x
-      value: 0
+      value: -0.14
       objectReference: {fileID: 0}
     - target: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.y
-      value: 0
+      value: 0.9
       objectReference: {fileID: 0}
     - target: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalPosition.z
-      value: 0
+      value: -3.16
       objectReference: {fileID: 0}
     - target: {fileID: 2629997939011448260, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_LocalRotation.w
@@ -19571,6 +19688,26 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 3.47
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: -1.85
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 0.88841146
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: 0.45904812
+      objectReference: {fileID: 0}
+    - target: {fileID: 3352271063598478007, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 54.651
+      objectReference: {fileID: 0}
     - target: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: m_Name
       value: CameraHolder
@@ -19578,7 +19715,13 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      insertIndex: 1
+      addedObject: {fileID: 483060286}
+    - targetCorrespondingSourceObject: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 483060283}
   m_SourcePrefab: {fileID: 100100000, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
 --- !u!1 &865505025
 GameObject:
