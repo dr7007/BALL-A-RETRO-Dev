@@ -1,7 +1,11 @@
 using UnityEngine;
+using System; // [ADD] 이벤트 선언용
 
 public class KHS_Script_PlungerController : MonoBehaviour
 {
+    // [ADD] 공 발사 이벤트(사운드 연동)
+    public static event Action OnBallLaunched;
+
     [Header("발사 설정")]
     [Tooltip("최소 발사 힘")]
     [SerializeField] private float minForce = 1f;
@@ -52,6 +56,9 @@ public class KHS_Script_PlungerController : MonoBehaviour
             ballRigidbody.AddForce(Vector3.forward * currentForce, ForceMode.Impulse);
         }
         currentForce = minForce;
+
+        // [ADD] 발사 직후 브로드캐스트(사운드 용)
+        OnBallLaunched?.Invoke();
     }
 
     // 공이 발사 준비 위치에 들어왔을 때 호출
