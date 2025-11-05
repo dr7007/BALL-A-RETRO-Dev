@@ -5,7 +5,7 @@ public class CJS_Script_AudioDirector : MonoBehaviour
 {
     [Header("Audio Sources")]
     public AudioSource bgmSource;          // Loop on
-    public AudioSource sfxSource;          // PlayOneShot¿ë
+    public AudioSource sfxSource;          // PlayOneShotìš©
 
     [Header("Clips")]
     public AudioClip bgmMain;    
@@ -56,6 +56,7 @@ public class CJS_Script_AudioDirector : MonoBehaviour
         KHS_Script_DumpManager.OnBallCollision += HandleHitSfx;
         KHS_Script_ScoreManager.OnGameClear += HandleClear;
         KHS_Script_ScoreManager.OnGameOver += HandleGameOver;
+        KHS_Script_BallOutController.BallOutEvt += HandleGameOver;
     }
 
     void OnDisable()
@@ -64,6 +65,7 @@ public class CJS_Script_AudioDirector : MonoBehaviour
         KHS_Script_DumpManager.OnBallCollision -= HandleHitSfx;
         KHS_Script_ScoreManager.OnGameClear -= HandleClear;
         KHS_Script_ScoreManager.OnGameOver -= HandleGameOver;
+        KHS_Script_BallOutController.BallOutEvt -= HandleGameOver;
     }
 
     private void HandleLaunch() => PlayOneShot(sfxBallLaunch);

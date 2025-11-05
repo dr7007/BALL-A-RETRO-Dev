@@ -3,11 +3,11 @@ using UnityEngine;
 public class CJS_Script_VFXDirector : MonoBehaviour
 {
     [Header("Prefabs")]
-    public GameObject obstacleHitVfx; // Àå¾Ö¹° Ãæµ¹ ÀÌÆåÆ®
-    public GameObject deathVfx;       // °ÔÀÓ¿À¹ö ÀÌÆåÆ®
+    public GameObject obstacleHitVfx; // ì¥ì• ë¬¼ ì¶©ëŒ ì´í™íŠ¸
+    public GameObject deathVfx;       // ê²Œì„ì˜¤ë²„ ì´í™íŠ¸
 
     [Header("Refs")]
-    public Transform ballTransform;   // Á×À½ ÀÌÆåÆ® À§Ä¡ ´ëÃ¼¿ë
+    public Transform ballTransform;   // ì£½ìŒ ì´í™íŠ¸ ìœ„ì¹˜ ëŒ€ì²´ìš©
 
     [Header("Options")]
     public float autoDestroySeconds = 2f;
@@ -15,12 +15,14 @@ public class CJS_Script_VFXDirector : MonoBehaviour
     void OnEnable()
     {
         KHS_Script_DumpManager.OnObstacleHitAt += SpawnHitVfx;
+        KHS_Script_BallOutController.BallOutEvt += SpawnDeathVfx;
         KHS_Script_ScoreManager.OnGameOver += SpawnDeathVfx;
     }
 
     void OnDisable()
     {
         KHS_Script_DumpManager.OnObstacleHitAt -= SpawnHitVfx;
+        KHS_Script_BallOutController.BallOutEvt -= SpawnDeathVfx;
         KHS_Script_ScoreManager.OnGameOver -= SpawnDeathVfx;
     }
 

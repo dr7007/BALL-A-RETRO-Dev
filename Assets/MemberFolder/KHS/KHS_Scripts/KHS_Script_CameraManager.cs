@@ -1,7 +1,10 @@
+using System;
 using UnityEngine;
 
 public class KHS_Script_CameraManager : MonoBehaviour
 {
+    public static event Action<Camera> CameraChangeEvt;
+
     public GameObject[] cameraGos;
 
     private bool isMain = true;
@@ -35,12 +38,14 @@ public class KHS_Script_CameraManager : MonoBehaviour
     public void MainCamOn()
     {
         isMain = true;
+        CameraChangeEvt.Invoke(cameraGos[0].GetComponent<Camera>());
         cameraGos[0].SetActive(true);
         cameraGos[1].SetActive(false);
     }
     public void SubCamOn()
     {
         isMain = false;
+        CameraChangeEvt.Invoke(cameraGos[1].GetComponent<Camera>());
         cameraGos[0].SetActive(false);
         cameraGos[1].SetActive(true);
     }
