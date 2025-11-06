@@ -37,6 +37,9 @@ namespace PSH
 
                 // 눈을 즉시 뜬 상태로 설정
                 eyeOpenEffect.SetOpenImmediate();
+                eyeOpenEffect.gameObject.SetActive(false);
+                dialogueUI.gameObject.SetActive(false);
+
                 // (필요하다면) 인트로 대사 없이 바로 게임 시작 로직 호출
             }
             else
