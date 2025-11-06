@@ -59,12 +59,6 @@ public class YJ_Script_PacManExit : MonoBehaviour
                 // 3. 타임라인 재생
                 railTimeline.Play();
                 railTimeline.stopped += OnRailRideEnd;
-
-                // 4. 트리거 비활성화 (BallOut 시 리셋됨)
-                if (triggerCollider != null)
-                {
-                    //triggerCollider.enabled = false;
-                }
             }
         }
     }
