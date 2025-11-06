@@ -5670,6 +5670,7 @@ MonoBehaviour:
   railMover: {fileID: 1455305415}
   railTimeline: {fileID: 0}
   oneTimeUse: 1
+  mainCam: {fileID: 0}
 --- !u!1001 &156696980
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -9348,6 +9349,7 @@ MonoBehaviour:
   railMover: {fileID: 969685335}
   railTimeline: {fileID: 969685336}
   oneTimeUse: 0
+  mainCam: {fileID: 2096431638}
 --- !u!1 &238928068
 GameObject:
   m_ObjectHideFlags: 0
@@ -47816,6 +47818,7 @@ MonoBehaviour:
   railMover: {fileID: 1012621418}
   railTimeline: {fileID: 0}
   oneTimeUse: 1
+  mainCam: {fileID: 0}
 --- !u!1 &1150427526
 GameObject:
   m_ObjectHideFlags: 0
@@ -59975,6 +59978,7 @@ MonoBehaviour:
   railMover: {fileID: 1934672315}
   railTimeline: {fileID: 1934672316}
   oneTimeUse: 0
+  mainCam: {fileID: 0}
 --- !u!65 &1472711574
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -87341,6 +87345,11 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2092274902}
   m_Mesh: {fileID: 4300000, guid: 8733361a4b4b0ca468d747668e58d307, type: 3}
+--- !u!20 &2096431638 stripped
+Camera:
+  m_CorrespondingSourceObject: {fileID: 977884043408662568, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+  m_PrefabInstance: {fileID: 862828783}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1 &2096737371
 GameObject:
   m_ObjectHideFlags: 0

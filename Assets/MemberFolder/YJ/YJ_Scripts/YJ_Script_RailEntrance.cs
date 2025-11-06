@@ -6,8 +6,6 @@ using UnityEngine.Playables; // Timeline을 제어하기 위해 필요
 
 public class YJ_Script_RailEntrance : MonoBehaviour
 {
-    public static event Action RailEndEvt;
-
     [Header("연결")]
     [Tooltip("애니메이션될 'RailMover' 오브젝트의 Transform")]
     public Transform railMover; // 2단계에서 만든 'RailMover' 연결
@@ -63,8 +61,6 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
             // 6. 이벤트 리스너 해제 (중요)
             railTimeline.stopped -= OnRailRideEnd;
-
-            RailEndEvt.Invoke();
         }
     }
 }

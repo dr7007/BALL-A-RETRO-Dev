@@ -45,8 +45,6 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt += KHS_GameOverBall;
-        YJ_Script_RailEntrance.RailEndEvt += KHS_TemperalDisable;
-        KHS_Script_FirstFloorContact.FirstContactEvt += KHS_TemperalDisableNot;
     }
 
 
@@ -54,8 +52,6 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
-        YJ_Script_RailEntrance.RailEndEvt -= KHS_TemperalDisable;
-        KHS_Script_FirstFloorContact.FirstContactEvt -= KHS_TemperalDisableNot;
     }
 
     private void KHS_GameOverBall()
@@ -79,14 +75,5 @@ public class KHS_Script_BallController : MonoBehaviour
     public int BallCountResponse()
     {
         return BallCount;
-    }
-    private void KHS_TemperalDisable()
-    {
-        isEnable = false;
-    }
-
-    private void KHS_TemperalDisableNot()
-    {
-        isEnable = true;
     }
 }
