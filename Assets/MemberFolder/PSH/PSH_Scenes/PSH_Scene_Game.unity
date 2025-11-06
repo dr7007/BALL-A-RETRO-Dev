@@ -13855,6 +13855,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 161407197}
+  - component: {fileID: 161407199}
+  - component: {fileID: 161407198}
   m_Layer: 5
   m_Name: Content
   m_TagString: Untagged
@@ -13879,8 +13881,48 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 1}
   m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: -0.0003183465}
-  m_SizeDelta: {x: 0, y: 300}
+  m_SizeDelta: {x: -268, y: 300}
   m_Pivot: {x: 0, y: 1}
+--- !u!114 &161407198
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161407196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3245ec927659c4140ac4f8d17403cc18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_HorizontalFit: 2
+  m_VerticalFit: 0
+--- !u!114 &161407199
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 161407196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 59f8146938fff824cb5fd77236b75775, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Padding:
+    m_Left: 84
+    m_Right: 0
+    m_Top: 0
+    m_Bottom: 0
+  m_ChildAlignment: 0
+  m_Spacing: 30
+  m_ChildForceExpandWidth: 1
+  m_ChildForceExpandHeight: 0
+  m_ChildControlWidth: 0
+  m_ChildControlHeight: 0
+  m_ChildScaleWidth: 0
+  m_ChildScaleHeight: 0
+  m_ReverseArrangement: 0
 --- !u!1 &161742047
 GameObject:
   m_ObjectHideFlags: 0
@@ -24591,6 +24633,14 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 344871583619855467, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+      propertyPath: gameOverUIObj
+      value: 
+      objectReference: {fileID: 1269730652}
+    - target: {fileID: 344871583619855467, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+      propertyPath: gameClearUIObj
+      value: 
+      objectReference: {fileID: 1269730652}
     - target: {fileID: 674198974141172472, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -44677,7 +44727,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &538150764
 RectTransform:
   m_ObjectHideFlags: 0
@@ -58550,6 +58600,7 @@ GameObject:
   m_Component:
   - component: {fileID: 693428836}
   - component: {fileID: 693428837}
+  - component: {fileID: 693428838}
   m_Layer: 5
   m_Name: Empty_RankTitle
   m_TagString: Untagged
@@ -58604,6 +58655,20 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &693428838
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 693428835}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 64e8f556a853a7e4ba5fdd236e04bb8a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  content: {fileID: 161407197}
+  itemPrefab: {fileID: 7436699160311743192, guid: 0115f4c58200efa4b921f3326480b4d1, type: 3}
 --- !u!1 &694327004
 GameObject:
   m_ObjectHideFlags: 0
@@ -74829,6 +74894,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54eaddb0a170724381a02d6d96d2654, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  railMover: {fileID: 0}
+  railTimeline: {fileID: 0}
+  mainCam: {fileID: 0}
 --- !u!65 &876624967
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -82982,7 +83050,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &973869144
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -110659,6 +110727,7 @@ GameObject:
   - component: {fileID: 1269730656}
   - component: {fileID: 1269730655}
   - component: {fileID: 1269730654}
+  - component: {fileID: 1269730657}
   m_Layer: 5
   m_Name: Panel_Rank
   m_TagString: Untagged
@@ -110754,6 +110823,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1269730652}
   m_CullTransparentMesh: 1
+--- !u!114 &1269730657
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1269730652}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 458de5327b80d1a4393dcea38f11666d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  service: {fileID: 1313531378}
+  textFinalScore: {fileID: 0}
+  textResult: {fileID: 0}
+  textLeaderboard: {fileID: 0}
+  leaderboardList: {fileID: 693428838}
+  gameMode: Classic
+  level: 1
+  autoSubmitOnShow: 1
 --- !u!1 &1270666414
 GameObject:
   m_ObjectHideFlags: 0
@@ -117380,7 +117469,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!224 &1336749443
 RectTransform:
   m_ObjectHideFlags: 0
@@ -123387,7 +123476,6 @@ GameObject:
   m_Component:
   - component: {fileID: 1393967473}
   - component: {fileID: 1393967475}
-  - component: {fileID: 1393967474}
   m_Layer: 5
   m_Name: Empty_Rank_Infor
   m_TagString: Untagged
@@ -123416,26 +123504,6 @@ RectTransform:
   m_AnchoredPosition: {x: 960, y: -669.28}
   m_SizeDelta: {x: 553.5, y: 602.8}
   m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &1393967474
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1393967472}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 458de5327b80d1a4393dcea38f11666d, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  service: {fileID: 0}
-  textFinalScore: {fileID: 0}
-  textResult: {fileID: 0}
-  textLeaderboard: {fileID: 0}
-  leaderboardList: {fileID: 0}
-  gameMode: Classic
-  level: 1
-  autoSubmitOnShow: 1
 --- !u!114 &1393967475
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -124406,6 +124474,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54eaddb0a170724381a02d6d96d2654, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  railMover: {fileID: 0}
+  railTimeline: {fileID: 0}
+  mainCam: {fileID: 0}
 --- !u!65 &1400354077
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -161579,7 +161650,7 @@ MonoBehaviour:
   rigidBody: {fileID: 0}
   Gravity: 2.3
   GravDirection: {x: 0, y: 0, z: 0}
-  BallCount: 3
+  BallCount: 1
 --- !u!54 &1793864478
 Rigidbody:
   m_ObjectHideFlags: 0
