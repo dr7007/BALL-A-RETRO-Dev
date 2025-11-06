@@ -177,6 +177,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [Tooltip("이번 라운드 동안 볼이 튕긴 최대 횟수")]
     [SerializeField] private int maxBounce = 0;
 
+    [Header("Round Infomation")]
+    [Tooltip("목표 라운드 수")]
+    [SerializeField] private int goalRound = 0;
+
     [Header("결과 연동")]
     [SerializeField] private CJS_Script_GameOverUI gameOverUI;
     [SerializeField] private CJS_Script_PinballRankingService rankingService;
@@ -225,7 +229,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void GameResultJudge()
     {
-        Debug.LogError("게임종료 결과 판정중!!!");
+        Debug.LogError("라운드종료 결과 판정중!!!");
         Debug.LogWarning($"최종 스코어 : {curScore}");
         if (curScore >= targetScore) OnGameClear?.Invoke();
         else OnGameOver?.Invoke();

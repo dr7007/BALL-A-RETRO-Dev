@@ -1,3 +1,4 @@
+using System.Runtime.InteropServices;
 using Unity.Collections;
 using UnityEngine;
 
@@ -11,11 +12,22 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     private GameObject plincoColliderGo;
     private KHS_Script_PlincoFunction[] plincoFunctions;
 
+    [SerializeField]
+    private KHS_Script_ScoreManager scoreManager;
+
+    [SerializeField]
+    private GameObject secretBumpersHolder;
+    [SerializeField]
+    private YJ_Script_BlackholeController blackHole;
+
     private bool on_Special_Func = false;
     private float special_Chance = 0f;
+    private CJS_Script_ChoiceRoller roller;
 
     private void Awake()
     {
+        roller = FindAnyObjectByType<CJS_Script_ChoiceRoller>();
+        scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
         blockerDMs = blockerHolderGo.GetComponentsInChildren<KHS_Script_DumpManager>();
         plincoFunctions = plincoColliderGo.GetComponentsInChildren<KHS_Script_PlincoFunction>();
     }
@@ -34,7 +46,7 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     }
     public void MatchingFunc(int idx)
     {
-        switch(idx)
+        switch (idx)
         {
             case 0:
                 AddBlockerScore(5);
@@ -47,6 +59,12 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 break;
             case 3:
                 AddSpecialBlocker(0.1f);
+                break;
+            case 4:
+                AddScoreMultiplier(0.2f);
+                break;
+            case 5:
+                SecretWeaponActivate(5);
                 break;
 
         }
@@ -124,9 +142,27 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
 
     private void PlincoMultipierInhence(int _multi)
     {
-        foreach(var plinco in plincoFunctions)
+        foreach (var plinco in plincoFunctions)
         {
             plinco.AddScoreMulti(_multi);
         }
+    }
+
+    private void AddScoreMultiplier(float _multi)
+    {
+        scoreManager.multiplier += _multi;
+    }
+
+    private void SecretWeaponActivate(int _idx)
+    {
+        secretBumpersHolder.SetActive(true);
+        blackHole.isForceActive = true;
+        blackHole.isActivated = true;
+        UnActiveChoice(_idx);
+    }
+
+    private void UnActiveChoice(int _idx)
+    {
+        roller.UnActiveChoices(_idx);
     }
 }

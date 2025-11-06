@@ -5,15 +5,15 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 {
     public enum ChanceDisplayMode
     {
-        NormalizedPool, // ¡Ú ÀÎ½ºÆåÅÍ¿Í µ¿ÀÏ: ÀüÃ¼ Ç® ±âÁØ Á¤±ÔÈ­(±ÇÀå)
-        PerDraw         // °¢ »Ì±â ½ÃÁ¡ÀÇ ³²Àº Ç® ±âÁØ(±âÁ¸ Ç¥½Ã ¹æ½Ä)
+        NormalizedPool, // â˜… ì¸ìŠ¤í™í„°ì™€ ë™ì¼: ì „ì²´ í’€ ê¸°ì¤€ ì •ê·œí™”(ê¶Œì¥)
+        PerDraw         // ê° ë½‘ê¸° ì‹œì ì˜ ë‚¨ì€ í’€ ê¸°ì¤€(ê¸°ì¡´ í‘œì‹œ ë°©ì‹)
     }
 
-    [Header("Prototype Data (DB Àü ÀÓ½Ã ¸ñ·Ï)")]
+    [Header("Prototype Data (DB ì „ ì„ì‹œ ëª©ë¡)")]
     public List<CJS_ChoiceData> allChoices = new List<CJS_ChoiceData>();
 
-    [Header("Editor Preview (ÀĞ±âÀü¿ë)")]
-    [SerializeField, Tooltip("ÇöÀç °¡ÁßÄ¡ ±âÁØ Á¤±ÔÈ­µÈ È®·ü(%) ¹Ì¸®º¸±â")]
+    [Header("Editor Preview (ì½ê¸°ì „ìš©)")]
+    [SerializeField, Tooltip("í˜„ì¬ ê°€ì¤‘ì¹˜ ê¸°ì¤€ ì •ê·œí™”ëœ í™•ë¥ (%) ë¯¸ë¦¬ë³´ê¸°")]
     private List<string> previewPercents = new List<string>();
 
     [Header("Display/Draw Settings")]
@@ -29,15 +29,15 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 
         if (allChoices.Count == 0)
         {
-            allChoices.Add(new CJS_ChoiceData { name = "¹üÆÛ Á¡¼ö +100", description = "¹üÆÛ ±âº» Á¡¼ö 100 Áõ°¡", rarity = "Common", weight = 5f, isEnabled = true });
-            allChoices.Add(new CJS_ChoiceData { name = "¹İ¹ß °è¼ö +10%", description = "¹İ¹ß °è¼ö 10% Áõ°¡", rarity = "Rare", weight = 3f, isEnabled = true });
-            allChoices.Add(new CJS_ChoiceData { name = "ÇÃ¸®ÆÛ È½¼ö +1", description = "´ÙÀ½ ¶ó¿îµå ÇÃ¸®ÆÛ 1È¸ Ãß°¡", rarity = "Epic", weight = 1.5f, isEnabled = true });
-            allChoices.Add(new CJS_ChoiceData { name = "ÄÚÀÎ +500", description = "Áï½Ã 500 ÄÚÀÎ", rarity = "Common", weight = 4f, isEnabled = true });
-            allChoices.Add(new CJS_ChoiceData { name = "¼Óµµ +5%", description = "º¼ ¼Óµµ 5% Áõ°¡", rarity = "Rare", weight = 2.5f, isEnabled = true });
-            allChoices.Add(new CJS_ChoiceData { name = "Àü¼³ È¿°ú", description = "°­·ÂÇÑ Àü¼³ È¿°ú", rarity = "Legendary", weight = 0.5f, isEnabled = true });
+            allChoices.Add(new CJS_ChoiceData { name = "ë²”í¼ ì ìˆ˜ +100", description = "ë²”í¼ ê¸°ë³¸ ì ìˆ˜ 100 ì¦ê°€", rarity = "Common", weight = 5f, isEnabled = true });
+            allChoices.Add(new CJS_ChoiceData { name = "ë°˜ë°œ ê³„ìˆ˜ +10%", description = "ë°˜ë°œ ê³„ìˆ˜ 10% ì¦ê°€", rarity = "Rare", weight = 3f, isEnabled = true });
+            allChoices.Add(new CJS_ChoiceData { name = "í”Œë¦¬í¼ íšŸìˆ˜ +1", description = "ë‹¤ìŒ ë¼ìš´ë“œ í”Œë¦¬í¼ 1íšŒ ì¶”ê°€", rarity = "Epic", weight = 1.5f, isEnabled = true });
+            allChoices.Add(new CJS_ChoiceData { name = "ì½”ì¸ +500", description = "ì¦‰ì‹œ 500 ì½”ì¸", rarity = "Common", weight = 4f, isEnabled = true });
+            allChoices.Add(new CJS_ChoiceData { name = "ì†ë„ +5%", description = "ë³¼ ì†ë„ 5% ì¦ê°€", rarity = "Rare", weight = 2.5f, isEnabled = true });
+            allChoices.Add(new CJS_ChoiceData { name = "ì „ì„¤ íš¨ê³¼", description = "ê°•ë ¥í•œ ì „ì„¤ íš¨ê³¼", rarity = "Legendary", weight = 0.5f, isEnabled = true });
         }
 
-        // ¼±ÅÃÁö È¿°ú¿ë ¸Å´ÏÀú ÁÖÀÔ(ÀÖÀ¸¸é)
+        // ì„ íƒì§€ íš¨ê³¼ìš© ë§¤ë‹ˆì € ì£¼ì…(ìˆìœ¼ë©´)
         var rl = GetComponent<KHS_Script_RogueLikeManager>();
         foreach (var choice in allChoices)
         {
@@ -47,27 +47,27 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 
     void OnValidate()
     {
-        // ÀÎ½ºÆåÅÍ ¹Ì¸®º¸±âµµ ½ÇÁ¦ Ç®°ú µ¿ÀÏÇÑ ±âÁØ(È°¼º+°¡ÁßÄ¡>0)À¸·Î °è»ê
+        // ì¸ìŠ¤í™í„° ë¯¸ë¦¬ë³´ê¸°ë„ ì‹¤ì œ í’€ê³¼ ë™ì¼í•œ ê¸°ì¤€(í™œì„±+ê°€ì¤‘ì¹˜>0)ìœ¼ë¡œ ê³„ì‚°
         var pool = BuildPoolFromAllChoices();
         var map = ComputeNormalizedPercentMap(pool);
         RebuildPreviewPercents(pool, map);
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     public List<CJS_ChoiceData> Roll3(out Dictionary<CJS_ChoiceData, float> rollChances)
     {
-        // 1) ½ÇÁ¦ ÃßÃ· Ç® ±¸¼º(È°¼º + weight>0). ÇÏ³ªµµ ¾øÀ¸¸é È°¼º¸¸ Çã¿ë
+        // 1) ì‹¤ì œ ì¶”ì²¨ í’€ êµ¬ì„±(í™œì„± + weight>0). í•˜ë‚˜ë„ ì—†ìœ¼ë©´ í™œì„±ë§Œ í—ˆìš©
         var pool = BuildPoolFromAllChoices();
 
-        // 2) "ÀÎ½ºÆåÅÍ¿Í µ¿ÀÏÇÑ" Ç¥½Ã È®·ü Å×ÀÌºí(ÀüÃ¼ Ç® ±âÁØ Á¤±ÔÈ­) ¹Ì¸® °è»ê
+        // 2) "ì¸ìŠ¤í™í„°ì™€ ë™ì¼í•œ" í‘œì‹œ í™•ë¥  í…Œì´ë¸”(ì „ì²´ í’€ ê¸°ì¤€ ì •ê·œí™”) ë¯¸ë¦¬ ê³„ì‚°
         var normalizedMap = ComputeNormalizedPercentMap(pool);
 
-        // 3) ºñº¹¿ø °¡ÁßÄ¡ ÃßÃ·(·ÎÁ÷ µ¿ÀÏ). ´Ù¸¸ UI¿¡ ³Ñ±æ È®·üÀº displayMode¿¡ µû¶ó ¼±ÅÃ
+        // 3) ë¹„ë³µì› ê°€ì¤‘ì¹˜ ì¶”ì²¨(ë¡œì§ ë™ì¼). ë‹¤ë§Œ UIì— ë„˜ê¸¸ í™•ë¥ ì€ displayModeì— ë”°ë¼ ì„ íƒ
         rollChances = new Dictionary<CJS_ChoiceData, float>();
         var result = new List<CJS_ChoiceData>(capacity: 3);
 
-        // ÀÛ¾÷¿ë ¸®½ºÆ®(Á¦°Å¿ë)
+        // ì‘ì—…ìš© ë¦¬ìŠ¤íŠ¸(ì œê±°ìš©)
         var work = new List<CJS_ChoiceData>(pool);
 
         for (int i = 0; i < 3 && work.Count > 0; i++)
@@ -77,13 +77,13 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 
             if (sum <= 0f)
             {
-                // ¸ğµç weight°¡ 0ÀÌ°Å³ª À½¼öÀÎ ºñÁ¤»ó ÄÉÀÌ½º: ±Õµî ·£´ı Æú¹é
+                // ëª¨ë“  weightê°€ 0ì´ê±°ë‚˜ ìŒìˆ˜ì¸ ë¹„ì •ìƒ ì¼€ì´ìŠ¤: ê· ë“± ëœë¤ í´ë°±
                 int idx = rnd.Next(0, work.Count);
                 picked = work[idx];
             }
             else
             {
-                // ´©Àû ºĞÆ÷ Ç¥º»ÃßÃâ
+                // ëˆ„ì  ë¶„í¬ í‘œë³¸ì¶”ì¶œ
                 double ticket = rnd.NextDouble() * sum;
                 float acc = 0f;
                 picked = work[0];
@@ -126,8 +126,8 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
         Debug.Log("[ChoiceRoller] Picked: " + picked.name);
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ³»ºÎ À¯Æ¿
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ë‚´ë¶€ ìœ í‹¸
 
     private List<CJS_ChoiceData> BuildPoolFromAllChoices()
     {
@@ -209,6 +209,11 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             else
                 previewPercents.Add($"{c.name}: 0.0%");
         }
+    }
+
+    public void UnActiveChoices(int _idx)
+    {
+        allChoices[_idx].isEnabled = false;
     }
 
     private static string SafeName(CJS_ChoiceData c) => c == null ? "(null)" : c.name;

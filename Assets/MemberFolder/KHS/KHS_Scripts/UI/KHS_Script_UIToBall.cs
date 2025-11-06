@@ -10,6 +10,10 @@ public class KHS_Script_UIToBall : MonoBehaviour
     private KHS_Script_BallController ballCon = null;
     private int ballCount = 0;
 
+    private void Awake()
+    {
+        ballCon = FindAnyObjectByType<KHS_Script_BallController>();
+    }
     private void Start()
     {
         BallCountUI = GetComponent<TextMeshProUGUI>();

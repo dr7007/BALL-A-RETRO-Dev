@@ -20,6 +20,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     // 내부 상태 변수
     private bool isBallCaptured = false;
     public bool isActivated = false;
+    public bool isForceActive = false;
 
     // 에디터에서 중력 범위를 하늘색 선으로 표시
     private void OnDrawGizmosSelected()
@@ -69,8 +70,11 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     {
         if (isActivated)
         {
-            SetActivated(false);
-            Debug.Log("블랙홀: 공 리셋 신호를 받아 비활성화됩니다.");
+            if (!isForceActive)
+            {
+                SetActivated(false);
+                Debug.Log("블랙홀: 공 리셋 신호를 받아 비활성화됩니다.");
+            }
         }
 
         isBallCaptured = false;
