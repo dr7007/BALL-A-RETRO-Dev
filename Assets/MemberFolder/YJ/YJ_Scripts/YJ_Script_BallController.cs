@@ -121,6 +121,19 @@ public class YJ_Script_BallController : MonoBehaviour
         }
     }
 
+    private void OnTriggerEnter(Collider other)
+    {
+        bool isFalling = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) == 0;
+
+        if (!isFalling) return;
+
+        if (other.gameObject.CompareTag("Playfield"))
+        {
+            Enter2DMode(playfieldYLevel);
+        }
+    }
+
+
     private void KHS_GameOverBall()
     {
         --BallCount;

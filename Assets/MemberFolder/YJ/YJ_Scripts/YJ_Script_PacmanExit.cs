@@ -1,25 +1,94 @@
-// PacManExitTrigger.cs (새 스크립트)
+using System;
 using UnityEngine;
+using UnityEngine.Playables;
 
+// 2층 출구 레일 전용 스크립트
 public class YJ_Script_PacManExit : MonoBehaviour
 {
+    [Header("연결")]
+    public Transform railMover;
+    public PlayableDirector railTimeline;
+
+    [Header("카메라 설정")]
+    public Camera mainCam;
+
+    private YJ_Script_BallController capturedBall = null;
+    private Collider triggerCollider; // 리셋을 위해 콜라이더 저장
+
+    // --- (신규) 리셋 로직 ---
+    private void Start()
+    {
+        triggerCollider = GetComponent<Collider>();
+    }
+
+    private void OnEnable()
+    {
+        // 공이 아웃되면 트리거를 다시 활성화
+        KHS_Script_BallOutController.BallOutEvt += ResetTrigger;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_BallOutController.BallOutEvt -= ResetTrigger;
+    }
+    private void ResetTrigger()
+    {
+        if (triggerCollider != null)
+        {
+            triggerCollider.enabled = true;
+        }
+    }
+    // --- (리셋 로직 끝) ---
+
+    // --- (수정) OnTriggerEnter ---
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ball"))
+        // 중복 실행 방지
+        if (other.CompareTag("Ball") && capturedBall == null)
         {
             YJ_Script_BallController ball = other.GetComponent<YJ_Script_BallController>();
             if (ball != null)
             {
-                // 1. 컨트롤 모드를 '핀볼'로 복귀
+                // 1. 팩맨 모드를 핀볼 모드로 되돌림
                 ball.SetControlMode(YJ_Script_BallController.ControlMode.Pinball);
 
-                // 2. (선택) 핀볼 모드로 돌아갈 때 Y축 고정을 풀고 낙하
-                ball.ReleaseForFalling(); 
+                // 2. 공 캡처
+                capturedBall = ball;
+                ball.CaptureAndParent(railMover);
 
-                // 3. (선택) 핀볼 모드로 돌아가 1층으로 즉시 이동
-                // (BallController에 public float playfieldYLevel 변수가 있어야 함)
-                // ball.Enter2DMode(0f); // 0f = 1층의 Y 높이
+                // 3. (제거) 2층 카메라 끄기 코드를 OnRailRideEnd로 이동
+
+                // 4. 타임라인 재생
+                railTimeline.Play();
+                railTimeline.stopped += OnRailRideEnd;
+
+                // 5. 트리거 비활성화 (BallOut 시 리셋됨)
+                if (triggerCollider != null)
+                {
+                    triggerCollider.enabled = false;
+                }
             }
+        }
+    }
+
+    // --- (수정) OnRailRideEnd ---
+    private void OnRailRideEnd(PlayableDirector director)
+    {
+        if (capturedBall != null)
+        {
+            // 1. 공을 '자유 낙하' 모드로 전환
+            capturedBall.ReleaseForFalling();
+            capturedBall = null; // 공 참조 해제
+
+            // 2. --- (중요) ---
+            // 타임라인이 끝나고 공이 낙하를 시작하는 *이 순간*에 2층을 숨깁니다.
+            if (mainCam != null)
+            {
+                mainCam.cullingMask &= ~(1 << LayerMask.NameToLayer("2F"));
+                Debug.Log("2F 레이어 컬링 마스크 제거 (숨김)");
+            }
+
+            // 3. 이벤트 리스너 해제 (중요)
+            railTimeline.stopped -= OnRailRideEnd;
         }
     }
 }
