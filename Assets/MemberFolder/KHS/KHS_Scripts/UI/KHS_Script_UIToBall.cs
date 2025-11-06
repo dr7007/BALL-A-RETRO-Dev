@@ -17,19 +17,35 @@ public class KHS_Script_UIToBall : MonoBehaviour
     private void Start()
     {
         BallCountUI = GetComponent<TextMeshProUGUI>();
+        BallCountReset();
+    }
+    private void OnEnable()
+    {
+        KHS_Script_BallOutController.BallOutEvt += BallOutUI;
+        KHS_Script_ScoreManager.Next_Round_Init += BallCountInitReset;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_BallOutController.BallOutEvt -= BallOutUI;
+        KHS_Script_ScoreManager.Next_Round_Init -= BallCountInitReset;
+    }
+
+    private void BallCountReset()
+    {
         if (ballCon != null)
         {
             ballCount = ballCon.BallCountResponse();
             BallCountUI.text = "" + ballCount;
         }
     }
-    private void OnEnable()
+
+    private void BallCountInitReset()
     {
-        KHS_Script_BallOutController.BallOutEvt += BallOutUI;
-    }
-    private void OnDisable()
-    {
-        KHS_Script_BallOutController.BallOutEvt -= BallOutUI;
+        if (ballCon != null)
+        {
+            ballCount = ballCon.BallCountInitResponse();
+            BallCountUI.text = "" + ballCount;
+        }
     }
 
     private void BallOutUI()

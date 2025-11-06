@@ -14,13 +14,23 @@ public class KHS_Script_UIToTScore : MonoBehaviour
     {
         KHS_Script_ScoreManager.OnGameOver += GameOverUI;
         KHS_Script_ScoreManager.OnGameClear += GameOverUI;
+        KHS_Script_ScoreManager.Next_Round_Init += UpdateTScore;
     }
     private void OnDisable()
     {
         KHS_Script_ScoreManager.OnGameOver -= GameOverUI;
         KHS_Script_ScoreManager.OnGameClear -= GameOverUI;
+        KHS_Script_ScoreManager.Next_Round_Init -= UpdateTScore;
     }
 
+    private void UpdateTScore()
+    {
+        if (scoreManager != null)
+        {
+            targetScore = scoreManager.targetScore;
+            targetScoreUI.text = " / " + targetScore;
+        }
+    }
 
     void Start()
     {

@@ -44,12 +44,13 @@ public class YJ_Script_BallController : MonoBehaviour
 
     [SerializeField]
     private int BallCount = 0;
-
+    private int initBallCount = -1;
     private Vector3 initBallPos = Vector3.zero;
     private Transform originParent;
 
     void Start()
     {
+        initBallCount = BallCount;
         initBallPos = transform.position;
         GravDirection = GetComponentInParent<Transform>().forward * -1;
         rigidBody = GetComponentInChildren<Rigidbody>();
@@ -101,6 +102,8 @@ public class YJ_Script_BallController : MonoBehaviour
         KHS_Script_ResetController.OnReset += KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt += KHS_GameOverBall;
         KHS_Script_ScoreManager.Next_Round_Init += KHS_BallReset;
+        KHS_Script_ScoreManager.OnGameClear += KHS_BallUnactive;
+        KHS_Script_ScoreManager.OnGameOver += KHS_BallUnactive;
     }
 
 
@@ -109,6 +112,8 @@ public class YJ_Script_BallController : MonoBehaviour
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
         KHS_Script_ScoreManager.Next_Round_Init -= KHS_BallReset;
+        KHS_Script_ScoreManager.OnGameClear -= KHS_BallUnactive;
+        KHS_Script_ScoreManager.OnGameOver -= KHS_BallUnactive;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -145,6 +150,11 @@ public class YJ_Script_BallController : MonoBehaviour
     public int BallCountResponse()
     {
         return BallCount;
+    }
+    public int BallCountInitResponse()
+    {
+        BallCount = initBallCount;
+        return initBallCount;
     }
 
     private void HandlePacManInput()
@@ -276,5 +286,10 @@ public class YJ_Script_BallController : MonoBehaviour
         Vector3 flatVelocity = rigidBody.linearVelocity;
         flatVelocity.y = 0;
         rigidBody.linearVelocity = flatVelocity;
+    }
+
+    private void KHS_BallUnactive()
+    {
+        gameObject.SetActive(false);
     }
 }

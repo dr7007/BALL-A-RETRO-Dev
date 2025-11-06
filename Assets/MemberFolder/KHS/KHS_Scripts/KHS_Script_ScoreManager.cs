@@ -169,6 +169,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public int targetScore = 5000;
     [Tooltip("스코어의 기본 배수 값 - 로그라이크 선택지로 증강 가능")]
     public float multiplier = 1.0f;
+    public int FinalUserScore = 0;
 
     [Header("볼 관련 정보")]
     [Tooltip("추후 점수 계산에 사용할 볼의 정보를 저장하기 위함")]
@@ -338,16 +339,19 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void RoundClearAfter()
     {
+        Debug.LogWarning("RoundClearAfter 진입");
         if(currentRound < goalRound)
         {
             currentgameScores[currentRound-1] = curScore;
             currentRound++;
+            targetScore += targetScore;
             NextRoundInit();
         }
         else
         {
             int finalScore = curScore;
 
+            OnGameClear.Invoke();
             if (curScore >= targetScore)
             {
                 foreach(var score in currentgameScores)
@@ -355,6 +359,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
                     if (score > finalScore)
                         finalScore = score;
                 }
+                FinalUserScore = finalScore;
                 OnGameClearWithScore?.Invoke(finalScore);
             }
 
@@ -387,10 +392,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     }
     private void NextRoundInit()
     {
+        Debug.LogWarning("NextRoundInit 진입");
         curScore = 0;
         numOfBounce = 0;
         ChangingMainCam();
-
         Next_Round_Init.Invoke();
     }
 
