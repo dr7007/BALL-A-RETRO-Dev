@@ -118,4 +118,8 @@ public class KHS_Script_FliperController : MonoBehaviour
             }
         }
     }
+    public void FlipperCountUpdate()
+    {
+        FliperCountChangeEvt.Invoke();
+    }
 }

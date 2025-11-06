@@ -116,4 +116,8 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
             receiver.GetComponent<ChangeSpriteRenderer>()?.F_ChangeSprite_Off();
         }
     }
+    public void ForcedOn()
+    {
+        goEnable.SetActive(true);
+    }
 }
