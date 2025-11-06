@@ -44,11 +44,18 @@
         },
         {
             "m_Id": "8a551e0310d0a983b62ac09737226af3"
+        },
+        {
+            "m_Id": "df858db84ef44db0afb0bbe6cc17f555"
         }
     ],
     "m_Keywords": [],
     "m_Dropdowns": [],
-    "m_CategoryData": [],
+    "m_CategoryData": [
+        {
+            "m_Id": "2bd504730cd241198b32a5cf74f88100"
+        }
+    ],
     "m_Nodes": [
         {
             "m_Id": "c421e7d1b4a6228cbc3b3d47902cdc87"
@@ -2127,6 +2134,60 @@
     "m_Labels": [
         "X",
         "Y"
+    ]
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.CategoryData",
+    "m_ObjectId": "2bd504730cd241198b32a5cf74f88100",
+    "m_Name": "",
+    "m_ChildObjectList": [
+        {
+            "m_Id": "0c013cfdb9622888a284f2ee96081990"
+        },
+        {
+            "m_Id": "eafbd9adc6f5428f9363684d7edda95d"
+        },
+        {
+            "m_Id": "a80d8e12cd994180a1f4ac3dcedd3792"
+        },
+        {
+            "m_Id": "54668090fcc48784bd1b0217d697b131"
+        },
+        {
+            "m_Id": "66f9a7ba2de029888cf5b9d7d877f114"
+        },
+        {
+            "m_Id": "c74d8b65909f5a8e9c4e3bdc5627c96a"
+        },
+        {
+            "m_Id": "63b27499161db58290fdc91bbedda1b6"
+        },
+        {
+            "m_Id": "4785c91d25b5b78f880463e3dcadd385"
+        },
+        {
+            "m_Id": "34f40ad330202b86bbff0fa0978e15f9"
+        },
+        {
+            "m_Id": "c0a07f0ae6363c80abff5476f2a04b3b"
+        },
+        {
+            "m_Id": "628258cca5df90889c308744dd5ec8a8"
+        },
+        {
+            "m_Id": "96a4d2c7fc71e5808b946b7e40ebbdee"
+        },
+        {
+            "m_Id": "cb0746f460856e8194807455b8ac9d21"
+        },
+        {
+            "m_Id": "8a551e0310d0a983b62ac09737226af3"
+        },
+        {
+            "m_Id": "df858db84ef44db0afb0bbe6cc17f555"
+        }
     ]
 }
 
@@ -6186,6 +6247,36 @@
         "X",
         "Y"
     ]
+}
+
+{
+    "m_SGVersion": 0,
+    "m_Type": "UnityEditor.ShaderGraph.Internal.Texture2DShaderProperty",
+    "m_ObjectId": "df858db84ef44db0afb0bbe6cc17f555",
+    "m_Guid": {
+        "m_GuidSerialized": "90bcfd0f-4152-4d3b-ba9d-afad88fdf860"
+    },
+    "m_Name": "Texture2D",
+    "m_DefaultRefNameVersion": 1,
+    "m_RefNameGeneratedByDisplayName": "Texture2D",
+    "m_DefaultReferenceName": "_Texture2D",
+    "m_OverrideReferenceName": "_MainTex",
+    "m_GeneratePropertyBlock": true,
+    "m_UseCustomSlotLabel": false,
+    "m_CustomSlotLabel": "",
+    "m_DismissedVersion": 0,
+    "m_Precision": 0,
+    "overrideHLSLDeclaration": false,
+    "hlslDeclarationOverride": 0,
+    "m_Hidden": false,
+    "m_Value": {
+        "m_SerializedTexture": "",
+        "m_Guid": ""
+    },
+    "isMainTexture": false,
+    "useTilingAndOffset": false,
+    "m_Modifiable": true,
+    "m_DefaultType": 0
 }
 
 {
