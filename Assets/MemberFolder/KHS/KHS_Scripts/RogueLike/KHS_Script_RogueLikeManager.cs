@@ -1,5 +1,6 @@
 using System.Runtime.InteropServices;
 using Unity.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class KHS_Script_RogueLikeManager : MonoBehaviour
@@ -20,12 +21,16 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     [SerializeField]
     private YJ_Script_BlackholeController blackHole;
 
+    [SerializeField]
+    private KHS_Script_FliperController fliper;
+
     private bool on_Special_Func = false;
     private float special_Chance = 0f;
     private CJS_Script_ChoiceRoller roller;
 
     private void Awake()
     {
+        fliper = FindAnyObjectByType<KHS_Script_FliperController>();
         roller = FindAnyObjectByType<CJS_Script_ChoiceRoller>();
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
         blockerDMs = blockerHolderGo.GetComponentsInChildren<KHS_Script_DumpManager>();
@@ -65,6 +70,9 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 break;
             case 5:
                 SecretWeaponActivate(5);
+                break;
+            case 6:
+                AddFliperCount(5);
                 break;
 
         }
@@ -164,5 +172,10 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     private void UnActiveChoice(int _idx)
     {
         roller.UnActiveChoices(_idx);
+    }
+
+    private void AddFliperCount(int _count)
+    {
+        fliper.fliper_Count += _count;
     }
 }

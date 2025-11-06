@@ -34,12 +34,15 @@ public class KHS_Script_FliperController : MonoBehaviour
 
     private void OffFliper(Collision collision)
     {
-        fliper_Count--;
-        FliperCountChangeEvt.Invoke();
         isCollision = false;
     }
     private void OnFliper(Collision collision)
     {
+        if (Input.GetKey(flippers[0].inputKey) || Input.GetKey(flippers[1].inputKey))
+        {
+            fliper_Count--;
+            FliperCountChangeEvt.Invoke();
+        }
         isCollision = true;
     }
     private void FliperCountReset()
