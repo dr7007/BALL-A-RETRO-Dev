@@ -416,6 +416,7 @@ Transform:
   m_Children:
   - {fileID: 212168631}
   - {fileID: 390134092}
+  - {fileID: 426686201}
   m_Father: {fileID: 2778006212365243016}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7736565
@@ -5001,7 +5002,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 6f71a1406aab01744b48c69ab685d131, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  isOn: 0
+  isOn: 1
 --- !u!114 &78714094
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -5014,7 +5015,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 25598fe2b0eb44b30aaa23d7aa11c2b8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  On: 0
+  On: 1
   b_Blinking: 0
   Emission_Off_: {r: 0, g: 0, b: 0, a: 1}
   Emission_On: {r: 1, g: 1, b: 1, a: 1}
@@ -8711,7 +8712,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &144270590
 Transform:
   m_ObjectHideFlags: 0
@@ -17437,7 +17438,7 @@ MonoBehaviour:
   - {fileID: 1581029410}
   - {fileID: 2107811788}
   - {fileID: 1238465578}
-  goEnable: {fileID: 0}
+  goEnable: {fileID: 1279319250}
 --- !u!1 &255124687
 GameObject:
   m_ObjectHideFlags: 0
@@ -22333,7 +22334,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &309997785
 Transform:
   m_ObjectHideFlags: 0
@@ -32599,6 +32600,73 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 425928303}
   m_Mesh: {fileID: 4300000, guid: 9e923f944bf93424a9e689eb5f5c2332, type: 3}
+--- !u!1 &426686200
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 426686201}
+  - component: {fileID: 426686202}
+  - component: {fileID: 426686203}
+  m_Layer: 0
+  m_Name: FirstFloorContact
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &426686201
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426686200}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.15841746, y: 0.214, z: 1.662}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 6664274}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!65 &426686202
+BoxCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426686200}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Size: {x: 0.5, y: 0.2, z: 0.5}
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &426686203
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 426686200}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: da79933419de03746bf61d1bc5daa02b, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  mainCam: {fileID: 1526102487}
 --- !u!1 &426946306
 GameObject:
   m_ObjectHideFlags: 0
@@ -43078,6 +43146,7 @@ MonoBehaviour:
   scoreManager: {fileID: 0}
   secretBumpersHolder: {fileID: 2080342007}
   blackHole: {fileID: 5585604430949037962}
+  fliper: {fileID: 0}
 --- !u!1 &564269976
 GameObject:
   m_ObjectHideFlags: 0
@@ -85021,7 +85090,7 @@ GameObject:
   - component: {fileID: 1235891140}
   - component: {fileID: 1235891139}
   - component: {fileID: 1235891138}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Portal_A
   m_TagString: Playfield
   m_Icon: {fileID: 0}
@@ -104011,7 +104080,7 @@ PrefabInstance:
     - target: {fileID: 7754779566761615709, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: exitPortal
       value: 
-      objectReference: {fileID: 3346592914206744932}
+      objectReference: {fileID: 0}
     - target: {fileID: 8657608136384626083, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
@@ -160835,7 +160904,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63469011cb2e2447b281709fabb33dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  exitPortal: {fileID: 1482646001}
+  exitPortal: {fileID: 0}
   activationCount: -1
   isActivated: 1
   randomSpeedRange: {x: 30, y: 100}
@@ -183894,7 +183963,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   pacManSpeed: 1.2
-  wallCheckDistance: 0.6
+  wallCheckDistance: 0.42
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 64

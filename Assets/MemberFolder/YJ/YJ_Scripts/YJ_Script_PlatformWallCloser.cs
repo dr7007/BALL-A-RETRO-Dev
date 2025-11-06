@@ -12,11 +12,15 @@ public class YJ_Script_PlatformWallCloser : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_BallOutController.BallOutEvt += ResetObject;
+
+        YJ_Script_PacManExit.OnPacManExit += ResetObject;
     }
 
     private void OnDisable()
     {
         KHS_Script_BallOutController.BallOutEvt -= ResetObject;
+
+        YJ_Script_PacManExit.OnPacManExit -= ResetObject;
     }
 
     private void Start()
