@@ -100,6 +100,7 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt += KHS_GameOverBall;
+        KHS_Script_ScoreManager.Next_Round_Init += KHS_BallReset;
     }
 
 
@@ -107,6 +108,7 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
+        KHS_Script_ScoreManager.Next_Round_Init -= KHS_BallReset;
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -126,7 +128,6 @@ public class YJ_Script_BallController : MonoBehaviour
         --BallCount;
         if (BallCount <= 0)
         {
-            gameObject.SetActive(false);
             GameOverEvt.Invoke();
         }
         else

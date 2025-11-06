@@ -182,6 +182,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [Tooltip("목표 라운드 수")]
     [SerializeField] private int goalRound = 0;
     [SerializeField] private int currentRound = 0;
+    [SerializeField] private int[] currentgameScores;
 
     [Header("결과 연동")]
     [SerializeField] private CJS_Script_GameOverUI gameOverUI;
@@ -198,6 +199,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     void Start()
     {
+        for(int i = 0; i<goalRound; i++)
+        {
+            currentgameScores.SetValue(0, i);
+        }
         ChangingMainCam();
         curScore = 0;
         numOfBounce = 0;
@@ -206,7 +211,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ResetController.OnReset += ScoreReset;
-        KHS_Script_BallController.GameOverEvt += GameResultJudge;
+        YJ_Script_BallController.GameOverEvt += GameResultJudge;
         KHS_Script_DumpManager.OnBallTrigger += BallTrigger;
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
         KHS_Script_DumpManager.OnScore += AddScore; // 기존: 위치정보 없음
@@ -220,7 +225,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= ScoreReset;
-        KHS_Script_BallController.GameOverEvt -= GameResultJudge;
+        YJ_Script_BallController.GameOverEvt -= GameResultJudge;
         KHS_Script_DumpManager.OnBallTrigger -= BallTrigger;
         KHS_Script_DumpManager.OnBallCollision -= BallCollision;
         KHS_Script_DumpManager.OnScore -= AddScore;
@@ -240,7 +245,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
         int finalScore = curScore;
 
-        if (curScore >= targetScore) OnGameClearWithScore?.Invoke(finalScore);
+        if (curScore >= targetScore) return;
         else OnGameOverWithScore?.Invoke(finalScore);
 
         if (gameOverUI != null)
@@ -333,17 +338,60 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void RoundClearAfter()
     {
-        if(currentRound + 1 < goalRound)
+        if(currentRound < goalRound)
         {
+            currentgameScores[currentRound-1] = curScore;
             currentRound++;
             NextRoundInit();
         }
         else
+        {
+            int finalScore = curScore;
+
+            if (curScore >= targetScore)
+            {
+                foreach(var score in currentgameScores)
+                {
+                    if (score > finalScore)
+                        finalScore = score;
+                }
+                OnGameClearWithScore?.Invoke(finalScore);
+            }
+
+            if (gameOverUI != null)
+            {
+                foreach (var score in currentgameScores)
+                {
+                    if (score > finalScore)
+                        finalScore = score;
+                }
+                gameOverUI.Show(finalScore);
+            }
+            else if (rankingService != null)
+            {
+                foreach (var score in currentgameScores)
+                {
+                    if (score > finalScore)
+                        finalScore = score;
+                }
+                rankingService.SubmitScore(finalScore, gameMode, level,
+                    onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
+                    onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
+                );
+            }
+
+            curScore = 0;
+            numOfBounce = 0;
+        }
 
     }
     private void NextRoundInit()
     {
+        curScore = 0;
+        numOfBounce = 0;
+        ChangingMainCam();
 
+        Next_Round_Init.Invoke();
     }
 
     private void ChangingSubCam()
@@ -354,5 +402,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void ChangingMainCam()
     {
         cameraShaker = camHolder.cameraGos[0].GetComponent<CJS_Script_CameraShaker>();
+    }
+
+    public int RoundRespone()
+    {
+        return currentRound;
     }
 }

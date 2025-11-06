@@ -4,7 +4,7 @@ using UnityEngine;
 public class KHS_Script_CloseObjController : MonoBehaviour
 {
     [SerializeField]
-    private KHS_Script_BallController ballCon = null;
+    private YJ_Script_BallController ballCon = null;
     [SerializeField]
     private bool ballStart = false;
     private BoxCollider boxcollider = null;
@@ -30,11 +30,13 @@ public class KHS_Script_CloseObjController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += CloseObjReset;
         KHS_Script_BallOutController.BallOutEvt += CloseObjReset;
+        KHS_Script_ScoreManager.Next_Round_Init += CloseObjReset;
     }
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= CloseObjReset;
         KHS_Script_BallOutController.BallOutEvt -= CloseObjReset;
+        KHS_Script_ScoreManager.Next_Round_Init -= CloseObjReset;
     }
 
     private void CloseObjReset()

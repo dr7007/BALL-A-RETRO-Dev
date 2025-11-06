@@ -45,6 +45,7 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt += KHS_GameOverBall;
+        KHS_Script_ScoreManager.Next_Round_Init += KHS_BallReset;
     }
 
 
@@ -52,6 +53,7 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
+        KHS_Script_ScoreManager.Next_Round_Init -= KHS_BallReset;
     }
 
     private void KHS_GameOverBall()

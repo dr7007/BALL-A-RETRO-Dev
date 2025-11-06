@@ -286,7 +286,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         }
         if (ball == null)
         {
-            var bc = FindAnyObjectByType<KHS_Script_BallController>();
+            var bc = FindAnyObjectByType<YJ_Script_BallController>();
             if (bc != null) ball = bc.transform;
         }
     }

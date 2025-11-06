@@ -7,12 +7,12 @@ public class KHS_Script_UIToBall : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI BallCountUI = null;
     [SerializeField]
-    private KHS_Script_BallController ballCon = null;
+    private YJ_Script_BallController ballCon = null;
     private int ballCount = 0;
 
     private void Awake()
     {
-        ballCon = FindAnyObjectByType<KHS_Script_BallController>();
+        ballCon = FindAnyObjectByType<YJ_Script_BallController>();
     }
     private void Start()
     {
