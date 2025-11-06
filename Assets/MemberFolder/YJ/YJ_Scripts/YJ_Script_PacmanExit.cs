@@ -5,6 +5,8 @@ using UnityEngine.Playables;
 // 2층 출구 레일 전용 스크립트
 public class YJ_Script_PacManExit : MonoBehaviour
 {
+    public static event Action OnPacManExit;
+
     [Header("연결")]
     public Transform railMover;
     public PlayableDirector railTimeline;
@@ -37,9 +39,7 @@ public class YJ_Script_PacManExit : MonoBehaviour
             triggerCollider.enabled = true;
         }
     }
-    // --- (리셋 로직 끝) ---
 
-    // --- (수정) OnTriggerEnter ---
     private void OnTriggerEnter(Collider other)
     {
         // 중복 실행 방지
@@ -50,18 +50,17 @@ public class YJ_Script_PacManExit : MonoBehaviour
             {
                 // 1. 팩맨 모드를 핀볼 모드로 되돌림
                 ball.SetControlMode(YJ_Script_BallController.ControlMode.Pinball);
+                OnPacManExit?.Invoke();
 
                 // 2. 공 캡처
                 capturedBall = ball;
                 ball.CaptureAndParent(railMover);
 
-                // 3. (제거) 2층 카메라 끄기 코드를 OnRailRideEnd로 이동
-
-                // 4. 타임라인 재생
+                // 3. 타임라인 재생
                 railTimeline.Play();
                 railTimeline.stopped += OnRailRideEnd;
 
-                // 5. 트리거 비활성화 (BallOut 시 리셋됨)
+                // 4. 트리거 비활성화 (BallOut 시 리셋됨)
                 if (triggerCollider != null)
                 {
                     triggerCollider.enabled = false;
@@ -70,7 +69,6 @@ public class YJ_Script_PacManExit : MonoBehaviour
         }
     }
 
-    // --- (수정) OnRailRideEnd ---
     private void OnRailRideEnd(PlayableDirector director)
     {
         if (capturedBall != null)
