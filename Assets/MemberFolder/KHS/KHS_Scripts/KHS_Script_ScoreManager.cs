@@ -152,6 +152,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 {
     public static event Action OnGameOver;
     public static event Action OnGameClear;
+    public static event Action Round_Clear;
 
     public static event Action<int> OnGameOverWithScore;
     public static event Action<int> OnGameClearWithScore;
@@ -165,12 +166,16 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public int curScore = 0;
     [Tooltip("목표 스코어 정보를 표시합니다")]
     public int targetScore = 5000;
+    [Tooltip("스코어의 기본 배수 값 - 로그라이크 선택지로 증강 가능")]
+    public float multiplier = 1.0f;
 
     [Header("볼 관련 정보")]
     [Tooltip("추후 점수 계산에 사용할 볼의 정보를 저장하기 위함")]
     [SerializeField] private int numOfBounce = 0;
     [Tooltip("득점 위치가 없을 때 대체로 사용할 볼 Transform(선택)")]
     [SerializeField] private Transform ballTransformFallback;
+    [Tooltip("이번 라운드 동안 볼이 튕긴 최대 횟수")]
+    [SerializeField] private int maxBounce = 0;
 
     [Header("결과 연동")]
     [SerializeField] private CJS_Script_GameOverUI gameOverUI;
@@ -202,6 +207,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         // 위치를 알고 호출할 수 있으면 DumpManager에서 AddScoreAt(value, worldPos) 호출 권장
         KHS_Script_PortalController.portalEvt += ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
+        KHS_Script_FliperDumpManager.OnFliperCollision += FliperBallCollision;
     }
 
     private void OnDisable()
@@ -214,6 +220,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
         KHS_Script_PortalController.portalEvt -= ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
+        KHS_Script_FliperDumpManager.OnFliperCollision -= FliperBallCollision;
     }
 
     private void GameResultJudge()
@@ -244,9 +251,11 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         numOfBounce = 0;
     }
 
-    private void FliperBallCollision()
+    private void FliperBallCollision(Collision _collision)
     {
         Debug.LogWarning($"플리퍼 충돌! 튕긴 횟수 초기화! 이번에 튕긴횟수 {numOfBounce}");
+        if(numOfBounce >= maxBounce)
+            maxBounce = numOfBounce;
         numOfBounce = 0;
     }
 
@@ -258,20 +267,20 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             ? ballTransformFallback.position
             : (cameraShaker != null ? cameraShaker.transform.position : Vector3.zero);
 
-        AddScoreAt(value, pos);
+        AddScoreAt(Mathf.RoundToInt(value * multiplier), pos);
     }
 
     // 새 API (권장): 득점 지점(worldPos)까지 같이 전달 -----------------------
     public void AddScoreAt(int value, Vector3 worldPos)
     {
         curScore += value;
-        Debug.LogWarning($"현재 스코어: {curScore} (+{value})");
+        Debug.LogWarning($"현재 스코어: {curScore} (+{value}*{multiplier})");
 
-        OnScoreGained?.Invoke(value);
-        OnScoreGainedAt?.Invoke(value, worldPos);
+        OnScoreGained?.Invoke(Mathf.RoundToInt(value * multiplier));
+        OnScoreGainedAt?.Invoke(Mathf.RoundToInt(value * multiplier), worldPos);
 
-        if (shakeOnScore && cameraShaker != null && value > 0)
-            cameraShaker.OnScored(value);
+        if (shakeOnScore && cameraShaker != null && Mathf.RoundToInt(value * multiplier) > 0)
+            cameraShaker.OnScored(Mathf.RoundToInt(value * multiplier));
     }
 
     public void MultiplyScore(int value)
