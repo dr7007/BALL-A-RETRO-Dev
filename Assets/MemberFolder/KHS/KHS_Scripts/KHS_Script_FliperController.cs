@@ -3,7 +3,9 @@ using UnityEngine;
 
 public class KHS_Script_FliperController : MonoBehaviour
 {
-    // 유니코드 변경 후 테스트용
+    public static event Action OnAnyFlipperPress;
+    public static event Action OnAnyFlipperRelease;
+
     [Header("플리퍼 세팅")]
     [SerializeField] private YJ_Script_Flipper[] flippers; // 여러 플리퍼를 관리할 배열
     [SerializeField] private float flipperSpeed = 800f; // 플리퍼 속도
@@ -53,15 +55,22 @@ public class KHS_Script_FliperController : MonoBehaviour
         {
             if (flipper.rigidbody != null && fliper_Count > 0)
             {
+                // 눌림 순간 이벤트
+                if (Input.GetKeyDown(flipper.inputKey))
+                    OnAnyFlipperPress?.Invoke();
+
                 if (Input.GetKey(flipper.inputKey))
                 {
                     flipper.isPressed = true;
                     flipper.invisibleCollider.isTrigger = false;
                 }
+
+                //  해제 순간 이벤트
                 if (Input.GetKeyUp(flipper.inputKey))
                 {
                     flipper.isPressed = false;
                     flipper.invisibleCollider.isTrigger = true;
+                    OnAnyFlipperRelease?.Invoke();
                 }
             }
             else
