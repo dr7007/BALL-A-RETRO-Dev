@@ -158257,7 +158257,7 @@ BoxCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
@@ -174760,7 +174760,7 @@ MeshCollider:
   m_LayerOverridePriority: 0
   m_IsTrigger: 0
   m_ProvidesContacts: 0
-  m_Enabled: 1
+  m_Enabled: 0
   serializedVersion: 5
   m_Convex: 0
   m_CookingOptions: 30
@@ -177320,7 +177320,7 @@ GameObject:
   - component: {fileID: 3705322568741651775}
   m_Layer: 0
   m_Name: Pinball_Board.002
-  m_TagString: Untagged
+  m_TagString: Playfield
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -183546,13 +183546,19 @@ MonoBehaviour:
   m_GameObject: {fileID: 4079135334308238895}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: b786852a40802914da5457d73f763f7a, type: 3}
+  m_Script: {fileID: 11500000, guid: 460c5f3c5079ebf4292a0ead57bca65d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  pacManSpeed: 3
+  wallCheckDistance: 0.6
+  wallLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
   rigidBody: {fileID: 0}
-  Gravity: 2.3
+  playfieldYLevel: 0.25
+  Gravity: 1.5
   GravDirection: {x: 0, y: 0, z: 0}
-  BallCount: 3
+  BallCount: 0
 --- !u!1 &8300816574244544129
 GameObject:
   m_ObjectHideFlags: 0
