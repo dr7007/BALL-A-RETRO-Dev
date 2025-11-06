@@ -153,6 +153,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public static event Action OnGameOver;
     public static event Action OnGameClear;
     public static event Action Round_Clear;
+    public static event Action Next_Round_Init;
 
     public static event Action<int> OnGameOverWithScore;
     public static event Action<int> OnGameClearWithScore;
@@ -180,6 +181,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [Header("Round Infomation")]
     [Tooltip("목표 라운드 수")]
     [SerializeField] private int goalRound = 0;
+    [SerializeField] private int currentRound = 0;
 
     [Header("결과 연동")]
     [SerializeField] private CJS_Script_GameOverUI gameOverUI;
@@ -212,6 +214,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_PortalController.portalEvt += ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision += FliperBallCollision;
+        KHS_Script_ScoreManager.Round_Clear += RoundClearAfter;
     }
 
     private void OnDisable()
@@ -225,13 +228,14 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_PortalController.portalEvt -= ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision -= FliperBallCollision;
+        KHS_Script_ScoreManager.Round_Clear -= RoundClearAfter;
     }
 
     private void GameResultJudge()
     {
         Debug.LogError("라운드종료 결과 판정중!!!");
         Debug.LogWarning($"최종 스코어 : {curScore}");
-        if (curScore >= targetScore) OnGameClear?.Invoke();
+        if (curScore >= targetScore) Round_Clear?.Invoke();
         else OnGameOver?.Invoke();
 
         int finalScore = curScore;
@@ -325,6 +329,21 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         curScore = 0;
         Debug.LogWarning($"리셋 전 마지막 튕김 수 표기 : {numOfBounce}");
         numOfBounce = 0;
+    }
+
+    private void RoundClearAfter()
+    {
+        if(currentRound + 1 < goalRound)
+        {
+            currentRound++;
+            NextRoundInit();
+        }
+        else
+
+    }
+    private void NextRoundInit()
+    {
+
     }
 
     private void ChangingSubCam()
