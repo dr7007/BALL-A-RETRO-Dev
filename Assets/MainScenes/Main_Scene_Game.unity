@@ -14351,7 +14351,11 @@ Transform:
   - {fileID: 859414233}
   - {fileID: 1177550330}
   - {fileID: 1959776394}
+  - {fileID: 1435170299}
+  - {fileID: 1649058874}
   - {fileID: 434086070}
+  - {fileID: 592532856}
+  - {fileID: 1796788359}
   m_Father: {fileID: 6664274}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &212209400
@@ -22498,7 +22502,7 @@ GameObject:
   - component: {fileID: 311662505}
   - component: {fileID: 311662504}
   m_Layer: 6
-  m_Name: RailEntrance_2F_A
+  m_Name: RailEntrance_2F_Entrance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -22534,7 +22538,7 @@ MonoBehaviour:
   railMover: {fileID: 859414233}
   railTimeline: {fileID: 859414234}
   oneTimeUse: 0
-  mainCam: {fileID: 0}
+  mainCam: {fileID: 1526102487}
 --- !u!65 &311662505
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -40633,7 +40637,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &532840772
 Transform:
   m_ObjectHideFlags: 0
@@ -45338,7 +45342,7 @@ GameObject:
   - component: {fileID: 592532858}
   - component: {fileID: 592532857}
   m_Layer: 6
-  m_Name: Platform_2F_RailEntrance_B
+  m_Name: RailEntrance_2F_Portal_B
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -45353,11 +45357,11 @@ Transform:
   m_GameObject: {fileID: 592532855}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: 2.0636218, y: 1.0326538, z: 3.9770026}
-  m_LocalScale: {x: 15, y: 10, z: 3.1499996}
+  m_LocalPosition: {x: 0.36083016, y: 0.10326538, z: 0.046692338}
+  m_LocalScale: {x: 1.0384614, y: 1, z: 0.22499995}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 714094969}
+  m_Father: {fileID: 212168631}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &592532857
 MonoBehaviour:
@@ -45371,6 +45375,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54eaddb0a170724381a02d6d96d2654, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  railMover: {fileID: 1796788359}
+  railTimeline: {fileID: 1796788360}
+  mainCam: {fileID: 1526102487}
 --- !u!65 &592532858
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -52876,8 +52883,6 @@ Transform:
   - {fileID: 1956223795}
   - {fileID: 1573558037}
   - {fileID: 1890170001}
-  - {fileID: 1435170299}
-  - {fileID: 592532856}
   m_Father: {fileID: 390134092}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &715847541
@@ -61765,7 +61770,7 @@ GameObject:
   - component: {fileID: 859414235}
   - component: {fileID: 859414234}
   m_Layer: 6
-  m_Name: RailMover_2F_A
+  m_Name: RailMover_2F_Entrance
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -71004,8 +71009,8 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1002855849}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -0.0278, y: -0, z: 0.0324}
+  m_LocalRotation: {x: 0, y: 0.38268343, z: 0, w: 0.92387956}
+  m_LocalPosition: {x: -0.0667, y: 0, z: 0.028}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -71018,7 +71023,7 @@ Transform:
   - {fileID: 1732251922}
   - {fileID: 503457646}
   m_Father: {fileID: 1959776394}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 45, z: 0}
 --- !u!1 &1004171184
 GameObject:
   m_ObjectHideFlags: 0
@@ -85003,6 +85008,132 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1235554322}
   m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
+--- !u!1 &1235891136
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1235891137}
+  - component: {fileID: 1235891141}
+  - component: {fileID: 1235891140}
+  - component: {fileID: 1235891139}
+  - component: {fileID: 1235891138}
+  m_Layer: 0
+  m_Name: Portal_A
+  m_TagString: Playfield
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1235891137
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235891136}
+  serializedVersion: 2
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -1.535, y: 0.6, z: -1.547}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
+  m_ConstrainProportionsScale: 1
+  m_Children: []
+  m_Father: {fileID: 2778006212365243016}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!135 &1235891138
+SphereCollider:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235891136}
+  m_Material: {fileID: 0}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_LayerOverridePriority: 0
+  m_IsTrigger: 1
+  m_ProvidesContacts: 0
+  m_Enabled: 1
+  serializedVersion: 3
+  m_Radius: 0.5
+  m_Center: {x: 0, y: 0, z: 0}
+--- !u!114 &1235891139
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235891136}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63469011cb2e2447b281709fabb33dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  exitPortal: {fileID: 1482646001}
+  activationCount: -1
+  isActivated: 1
+  randomSpeedRange: {x: 30, y: 100}
+  randomAngleRange: 180
+--- !u!23 &1235891140
+MeshRenderer:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235891136}
+  m_Enabled: 1
+  m_CastShadows: 1
+  m_ReceiveShadows: 1
+  m_DynamicOccludee: 1
+  m_StaticShadowCaster: 0
+  m_MotionVectors: 1
+  m_LightProbeUsage: 1
+  m_ReflectionProbeUsage: 1
+  m_RayTracingMode: 2
+  m_RayTraceProcedural: 0
+  m_RayTracingAccelStructBuildFlagsOverride: 0
+  m_RayTracingAccelStructBuildFlags: 1
+  m_SmallMeshCulling: 1
+  m_RenderingLayerMask: 1
+  m_RendererPriority: 0
+  m_Materials:
+  - {fileID: 2100000, guid: f086775473d29b94ab083d996e183c68, type: 2}
+  m_StaticBatchInfo:
+    firstSubMesh: 0
+    subMeshCount: 0
+  m_StaticBatchRoot: {fileID: 0}
+  m_ProbeAnchor: {fileID: 0}
+  m_LightProbeVolumeOverride: {fileID: 0}
+  m_ScaleInLightmap: 1
+  m_ReceiveGI: 1
+  m_PreserveUVs: 0
+  m_IgnoreNormalsForChartDetection: 0
+  m_ImportantGI: 0
+  m_StitchLightmapSeams: 1
+  m_SelectedEditorRenderState: 3
+  m_MinimumChartSize: 4
+  m_AutoUVMaxDistance: 0.5
+  m_AutoUVMaxAngle: 89
+  m_LightmapParameters: {fileID: 0}
+  m_SortingLayerID: 0
+  m_SortingLayer: 0
+  m_SortingOrder: 0
+  m_AdditionalVertexStreams: {fileID: 0}
+--- !u!33 &1235891141
+MeshFilter:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1235891136}
+  m_Mesh: {fileID: 10207, guid: 0000000000000000e000000000000000, type: 0}
 --- !u!1 &1236726041
 GameObject:
   m_ObjectHideFlags: 0
@@ -98953,7 +99084,7 @@ GameObject:
   - component: {fileID: 1435170301}
   - component: {fileID: 1435170300}
   m_Layer: 6
-  m_Name: Platform_2F_RailEntrance_A
+  m_Name: RailEntrance_2F_Portal_A
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -98968,11 +99099,11 @@ Transform:
   m_GameObject: {fileID: 1435170298}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0.7071068, z: -0, w: 0.7071068}
-  m_LocalPosition: {x: -1.7548113, y: 1.0326538, z: 3.9770017}
-  m_LocalScale: {x: 15, y: 10, z: 3.1499996}
+  m_LocalPosition: {x: 0.08808491, y: 0.10326538, z: 0.046692282}
+  m_LocalScale: {x: 1.0384614, y: 1, z: 0.22499995}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 714094969}
+  m_Father: {fileID: 212168631}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &1435170300
 MonoBehaviour:
@@ -98986,6 +99117,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d54eaddb0a170724381a02d6d96d2654, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  railMover: {fileID: 1649058874}
+  railTimeline: {fileID: 1649058875}
+  mainCam: {fileID: 1526102487}
 --- !u!65 &1435170301
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -103877,7 +104011,7 @@ PrefabInstance:
     - target: {fileID: 7754779566761615709, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: exitPortal
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 3346592914206744932}
     - target: {fileID: 8657608136384626083, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
@@ -115015,6 +115149,80 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1646251189}
   m_Mesh: {fileID: 4300000, guid: 9e923f944bf93424a9e689eb5f5c2332, type: 3}
+--- !u!1 &1649058873
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1649058874}
+  - component: {fileID: 1649058876}
+  - component: {fileID: 1649058875}
+  m_Layer: 0
+  m_Name: RailMover_2F_Portal_A
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1649058874
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649058873}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0.08808491, y: 0.10326538, z: 0.046692282}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 212168631}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!320 &1649058875
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649058873}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 11400000, guid: 962d3f81e8a248a478748598894ea9bd, type: 2}
+  m_InitialState: 0
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings:
+  - key: {fileID: 3479135823815631700, guid: 962d3f81e8a248a478748598894ea9bd, type: 2}
+    value: {fileID: 1649058876}
+  m_ExposedReferences:
+    m_References: []
+--- !u!95 &1649058876
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1649058873}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1001 &1649195380
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -123674,6 +123882,78 @@ MeshFilter:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1795088053}
   m_Mesh: {fileID: 4300000, guid: 103fe5e2207aec643b36412301afa68e, type: 3}
+--- !u!1 &1796788358
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1796788359}
+  - component: {fileID: 1796788361}
+  - component: {fileID: 1796788360}
+  m_Layer: 0
+  m_Name: RailMover_2F_Portal_B
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &1796788359
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796788358}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 212168631}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!320 &1796788360
+PlayableDirector:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796788358}
+  m_Enabled: 1
+  serializedVersion: 3
+  m_PlayableAsset: {fileID: 0}
+  m_InitialState: 1
+  m_WrapMode: 2
+  m_DirectorUpdateMode: 1
+  m_InitialTime: 0
+  m_SceneBindings: []
+  m_ExposedReferences:
+    m_References: []
+--- !u!95 &1796788361
+Animator:
+  serializedVersion: 7
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1796788358}
+  m_Enabled: 1
+  m_Avatar: {fileID: 0}
+  m_Controller: {fileID: 0}
+  m_CullingMode: 0
+  m_UpdateMode: 0
+  m_ApplyRootMotion: 0
+  m_LinearVelocityBlending: 0
+  m_StabilizeFeet: 0
+  m_AnimatePhysics: 0
+  m_WarningMessage: 
+  m_HasTransformHierarchy: 1
+  m_AllowConstantClipSamplingOptimization: 1
+  m_KeepAnimatorStateOnDisable: 0
+  m_WriteDefaultValuesOnDisable: 0
 --- !u!1 &1799250864
 GameObject:
   m_ObjectHideFlags: 0
@@ -152024,8 +152304,8 @@ Transform:
   m_GameObject: {fileID: 8049605661621679958}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 2.37, y: 0.135, z: 3.66}
-  m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
+  m_LocalPosition: {x: 2.37, y: 0.25, z: 3.66}
+  m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 2778006212365243016}
@@ -158465,6 +158745,7 @@ Transform:
   - {fileID: 2378013375823096961}
   - {fileID: 799309737716437108}
   - {fileID: 1167233091103209859}
+  - {fileID: 1235891137}
   m_Father: {fileID: 5297872601669277053}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &2788843735279748696
@@ -180515,7 +180796,7 @@ Transform:
   m_GameObject: {fileID: 4079135334308238895}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 3.3219995, y: 0.25, z: -3.0259995}
+  m_LocalPosition: {x: 3.352, y: 0.25, z: -3.104}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.24999999}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -182618,7 +182899,7 @@ GameObject:
   - component: {fileID: 3346592914206744932}
   - component: {fileID: 1882095701115937046}
   m_Layer: 0
-  m_Name: Portal_A (1)
+  m_Name: Portal_C(ExitOnly)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -183612,11 +183893,11 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 460c5f3c5079ebf4292a0ead57bca65d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  pacManSpeed: 3
+  pacManSpeed: 1.2
   wallCheckDistance: 0.6
   wallLayerMask:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 64
   rigidBody: {fileID: 0}
   playfieldYLevel: 0.25
   Gravity: 1.5
