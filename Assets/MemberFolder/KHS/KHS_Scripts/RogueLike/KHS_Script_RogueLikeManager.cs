@@ -23,6 +23,8 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
 
     [SerializeField]
     private KHS_Script_FliperController fliper;
+    [SerializeField]
+    private KHS_Script_BatteryLedManager batLedManager;
 
     private bool on_Special_Func = false;
     private float special_Chance = 0f;
@@ -74,7 +76,9 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
             case 6:
                 AddFliperCount(5);
                 break;
-
+            case 7:
+                ClosetheHole();
+                break;
         }
     }
 
@@ -177,5 +181,11 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     private void AddFliperCount(int _count)
     {
         fliper.fliper_Count += _count;
+        fliper.FlipperCountUpdate();
+    }
+
+    private void ClosetheHole()
+    {
+        batLedManager.ForcedOn();
     }
 }
