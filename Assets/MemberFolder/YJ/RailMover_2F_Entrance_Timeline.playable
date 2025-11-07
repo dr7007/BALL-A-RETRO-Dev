@@ -65,7 +65,7 @@ MonoBehaviour:
   - m_Version: 1
     m_Start: 0
     m_ClipIn: 0
-    m_Asset: {fileID: -550062489467854971}
+    m_Asset: {fileID: -2671405852982015224}
     m_Duration: 2.1333333333333333
     m_TimeScale: 1
     m_ParentTrack: {fileID: -4079874569406921195}
@@ -130,10 +130,10 @@ MonoBehaviour:
     m_PreExtrapolationMode: 0
     m_PostExtrapolationTime: 0
     m_PreExtrapolationTime: 0
-    m_DisplayName: RailMover_2F_A
+    m_DisplayName: RailEntrance_2F_Entrance
   m_Markers:
     m_Objects: []
---- !u!114 &-550062489467854971
+--- !u!114 &-2671405852982015224
 MonoBehaviour:
   m_ObjectHideFlags: 1
   m_CorrespondingSourceObject: {fileID: 0}
@@ -146,15 +146,15 @@ MonoBehaviour:
   m_Name: ControlPlayableAsset
   m_EditorClassIdentifier: 
   sourceGameObject:
-    exposedName: 6f0ceaaf275116e468244900f1da32dd
+    exposedName: a796a30a9d9d74b48b5c8554f7058553
     defaultValue: {fileID: 0}
   prefabGameObject: {fileID: 0}
   updateParticle: 1
-  particleRandomSeed: 6026
-  updateDirector: 0
+  particleRandomSeed: 8973
+  updateDirector: 1
   updateITimeControl: 1
   searchHierarchy: 0
-  active: 0
+  active: 1
   postPlayback: 2
   directorOnClipEnd: 0
 --- !u!114 &11400000
