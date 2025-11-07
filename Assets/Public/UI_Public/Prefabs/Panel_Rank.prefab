@@ -2922,11 +2922,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 5740651526343882795, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClick_RankingPanelClose
+      value: CloseRaning
       objectReference: {fileID: 0}
     - target: {fileID: 5740651526343882795, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
-      value: PSH.PSH_Script_LobbyUIManager, Assembly-CSharp
+      value: PSH_Script_GameEndUI, Assembly-CSharp
       objectReference: {fileID: 0}
     - target: {fileID: 6998114532751354666, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
       propertyPath: m_Name
@@ -2935,8 +2935,53 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 6998114532751354666, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1020342928832031770}
   m_SourcePrefab: {fileID: 100100000, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
+--- !u!1 &1329438163418212844 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 6998114532751354666, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
+  m_PrefabInstance: {fileID: 8317393011156140742}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1020342928832031770
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1329438163418212844}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 33143bfce0264d345acdaf1d51b03091, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  buttonText: {fileID: 0}
+  hoverScale: 1.05
+  scaleDuration: 0.2
+  textHoverColor: {r: 0, g: 1, b: 1, a: 1}
+  onClick:
+    m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: PSH_Script_GameEndUI, Assembly-CSharp
+        m_MethodName: CloseRaning
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+  useFadeEffect: 1
+  hoverAlpha: 0.7
+  fadeDuration: 0.2
+  targetBackground: {fileID: 0}
+  hoverBackgroundSprite: {fileID: 0}
+  setBackgroundNativeSizeOnHover: 0
 --- !u!224 &4061011778175237194 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 5419743856252468876, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
