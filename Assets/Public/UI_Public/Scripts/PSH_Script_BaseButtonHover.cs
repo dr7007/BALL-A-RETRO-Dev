@@ -143,7 +143,7 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
             float alpha = Mathf.Lerp(startAlpha, targetAlpha, time / duration);
             color.a = alpha;
             buttonImage.color = color;
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             yield return null;
         }
 
@@ -184,7 +184,7 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
             float t = Mathf.SmoothStep(0.0f, 1.0f, time / duration);
             rectTransform.localScale = Vector3.Lerp(startScale, targetScale, t);
             
-            time += Time.deltaTime;
+            time += Time.unscaledDeltaTime;
             yield return null;
         }
         rectTransform.localScale = targetScale;

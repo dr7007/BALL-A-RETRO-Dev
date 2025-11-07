@@ -14,14 +14,23 @@ public class KHS_Script_RogueLikeGenerate : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ScoreManager.Next_Round_Init += RogueLikeGenerateTime;
+        KHS_Script_ScoreManager.OnGameClear += GameOverUnactiveUI;
+        KHS_Script_ScoreManager.OnGameOver += GameOverUnactiveUI;
     }
     private void OnDisable()
     {
         KHS_Script_ScoreManager.Next_Round_Init -= RogueLikeGenerateTime;
+        KHS_Script_ScoreManager.OnGameClear -= GameOverUnactiveUI;
+        KHS_Script_ScoreManager.OnGameOver -= GameOverUnactiveUI;
     }
 
     private void RogueLikeGenerateTime()
     {
         button.onClick.Invoke();
+    }
+
+    private void GameOverUnactiveUI()
+    {
+        transform.parent.gameObject.SetActive(false);
     }
 }
