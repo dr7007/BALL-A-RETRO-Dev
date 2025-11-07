@@ -3,7 +3,7 @@ using UnityEngine;
 using UnityEngine.Playables;
 
 // 2층 출구 레일 전용 스크립트
-public class YJ_Script_PacManExit : MonoBehaviour
+public class YJ_Script_RouletteEntrance : MonoBehaviour
 {
     public static event Action OnPacManExit;
 
@@ -71,20 +71,16 @@ public class YJ_Script_PacManExit : MonoBehaviour
             YJ_Script_BallController ball = other.GetComponent<YJ_Script_BallController>();
             if (ball != null)
             {
-                // 1. 팩맨 모드를 핀볼 모드로 되돌림
-                ball.SetControlMode(YJ_Script_BallController.ControlMode.Pinball);
-                OnPacManExit?.Invoke();
-
-                // 2. 공 캡처
+                // 1. 공 캡처
                 capturedBall = ball;
                 ball.CaptureAndParent(railMover);
 
-                // 3. 속도 추적 시작
+                // 2. 속도 추적 시작
                 lastMoverPosition = railMover.position; // 추적 시작 위치 초기화
                 currentMoverVelocity = Vector3.zero;
                 isTrackingVelocity = true;
 
-                // 4. 타임라인 재생
+                // 3. 타임라인 재생
                 railTimeline.Play();
                 railTimeline.stopped += OnRailRideEnd;
             }
