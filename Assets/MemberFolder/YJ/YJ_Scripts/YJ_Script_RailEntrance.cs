@@ -56,7 +56,7 @@ public class YJ_Script_RailEntrance : MonoBehaviour
         if (capturedBall != null)
         {
             // 5. 공을 '기차'에서 내려서 낙하하게 함
-            capturedBall.ReleaseForFalling();
+            capturedBall.ReleaseForFalling(Vector3.zero);
             capturedBall = null;
 
             // 6. 이벤트 리스너 해제 (중요)

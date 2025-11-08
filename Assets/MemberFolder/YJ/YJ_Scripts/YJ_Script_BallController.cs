@@ -255,7 +255,7 @@ public class YJ_Script_BallController : MonoBehaviour
         Debug.Log("2D 모드로 즉시 복귀 (해제됨)");
     }
 
-    public void ReleaseForFalling()
+    public void ReleaseForFalling(Vector3 initialVelocity)
     {
         transform.parent = originParent;
         rigidBody.isKinematic = false;
@@ -263,7 +263,10 @@ public class YJ_Script_BallController : MonoBehaviour
         // Y축 고정 해제
         rigidBody.constraints = defaultConstraints & ~RigidbodyConstraints.FreezePositionY;
 
-        Debug.Log("3D 낙하 모드로 해제됨 (Y축 고정 해제)");
+        rigidBody.linearVelocity = initialVelocity;
+        rigidBody.angularVelocity = initialVelocity;
+
+        Debug.Log($"3D 낙하 모드 해제됨 (초기 속도: {initialVelocity})");
     }
 
     public void Enter2DMode(float targetYLevel)
