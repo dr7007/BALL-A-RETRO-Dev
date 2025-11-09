@@ -80,13 +80,10 @@ public class PSH_Script_StartButton : PSH_Script_BaseButtonHover, IPointerClickH
         {
             targetBackground.sprite = originalBackgroundSprite;
 
-            // ▼▼▼ 새 기능: 배경 크기 원상 복구 ▼▼▼
-            // 호버 시 크기를 변경했다면, 다시 원래 크기로 되돌립니다.
             if (setBackgroundNativeSizeOnHover)
             {
                 targetBackground.rectTransform.sizeDelta = originalBackgroundSize;
             }
-            // ▲▲▲ 여기까지 ▲▲▲
         }
     }
 

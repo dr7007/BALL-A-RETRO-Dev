@@ -71,7 +71,7 @@ namespace PSH
         {
             float startTime = Time.time;
             if (loadingPanel != null) loadingPanel.SetActive(true);
-            else Debug.LogWarning("SceneLoader에 Loading Panel이 할당되지 않았습니다.");
+           //else Debug.LogWarning("SceneLoader에 Loading Panel이 할당되지 않았습니다.");
 
             AsyncOperation asyncLoad = SceneManager.LoadSceneAsync(sceneName);
             asyncLoad.allowSceneActivation = false; // 씬이 준비되어도 바로 활성화하지 않음
@@ -113,7 +113,7 @@ namespace PSH
         {
             float startTime = Time.time;
             if (loadingPanel != null) loadingPanel.SetActive(true);
-            else Debug.LogWarning("SceneLoader에 Loading Panel이 할당되지 않았습니다.");
+           // else Debug.LogWarning("SceneLoader에 Loading Panel이 할당되지 않았습니다.");
 
             // 패널이 한 프레임이라도 보이도록 대기
             yield return null;
