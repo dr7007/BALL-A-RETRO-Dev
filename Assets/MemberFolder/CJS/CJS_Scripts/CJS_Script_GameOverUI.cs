@@ -1,3 +1,4 @@
+using System;
 using System.Text;
 using TMPro;
 using UnityEngine;
@@ -10,37 +11,53 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     public TMP_Text textResult;
 
     [Header("Leaderboard (choose one)")]
-    public TMP_Text textLeaderboard;
+    public TMP_Text textLeaderboard;                  
     public CJS_Script_LeaderboardList leaderboardList;
+
+    [Header("Panels")]
+    public GameObject panelGameEnd;
+    public GameObject panelRank;    
 
     [Header("Options")]
     public string gameMode = "Classic";
     public int level = 1;
     public bool autoSubmitOnShow = true;
 
-    int _finalScore;
+    private int _finalScore;
+    private SubmitResp _lastSubmit; 
 
     void Awake()
     {
         if (service == null)
-        {
             service = FindObjectOfType<CJS_Script_PinballRankingService>(includeInactive: true);
-            if (service == null) Debug.LogError("[GameOverUI] RankingService not found in scene.");
-            else Debug.Log("[GameOverUI] Service auto-wired.");
-        }
+
+        if (panelGameEnd == null) panelGameEnd = gameObject; // 자기 자신을 종료 패널로 사용 가능
+
+        if (service == null)
+            Debug.LogError("[GameOverUI] RankingService not found in scene.");
+        else
+            Debug.Log("[GameOverUI] Service wired.");
     }
 
     public void Show(int finalScore)
     {
         _finalScore = finalScore;
-        gameObject.SetActive(true);
-        if (textFinalScore) textFinalScore.text = $"최종 점수: {_finalScore:N0}";
+
+        if (panelGameEnd) panelGameEnd.SetActive(true);
+        if (panelRank) panelRank.SetActive(false);
+
+        if (textFinalScore) textFinalScore.text = _finalScore.ToString("N0");
         if (textResult) textResult.text = "제출 대기중…";
 
         Debug.Log($"[GameOverUI.Show] finalScore={_finalScore} autoSubmit={autoSubmitOnShow}");
         if (autoSubmitOnShow) OnClickSubmit();
     }
 
+    public void SetFinalScore(int score)
+    {
+        _finalScore = score;
+        if (textFinalScore) textFinalScore.text = score.ToString("N0");
+    }
     public void OnClickSubmit()
     {
         if (service == null) { Debug.LogError("[GameOverUI] service is null"); return; }
@@ -51,18 +68,19 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         service.SubmitScore(_finalScore, gameMode, level,
             onDone: resp =>
             {
+                _lastSubmit = resp; // 보관
+
                 if (textResult)
                     textResult.text = $"내 점수: {resp.your_score:N0}\n내 랭킹: #{resp.rank}";
 
+                // 응답에 top10이 있으면 즉시 채워둠 랭크 패널 열릴 때 재사용
                 if (leaderboardList != null)
-                    leaderboardList.Populate(resp.top10 ?? new ScoreRow[0]);
+                {
+                    leaderboardList.Populate(resp.top10 ?? Array.Empty<ScoreRow>());
+                }
                 else if (textLeaderboard != null)
                 {
-                    var sb = new StringBuilder();
-                    var arr = resp.top10 ?? new ScoreRow[0];
-                    for (int i = 0; i < arr.Length; i++)
-                        sb.AppendLine($"{i + 1,2}. {Safe(arr[i].nickname, 18),-18}  {arr[i].score,8:N0}");
-                    textLeaderboard.text = sb.ToString();
+                    textLeaderboard.text = BuildTop10Text(resp.top10);
                 }
             },
             onFail: err =>
@@ -75,10 +93,74 @@ public class CJS_Script_GameOverUI : MonoBehaviour
 
     public void OnClickSubmitRandomForTest()
     {
-        int rnd = Random.Range(1000, 50000);
+        int rnd = UnityEngine.Random.Range(1000, 50000);
         Debug.Log("[GameOverUI] OnClickSubmitRandomForTest() score=" + rnd);
         _finalScore = rnd;
         OnClickSubmit();
+    }
+
+    public void OnClickOpenRank()
+    {
+        Debug.Log("[GameOverUI] OnClickOpenRank");
+
+        // 최근 제출 응답이 있으면 재사용, 없으면 서버 재조회
+        if (leaderboardList)
+        {
+            if (_lastSubmit?.top10 != null)
+            {
+                leaderboardList.Populate(_lastSubmit.top10);
+            }
+            else if (service != null)
+            {
+                service.FetchLeaderboard(gameMode, level,
+                    lb => leaderboardList.Populate(lb.top10 ?? Array.Empty<ScoreRow>()),
+                    err => Debug.LogError("[Rank] fetch fail: " + err));
+            }
+        }
+        else if (textLeaderboard)
+        {
+            if (_lastSubmit?.top10 != null)
+            {
+                textLeaderboard.text = BuildTop10Text(_lastSubmit.top10);
+            }
+            else if (service != null)
+            {
+                service.FetchLeaderboard(gameMode, level,
+                    lb => { textLeaderboard.text = BuildTop10Text(lb.top10); },
+                    err => Debug.LogError("[Rank] fetch fail: " + err));
+            }
+        }
+
+        if (panelGameEnd) panelGameEnd.SetActive(false);
+        if (panelRank) panelRank.SetActive(true);
+    }
+
+    public void OnClickCloseRank()
+    {
+        if (panelRank) panelRank.SetActive(false);
+        if (panelGameEnd) panelGameEnd.SetActive(true);
+    }
+
+    public void OnClickRefreshLeaderboard()
+    {
+        if (service == null) return;
+
+        service.FetchLeaderboard(gameMode, level,
+            lb =>
+            {
+                if (leaderboardList) leaderboardList.Populate(lb.top10 ?? Array.Empty<ScoreRow>());
+                else if (textLeaderboard) textLeaderboard.text = BuildTop10Text(lb.top10);
+            },
+            err => Debug.LogError("[Rank] refresh fail: " + err));
+    }
+
+    string BuildTop10Text(ScoreRow[] rows)
+    {
+        var arr = rows ?? Array.Empty<ScoreRow>();
+        var sb = new StringBuilder();
+        for (int i = 0; i < arr.Length; i++)
+            sb.AppendLine($"{i + 1,2}. {Safe(arr[i].nickname, 18),-18}  {arr[i].score,8:N0}");
+        return sb.ToString();
     }
 
     string Safe(string s, int maxLen)
