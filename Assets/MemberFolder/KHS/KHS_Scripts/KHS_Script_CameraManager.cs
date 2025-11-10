@@ -109,6 +109,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
         // cameraGos[0]은 비활성화
         cameraGos[2].SetActive(false);
+        
+        
     }
     public void MonitorOffAfterDialogue(string _str)
     {

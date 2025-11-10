@@ -34,7 +34,7 @@ public class KHS_Script_UIToBall : MonoBehaviour
     {
         if (ballCon != null)
         {
-            ballCount = ballCon.BallCountResponse();
+            ballCount = ballCon.GetBallCount();
             BallCountUI.text = "" + ballCount;
         }
     }

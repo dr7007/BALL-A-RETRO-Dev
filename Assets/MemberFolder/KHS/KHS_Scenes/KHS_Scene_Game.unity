@@ -1571,6 +1571,10 @@ PrefabInstance:
       value: 3
       objectReference: {fileID: 0}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
+      propertyPath: RoundImgGo
+      value: 
+      objectReference: {fileID: 1013432110}
+    - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: gameOverUI
       value: 
       objectReference: {fileID: 1329371494}
@@ -4302,8 +4306,29 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 7483848681945761159, guid: 59d46c0385596774c93779a0173aa1b5, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1013432115}
   m_SourcePrefab: {fileID: 100100000, guid: 59d46c0385596774c93779a0173aa1b5, type: 3}
+--- !u!1 &1013432110 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7483848681945761159, guid: 59d46c0385596774c93779a0173aa1b5, type: 3}
+  m_PrefabInstance: {fileID: 1013432109}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1013432115
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013432110}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 05e24067daf14af49b1ba1fe520ec611, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  roundImgGos: []
 --- !u!1 &1043102576
 GameObject:
   m_ObjectHideFlags: 0

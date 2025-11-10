@@ -143,13 +143,8 @@ public class YJ_Script_BallController : MonoBehaviour
 
     private void KHS_GameOverBall()
     {
-        --BallCount;
-        if (BallCount <= 0)
-        {
-            GameOverEvt.Invoke();
-        }
-        else
-            KHS_BallReset();
+        // 점수 매니저에게 판단 위임
+        KHS_Script_ScoreManager.Instance?.HandleBallOut(this);
     }
     private void KHS_BallReset()
     {
@@ -160,10 +155,9 @@ public class YJ_Script_BallController : MonoBehaviour
         rigidBody.constraints = defaultConstraints;
     }
 
-    public int BallCountResponse()
-    {
-        return BallCount;
-    }
+    public int GetBallCount() => BallCount;
+    public void SetBallCount(int count) => BallCount = count;
+
     public int BallCountInitResponse()
     {
         BallCount = initBallCount;

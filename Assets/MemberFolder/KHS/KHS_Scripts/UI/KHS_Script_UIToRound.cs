@@ -7,6 +7,8 @@ public class KHS_Script_UIToRound : MonoBehaviour
     [SerializeField]
     private TextMeshProUGUI tmp;
 
+
+
     private void OnEnable()
     {
         KHS_Script_ScoreManager.Next_Round_Init += UpdateUIRound;

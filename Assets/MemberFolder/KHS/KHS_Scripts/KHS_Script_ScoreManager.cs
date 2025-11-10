@@ -146,7 +146,9 @@
 //    }
 //}
 using System;
+using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class KHS_Script_ScoreManager : MonoBehaviour
 {
@@ -161,6 +163,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // 이펙트용 이벤트
     public static event Action<int> OnScoreGained;                 // 점수 델타만
     public static event Action<int, Vector3> OnScoreGainedAt;      // 점수 + 월드위치
+
+    public static KHS_Script_ScoreManager Instance { get; private set; }
 
     [Header("스코어 정보")]
     [Tooltip("현재 스코어 정보를 표시합니다")]
@@ -198,6 +202,12 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [Tooltip("카메라쉐이크기능쓸지말지")]
     [SerializeField] private bool shakeOnScore = true;
 
+    private void Awake()
+    {
+        if (Instance == null) Instance = this;
+        else Destroy(gameObject);
+    }
+
     void Start()
     {
         for(int i = 0; i<goalRound; i++)
@@ -220,7 +230,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_PortalController.portalEvt += ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision += FliperBallCollision;
-        KHS_Script_ScoreManager.Round_Clear += RoundClearAfter;
+        Round_Clear += RoundClearAfter;
     }
 
     private void OnDisable()
@@ -234,7 +244,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_PortalController.portalEvt -= ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision -= FliperBallCollision;
-        KHS_Script_ScoreManager.Round_Clear -= RoundClearAfter;
+        Round_Clear -= RoundClearAfter;
     }
 
     private void GameResultJudge()
@@ -424,4 +434,36 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         return currentRound;
     }
+    public void RoundImagePhase()
+    {
+        
+    }
+    public void HandleBallOut(YJ_Script_BallController ball)
+    {
+        Debug.Log("BallOut 감지됨 - 점수 및 라운드 상태 판단 중");
+
+        // 목표 점수 달성 → 즉시 라운드 클리어
+        if (curScore >= targetScore)
+        {
+            Debug.Log("목표점수 달성! Round_Clear 즉시 호출");
+            Round_Clear?.Invoke();
+            return;
+        }
+
+        // 목표 미달 → 볼 카운트 차감
+        int remain = ball.GetBallCount() - 1;
+        if (remain > 0)
+        {
+            Debug.Log($"목표점수 미달. 잔여 볼 {remain}개. 다음 볼로 진행");
+            ball.BallCountInitResponse(); // 내부 BallCount 갱신
+            ball.SendMessage("KHS_BallReset", SendMessageOptions.DontRequireReceiver);
+        }
+        else
+        {
+            Debug.Log("볼 소진! Game Over 처리");
+            OnGameOver?.Invoke();
+            OnGameOverWithScore?.Invoke(curScore);
+        }
+    }
 }
+
