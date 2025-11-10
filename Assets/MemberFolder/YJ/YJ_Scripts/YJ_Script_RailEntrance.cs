@@ -1,8 +1,7 @@
-// RailEntrance.cs (레일 입구의 'Is Trigger'가 켜진 콜라이더에 부착)
-
+// RailEntrance.cs (레일 입구 트리거)
 using System;
 using UnityEngine;
-using UnityEngine.Playables; // Timeline을 제어하기 위해 필요
+using UnityEngine.Playables;
 
 public class YJ_Script_RailEntrance : MonoBehaviour
 {
@@ -17,50 +16,44 @@ public class YJ_Script_RailEntrance : MonoBehaviour
     [Tooltip("한 번 작동하면 비활성화")]
     public bool oneTimeUse = true;
 
-    [Header("카메라 설정")]
-    [Tooltip("2층 레이어 관리를 위한 카메라")]
-    public Camera mainCam;
+    [Header("카메라 전환")]
+    public CJS_Script_CameraSwitcher camSwitch; // ★ 새로 추가
 
     private YJ_Script_BallController capturedBall = null; // 어떤 공을 태웠는지 기억
 
     private void OnTriggerEnter(Collider other)
     {
-        if (other.CompareTag("Ball"))
-        {
-            YJ_Script_BallController ball = other.GetComponent<YJ_Script_BallController>();
-            if (ball != null)
-            {
-                // 1. 공을 캡처해서 'RailMover'의 자식으로 만듦
-                capturedBall = ball; // 공을 기억
-                ball.CaptureAndParent(railMover);
+        if (!other.CompareTag("Ball")) return;
 
-                mainCam.cullingMask |= (1 << LayerMask.NameToLayer("2F"));   // mainCam의 cullingMask에 2F 레이어 추가
-                // 2. Timeline 애니메이션 재생
-                railTimeline.Play();
+        var ball = other.GetComponent<YJ_Script_BallController>();
+        if (!ball) return;
 
-                // 3. (선택) Timeline 종료 시 호출할 함수를 연결
-                // (Timeline이 끝나면 OnRailRideEnd 함수를 호출하도록 예약)
-                railTimeline.stopped += OnRailRideEnd;
+        // 1) 공을 레일에 태움
+        capturedBall = ball;
+        ball.CaptureAndParent(railMover);
 
-                if (oneTimeUse)
-                {
-                    GetComponent<Collider>().enabled = false; // 트리거 비활성화
-                }
-            }
-        }
+        // 2) 타임라인 재생 & 종료 콜백
+        railTimeline.stopped += OnRailRideEnd;
+        railTimeline.Play();
+
+        if (oneTimeUse)
+            GetComponent<Collider>().enabled = false;
     }
 
-    // 4. Timeline 재생이 'stopped' 되었을 때 호출되는 함수
+    // 3) 타임라인 종료 시
     private void OnRailRideEnd(PlayableDirector director)
     {
+        railTimeline.stopped -= OnRailRideEnd;
+
         if (capturedBall != null)
         {
             // 5. 공을 '기차'에서 내려서 낙하하게 함
             capturedBall.ReleaseForFalling(Vector3.zero, false);
-            capturedBall = null;
 
-            // 6. 이벤트 리스너 해제 (중요)
-            railTimeline.stopped -= OnRailRideEnd;
+            capturedBall = null;
         }
+
+        // 레일 주행 끝 = 2층 미로 시작 → 탑뷰 카메라로 스위치
+        if (camSwitch) camSwitch.ToMaze();
     }
 }
