@@ -264,7 +264,6 @@ public class YJ_Script_BallController : MonoBehaviour
         rigidBody.constraints = defaultConstraints & ~RigidbodyConstraints.FreezePositionY;
 
         rigidBody.linearVelocity = initialVelocity;
-        rigidBody.angularVelocity = initialVelocity;
 
         Debug.Log($"3D 낙하 모드 해제됨 (초기 속도: {initialVelocity})");
     }
