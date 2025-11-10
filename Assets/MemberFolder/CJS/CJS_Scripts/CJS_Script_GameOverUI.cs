@@ -1,59 +1,66 @@
 using System;
 using System.Text;
-using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
+using TMPro;
 
+/// 게임오버 패널 컨트롤 + 점수 제출 + 리더보드 + 선택지 요약 갱신
 public class CJS_Script_GameOverUI : MonoBehaviour
 {
-    [Header("Refs")]
-    public CJS_Script_PinballRankingService service;
-    public TMP_Text textFinalScore;
-    public TMP_Text textResult;
+    [Header("Services")]
+    [SerializeField] private CJS_Script_PinballRankingService service;
+
+    [Header("Score Texts")]
+    [SerializeField] private TMP_Text textFinalScore;
+    [SerializeField] private TMP_Text textResult;
 
     [Header("Leaderboard (choose one)")]
-    public TMP_Text textLeaderboard;
-    public CJS_Script_LeaderboardList leaderboardList;
+    [SerializeField] private TMP_Text textLeaderboard;                 // 단순 텍스트 출력
+    [SerializeField] private CJS_Script_LeaderboardList leaderboardList; // 아이템 프리팹 방식
 
     [Header("Panels")]
-    public GameObject panelGameEnd;
-    public GameObject panelRank;
+    [SerializeField] private GameObject panelGameEnd;   // 게임오버 요약 패널
+    [SerializeField] private GameObject panelRank;      // 랭크 패널
 
-    [Header("Choice Summary")]
-    public CJS_Script_ChoiceSummaryUI choiceSummaryUI;
+    [Header("Choice Summary (optional)")]
+    [SerializeField] private CJS_Script_ChoiceSummaryUI summaryUI; // 게임오버시 선택지 요약
 
-    [Header("Options")]
-    public string gameMode = "Classic";
-    public int level = 1;
-    public bool autoSubmitOnShow = true;
+    [Header("Submit Options")]
+    [SerializeField] private string gameMode = "Classic";
+    [SerializeField] private int level = 1;
+    [SerializeField] private bool autoSubmitOnShow = true;
 
+    // ─────────────────────────────────────────────────────────────────────────────
     private int _finalScore;
     private SubmitResp _lastSubmit;
 
     void Awake()
     {
-        if (service == null)
+        if (!service)
             service = FindObjectOfType<CJS_Script_PinballRankingService>(includeInactive: true);
 
-        if (panelGameEnd == null) panelGameEnd = gameObject;
+        if (!panelGameEnd) panelGameEnd = gameObject; // 자기 자신을 사용할 수도 있음
 
-        if (service == null)
+        if (!service)
             Debug.LogError("[GameOverUI] RankingService not found in scene.");
-        else
-            Debug.Log("[GameOverUI] Service wired.");
     }
 
+    // 외부에서 게임오버 시 호출
     public void Show(int finalScore)
     {
         _finalScore = finalScore;
 
-        if (panelGameEnd) panelGameEnd.SetActive(true);
+        // 패널 전환
         if (panelRank) panelRank.SetActive(false);
+        if (panelGameEnd) panelGameEnd.SetActive(true);
 
+        // 점수 출력
         if (textFinalScore) textFinalScore.text = _finalScore.ToString("N0");
         if (textResult) textResult.text = "제출 대기중…";
 
-        //  최종 선택지 요약 생성
-        choiceSummaryUI?.ShowSummary();
+        // 선택지 요약 재빌드 (패널 열릴 때 항상 최신)
+        summaryUI?.Rebuild();
+        ForceLayout();
 
         Debug.Log($"[GameOverUI.Show] finalScore={_finalScore} autoSubmit={autoSubmitOnShow}");
         if (autoSubmitOnShow) OnClickSubmit();
@@ -65,9 +72,10 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         if (textFinalScore) textFinalScore.text = score.ToString("N0");
     }
 
+    // 점수 제출 버튼
     public void OnClickSubmit()
     {
-        if (service == null) { Debug.LogError("[GameOverUI] service is null"); return; }
+        if (!service) { Debug.LogError("[GameOverUI] service is null"); return; }
 
         if (textResult) textResult.text = "서버에 전송중…";
         Debug.Log("[GameOverUI] OnClickSubmit()");
@@ -80,10 +88,15 @@ public class CJS_Script_GameOverUI : MonoBehaviour
                 if (textResult)
                     textResult.text = $"내 점수: {resp.your_score:N0}\n내 랭킹: #{resp.rank}";
 
-                if (leaderboardList != null)
+                // Top10 초기 채우기 (랭크 패널 열릴 때도 재사용)
+                if (leaderboardList)
+                {
                     leaderboardList.Populate(resp.top10 ?? Array.Empty<ScoreRow>());
-                else if (textLeaderboard != null)
+                }
+                else if (textLeaderboard)
+                {
                     textLeaderboard.text = BuildTop10Text(resp.top10);
+                }
             },
             onFail: err =>
             {
@@ -93,6 +106,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         );
     }
 
+    // 테스트용 랜덤 제출
     public void OnClickSubmitRandomForTest()
     {
         int rnd = UnityEngine.Random.Range(1000, 50000);
@@ -101,17 +115,19 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         OnClickSubmit();
     }
 
+    // 랭크 패널 열기
     public void OnClickOpenRank()
     {
         Debug.Log("[GameOverUI] OnClickOpenRank");
 
+        // 기존 응답이 있으면 재사용, 없으면 서버 조회
         if (leaderboardList)
         {
             if (_lastSubmit?.top10 != null)
             {
                 leaderboardList.Populate(_lastSubmit.top10);
             }
-            else if (service != null)
+            else if (service)
             {
                 service.FetchLeaderboard(gameMode, level,
                     lb => leaderboardList.Populate(lb.top10 ?? Array.Empty<ScoreRow>()),
@@ -124,7 +140,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
             {
                 textLeaderboard.text = BuildTop10Text(_lastSubmit.top10);
             }
-            else if (service != null)
+            else if (service)
             {
                 service.FetchLeaderboard(gameMode, level,
                     lb => { textLeaderboard.text = BuildTop10Text(lb.top10); },
@@ -134,17 +150,22 @@ public class CJS_Script_GameOverUI : MonoBehaviour
 
         if (panelGameEnd) panelGameEnd.SetActive(false);
         if (panelRank) panelRank.SetActive(true);
+        ForceLayout();
     }
 
     public void OnClickCloseRank()
     {
         if (panelRank) panelRank.SetActive(false);
         if (panelGameEnd) panelGameEnd.SetActive(true);
+
+        // 요약 패널로 돌아오면 한 번 더 레이아웃 갱신(애니메이션 사용 시 안전)
+        summaryUI?.Rebuild();
+        ForceLayout();
     }
 
     public void OnClickRefreshLeaderboard()
     {
-        if (service == null) return;
+        if (!service) return;
 
         service.FetchLeaderboard(gameMode, level,
             lb =>
@@ -155,7 +176,17 @@ public class CJS_Script_GameOverUI : MonoBehaviour
             err => Debug.LogError("[Rank] refresh fail: " + err));
     }
 
-    string BuildTop10Text(ScoreRow[] rows)
+    // ─────────────────────────────────────────────────────────────────────────────
+    // 내부 유틸
+
+    private void ForceLayout()
+    {
+        // 패널 전환 직후 UI가 비어 보이는 현상 방지용
+        Canvas.ForceUpdateCanvases();
+        Canvas.ForceUpdateCanvases();
+    }
+
+    private string BuildTop10Text(ScoreRow[] rows)
     {
         var arr = rows ?? Array.Empty<ScoreRow>();
         var sb = new StringBuilder();
@@ -164,7 +195,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         return sb.ToString();
     }
 
-    string Safe(string s, int maxLen)
+    private string Safe(string s, int maxLen)
     {
         if (string.IsNullOrEmpty(s)) return "Player";
         s = s.Trim();
