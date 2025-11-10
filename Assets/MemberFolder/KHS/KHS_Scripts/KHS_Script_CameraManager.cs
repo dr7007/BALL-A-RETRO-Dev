@@ -6,6 +6,7 @@ using UnityEngine;
 public class KHS_Script_CameraManager : MonoBehaviour
 {
     public static event Action<Camera> CameraChangeEvt;
+    public static event Action<bool> MonitorEvt;
 
     public GameObject[] cameraGos;
 
@@ -65,6 +66,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
     }
     public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
     {
+        MonitorEvt?.Invoke(true);
         // 목표 위치 (cameraGos[2] 원래 위치) 저장
         cameraTargetPos = cameraGos[2].transform.position;
         cameraTargetRot = cameraGos[2].transform.rotation;
@@ -109,8 +111,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
         // cameraGos[0]은 비활성화
         cameraGos[2].SetActive(false);
-        
-        
+        MonitorEvt?.Invoke(false);
     }
     public void MonitorOffAfterDialogue(string _str)
     {

@@ -905,10 +905,10 @@ MonoBehaviour:
   blockerHolderGo: {fileID: 765489748}
   plincoColliderGo: {fileID: 765489747}
   scoreManager: {fileID: 0}
-  secretBumpersHolder: {fileID: 0}
-  blackHole: {fileID: 0}
+  secretBumpersHolder: {fileID: 1409231096}
+  blackHole: {fileID: 1409231095}
   fliper: {fileID: 0}
-  batLedManager: {fileID: 0}
+  batLedManager: {fileID: 1409231097}
 --- !u!114 &210351155
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2295,11 +2295,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 8168462800736264211, guid: 4ec593fcfed037c45a0a47b0c6a3a31e, type: 3}
       propertyPath: gameSceneName
-      value: Main_Scene_Game
+      value: KHS_Scene_Game
       objectReference: {fileID: 0}
     - target: {fileID: 8168462800736264211, guid: 4ec593fcfed037c45a0a47b0c6a3a31e, type: 3}
       propertyPath: lobbySceneName
-      value: Main_Scene_Lobby
+      value: KHS_Scene_Lobby
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -2695,7 +2695,7 @@ PrefabInstance:
     - target: {fileID: 1542119775664284777, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 2018382098367146203, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: m_Size.x
       value: 0.6250439
@@ -2703,7 +2703,7 @@ PrefabInstance:
     - target: {fileID: 2105806855838236087, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 2168187545969464859, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0.7799995
@@ -2783,7 +2783,7 @@ PrefabInstance:
     - target: {fileID: 3567466740502761307, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 4135660165582028876, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: m_LocalPosition.x
       value: -0.9700012
@@ -2891,11 +2891,11 @@ PrefabInstance:
     - target: {fileID: 7276168018071796104, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 7375052462540259902, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 7487186963980428651, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -2911,7 +2911,7 @@ PrefabInstance:
     - target: {fileID: 7637936118668786562, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 7754779566761615709, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: exitPortal
       value: 
@@ -2923,7 +2923,7 @@ PrefabInstance:
     - target: {fileID: 8657608136384626083, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 8933402465719865541, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: m_LocalPosition.x
       value: 2.0999994
@@ -2931,11 +2931,11 @@ PrefabInstance:
     - target: {fileID: 8973521632973336990, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 9106015654493633441, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     - target: {fileID: 9138071632080275502, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: isSpecial
       value: 0
@@ -2943,7 +2943,7 @@ PrefabInstance:
     - target: {fileID: 9211595589411357538, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       propertyPath: portalCon
       value: 
-      objectReference: {fileID: 0}
+      objectReference: {fileID: 1409231098}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -2959,6 +2959,17 @@ GameObject:
   m_CorrespondingSourceObject: {fileID: 6824330185582518755, guid: 60530decade40794dab00e0ed0f67939, type: 3}
   m_PrefabInstance: {fileID: 765489746}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &765489749 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7754779566761615709, guid: 60530decade40794dab00e0ed0f67939, type: 3}
+  m_PrefabInstance: {fileID: 765489746}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63469011cb2e2447b281709fabb33dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &767732745
 GameObject:
   m_ObjectHideFlags: 0
@@ -5650,6 +5661,10 @@ PrefabInstance:
       propertyPath: mainCam
       value: 
       objectReference: {fileID: 321755157}
+    - target: {fileID: 2190302751165597484, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+      propertyPath: exitPortal
+      value: 
+      objectReference: {fileID: 765489749}
     - target: {fileID: 3672657625201326644, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: fliperCooldown
       value: 10
@@ -5723,6 +5738,44 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+--- !u!114 &1409231095 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8494948842638576, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 1409231094}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b1b9dc35c8db524428140cf5d5e69dd6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!1 &1409231096 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5406526402416689322, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 1409231094}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1409231097 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7928765784720183562, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 1409231094}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 53be805616f76ff4db662a5354af610d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!114 &1409231098 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8398544685023298014, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 1409231094}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c63469011cb2e2447b281709fabb33dc, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1481253793
 GameObject:
   m_ObjectHideFlags: 0

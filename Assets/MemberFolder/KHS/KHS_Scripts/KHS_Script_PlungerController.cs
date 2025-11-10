@@ -1,30 +1,46 @@
 using UnityEngine;
-using System; // [ADD] ÀÌº¥Æ® ¼±¾ğ¿ë
+using System;
+using PSH; // [ADD] ì´ë²¤íŠ¸ ì„ ì–¸ìš©
 
 public class KHS_Script_PlungerController : MonoBehaviour
 {
-    // [ADD] °ø ¹ß»ç ÀÌº¥Æ®(»ç¿îµå ¿¬µ¿)
+    // [ADD] ê³µ ë°œì‚¬ ì´ë²¤íŠ¸(ì‚¬ìš´ë“œ ì—°ë™)
     public static event Action OnBallLaunched;
 
-    [Header("¹ß»ç ¼³Á¤")]
-    [Tooltip("ÃÖ¼Ò ¹ß»ç Èû")]
+    [Header("ë°œì‚¬ ì„¤ì •")]
+    [Tooltip("ìµœì†Œ ë°œì‚¬ í˜")]
     [SerializeField] private float minForce = 1f;
 
-    [Tooltip("ÃÖ´ë ¹ß»ç Èû")]
+    [Tooltip("ìµœëŒ€ ë°œì‚¬ í˜")]
     [SerializeField] private float maxForce = 50f;
 
-    [Tooltip("ÃÖ´ë Èû±îÁö µµ´ŞÇÏ´Â ½Ã°£ (ÃÊ)")]
+    [Tooltip("ìµœëŒ€ í˜ê¹Œì§€ ë„ë‹¬í•˜ëŠ” ì‹œê°„ (ì´ˆ)")]
     [SerializeField] private float chargeTime = 2f;
 
-    // ³»ºÎ º¯¼ö
+    // ë‚´ë¶€ ë³€ìˆ˜
     private float currentForce;
     [SerializeField]
     private Rigidbody ballRigidbody;
     [SerializeField]
     private bool isBallReady = false;
 
+    [SerializeField]
+    private bool isLock = false;
+
+    private void OnEnable()
+    {
+        KHS_Script_CameraManager.MonitorEvt += PlungerStopFunc;
+        PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_CameraManager.MonitorEvt -= PlungerStopFunc;
+        PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
+    }
+
     private void Start()
     {
+        isLock = true;
         currentForce = minForce;
     }
 
@@ -34,21 +50,32 @@ public class KHS_Script_PlungerController : MonoBehaviour
         {
             return;
         }
-
-        if (Input.GetKey(KeyCode.Space))
+        if (!isLock)
         {
-            if (currentForce < maxForce)
+            if (Input.GetKey(KeyCode.Space))
             {
-                currentForce += (maxForce - minForce) / chargeTime * Time.deltaTime;
+                if (currentForce < maxForce)
+                {
+                    currentForce += (maxForce - minForce) / chargeTime * Time.deltaTime;
+                }
             }
-        }
 
-        if (Input.GetKeyUp(KeyCode.Space))
-        {
-            Launch();
+            if (Input.GetKeyUp(KeyCode.Space))
+            {
+                Launch();
+            }
         }
     }
 
+    private void PlungerStopFunc(bool _start)
+    {
+        isLock = _start;
+    }
+
+    private void NoIntroExceptionFunc()
+    {
+        isLock = false;
+    }
     private void Launch()
     {
         if (ballRigidbody != null)
@@ -57,20 +84,20 @@ public class KHS_Script_PlungerController : MonoBehaviour
         }
         currentForce = minForce;
 
-        // [ADD] ¹ß»ç Á÷ÈÄ ºê·ÎµåÄ³½ºÆ®(»ç¿îµå ¿ë)
+        // [ADD] ë°œì‚¬ ì§í›„ ë¸Œë¡œë“œìºìŠ¤íŠ¸(ì‚¬ìš´ë“œ ìš©)
         OnBallLaunched?.Invoke();
     }
 
-    // °øÀÌ ¹ß»ç ÁØºñ À§Ä¡¿¡ µé¾î¿ÔÀ» ¶§ È£Ãâ
+    // ê³µì´ ë°œì‚¬ ì¤€ë¹„ ìœ„ì¹˜ì— ë“¤ì–´ì™”ì„ ë•Œ í˜¸ì¶œ
     private void OnTriggerEnter(Collider other)
     {
-        // "Ball" ÅÂ±×¸¦ °¡Áø ¿ÀºêÁ§Æ®°¡ µé¾î¿Ô´ÂÁö È®ÀÎ
+        // "Ball" íƒœê·¸ë¥¼ ê°€ì§„ ì˜¤ë¸Œì íŠ¸ê°€ ë“¤ì–´ì™”ëŠ”ì§€ í™•ì¸
         if (other.CompareTag("Ball"))
         {
             ballRigidbody = other.GetComponent<Rigidbody>();
             if (ballRigidbody != null)
             {
-                // °øÀÇ Á÷¼± ¼Óµµ¿Í È¸Àü ¼Óµµ¸¦ Áï½Ã 0À¸·Î ¸¸µé¾î Æ¢´Â Çö»óÀ» ¹æÁö
+                // ê³µì˜ ì§ì„  ì†ë„ì™€ íšŒì „ ì†ë„ë¥¼ ì¦‰ì‹œ 0ìœ¼ë¡œ ë§Œë“¤ì–´ íŠ€ëŠ” í˜„ìƒì„ ë°©ì§€
                 ballRigidbody.linearVelocity = Vector3.zero;
                 ballRigidbody.angularVelocity = Vector3.zero;
 
@@ -79,7 +106,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
         }
     }
 
-    // °øÀÌ ¹ß»çµÇ¾î À§Ä¡¸¦ ¹ş¾î³µÀ» ¶§ È£Ãâ
+    // ê³µì´ ë°œì‚¬ë˜ì–´ ìœ„ì¹˜ë¥¼ ë²—ì–´ë‚¬ì„ ë•Œ í˜¸ì¶œ
     private void OnTriggerExit(Collider other)
     {
         if (other.CompareTag("Ball"))

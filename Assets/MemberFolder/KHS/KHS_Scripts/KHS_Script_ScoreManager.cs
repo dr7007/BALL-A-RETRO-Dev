@@ -455,7 +455,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (remain > 0)
         {
             Debug.Log($"목표점수 미달. 잔여 볼 {remain}개. 다음 볼로 진행");
-            ball.BallCountInitResponse(); // 내부 BallCount 갱신
+            ball.SetBallCount(remain); // 내부 BallCount 갱신
             ball.SendMessage("KHS_BallReset", SendMessageOptions.DontRequireReceiver);
         }
         else
