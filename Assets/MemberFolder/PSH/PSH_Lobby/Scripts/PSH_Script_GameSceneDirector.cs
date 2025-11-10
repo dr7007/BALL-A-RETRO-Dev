@@ -16,6 +16,15 @@ namespace PSH
         // 이 씬의 인트로가 이미 한 번 재생되었는지 확인하는 static 변수
         private static bool hasPlayedIntro = false;
 
+        /// <summary>
+        /// '인트로를 봤음' 플래그를 리셋합니다. 
+        /// 로비로 돌아갈 때 호출해야 합니다.
+        /// </summary>
+        public static void ResetIntroFlag()
+        {
+            hasPlayedIntro = false;
+            Debug.Log("GameSceneDirector: 인트로 플래그 리셋 완료.");
+        }
         private void Start()
         {
             // PSH_Script_DialogueUI의 싱글톤 인스턴스를 찾음

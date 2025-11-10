@@ -49,6 +49,7 @@ namespace PSH
         private IEnumerator AnimateEyeOpen()
         {
             float elapsedTime = 0f;
+            Time.timeScale = 0f;
             materialInstance.SetFloat(smoothnessPropertyName, 0f); // 0에서 시작
 
             while (elapsedTime < animationDuration)
@@ -57,7 +58,7 @@ namespace PSH
                 float smoothness = Mathf.Lerp(0f, 1f, elapsedTime / animationDuration);
                 materialInstance.SetFloat(smoothnessPropertyName, smoothness);
 
-                elapsedTime += Time.deltaTime;
+                elapsedTime += Time.unscaledDeltaTime;
                 yield return null; // 다음 프레임까지 대기
             }
 
@@ -66,6 +67,7 @@ namespace PSH
             Debug.Log("EyeOpen 애니메이션 완료.");
 
             // 애니메이션이 끝났음을 구독자들에게 방송
+            Time.timeScale = 1f;
             OnEyeOpenComplete?.Invoke();
         }
     }

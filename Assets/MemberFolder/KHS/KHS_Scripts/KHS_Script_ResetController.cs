@@ -1,3 +1,4 @@
+using PSH;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -67,7 +68,7 @@ public class KHS_Script_ResetController : MonoBehaviour
         Time.timeScale = 1f;
         OnReset.Invoke();
         Debug.LogError("Reset!");
-        SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
+        PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(gameSceneName, false);
     }
 
     public void GameGoToLobbyFunc()
@@ -75,6 +76,7 @@ public class KHS_Script_ResetController : MonoBehaviour
         Time.timeScale = 1f;
         OnReset.Invoke();
         Debug.LogError("Go to Lobby");
-        SceneManager.LoadScene(lobbySceneName, LoadSceneMode.Single);
+        PSH_Script_GameSceneDirector.ResetIntroFlag();
+        PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
     }
 }
