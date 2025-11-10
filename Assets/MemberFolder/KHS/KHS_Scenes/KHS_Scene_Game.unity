@@ -5525,6 +5525,7 @@ MonoBehaviour:
   leaderboardList: {fileID: 951398240}
   panelGameEnd: {fileID: 1329371493}
   panelRank: {fileID: 951398237}
+  choiceSummaryUI: {fileID: 0}
   gameMode: Classic
   level: 1
   autoSubmitOnShow: 1
@@ -5667,7 +5668,7 @@ PrefabInstance:
       objectReference: {fileID: 765489749}
     - target: {fileID: 3672657625201326644, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: fliperCooldown
-      value: 10
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3672657625201326644, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: lastFlipperActiveDuration
@@ -8330,6 +8331,7 @@ MonoBehaviour:
   leaderboardList: {fileID: 986676373}
   panelGameEnd: {fileID: 0}
   panelRank: {fileID: 0}
+  choiceSummaryUI: {fileID: 0}
   gameMode: Classic
   level: 1
   autoSubmitOnShow: 1
