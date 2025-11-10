@@ -12,6 +12,8 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     [SerializeField]
     private GameObject plincoColliderGo;
     private KHS_Script_PlincoFunction[] plincoFunctions;
+    [SerializeField]
+    private KHS_Script_UIToPlinco plincoUI;
 
     [SerializeField]
     private KHS_Script_ScoreManager scoreManager;
@@ -158,6 +160,7 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
         {
             plinco.AddScoreMulti(_multi);
         }
+            plincoUI.UpdatePlincoUI();
     }
 
     private void AddScoreMultiplier(float _multi)

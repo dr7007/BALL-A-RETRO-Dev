@@ -11,6 +11,10 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
     [Tooltip("RailMover에 붙어있는 Playable Director")]
     public PlayableDirector railTimeline; // 'RailMover' 연결
+    
+    [Header("카메라 설정")]
+    [Tooltip("2층 레이어 관리를 위한 카메라")]
+    public Camera mainCam;
 
     [Header("설정")]
     [Tooltip("한 번 작동하면 비활성화")]
@@ -27,6 +31,8 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
         var ball = other.GetComponent<YJ_Script_BallController>();
         if (!ball) return;
+
+        mainCam.cullingMask |= (1 << LayerMask.NameToLayer("2F"));   // mainCam의 cullingMask에 2F 레이어 추가
 
         // 1) 공을 레일에 태움
         capturedBall = ball;
@@ -47,6 +53,7 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
         if (capturedBall != null)
         {
+            if (camSwitch) camSwitch.ToMain();
             // 5. 공을 '기차'에서 내려서 낙하하게 함
             capturedBall.ReleaseForFalling(Vector3.zero, false);
 

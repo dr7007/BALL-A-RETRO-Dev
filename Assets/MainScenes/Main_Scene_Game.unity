@@ -3121,8 +3121,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   glitchDuration: 1.5
-  glitchTimeScale: 1
+  fireworkDuration: 2
   finalUIScript: {fileID: 1924571551}
+  fireworkObject: {fileID: 0}
   gameOverCutsceneId: Ending2
   gameClearCutsceneId: Ending1
 --- !u!1 &520721285 stripped
@@ -3503,6 +3504,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   blockerHolderGo: {fileID: 1482646002}
   plincoColliderGo: {fileID: 1482646000}
+  plincoUI: {fileID: 1186839299}
   scoreManager: {fileID: 0}
   secretBumpersHolder: {fileID: 2080342007}
   blackHole: {fileID: 5585604430949037962}
@@ -4521,6 +4523,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 499262042458432669, guid: 0b81678e7ebe18f48b5cbb3aeaba1a1a, type: 3}
       insertIndex: -1
       addedObject: {fileID: 520721289}
+    - targetCorrespondingSourceObject: {fileID: 7334356873897479653, guid: 0b81678e7ebe18f48b5cbb3aeaba1a1a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1186839299}
   m_SourcePrefab: {fileID: 100100000, guid: 0b81678e7ebe18f48b5cbb3aeaba1a1a, type: 3}
 --- !u!1 &825484611 stripped
 GameObject:
@@ -5366,6 +5371,26 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1129462521}
   m_CullTransparentMesh: 1
+--- !u!1 &1186839294 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 7334356873897479653, guid: 0b81678e7ebe18f48b5cbb3aeaba1a1a, type: 3}
+  m_PrefabInstance: {fileID: 825484610}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &1186839299
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1186839294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: c0ec41f4fc4db9548b7279b0236ad94d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  PlincoScoreUIs: []
+  PlincoFuncs: []
+  PlincoColliderHolder: {fileID: 1482646000}
 --- !u!1001 &1206847916
 PrefabInstance:
   m_ObjectHideFlags: 0
