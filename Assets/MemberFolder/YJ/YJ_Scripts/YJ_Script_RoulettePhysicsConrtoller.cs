@@ -13,15 +13,19 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
 
     private YJ_Script_BallController capturedBall;
     private bool isSlowingDown = false;
-
     private int lastKnownSlotNumber = -1;
-
     //public static event Action<int> OnRouletteResult; // 점수 계산기에 보낼 이벤트
-
     private KHS_Script_ScoreManager scoreManager;
+
+    private MeshRenderer plateRenderer;
+    [SerializeField]
+    private MeshRenderer numberRenderer;
+    private MeshCollider plateCollider;
 
     private void Start()
     {
+        plateRenderer = GetComponent<MeshRenderer>();
+        plateCollider = GetComponent<MeshCollider>();
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
     }
 
@@ -93,5 +97,23 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
         Debug.Log($"--- 룰렛 결과: {lastKnownSlotNumber} ---");
         //OnRouletteResult?.Invoke(lastKnownSlotNumber);
         scoreManager.MultiplyScore(lastKnownSlotNumber);
+
+        // 점수 계산 후 2초 대기
+        yield return new WaitForSeconds(2.0f);
+
+        Debug.Log("룰렛 판 숨기기!");
+        if (plateRenderer != null) plateRenderer.enabled = false;
+        if (numberRenderer!= null) numberRenderer.enabled = false;
+        if (plateCollider != null) plateCollider.enabled = false;
+
+        capturedBall = null; // 공 추적 중지
+        yield return new WaitForSeconds(5.0f);
+
+        Debug.Log("룰렛 판 다시 생성.");
+        if (plateRenderer != null) plateRenderer.enabled = true;
+        if (numberRenderer != null) numberRenderer.enabled = true;
+        if (plateCollider != null) plateCollider.enabled = true;
+
+        isSlowingDown = false;
     }
 }
