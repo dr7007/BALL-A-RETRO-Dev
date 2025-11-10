@@ -10457,6 +10457,8 @@ MonoBehaviour:
   textResult: {fileID: 320687132}
   textLeaderboard: {fileID: 0}
   leaderboardList: {fileID: 1718207547}
+  panelGameEnd: {fileID: 0}
+  panelRank: {fileID: 0}
   gameMode: Classic
   level: 1
   autoSubmitOnShow: 1
@@ -120880,6 +120882,18 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   content: {fileID: 570393067}
   itemPrefab: {fileID: 7436699160311743192, guid: 0115f4c58200efa4b921f3326480b4d1, type: 3}
+  showInlineRank: 0
+  useRankColors: 1
+  rank1Color: {r: 1, g: 0.25, b: 0.25, a: 1}
+  rank2Color: {r: 1, g: 0.9, b: 0.3, a: 1}
+  rank3Color: {r: 1, g: 0.4, b: 0.8, a: 1}
+  rank4Color: {r: 0.35, g: 1, b: 0.35, a: 1}
+  rank5Color: {r: 1, g: 0.72, b: 0.85, a: 1}
+  rank6Color: {r: 0.95, g: 0.75, b: 0, a: 1}
+  rank7Color: {r: 0, g: 0.75, b: 0.35, a: 1}
+  rank8to10Color: {r: 0.7, g: 0.7, b: 0.7, a: 1}
+  defaultNameColor: {r: 1, g: 1, b: 1, a: 1}
+  defaultScoreColor: {r: 1, g: 1, b: 1, a: 1}
 --- !u!114 &1718207548
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -178793,13 +178807,33 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 744539084383290112, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 1551910541458985965, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 3924914652082698042, guid: d42e13056d469e948a020ab9d770254b, type: 3}
       propertyPath: mainCam
       value: 
       objectReference: {fileID: 1526102487}
+    - target: {fileID: 4642569125734369572, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -1.5
+      objectReference: {fileID: 0}
     - target: {fileID: 5046380057712934622, guid: d42e13056d469e948a020ab9d770254b, type: 3}
       propertyPath: m_Name
       value: RouletteBody
+      objectReference: {fileID: 0}
+    - target: {fileID: 7889750394937735777, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7889750394937735777, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.015
       objectReference: {fileID: 0}
     - target: {fileID: 8167901991824434013, guid: d42e13056d469e948a020ab9d770254b, type: 3}
       propertyPath: m_LocalPosition.x
@@ -178841,6 +178875,14 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 8243148336679778726, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: numberRenderer
+      value: 
+      objectReference: {fileID: 7911352518727687227}
+    - target: {fileID: 8304550419839697048, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+      propertyPath: exitPortal
+      value: 
+      objectReference: {fileID: 3346592914206744932}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -184499,6 +184541,11 @@ MonoBehaviour:
   waitTime: 2
   activationCount: -1
   acceleration: 1
+--- !u!23 &7911352518727687227 stripped
+MeshRenderer:
+  m_CorrespondingSourceObject: {fileID: 7003673752320631723, guid: d42e13056d469e948a020ab9d770254b, type: 3}
+  m_PrefabInstance: {fileID: 6650411104588435897}
+  m_PrefabAsset: {fileID: 0}
 --- !u!4 &7911604958915706405
 Transform:
   m_ObjectHideFlags: 0
@@ -186554,6 +186601,8 @@ MonoBehaviour:
   flipperSpeed: 800
   impactForceMultiplier: 5
   fliper_Count: 10
+  fliperCooldown: 0.2
+  lastFlipperActiveDuration: 0.25
 --- !u!33 &8443237413196748225
 MeshFilter:
   m_ObjectHideFlags: 0
