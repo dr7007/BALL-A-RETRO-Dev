@@ -18,6 +18,7 @@ public class GlitchEffectController : MonoBehaviour
     {
         KHS_Script_ScoreManager.OnGameOver += StartGlitchEffect;
         PSH_Script_GameSceneDirector.NoIntroStartEvt += StopGlitchEffect;
+        KHS_Script_ResetController.OnReset += StopGlitchEffect;
     }
 
     // 스크립트가 비활성화될 때 이벤트 구독 해제 (메모리 누수 방지)
@@ -25,6 +26,7 @@ public class GlitchEffectController : MonoBehaviour
     {
         KHS_Script_ScoreManager.OnGameOver -= StartGlitchEffect;
         PSH_Script_GameSceneDirector.NoIntroStartEvt -= StopGlitchEffect;
+        KHS_Script_ResetController.OnReset -= StopGlitchEffect;
     }
 
     // 게임 오버 이벤트가 발생하면 이 함수가 호출됨

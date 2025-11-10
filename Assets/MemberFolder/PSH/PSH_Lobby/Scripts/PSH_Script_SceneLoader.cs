@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
@@ -147,7 +148,6 @@ namespace PSH
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
             Debug.Log($"'{scene.name}' 씬 로드가 완료되었습니다.");
-
             // 코루틴이 스스로를 정리하므로, OnSceneLoaded에서 UI를 제어하거나
             // currentLoadingCoroutine을 null로 설정하지 않습니다.
         }

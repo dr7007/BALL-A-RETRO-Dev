@@ -10,20 +10,18 @@ public class KHS_Script_GameOverUI : MonoBehaviour
     private GameObject gameClearUIObj;
 
     private Canvas gameUICanvas;
-
+    private bool isReset = false;
     private void Awake()
     {
         gameUICanvas = GetComponent<Canvas>();
     }
     private void Start()
     {
-        gameUICanvas.enabled = false;
-        gameOverUIObj.SetActive(false);
-        gameClearUIObj.SetActive(false);
+        GameReset();
     }
     private void OnEnable()
     {
-        PSH_Script_GameSceneDirector.NoIntroStartEvt += GameReset;
+        PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroReset;
         KHS_Script_ScoreManager.OnGameOver += GameOver;
         KHS_Script_ScoreManager.OnGameClear += GameClear;
         PSH_Script_DialogueUI.DialogueEvt += DialoguePreProcessing;
@@ -32,7 +30,7 @@ public class KHS_Script_GameOverUI : MonoBehaviour
 
     private void OnDisable()
     {
-        PSH_Script_GameSceneDirector.NoIntroStartEvt -= GameReset;
+        PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroReset;
         KHS_Script_ScoreManager.OnGameOver -= GameOver;
         KHS_Script_ScoreManager.OnGameClear -= GameClear;
         PSH_Script_DialogueUI.DialogueEvt -= DialoguePreProcessing;
@@ -46,9 +44,27 @@ public class KHS_Script_GameOverUI : MonoBehaviour
     {
         gameClearUIObj.SetActive(true);
     }
+    private void NoIntroReset()
+    {
+        Debug.Log("NoIntroReset 이벤트로 인해 동작");
+        isReset = true;
+        GameReset();
+    }
+
     private void GameReset()
     {
-        gameUICanvas.enabled = true;
+        if (!isReset)
+        {
+            gameUICanvas.enabled = false;
+            gameOverUIObj.SetActive(false);
+            gameClearUIObj.SetActive(false);
+        }
+        else
+        {
+            gameUICanvas.enabled = true;
+            gameOverUIObj.SetActive(false);
+            gameClearUIObj.SetActive(false);
+        }
     }
 
     private void DialoguePreProcessing(string _str)
