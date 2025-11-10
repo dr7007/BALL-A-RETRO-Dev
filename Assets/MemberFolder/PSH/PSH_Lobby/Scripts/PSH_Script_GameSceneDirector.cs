@@ -1,59 +1,72 @@
-using Unity.VisualScripting;
+using System;
 using UnityEngine;
 
 namespace PSH
 {
     /// <summary>
-    /// °ÔÀÓ ¾ÀÀÇ ½ÃÀÛ ½ÃÄö½º¸¦ ÁöÈÖÇÕ´Ï´Ù. (¿¹: ÀÎÆ®·Î ¾Ö´Ï¸ŞÀÌ¼Ç -> ´ë»ç ½ÃÀÛ)
+    /// ê²Œì„ ì”¬ì˜ ì‹œì‘ ì‹œí€€ìŠ¤ë¥¼ ì§€íœ˜í•©ë‹ˆë‹¤. (ì˜ˆ: ì¸íŠ¸ë¡œ ì• ë‹ˆë©”ì´ì…˜ -> ëŒ€ì‚¬ ì‹œì‘)
     /// </summary>
     public class PSH_Script_GameSceneDirector : MonoBehaviour
     {
-        [SerializeField] private PSH_Script_EyeOpenEffect eyeOpenEffect; // ÀÎ½ºÆåÅÍ¿¡¼­ ÇÒ´ç
+        public static event Action<PSH_Script_DialogueUI> OpeningEyeEvt;
+        public static event Action NoIntroStartEvt;
 
-        // ÀÌ ¾ÀÀÇ ÀÎÆ®·Î°¡ ÀÌ¹Ì ÇÑ ¹ø Àç»ıµÇ¾ú´ÂÁö È®ÀÎÇÏ´Â static º¯¼ö
+        [SerializeField] private PSH_Script_EyeOpenEffect eyeOpenEffect; // ì¸ìŠ¤í™í„°ì—ì„œ í• ë‹¹
+
+        // ì´ ì”¬ì˜ ì¸íŠ¸ë¡œê°€ ì´ë¯¸ í•œ ë²ˆ ì¬ìƒë˜ì—ˆëŠ”ì§€ í™•ì¸í•˜ëŠ” static ë³€ìˆ˜
         private static bool hasPlayedIntro = false;
 
+        /// <summary>
+        /// 'ì¸íŠ¸ë¡œë¥¼ ë´¤ìŒ' í”Œë˜ê·¸ë¥¼ ë¦¬ì…‹í•©ë‹ˆë‹¤. 
+        /// ë¡œë¹„ë¡œ ëŒì•„ê°ˆ ë•Œ í˜¸ì¶œí•´ì•¼ í•©ë‹ˆë‹¤.
+        /// </summary>
+        public static void ResetIntroFlag()
+        {
+            hasPlayedIntro = false;
+            Debug.Log("GameSceneDirector: ì¸íŠ¸ë¡œ í”Œë˜ê·¸ ë¦¬ì…‹ ì™„ë£Œ.");
+        }
         private void Start()
         {
-            // PSH_Script_DialogueUIÀÇ ½Ì±ÛÅæ ÀÎ½ºÅÏ½º¸¦ Ã£À½
+            // PSH_Script_DialogueUIì˜ ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ë¥¼ ì°¾ìŒ
             PSH_Script_DialogueUI dialogueUI = PSH_Script_DialogueUI.Instance;
 
             if (dialogueUI == null)
             {
-                Debug.LogError("GameSceneDirector: PSH_Script_DialogueUIÀÇ Instance¸¦ Ã£À» ¼ö ¾ø½À´Ï´Ù.");
+                Debug.LogError("GameSceneDirector: PSH_Script_DialogueUIì˜ Instanceë¥¼ ì°¾ì„ ìˆ˜ ì—†ìŠµë‹ˆë‹¤.");
                 return;
             }
 
             if (eyeOpenEffect == null)
             {
-                Debug.LogError("GameSceneDirector: EyeOpenEffect°¡ ÀÎ½ºÆåÅÍ¿¡ ÇÒ´çµÇÁö ¾Ê¾Ò½À´Ï´Ù.");
+                Debug.LogError("GameSceneDirector: EyeOpenEffectê°€ ì¸ìŠ¤í™í„°ì— í• ë‹¹ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.");
                 return;
             }
 
 
             if (hasPlayedIntro)
             {
-                // --- ÀÌ¹Ì ÀÎÆ®·Î¸¦ º» °æ¿ì (¿¹: Á×¾î¼­ ¾ÀÀ» ´Ù½Ã ·Îµå) ---
+                // --- ì´ë¯¸ ì¸íŠ¸ë¡œë¥¼ ë³¸ ê²½ìš° (ì˜ˆ: ì£½ì–´ì„œ ì”¬ì„ ë‹¤ì‹œ ë¡œë“œ) ---
 
-                // ´«À» Áï½Ã ¶á »óÅÂ·Î ¼³Á¤
+                // ëˆˆì„ ì¦‰ì‹œ ëœ¬ ìƒíƒœë¡œ ì„¤ì •
                 eyeOpenEffect.SetOpenImmediate();
                 eyeOpenEffect.gameObject.SetActive(false);
                 dialogueUI.gameObject.SetActive(false);
+                NoIntroStartEvt.Invoke();
 
-                // (ÇÊ¿äÇÏ´Ù¸é) ÀÎÆ®·Î ´ë»ç ¾øÀÌ ¹Ù·Î °ÔÀÓ ½ÃÀÛ ·ÎÁ÷ È£Ãâ
+                // (í•„ìš”í•˜ë‹¤ë©´) ì¸íŠ¸ë¡œ ëŒ€ì‚¬ ì—†ì´ ë°”ë¡œ ê²Œì„ ì‹œì‘ ë¡œì§ í˜¸ì¶œ
             }
             else
             {
-                // --- ¾À¿¡ Ã³À½ ÁøÀÔÇÑ °æ¿ì ---
+                // --- ì”¬ì— ì²˜ìŒ ì§„ì…í•œ ê²½ìš° ---
                 hasPlayedIntro = true;
 
-                // 1. EyeOpenEffectÀÇ '¾Ö´Ï¸ŞÀÌ¼Ç ¿Ï·á' ¹æ¼ÛÀ» '±¸µ¶'ÇÕ´Ï´Ù.
-                //    "¾Ö´Ï¸ŞÀÌ¼ÇÀÌ ³¡³ª¸é, StartIntroDialogue ÇÔ¼ö¸¦ ½ÇÇàÇØÁà"
+                // 1. EyeOpenEffectì˜ 'ì• ë‹ˆë©”ì´ì…˜ ì™„ë£Œ' ë°©ì†¡ì„ 'êµ¬ë…'í•©ë‹ˆë‹¤.
+                //    "ì• ë‹ˆë©”ì´ì…˜ì´ ëë‚˜ë©´, StartIntroDialogue í•¨ìˆ˜ë¥¼ ì‹¤í–‰í•´ì¤˜"
                 eyeOpenEffect.OnEyeOpenComplete += () => {
-                    dialogueUI.Play("Intro");
+                    OpeningEyeEvt.Invoke(dialogueUI);
                 };
 
-                // 2. ¾Ö´Ï¸ŞÀÌ¼Ç ½ÃÀÛÀ» '¸í·É'ÇÕ´Ï´Ù.
+                // 2. ì• ë‹ˆë©”ì´ì…˜ ì‹œì‘ì„ 'ëª…ë ¹'í•©ë‹ˆë‹¤.
                 eyeOpenEffect.BeginAnimation();
             }
         }

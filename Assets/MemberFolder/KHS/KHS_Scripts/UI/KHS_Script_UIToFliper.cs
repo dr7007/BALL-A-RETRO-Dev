@@ -1,4 +1,3 @@
-using System.Runtime.CompilerServices;
 using TMPro;
 using UnityEngine;
 
@@ -31,6 +30,6 @@ public class KHS_Script_UIToFliper : MonoBehaviour
     
     private void FliperCountUIUpdate()
     {
-        fliperUI.text = $"Fliper Count : {fliperCon.fliper_Count}";
+        fliperUI.text = $"{fliperCon.fliper_Count}";
     }
 }

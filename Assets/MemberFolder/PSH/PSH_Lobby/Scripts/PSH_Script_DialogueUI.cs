@@ -7,6 +7,8 @@ using System.Collections.Generic;
 using UnityEngine.Video;
 using UnityEngine.UI;
 using UnityEngine.SceneManagement;
+using System.ComponentModel.Design;
+using System;
 
 
 namespace PSH
@@ -16,6 +18,7 @@ namespace PSH
 
     public class PSH_Script_DialogueUI : MonoBehaviour, IPointerClickHandler
     {
+        public static event Action<string> DialogueEvt;
         public static PSH_Script_DialogueUI Instance { get; private set; }
 
         [Header("UI")]
@@ -165,11 +168,18 @@ namespace PSH
             transform.GetChild(0).gameObject.SetActive(false);
             if (panelRoot) panelRoot.SetActive(false);
 
+            if(currentCutsceneId == "Intro")
+            {
+                DialogueEvt(currentCutsceneId);
+            }
+
+
             // 상태 초기화
             currentLines.Clear();
             idx = -1;
             currentCutsceneId = null;
 
+            
             // (필요시 이곳에 씬 이동 등 다음 로직 추가)
             // if (currentCutsceneId == "Intro")
             // {

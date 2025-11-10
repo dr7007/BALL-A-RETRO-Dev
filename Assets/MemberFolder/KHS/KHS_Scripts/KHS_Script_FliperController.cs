@@ -4,9 +4,6 @@ using UnityEngine;
 public class KHS_Script_FliperController : MonoBehaviour
 {
     public static event Action FliperCountChangeEvt;
-
-    // 유니코드 변경 후 테스트용
-
     public static event Action OnAnyFlipperPress;
     public static event Action OnAnyFlipperRelease;
 
@@ -18,6 +15,17 @@ public class KHS_Script_FliperController : MonoBehaviour
     public float impactForceMultiplier = 80f; // 충격량 계수
     public int fliper_Count = 10;
     private int fliper_Inital = -1;
+
+    [Header("플리퍼 유예 시간")]
+    [SerializeField] 
+    private float fliperCooldown = 0.2f; // 0.2초 유예 (원하는 값으로 조정 가능)
+    private float lastFliperUseTime = -999f; // 마지막으로 카운트 깎인 시간
+
+    // 마지막 한 번의 플리퍼 동작을 보장하기 위한 상태값
+    private bool lastFlipperActive = false;
+    private float lastFlipperEndTime = 0f;
+    [SerializeField] 
+    private float lastFlipperActiveDuration = 0.25f; // 마지막 한 번 유지시간 (0.25초 정도 추천)
 
     private void OnEnable()
     {
@@ -38,17 +46,32 @@ public class KHS_Script_FliperController : MonoBehaviour
     }
     private void OnFliper(Collision collision)
     {
-        if (Input.GetKey(flippers[0].inputKey) || Input.GetKey(flippers[1].inputKey))
+        // 유예 시간 내에는 무시
+        if (Time.time - lastFliperUseTime < fliperCooldown)
+            return;
+
+        // 키 입력 시만 카운트 감소
+        else if (Input.GetKey(flippers[0].inputKey) || Input.GetKey(flippers[1].inputKey))
         {
+            // 마지막 1회일 경우 → 감소 후에도 한 번은 강제 활성 유지
+            if (fliper_Count == 1)
+            {
+                lastFlipperActive = true;
+                lastFlipperEndTime = Time.time + lastFlipperActiveDuration;
+            }
+
             fliper_Count--;
-            FliperCountChangeEvt.Invoke();
+            lastFliperUseTime = Time.time; // 시간 갱신
+            FliperCountChangeEvt?.Invoke();
         }
+
         isCollision = true;
     }
     private void FliperCountReset()
     {
         fliper_Count = fliper_Inital;
         FliperCountChangeEvt.Invoke();
+        lastFlipperActive = false;
     }
 
     private void Start()
@@ -70,9 +93,8 @@ public class KHS_Script_FliperController : MonoBehaviour
         // 지정한 키 입력을 감지
         foreach (var flipper in flippers)
         {
-            if (flipper.rigidbody != null && fliper_Count > 0)
+            if (flipper.rigidbody != null && (fliper_Count > 0 || lastFlipperActive))
             {
-                // 눌림 순간 이벤트
                 if (Input.GetKeyDown(flipper.inputKey))
                     OnAnyFlipperPress?.Invoke();
 
@@ -82,12 +104,24 @@ public class KHS_Script_FliperController : MonoBehaviour
                     flipper.invisibleCollider.isTrigger = false;
                 }
 
-                //  해제 순간 이벤트
                 if (Input.GetKeyUp(flipper.inputKey))
                 {
                     flipper.isPressed = false;
                     flipper.invisibleCollider.isTrigger = true;
                     OnAnyFlipperRelease?.Invoke();
+                }
+
+                // 마지막 한 번 강제 활성 유지
+                if (lastFlipperActive && Time.time < lastFlipperEndTime)
+                {
+                    flipper.isPressed = true;
+                    flipper.invisibleCollider.isTrigger = false;
+                }
+                else if (lastFlipperActive && Time.time >= lastFlipperEndTime)
+                {
+                    lastFlipperActive = false;
+                    flipper.isPressed = false;
+                    flipper.invisibleCollider.isTrigger = true;
                 }
             }
             else

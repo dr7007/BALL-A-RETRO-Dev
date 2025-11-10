@@ -1,3 +1,4 @@
+using PSH;
 using System;
 using UnityEngine;
 using UnityEngine.EventSystems;
@@ -5,7 +6,7 @@ using UnityEngine.SceneManagement;
 
 public class KHS_Script_ResetController : MonoBehaviour
 {
-    
+    public static event Action OnGameStart;
     public static event Action OnReset;
     public string gameSceneName;
     public string lobbySceneName;
@@ -23,21 +24,18 @@ public class KHS_Script_ResetController : MonoBehaviour
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
-                Debug.LogError("Reset!");
-                SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
+                GameResetFunc();
             }
             else if (Input.anyKeyDown)
             {
-                Debug.LogError("Go to Lobby");
-                SceneManager.LoadScene(lobbySceneName, LoadSceneMode.Single);
+                GameGoToLobbyFunc();
             }
         }
         else
         {
             if (Input.GetKeyDown(KeyCode.R))
             {
-                Debug.LogError("Reset!");
-                SceneManager.LoadScene(gameSceneName, LoadSceneMode.Single);
+                GameResetFunc();
             }
         }
     }
@@ -56,11 +54,29 @@ public class KHS_Script_ResetController : MonoBehaviour
 
     private void GameOver()
     {
+        isClear = false;
 
     }
 
     private void GameClear()
     {
         isClear = true;
+    }
+
+    public void GameResetFunc()
+    {
+        Time.timeScale = 1f;
+        OnReset.Invoke();
+        Debug.LogError("Reset!");
+        PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(gameSceneName, false);
+    }
+
+    public void GameGoToLobbyFunc()
+    {
+        Time.timeScale = 1f;
+        OnReset.Invoke();
+        Debug.LogError("Go to Lobby");
+        PSH_Script_GameSceneDirector.ResetIntroFlag();
+        PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
     }
 }

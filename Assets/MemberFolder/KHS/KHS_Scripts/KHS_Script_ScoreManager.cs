@@ -241,29 +241,40 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         Debug.LogError("라운드종료 결과 판정중!!!");
         Debug.LogWarning($"최종 스코어 : {curScore}");
-        if (curScore >= targetScore) Round_Clear?.Invoke();
-        else OnGameOver?.Invoke();
 
         int finalScore = curScore;
 
-        if (curScore >= targetScore) return;
-        else OnGameOverWithScore?.Invoke(finalScore);
+        // ── 1) 목표 달성: 라운드 클리어만 알리고 종료
+        if (curScore >= targetScore)
+        {
+            Round_Clear?.Invoke();
+            return;
+        }
+
+        // ── 2) 게임오버: 이벤트 → 점수 표시 → (필요 시) 서버 제출
+        OnGameOver?.Invoke();
+        OnGameOverWithScore?.Invoke(finalScore);
 
         if (gameOverUI != null)
         {
+            // 점수 텍스트 즉시 갱신 후 패널 열기(Show 안에서 autoSubmitOnShow면 서버 전송)
+            gameOverUI.SetFinalScore(finalScore);
             gameOverUI.Show(finalScore);
         }
         else if (rankingService != null)
         {
+            // GameOverUI가 없을 때만 직접 제출(중복 제출 방지)
             rankingService.SubmitScore(finalScore, gameMode, level,
                 onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
                 onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
             );
         }
 
+        // ── 3) 정리
         curScore = 0;
         numOfBounce = 0;
     }
+
 
     private void FliperBallCollision(Collision _collision)
     {

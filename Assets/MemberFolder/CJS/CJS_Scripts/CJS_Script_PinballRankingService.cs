@@ -8,6 +8,8 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     [SerializeField] string baseUrl = "http://localhost/pinball";
     [SerializeField] string apiKey = "CHANGE_ME_STRONG_KEY";
 
+    private static CJS_Script_PinballRankingService instance;
+
     public string Nickname
     {
         get => PlayerPrefs.GetString("nickname", "");
@@ -16,8 +18,17 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
     void Awake()
     {
+        if (instance != null && instance != this)
+        {
+            Debug.LogWarning("[RankingService] Duplicate detected, destroying new instance.");
+            Destroy(gameObject);
+            return;
+        }
+
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+
         Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
-        DontDestroyOnLoad(gameObject); 
     }
 
     public void SetNicknameAndStart(string nick)
