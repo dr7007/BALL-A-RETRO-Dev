@@ -5,8 +5,8 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 {
     public enum ChanceDisplayMode
     {
-        NormalizedPool, // ★ 인스펙터와 동일: 전체 풀 기준 정규화(권장)
-        PerDraw         // 각 뽑기 시점의 남은 풀 기준(기존 표시 방식)
+        NormalizedPool,
+        PerDraw        
     }
 
     [Header("Prototype Data (DB 전 임시 목록)")]
@@ -37,7 +37,6 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             allChoices.Add(new CJS_ChoiceData { name = "전설 효과", description = "강력한 전설 효과", rarity = "Legendary", weight = 0.5f, isEnabled = true });
         }
 
-        // 선택지 효과용 매니저 주입(있으면)
         var rl = GetComponent<KHS_Script_RogueLikeManager>();
         foreach (var choice in allChoices)
         {
@@ -53,7 +52,6 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
         RebuildPreviewPercents(pool, map);
     }
 
-    // ─────────────────────────────────────────────────────────────────────────────
 
     public List<CJS_ChoiceData> Roll3(out Dictionary<CJS_ChoiceData, float> rollChances)
     {
@@ -67,7 +65,7 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
         rollChances = new Dictionary<CJS_ChoiceData, float>();
         var result = new List<CJS_ChoiceData>(capacity: 3);
 
-        // 작업용 리스트(제거용)
+        // 작업용 리스트
         var work = new List<CJS_ChoiceData>(pool);
 
         for (int i = 0; i < 3 && work.Count > 0; i++)
@@ -125,9 +123,6 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
         picked.roguelike?.MatchingFunc(picked.funcIdx);
         Debug.Log("[ChoiceRoller] Picked: " + picked.name);
     }
-
-    // ─────────────────────────────────────────────────────────────────────────────
-    // 내부 유틸
 
     private List<CJS_ChoiceData> BuildPoolFromAllChoices()
     {

@@ -15,8 +15,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     [SerializeField] private Transform content;                  // 카드가 생성될 Grid 부모
     [SerializeField] private CJS_Script_ChoiceCard cardPrefab;   // 카드 프리팹(루트에 Button)
 
-    [SerializeField] private GameObject gameUICanvasGo;           // 모니터 클릭 편의를 위한 작업 - KHS
-    [SerializeField] private KHS_Script_CameraManager camManager; // 위와 동일한 이유 
+    [SerializeField] private GameObject gameUICanvasGo;           // 모니터 클릭 편의 - KHS
+    [SerializeField] private KHS_Script_CameraManager camManager; // 동일
 
     [Header("Buttons")]
     [SerializeField] private Button btnReroll;
@@ -146,7 +146,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (busy) return;
         busy = true;
 
-        roller.PushPicked(picked);
+        roller.PushPicked(picked);                      // 효과 적용
+        CJS_Script_ChoiceState.I?.Add(picked);         // ★ 선택 스냅샷 기록(아이콘 포함)
 
         Hide();
         busy = false;
@@ -187,9 +188,10 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (btnSkip != null)
             btnSkip.interactable = isOpen;
     }
+
     private void gameUIFuncInsert()
     {
-        gameUICanvasGo.SetActive(true);
-        camManager.MonitorOff();
+        if (gameUICanvasGo) gameUICanvasGo.SetActive(true);
+        if (camManager) camManager.MonitorOff();
     }
 }
