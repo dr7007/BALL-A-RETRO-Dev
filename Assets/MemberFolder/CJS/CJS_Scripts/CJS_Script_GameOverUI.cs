@@ -11,12 +11,15 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     public TMP_Text textResult;
 
     [Header("Leaderboard (choose one)")]
-    public TMP_Text textLeaderboard;                  
+    public TMP_Text textLeaderboard;
     public CJS_Script_LeaderboardList leaderboardList;
 
     [Header("Panels")]
     public GameObject panelGameEnd;
-    public GameObject panelRank;    
+    public GameObject panelRank;
+
+    [Header("Choice Summary")]
+    public CJS_Script_ChoiceSummaryUI choiceSummaryUI;
 
     [Header("Options")]
     public string gameMode = "Classic";
@@ -24,14 +27,14 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     public bool autoSubmitOnShow = true;
 
     private int _finalScore;
-    private SubmitResp _lastSubmit; 
+    private SubmitResp _lastSubmit;
 
     void Awake()
     {
         if (service == null)
             service = FindObjectOfType<CJS_Script_PinballRankingService>(includeInactive: true);
 
-        if (panelGameEnd == null) panelGameEnd = gameObject; // 자기 자신을 종료 패널로 사용 가능
+        if (panelGameEnd == null) panelGameEnd = gameObject;
 
         if (service == null)
             Debug.LogError("[GameOverUI] RankingService not found in scene.");
@@ -49,6 +52,9 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         if (textFinalScore) textFinalScore.text = _finalScore.ToString("N0");
         if (textResult) textResult.text = "제출 대기중…";
 
+        //  최종 선택지 요약 생성
+        choiceSummaryUI?.ShowSummary();
+
         Debug.Log($"[GameOverUI.Show] finalScore={_finalScore} autoSubmit={autoSubmitOnShow}");
         if (autoSubmitOnShow) OnClickSubmit();
     }
@@ -58,6 +64,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         _finalScore = score;
         if (textFinalScore) textFinalScore.text = score.ToString("N0");
     }
+
     public void OnClickSubmit()
     {
         if (service == null) { Debug.LogError("[GameOverUI] service is null"); return; }
@@ -68,20 +75,15 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         service.SubmitScore(_finalScore, gameMode, level,
             onDone: resp =>
             {
-                _lastSubmit = resp; // 보관
+                _lastSubmit = resp;
 
                 if (textResult)
                     textResult.text = $"내 점수: {resp.your_score:N0}\n내 랭킹: #{resp.rank}";
 
-                // 응답에 top10이 있으면 즉시 채워둠 랭크 패널 열릴 때 재사용
                 if (leaderboardList != null)
-                {
                     leaderboardList.Populate(resp.top10 ?? Array.Empty<ScoreRow>());
-                }
                 else if (textLeaderboard != null)
-                {
                     textLeaderboard.text = BuildTop10Text(resp.top10);
-                }
             },
             onFail: err =>
             {
@@ -103,7 +105,6 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     {
         Debug.Log("[GameOverUI] OnClickOpenRank");
 
-        // 최근 제출 응답이 있으면 재사용, 없으면 서버 재조회
         if (leaderboardList)
         {
             if (_lastSubmit?.top10 != null)

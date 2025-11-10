@@ -1,53 +1,59 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.UI; 
 
 public class PSH_Script_QuickChoiceOnOff : MonoBehaviour
 {
     private RectTransform rectTransform;
-    public float duration = 0.5f; 
-    
-    private float originalX; 
-    private readonly float hiddenXOffset = -460f; 
+
+    [Header("Slide")]
+    public float duration = 0.5f;
+    private float originalX;
+    private readonly float hiddenXOffset = -460f;
+
+    [Header("Inventory Hook")]
+    [SerializeField] private CJS_Script_ChoiceInventoryUI inventoryUI;
+    [SerializeField] private bool rebuildOnEveryOpen = true;
 
     void Awake()
     {
         rectTransform = GetComponent<RectTransform>();
-        if (rectTransform == null)
-        {
-            Debug.LogError("RectTransform 컴포넌트를 찾을 수 없습니다. 이 스크립트는 UI 요소에 부착되어야 합니다.");
-            return;
-        }
+        originalX = rectTransform.anchoredPosition.x;
 
-        originalX = rectTransform.anchoredPosition.x; 
-        
-        Vector2 hiddenPos = rectTransform.anchoredPosition;
-        hiddenPos.x = originalX + hiddenXOffset;
-        rectTransform.anchoredPosition = hiddenPos;
+        // start hidden
+        var pos = rectTransform.anchoredPosition;
+        pos.x = originalX + hiddenXOffset;
+        rectTransform.anchoredPosition = pos;
+
+        // 처음엔 안 보이는 상태로 통지
+        inventoryUI?.SetVisible(false);
     }
-   
+
     public void OnToggleValueChanged(bool isToggledOn)
     {
+        //  가시성 먼저 통지
+        inventoryUI?.SetVisible(isToggledOn);
+
+        // 열릴 때 최신 상태로
+        if (isToggledOn && rebuildOnEveryOpen)
+            inventoryUI?.RebuildAll();
+
         float targetX = isToggledOn ? originalX : originalX + hiddenXOffset;
-        StopAllCoroutines(); 
+        StopAllCoroutines();
         StartCoroutine(MoveUI(targetX));
     }
 
-   IEnumerator MoveUI(float targetX)
+    private IEnumerator MoveUI(float targetX)
     {
-        float timeElapsed = 0f;
-        Vector2 startPos = rectTransform.anchoredPosition;
-        Vector2 endPos = new Vector2(targetX, startPos.y);
-        while (timeElapsed < duration)
-        {
-            float t = timeElapsed / duration;
-            rectTransform.anchoredPosition = Vector2.Lerp(startPos, endPos, t);
+        float t = 0f;
+        var start = rectTransform.anchoredPosition;
+        var end = new Vector2(targetX, start.y);
 
-            timeElapsed += Time.deltaTime;
-            
+        while (t < duration)
+        {
+            rectTransform.anchoredPosition = Vector2.Lerp(start, end, t / duration);
+            t += Time.deltaTime;
             yield return null;
         }
-        rectTransform.anchoredPosition = endPos;
-
+        rectTransform.anchoredPosition = end;
     }
 }
