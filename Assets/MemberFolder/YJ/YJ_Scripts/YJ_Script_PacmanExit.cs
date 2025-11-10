@@ -98,7 +98,7 @@ public class YJ_Script_PacManExit : MonoBehaviour
         if (capturedBall != null)
         {
             // 1. 공을 '자유 낙하' 모드로 전환 (계산된 속도 전달)
-            capturedBall.ReleaseForFalling(currentMoverVelocity);
+            capturedBall.ReleaseForFalling(Vector3.zero, false);
             capturedBall = null; // 공 참조 해제
 
             // 2. 2층 카메라 숨김
