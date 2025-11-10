@@ -100204,6 +100204,8 @@ MonoBehaviour:
   flipperSpeed: 800
   impactForceMultiplier: 5
   fliper_Count: 10
+  fliperCooldown: 0.2
+  lastFlipperActiveDuration: 0.25
 --- !u!1 &1138196862
 GameObject:
   m_ObjectHideFlags: 0
@@ -174916,7 +174918,7 @@ TrailRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: 8b3cc142b0783eb40be02cde5b31ca6a, type: 2}
+  - {fileID: 2100000, guid: 96d60590d2a3f0143a9a84d4568d9de8, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -174959,34 +174961,34 @@ TrailRenderer:
       m_RotationOrder: 4
     colorGradient:
       serializedVersion: 2
-      key0: {r: 1, g: 1, b: 1, a: 1}
-      key1: {r: 1, g: 1, b: 1, a: 1}
-      key2: {r: 0, g: 0, b: 0, a: 0}
-      key3: {r: 0, g: 0, b: 0, a: 0}
+      key0: {r: 0, g: 0.6901961, b: 0.12465381, a: 0}
+      key1: {r: 0, g: 0.14199224, b: 0.7058824, a: 0.18039216}
+      key2: {r: 1, g: 0.59621054, b: 0, a: 0.24891481}
+      key3: {r: 0.9421777, g: 1, b: 0.06132078, a: 0}
       key4: {r: 0, g: 0, b: 0, a: 0}
       key5: {r: 0, g: 0, b: 0, a: 0}
       key6: {r: 0, g: 0, b: 0, a: 0}
       key7: {r: 0, g: 0, b: 0, a: 0}
       ctime0: 0
-      ctime1: 65535
-      ctime2: 0
-      ctime3: 0
+      ctime1: 3662
+      ctime2: 24287
+      ctime3: 65535
       ctime4: 0
       ctime5: 0
       ctime6: 0
       ctime7: 0
-      atime0: 0
-      atime1: 65535
-      atime2: 0
-      atime3: 0
+      atime0: 771
+      atime1: 5204
+      atime2: 23708
+      atime3: 65535
       atime4: 0
       atime5: 0
       atime6: 0
       atime7: 0
       m_Mode: 0
-      m_ColorSpace: -1
-      m_NumColorKeys: 2
-      m_NumAlphaKeys: 2
+      m_ColorSpace: 0
+      m_NumColorKeys: 4
+      m_NumAlphaKeys: 4
     numCornerVertices: 0
     numCapVertices: 0
     alignment: 0
