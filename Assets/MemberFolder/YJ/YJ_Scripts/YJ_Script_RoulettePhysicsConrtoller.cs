@@ -45,7 +45,7 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
 
         if (capturedBall != null)
         {
-            capturedBall.ReleaseForFalling(Vector3.zero);
+            capturedBall.ReleaseForFalling(Vector3.zero, false);
             capturedBall = null;
         }
     }

@@ -26,6 +26,11 @@ public class YJ_Script_BallController : MonoBehaviour
     [SerializeField]
     private LayerMask wallLayerMask;
 
+    [Header("룰렛 랜덤성")]
+    [Tooltip("룰렛 진입 시 추가할 랜덤 힘의 강도")]
+    [SerializeField]
+    private float rouletteRandomForce = 2f; // 인스펙터에서 강도 조절
+
     private Vector3 pacManDirection = Vector3.zero;
 
     [SerializeField]
@@ -255,7 +260,7 @@ public class YJ_Script_BallController : MonoBehaviour
         Debug.Log("2D 모드로 즉시 복귀 (해제됨)");
     }
 
-    public void ReleaseForFalling(Vector3 initialVelocity)
+    public void ReleaseForFalling(Vector3 initialVelocity, bool isRoulette)
     {
         transform.parent = originParent;
         rigidBody.isKinematic = false;
@@ -263,7 +268,16 @@ public class YJ_Script_BallController : MonoBehaviour
         // Y축 고정 해제
         rigidBody.constraints = defaultConstraints & ~RigidbodyConstraints.FreezePositionY;
 
-        rigidBody.linearVelocity = initialVelocity;
+        Vector3 finalVelocity = initialVelocity;
+
+        if (isRoulette)
+        {
+            Vector2 randomDir2D = UnityEngine.Random.insideUnitCircle.normalized;
+            Vector3 randomForce = new Vector3(randomDir2D.x, 0, randomDir2D.y) * rouletteRandomForce;
+            finalVelocity += randomForce; // initialVelocity에 더함
+        }
+
+        rigidBody.linearVelocity = finalVelocity;
 
         Debug.Log($"3D 낙하 모드 해제됨 (초기 속도: {initialVelocity})");
     }

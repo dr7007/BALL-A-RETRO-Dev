@@ -50718,6 +50718,7 @@ MonoBehaviour:
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  rouletteRandomForce: 5
   rigidBody: {fileID: 0}
   playfieldYLevel: 0.25
   Gravity: 1.5
@@ -50733,7 +50734,7 @@ Rigidbody:
   serializedVersion: 4
   m_Mass: 0.2
   m_Drag: 0
-  m_AngularDrag: 0.05
+  m_AngularDrag: 2
   m_CenterOfMass: {x: 0, y: 0, z: 0}
   m_InertiaTensor: {x: 1, y: 1, z: 1}
   m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
@@ -176684,6 +176685,7 @@ MonoBehaviour:
   wallLayerMask:
     serializedVersion: 2
     m_Bits: 64
+  rouletteRandomForce: 2
   rigidBody: {fileID: 0}
   playfieldYLevel: 0.25
   Gravity: 1.5
