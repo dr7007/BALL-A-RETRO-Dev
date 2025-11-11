@@ -44,7 +44,8 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
 
     private IEnumerator ScoreMultipleAndTeleportCoroutine(Collider other)
     {
-        yield return new WaitForSeconds(1f);
+        other.GetComponent<Rigidbody>().isKinematic = true;
+        yield return new WaitForSeconds(1.5f);
         if (scoreManager == null)
         {
             Debug.Log("ScoreManager가 씬에 없음");

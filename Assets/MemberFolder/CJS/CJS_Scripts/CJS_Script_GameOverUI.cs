@@ -253,8 +253,8 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     {
         _finalScore = finalScore;
 
-        if (panelGameEnd) panelGameEnd.SetActive(true);
-        if (panelRank) panelRank.SetActive(false);
+        //if (panelGameEnd) panelGameEnd.SetActive(true);
+        //if (panelRank) panelRank.SetActive(false);
 
         // 숫자만 표시
         if (textFinalScore) textFinalScore.text = _finalScore.ToString("N0");

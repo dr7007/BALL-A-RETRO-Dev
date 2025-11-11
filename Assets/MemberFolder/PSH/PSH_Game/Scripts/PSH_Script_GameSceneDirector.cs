@@ -16,7 +16,7 @@ namespace PSH
         [Tooltip("눈 뜨는 효과 오브젝트")]
         [SerializeField] private PSH_Script_EyeOpenEffect eyeOpenEffect;
         [Tooltip("게임 시작 후 켜질 메인 게임 캔버스 (HUD)")]
-        [SerializeField] private GameObject mainGameCanvas;
+     
 
         // 이 씬의 인트로가 이미 한 번 재생되었는지 확인하는 static 변수
         private static bool hasPlayedIntro = false;
@@ -25,15 +25,6 @@ namespace PSH
         {
             hasPlayedIntro = false;
             Debug.Log("[GameSceneDirector] 인트로 플래그 리셋 완료.");
-        }
-
-        private void Awake()
-        {
-            // 게임 시작 전에는 메인 캔버스를 확실하게 꺼둡니다.
-            if (mainGameCanvas != null)
-            {
-                mainGameCanvas.SetActive(false);
-            }
         }
 
         private void OnEnable()
@@ -66,11 +57,6 @@ namespace PSH
                     eyeOpenEffect.gameObject.SetActive(false);
                 }
 
-                // 2. 메인 게임 캔버스 켜기 (가장 중요!)
-                if (mainGameCanvas != null)
-                {
-                    mainGameCanvas.SetActive(true);
-                }
 
                 // 3. 이벤트 전파
                 NoIntroStartEvt?.Invoke();
@@ -98,11 +84,7 @@ namespace PSH
             // 인트로 대사가 끝났다면 메인 캔버스를 켭니다.
             if (cutsceneId == "Intro")
             {
-                Debug.Log("[GameSceneDirector] 인트로 대사 종료 -> 메인 게임 캔버스 ON");
-                if (mainGameCanvas != null)
-                {
-                    mainGameCanvas.SetActive(true);
-                }
+
             }
         }
     }

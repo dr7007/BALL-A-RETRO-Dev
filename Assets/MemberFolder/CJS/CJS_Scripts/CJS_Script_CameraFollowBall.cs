@@ -57,6 +57,8 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     private bool _following;
     private float _velZ;
 
+    private bool _temporarilyDisabled = false; // 일시 비활성화 상태 플래그
+
     void Awake()
     {
         if (cam == null) cam = Camera.main;
@@ -293,6 +295,28 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     private void ChangeCameraFunc(Camera _cam)
     {
         cam = _cam;
+
+        // 룰렛 카메라일 경우 - 기능 일시 정지
+        if (cam != null && cam.gameObject.name == "RouletteCamera")
+        {
+            // 팔로우 중이라면 멈추고 상태 저장
+            if (_following)
+            {
+                _following = false;
+                StopAllCoroutines();
+            }
+            _temporarilyDisabled = true;
+            return;
+        }
+
+        // 다른 카메라가 들어올 때 - 다시 기능 복귀
+        if (_temporarilyDisabled)
+        {
+            _temporarilyDisabled = false;
+            SaveDefaultPose(); // 혹시 위치 초기화를 보장하기 위해
+        }
+
+        // 정상적인 카메라 전환 시 팔로우 재개
         StartFollow();
     }
 }

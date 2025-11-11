@@ -20,24 +20,24 @@ public class KHS_Script_ResetController : MonoBehaviour
 
     void Update()
     {
-        if(isClear)
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                GameResetFunc();
-            }
-            else if (Input.anyKeyDown)
-            {
-                GameGoToLobbyFunc();
-            }
-        }
-        else
-        {
-            if (Input.GetKeyDown(KeyCode.R))
-            {
-                GameResetFunc();
-            }
-        }
+        //if(isClear)
+        //{
+        //    if (Input.GetKeyDown(KeyCode.R))
+        //    {
+        //        GameResetFunc();
+        //    }
+        //    else if (Input.anyKeyDown)
+        //    {
+        //        GameGoToLobbyFunc();
+        //    }
+        //}
+        //else
+        //{
+        //    if (Input.GetKeyDown(KeyCode.R))
+        //    {
+        //        GameResetFunc();
+        //    }
+        //}
     }
 
     private void OnEnable()

@@ -559,9 +559,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         Next_Round_Init?.Invoke();
     }
 
-    private void ChangingSubCam()
+    private void ChangingSubCam(int _idx)
     {
-        cameraShaker = camHolder.cameraGos[1].GetComponent<CJS_Script_CameraShaker>();
+        cameraShaker = camHolder.cameraGos[_idx].GetComponent<CJS_Script_CameraShaker>();
     }
 
     private void ChangingMainCam()
