@@ -96,7 +96,7 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
 
         Debug.Log($"--- 룰렛 결과: {lastKnownSlotNumber} ---");
         //OnRouletteResult?.Invoke(lastKnownSlotNumber);
-        scoreManager.MultiplyScore(lastKnownSlotNumber);
+        scoreManager.AddScore(lastKnownSlotNumber);
 
         // 점수 계산 후 2초 대기
         yield return new WaitForSeconds(2.0f);
