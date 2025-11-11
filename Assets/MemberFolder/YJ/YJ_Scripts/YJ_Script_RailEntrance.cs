@@ -22,8 +22,25 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
     [Header("카메라 전환")]
     public CJS_Script_CameraSwitcher camSwitch; // ★ 새로 추가
+    [Tooltip("2F 진입 타임라인인지 체크")]
+    public bool is2FEntrance = false;
 
     private YJ_Script_BallController capturedBall = null; // 어떤 공을 태웠는지 기억
+    private bool isHoleClosed = false; // 2층 플랫폼으로 갈 수 있는지에 대한 여부
+
+    private void OnEnable()
+    {
+        KHS_Script_BatteryLedManager.HoleCoverActiveEvt += HoleActive;
+        KHS_Script_BatteryLedManager.HoleCoverUnActiveEvt += HoleUnActive;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_BatteryLedManager.HoleCoverActiveEvt -= HoleActive;
+        KHS_Script_BatteryLedManager.HoleCoverUnActiveEvt -= HoleUnActive;
+    }
+
+    private void HoleActive() => isHoleClosed = true;
+    private void HoleUnActive() => isHoleClosed = false;
 
     private void OnTriggerEnter(Collider other)
     {
@@ -53,14 +70,16 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
         if (capturedBall != null)
         {
-            if (camSwitch) camSwitch.ToMain();
             // 5. 공을 '기차'에서 내려서 낙하하게 함
             capturedBall.ReleaseForFalling(Vector3.zero, false);
 
             capturedBall = null;
         }
 
-        // 레일 주행 끝 = 2층 미로 시작 → 탑뷰 카메라로 스위치
-        if (camSwitch) camSwitch.ToMaze();
+        // 레일 주행 끝 = 2층 미로 시작 → 탑뷰 카메라로 스위치\
+        if (isHoleClosed && camSwitch && is2FEntrance)
+        { 
+            camSwitch.ToMaze();
+        }
     }
 }

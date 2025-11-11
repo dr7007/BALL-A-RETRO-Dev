@@ -6,6 +6,11 @@ using UnityEngine;
 public class KHS_Script_RogueLikeManager : MonoBehaviour
 {
     [SerializeField]
+    private YJ_Script_BallController ballCon;
+    [SerializeField]
+    private KHS_Script_UIToBall[] ballUI;
+
+    [SerializeField]
     private GameObject blockerHolderGo;
     private KHS_Script_DumpManager[] blockerDMs;
 
@@ -79,7 +84,10 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 AddFliperCount(5);
                 break;
             case 7:
-                ClosetheHole();
+                ClosetheHole(7);
+                break;
+            case 8:
+                BallAdditive(3);
                 break;
         }
     }
@@ -184,11 +192,20 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     private void AddFliperCount(int _count)
     {
         fliper.fliper_Count += _count;
+        fliper.FlipperCountUp(_count);
         fliper.FlipperCountUpdate();
     }
 
-    private void ClosetheHole()
+    private void ClosetheHole(int _idx)
     {
         batLedManager.ForcedOn();
+        UnActiveChoice(_idx);
+    }
+
+    private void BallAdditive(int _creadits)
+    {
+        ballCon.AddBallFunc(_creadits);
+        foreach(var bui in ballUI)
+            bui.BallInfoUpdate();
     }
 }

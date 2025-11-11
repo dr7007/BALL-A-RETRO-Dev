@@ -1,7 +1,11 @@
+using System;
 using UnityEngine;
 
 public class KHS_Script_BatteryLedManager : MonoBehaviour
 {
+    public static event Action HoleCoverActiveEvt;
+    public static event Action HoleCoverUnActiveEvt;
+
     [SerializeField]
     private KHS_Script_BatteryLedReceiver[] receivers;
     private KHS_Script_ScoreManager scoreManager;
@@ -13,6 +17,7 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
 
     private int ledOnMount = 0;
     private bool init_delay = false;
+    private bool isForced = false;
 
     private void OnEnable()
     {
@@ -62,6 +67,7 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
             {
                 goEnable.SetActive(true);
                 Debug.Log("오브젝트가 활성화 되었습니다!");
+                HoleCoverActiveEvt.Invoke();
             }
 
             foreach (var  receiver in receivers)
@@ -79,9 +85,10 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
 
     private void ResetGoEnable()
     {
-        if (goEnable != null)
+        if (goEnable != null && !isForced)
         {
             goEnable.SetActive(false);
+            HoleCoverUnActiveEvt.Invoke();
         }
     }
 
@@ -118,6 +125,8 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
     }
     public void ForcedOn()
     {
+        isForced = true;
         goEnable.SetActive(true);
+        HoleCoverActiveEvt.Invoke();
     }
 }

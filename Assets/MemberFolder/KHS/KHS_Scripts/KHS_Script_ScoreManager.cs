@@ -329,6 +329,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public static event Action OnGameClear;
     public static event Action Round_Clear;
     public static event Action Next_Round_Init;
+    public static event Action UILateUpdate;
 
     public static event Action<int> OnGameOverWithScore;
     public static event Action<int> OnGameClearWithScore;
@@ -588,11 +589,12 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             Debug.Log($"목표점수 미달. 잔여 볼 {remain}개. 다음 볼로 진행");
             ball.SetBallCount(remain);
             ball.SendMessage("KHS_BallReset", SendMessageOptions.DontRequireReceiver);
+            UILateUpdate.Invoke();
         }
         else
         {
-            Debug.Log("볼 소진! Game Over 처리 → GameResultJudge 직접 호출");  // ★ 추가 로그
-            GameResultJudge();                                              // ★ 핵심: 직접 호출
+            Debug.Log("볼 소진! Game Over 처리 → GameResultJudge 직접 호출");  // 추가 로그
+            GameResultJudge();                                              // 핵심: 직접 호출
                                                                             // (이벤트는 선택) OnGameOver?.Invoke(); OnGameOverWithScore?.Invoke(curScore);
         }
     }

@@ -163,6 +163,12 @@ public class YJ_Script_BallController : MonoBehaviour
     public int GetBallCount() => BallCount;
     public void SetBallCount(int count) => BallCount = count;
 
+    public void AddBallFunc(int _count)
+    {
+        initBallCount += _count;
+        BallCount += _count;
+    }
+
     public int BallCountInitResponse()
     {
         BallCount = initBallCount;

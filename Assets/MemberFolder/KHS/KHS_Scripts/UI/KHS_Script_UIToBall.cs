@@ -21,12 +21,12 @@ public class KHS_Script_UIToBall : MonoBehaviour
     }
     private void OnEnable()
     {
-        KHS_Script_BallOutController.BallOutEvt += BallOutUI;
+        KHS_Script_ScoreManager.UILateUpdate += BallOutUI;
         KHS_Script_ScoreManager.Next_Round_Init += BallCountInitReset;
     }
     private void OnDisable()
     {
-        KHS_Script_BallOutController.BallOutEvt -= BallOutUI;
+        KHS_Script_ScoreManager.UILateUpdate -= BallOutUI;
         KHS_Script_ScoreManager.Next_Round_Init -= BallCountInitReset;
     }
 
@@ -50,7 +50,12 @@ public class KHS_Script_UIToBall : MonoBehaviour
 
     private void BallOutUI()
     {
-        --ballCount;
+        ballCount = ballCon.GetBallCount();
         BallCountUI.text = "" + ballCount;
+    }
+
+    public void BallInfoUpdate()
+    {
+        BallCountUI.text = "" + ballCon.GetBallCount();
     }
 }

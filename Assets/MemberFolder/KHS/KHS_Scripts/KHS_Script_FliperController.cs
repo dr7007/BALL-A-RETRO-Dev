@@ -156,4 +156,8 @@ public class KHS_Script_FliperController : MonoBehaviour
     {
         FliperCountChangeEvt.Invoke();
     }
+    public void FlipperCountUp(int _up)
+    {
+        fliper_Inital += _up;
+    }
 }
