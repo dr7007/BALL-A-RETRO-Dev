@@ -8,15 +8,15 @@ using UnityEngine.EventSystems;
 public class CJS_Script_ChoiceUIController : MonoBehaviour
 {
     [Header("Refs")]
-    [SerializeField] private MonoBehaviour rollerBehaviour;      // Inspector¿¡ CJS_Script_ChoiceRoller
+    [SerializeField] private MonoBehaviour rollerBehaviour;      // Inspectorì— CJS_Script_ChoiceRoller
     private CJS_IChoiceRoller roller;
 
     [SerializeField] private GameObject panelRoot;               // Panel_Choice
-    [SerializeField] private Transform content;                  // Ä«µå°¡ »ı¼ºµÉ Grid ºÎ¸ğ
-    [SerializeField] private CJS_Script_ChoiceCard cardPrefab;   // Ä«µå ÇÁ¸®ÆÕ(·çÆ®¿¡ Button)
+    [SerializeField] private Transform content;                  // ì¹´ë“œê°€ ìƒì„±ë  Grid ë¶€ëª¨
+    [SerializeField] private CJS_Script_ChoiceCard cardPrefab;   // ì¹´ë“œ í”„ë¦¬íŒ¹(ë£¨íŠ¸ì— Button)
 
-    [SerializeField] private GameObject gameUICanvasGo;           // ¸ğ´ÏÅÍ Å¬¸¯ ÆíÀÇ - KHS
-    [SerializeField] private KHS_Script_CameraManager camManager; // µ¿ÀÏ
+    [SerializeField] private GameObject gameUICanvasGo;           // ëª¨ë‹ˆí„° í´ë¦­ í¸ì˜ - KHS
+    [SerializeField] private KHS_Script_CameraManager camManager; // ë™ì¼
 
     [Header("Buttons")]
     [SerializeField] private Button btnReroll;
@@ -31,28 +31,35 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private bool isOpen;
     private bool busy;
 
+    [SerializeField]
+    private YJ_Script_BallController ballCon;
+    [SerializeField]
+    private int pickCount = 0;
+
     void OnValidate()
     {
         if (rollerBehaviour != null && !(rollerBehaviour is CJS_IChoiceRoller))
-            Debug.LogWarning("CJS_Script_ChoiceUIController: rollerBehaviour´Â CJS_IChoiceRoller¸¦ ±¸ÇöÇØ¾ß ÇÕ´Ï´Ù.", this);
+            Debug.LogWarning("CJS_Script_ChoiceUIController: rollerBehaviourëŠ” CJS_IChoiceRollerë¥¼ êµ¬í˜„í•´ì•¼ í•©ë‹ˆë‹¤.", this);
     }
 
     void OnEnable()
     {
         if (btnReroll != null) btnReroll.onClick.AddListener(OnClickReroll);
         if (btnSkip != null) btnSkip.onClick.AddListener(OnClickSkip);
+        KHS_Script_ScoreManager.Round_Clear += PickCountBonusFunc;
     }
 
     void OnDisable()
     {
         if (btnReroll != null) btnReroll.onClick.RemoveListener(OnClickReroll);
         if (btnSkip != null) btnSkip.onClick.RemoveListener(OnClickSkip);
+        KHS_Script_ScoreManager.Round_Clear -= PickCountBonusFunc;
     }
 
     void Awake()
     {
         roller = rollerBehaviour as CJS_IChoiceRoller;
-        if (panelRoot != null) panelRoot.SetActive(false);
+        //if (panelRoot != null) panelRoot.SetActive(false);
         usedReroll = 0;
         isOpen = false;
         busy = false;
@@ -73,12 +80,12 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (isOpen) return;
         if (roller == null)
         {
-            Debug.LogError("CJS_IChoiceRoller°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.", this);
+            Debug.LogError("CJS_IChoiceRollerê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.", this);
             return;
         }
         if (cardPrefab == null || content == null)
         {
-            Debug.LogError("cardPrefab ¶Ç´Â content°¡ ¿¬°áµÇÁö ¾Ê¾Ò½À´Ï´Ù.", this);
+            Debug.LogError("cardPrefab ë˜ëŠ” contentê°€ ì—°ê²°ë˜ì§€ ì•Šì•˜ìŠµë‹ˆë‹¤.", this);
             return;
         }
 
@@ -109,7 +116,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         ClearCards();
 
         SetChoiceButtonsVisible(false);
-        if (panelRoot != null) panelRoot.SetActive(false);
+        //if (panelRoot != null) panelRoot.SetActive(false);
 
         UpdateRerollUI();
     }
@@ -124,7 +131,14 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         for (int i = 0; i < picks.Count; i++)
         {
             var card = Instantiate(cardPrefab, content);
-            card.GetComponent<Button>().onClick.AddListener(gameUIFuncInsert);
+            if (pickCount <= 1)
+            {
+                card.GetComponent<Button>().onClick.AddListener(gameUIFuncInsert);
+            }
+            else
+            {
+                card.GetComponent<Button>().onClick.AddListener(RefreshCards);
+            }
             float chance = 0f;
             if (chanceMap != null && chanceMap.TryGetValue(picks[i], out float p))
                 chance = p;
@@ -146,11 +160,18 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (busy) return;
         busy = true;
 
-        roller.PushPicked(picked);                      // È¿°ú Àû¿ë
-        CJS_Script_ChoiceState.I?.Add(picked);         // ¡Ú ¼±ÅÃ ½º³À¼¦ ±â·Ï(¾ÆÀÌÄÜ Æ÷ÇÔ)
+        roller.PushPicked(picked);                      // íš¨ê³¼ ì ìš©
+        CJS_Script_ChoiceState.I?.Add(picked);         // â˜… ì„ íƒ ìŠ¤ëƒ…ìƒ· ê¸°ë¡(ì•„ì´ì½˜ í¬í•¨)
 
-        Hide();
-        busy = false;
+        if (pickCount < 0)
+        {
+            Hide();
+        }
+        else
+        {
+            pickCount--;
+        }
+            busy = false;
     }
 
     private void OnClickReroll()
@@ -180,7 +201,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private void UpdateRerollUI()
     {
         if (txtRerollInfo != null)
-            txtRerollInfo.text = Mathf.Max(0, maxReroll - usedReroll) + "È¸";
+            txtRerollInfo.text = Mathf.Max(0, maxReroll - usedReroll) + "íšŒ";
 
         if (btnReroll != null)
             btnReroll.interactable = isOpen && (usedReroll < maxReroll);
@@ -193,5 +214,11 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     {
         if (gameUICanvasGo) gameUICanvasGo.SetActive(true);
         if (camManager) camManager.MonitorOff();
+    }
+
+    private void PickCountBonusFunc()
+    {
+        Debug.LogWarning("Round_Clear ì´ë²¤íŠ¸ ë°œìƒ");
+        pickCount = ballCon.GetBallCount();
     }
 }

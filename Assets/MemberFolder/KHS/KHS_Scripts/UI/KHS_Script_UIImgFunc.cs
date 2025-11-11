@@ -6,6 +6,8 @@ using System.Collections;
 
 public class KHS_Script_UIImgFunc : MonoBehaviour
 {
+    public static event Action<bool> RoundUIEvt;
+
     [Header("Round 이미지 연출 관련")]
     [Tooltip("Round 이미지 오브젝트 연결")]
     [SerializeField]
@@ -60,6 +62,7 @@ public class KHS_Script_UIImgFunc : MonoBehaviour
 
     private IEnumerator StartRoundCoroutine(int _round)
     {
+        RoundUIEvt?.Invoke(true);
         Time.timeScale = 0f;
 
         roundImgGos[_round].SetActive(true);
@@ -111,7 +114,7 @@ public class KHS_Script_UIImgFunc : MonoBehaviour
 
         // 비활성화
         roundImgGos[_round].SetActive(false);
-
+        RoundUIEvt?.Invoke(false);
         yield break;
     }
 }
