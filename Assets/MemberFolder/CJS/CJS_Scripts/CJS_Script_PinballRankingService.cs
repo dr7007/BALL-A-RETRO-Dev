@@ -5,11 +5,14 @@ using UnityEngine.Networking;
 public class CJS_Script_PinballRankingService : MonoBehaviour
 {
     [Header("Server")]
-    [SerializeField] string baseUrl = "http://localhost/pinball";
-    [SerializeField] string apiKey = "CHANGE_ME_STRONG_KEY";
+    [SerializeField] private string baseUrl = "http://localhost/pinball";
+    [SerializeField] private string apiKey = "CHANGE_ME_STRONG_KEY";
 
+    // ΩÃ±€≈Ê
     private static CJS_Script_PinballRankingService instance;
+    public static CJS_Script_PinballRankingService Instance => instance;
 
+    // Player nickname
     public string Nickname
     {
         get => PlayerPrefs.GetString("nickname", "");
@@ -18,6 +21,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
     void Awake()
     {
+        // ΩÃ±€≈Ê ∫∏¿Â + ¿Ø¡ˆ
         if (instance != null && instance != this)
         {
             Debug.LogWarning("[RankingService] Duplicate detected, destroying new instance.");
@@ -31,6 +35,8 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
     }
 
+    // ---- Public API ---------------------------------------------------------
+
     public void SetNicknameAndStart(string nick)
     {
         if (string.IsNullOrWhiteSpace(nick)) nick = "Guest";
@@ -43,7 +49,24 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         StartCoroutine(CoRegisterNickname(onDone, onFail));
     }
 
-    IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
+    public void SubmitScore(int score, string gameMode, int level,
+                            System.Action<SubmitResp> onDone,
+                            System.Action<string> onFail)
+    {
+        Debug.Log($"[SubmitScore()] called score={score} mode='{gameMode}' level={level}");
+        StartCoroutine(CoSubmit(score, gameMode, level, onDone, onFail));
+    }
+
+    public void FetchLeaderboard(string gameMode, int level,
+                                 System.Action<LbResp> onDone,
+                                 System.Action<string> onFail)
+    {
+        StartCoroutine(CoFetch(gameMode, level, onDone, onFail));
+    }
+
+    // ---- Coroutines ---------------------------------------------------------
+
+    private IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
         if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
 
@@ -53,10 +76,12 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
         var url = $"{baseUrl}/register_nickname.php";
         Debug.Log($"[Register] url={url} nickname='{Nickname}'");
+
         using (var req = UnityWebRequest.Post(url, f))
         {
             yield return req.SendWebRequest();
             Debug.Log($"[Register] HTTP={req.responseCode} text={req.downloadHandler.text}");
+
             if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
 
             RegisterResp resp = null;
@@ -70,17 +95,9 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         }
     }
 
-    public void SubmitScore(int score, string gameMode, int level,
-                            System.Action<SubmitResp> onDone,
-                            System.Action<string> onFail)
-    {
-        Debug.Log($"[SubmitScore()] called score={score} mode='{gameMode}' level={level}");
-        StartCoroutine(CoSubmit(score, gameMode, level, onDone, onFail));
-    }
-
-    IEnumerator CoSubmit(int score, string gameMode, int level,
-                         System.Action<SubmitResp> onDone,
-                         System.Action<string> onFail)
+    private IEnumerator CoSubmit(int score, string gameMode, int level,
+                                 System.Action<SubmitResp> onDone,
+                                 System.Action<string> onFail)
     {
         if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
 
@@ -93,10 +110,12 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
         var url = $"{baseUrl}/submit_score.php";
         Debug.Log($"[Submit] url={url} nick='{Nickname}' score={score} mode='{gameMode}' level={level}");
+
         using (var req = UnityWebRequest.Post(url, f))
         {
             yield return req.SendWebRequest();
             Debug.Log($"[Submit] HTTP={req.responseCode} text={req.downloadHandler.text}");
+
             if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
 
             SubmitResp resp = null;
@@ -110,16 +129,9 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         }
     }
 
-    public void FetchLeaderboard(string gameMode, int level,
-                                 System.Action<LbResp> onDone,
-                                 System.Action<string> onFail)
-    {
-        StartCoroutine(CoFetch(gameMode, level, onDone, onFail));
-    }
-
-    IEnumerator CoFetch(string gameMode, int level,
-                        System.Action<LbResp> onDone,
-                        System.Action<string> onFail)
+    private IEnumerator CoFetch(string gameMode, int level,
+                                System.Action<LbResp> onDone,
+                                System.Action<string> onFail)
     {
         WWWForm f = new WWWForm();
         if (!string.IsNullOrEmpty(gameMode)) f.AddField("game_mode", gameMode);
@@ -128,10 +140,12 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
         var url = $"{baseUrl}/get_leaderboard.php";
         Debug.Log($"[Leaderboard] url={url} mode='{gameMode}' level={level}");
+
         using (var req = UnityWebRequest.Post(url, f))
         {
             yield return req.SendWebRequest();
             Debug.Log($"[Leaderboard] HTTP={req.responseCode} text={req.downloadHandler.text}");
+
             if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
 
             LbResp resp = null;
