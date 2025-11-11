@@ -66,7 +66,7 @@ public class KHS_Script_ResetController : MonoBehaviour
     public void GameResetFunc()
     {
         Time.timeScale = 1f;
-        OnReset.Invoke();
+        OnReset?.Invoke();
         Debug.LogError("Reset!");
         PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(gameSceneName, false);
     }
@@ -74,7 +74,7 @@ public class KHS_Script_ResetController : MonoBehaviour
     public void GameGoToLobbyFunc()
     {
         Time.timeScale = 1f;
-        OnReset.Invoke();
+        OnReset?.Invoke();
         Debug.LogError("Go to Lobby");
         PSH_Script_GameSceneDirector.ResetIntroFlag();
         PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
