@@ -1,6 +1,6 @@
 using UnityEngine;
 using TMPro;
-using UnityEngine.UI; 
+using UnityEngine.UI;
 using System.Collections;
 using System.Collections.Generic;
 using System;
@@ -10,8 +10,8 @@ namespace PSH
 {
     public class PSH_Script_DialogueUI : MonoBehaviour, IPointerClickHandler
     {
-        public static event Action<string> DialogueEvt;       
-        public static event Action<string> OnDialogueComplete; 
+        public static event Action<string> DialogueEvt;
+        public static event Action<string> OnDialogueComplete;
 
         public static PSH_Script_DialogueUI Instance { get; private set; }
 
@@ -25,7 +25,7 @@ namespace PSH
         [SerializeField] GameObject endingPanelRoot;
         [SerializeField] TMP_Text endingText;
         [Tooltip("엔딩 대사 진행 시 이미지가 바뀔 타겟 Image 컴포넌트")]
-        [SerializeField] Image endingImage; 
+        [SerializeField] Image endingImage;
 
         [Header("Dialogue Sprites")]
         [Tooltip("Intro 대사 순서에 맞춰 보여줄 스프라이트들")]
@@ -40,7 +40,7 @@ namespace PSH
         [SerializeField] float charInterval = 0.04f;
 
         private List<string> currentLines = new();
-        private List<Sprite> currentSprites = null; 
+        private List<Sprite> currentSprites = null;
         private Image currentActiveImage = null;
 
         private int idx = -1;
@@ -129,17 +129,17 @@ namespace PSH
         {
             if (idx != -1 && Input.anyKeyDown)
             {
-                 if (currentLines.Count == 0) return;
-                 if (isTyping) { StopCoroutine(typingCo); if(currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
-                 else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
+                if (currentLines.Count == 0) return;
+                if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
+                else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
             }
         }
 
         public void OnPointerClick(PointerEventData _)
         {
-             if (idx == -1 || currentLines.Count == 0) return;
-             if (isTyping) { StopCoroutine(typingCo); if(currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
-             else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
+            if (idx == -1 || currentLines.Count == 0) return;
+            if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
+            else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
         }
 
         private void UpdateDialogueImage()
@@ -156,9 +156,19 @@ namespace PSH
 
         private void EndDialogue()
         {
-            if (currentActivePanel) currentActivePanel.SetActive(false);
-            
+            // 💡 [수정] 대사가 끝난 ID를 먼저 저장합니다.
             string finishedId = currentCutsceneId;
+
+            // 💡 [수정] "Intro"일 때만 패널을 끄고, "Ending1/2"일 때는 끄지 않습니다.
+            if (finishedId == "Intro")
+            {
+                if (currentActivePanel) currentActivePanel.SetActive(false);
+                Time.timeScale = originalTimeScale;
+                DialogueEvt?.Invoke("Intro");
+            }
+            // (else: "Ending1" or "Ending2" - 패널을 끄지 않고 놔둡니다.)
+
+            // 상태 초기화
             currentLines.Clear();
             currentSprites = null;
             currentActiveImage = null;
@@ -167,12 +177,7 @@ namespace PSH
             idx = -1;
             currentCutsceneId = null;
 
-            if (finishedId == "Intro")
-            {
-                Time.timeScale = originalTimeScale;
-                DialogueEvt?.Invoke("Intro");
-            }
-
+            // 감독에게 보고 (인트로가 끝났을 때도 보고는 해야 함)
             OnDialogueComplete?.Invoke(finishedId);
         }
 
@@ -190,7 +195,7 @@ namespace PSH
             var raw = ta.text;
             if (raw.StartsWith("\uFEFF")) raw = raw.Substring(1); // BOM 제거
             raw = raw.Replace("\r\n", "\n").Replace("\r", "\n"); // 줄바꿈 통일
-            
+
             var rows = raw.Split('\n');
             HashSet<string> foundKeys = new HashSet<string>(); // 디버깅용 키 목록
 
