@@ -1,8 +1,6 @@
 using PSH;
 using System;
 using UnityEngine;
-using UnityEngine.EventSystems;
-using UnityEngine.SceneManagement;
 
 public class KHS_Script_ResetController : MonoBehaviour
 {
@@ -57,30 +55,28 @@ public class KHS_Script_ResetController : MonoBehaviour
         KHS_Script_ScoreManager.OnGameOver -= GameOver;
     }
 
-    private void GameOver()
-    {
-        isClear = false;
-
-    }
-
-    private void GameClear()
-    {
-        isClear = true;
-    }
+    private void GameOver() { isClear = false; }
+    private void GameClear() { isClear = true; }
 
     public void GameResetFunc()
     {
         Time.timeScale = 1f;
+
+        CJS_Script_ChoiceState.I?.ResetForNewRun();
+
         OnReset?.Invoke();
-        Debug.LogError("Reset!");
+        Debug.Log("[Reset] Reload GameScene");
         PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(gameSceneName, false);
     }
 
     public void GameGoToLobbyFunc()
     {
         Time.timeScale = 1f;
+
+        CJS_Script_ChoiceState.I?.ResetForNewRun();
+
         OnReset?.Invoke();
-        Debug.LogError("Go to Lobby");
+        Debug.Log("[Reset] Go Lobby");
         PSH_Script_GameSceneDirector.ResetIntroFlag();
         PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
     }

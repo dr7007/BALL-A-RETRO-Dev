@@ -6,24 +6,34 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
 {
     [Header("UI Refs")]
     [SerializeField] private GameObject panelRoot;
-    [SerializeField] private Transform grid;      
+    [SerializeField] private Transform grid;
     [SerializeField] private CJS_Script_ChoiceSlot slotPrefab;
 
     private bool needsRebuild;
-    private bool isVisible;  
+    private bool isVisible;
 
     void OnEnable()
     {
         var s = CJS_Script_ChoiceState.I;
-        if (s != null) s.OnPicked += HandlePicked;
+        if (s != null)
+        {
+            s.OnPicked += HandlePicked;
+            s.OnCleared += HandleCleared;  
+        }
+        KHS_Script_ResetController.OnReset += HandleGlobalReset; 
     }
+
     void OnDisable()
     {
         var s = CJS_Script_ChoiceState.I;
-        if (s != null) s.OnPicked -= HandlePicked;
+        if (s != null)
+        {
+            s.OnPicked -= HandlePicked;
+            s.OnCleared -= HandleCleared;
+        }
+        KHS_Script_ResetController.OnReset -= HandleGlobalReset;
     }
 
-    //  슬라이드 스크립트에서 호출
     public void SetVisible(bool v)
     {
         isVisible = v;
@@ -40,10 +50,9 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
         int count = (list == null) ? 0 : list.Count;
         Debug.Log($"[InventoryUI] RebuildAll count={count}");
 
-        if (list == null) return;
-
-        for (int i = 0; i < list.Count; i++)
-            AddSlot(list[i]);
+        if (list != null)
+            for (int i = 0; i < list.Count; i++)
+                AddSlot(list[i]);
 
         needsRebuild = false;
         RefreshLayoutNow();
@@ -53,15 +62,32 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
     {
         if (!grid || !slotPrefab) return;
 
-        if (isVisible)        //  패널 열려 있으면 즉시 1칸 추가 + 레이아웃 갱신
+        if (isVisible)
         {
             AddSlot(snap);
             RefreshLayoutNow();
         }
         else
         {
-            needsRebuild = true; // 닫혀 있으면 다음에 RebuildAll
+            needsRebuild = true;
         }
+    }
+
+    private void HandleCleared()     
+    {
+        ClearUI();
+    }
+
+    private void HandleGlobalReset() 
+    {
+        ClearUI();
+    }
+
+    private void ClearUI()
+    {
+        foreach (Transform c in grid) Destroy(c.gameObject);
+        needsRebuild = false;
+        RefreshLayoutNow();
     }
 
     private void AddSlot(CJS_ChoiceSnapshot snap)
