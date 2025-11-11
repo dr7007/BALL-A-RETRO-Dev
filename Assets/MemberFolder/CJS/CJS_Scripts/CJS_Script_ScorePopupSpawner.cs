@@ -10,25 +10,9 @@ public class CJS_Script_ScorePopupSpawner : MonoBehaviour
     public TextMeshProUGUI popupPrefab;         // TMP + (권장) CanvasGroup 포함
     public Camera worldCamera;                  // 월드→스크린 변환용 (없으면 Camera.main)
 
-    [Header("Anchor To Ball (World-Side Offset)")]
-    [Tooltip("OnScoreGainedAt(worldPos)를 공 옆에 붙여 찍을지")]
-    public bool anchorToWorld = true;
-
-    [Tooltip("카메라의 오른쪽 방향으로 월드 오프셋(미터)")]
-    public float worldOffsetRight = 0.15f;
-
-    [Tooltip("카메라의 위쪽 방향으로 월드 오프셋(미터)")]
-    public float worldOffsetUp = 0.15f;
-
-    [Tooltip("화면 밖으로 나가지 않게 패딩 안쪽으로 클램핑")]
-    public bool clampToScreen = true;
-
-    [Tooltip("클램핑 시 화면 가장자리로부터 여유 픽셀")]
-    public Vector2 clampPadding = new Vector2(24, 24);
-
     [Header("Fallback (No Position Event)")]
     [Tooltip("OnScoreGained(위치 없음) 수신 시 사용할 스크린 오프셋(픽셀)")]
-    public Vector2 screenOffset = new Vector2(0, 80);
+    public Vector2 screenOffset = new Vector2(0, 0); // 위치 고정을 위해 기본값을 (0, 0)으로 설정 권장
 
     [Header("Anim")]
     public float riseDistance = 60f;
@@ -42,59 +26,33 @@ public class CJS_Script_ScorePopupSpawner : MonoBehaviour
 
     void Awake()
     {
+        // 월드 카메라 관련 설정은 더 이상 사용되지 않으므로 제거하거나 그대로 둘 수 있지만,
+        // 현재는 나머지 기능에 영향을 미치지 않으므로 유지
         if (worldCamera == null) worldCamera = Camera.main;
     }
 
     void OnEnable()
     {
-        KHS_Script_ScoreManager.OnScoreGainedAt += HandleScoreAt;
+        //  HandleScoreAt 관련 구독 제거
         KHS_Script_ScoreManager.OnScoreGained += HandleScoreNoPos;
     }
 
     void OnDisable()
     {
-        KHS_Script_ScoreManager.OnScoreGainedAt -= HandleScoreAt;
+        // HandleScoreAt 관련 해지 제거
         KHS_Script_ScoreManager.OnScoreGained -= HandleScoreNoPos;
     }
 
-    private void HandleScoreAt(int delta, Vector3 worldPos)
-    {
-        if (delta <= 0 || popupPrefab == null || canvasRoot == null) return;
-        if (worldCamera == null) worldCamera = Camera.main;
-
-        // 1) 공(또는 득점 지점) 옆으로 월드 오프셋
-        Vector3 pos = worldPos;
-        if (anchorToWorld && worldCamera != null)
-        {
-            var cam = worldCamera.transform;
-            pos += cam.right * worldOffsetRight + cam.up * worldOffsetUp;
-        }
-
-        // 2) 스크린 좌표 변환(+옵션 클램프)
-        Vector3 scr = worldCamera.WorldToScreenPoint(pos);
-        if (scr.z < 0f) // 카메라 뒤에 있으면 중앙으로 폴백
-        {
-            scr = new Vector3(Screen.width * 0.5f, Screen.height * 0.6f, 0f);
-        }
-        Vector2 screenPos = new Vector2(scr.x, scr.y);
-        if (clampToScreen)
-        {
-            float minX = clampPadding.x;
-            float maxX = Screen.width - clampPadding.x;
-            float minY = clampPadding.y;
-            float maxY = Screen.height - clampPadding.y;
-            screenPos.x = Mathf.Clamp(screenPos.x, minX, maxX);
-            screenPos.y = Mathf.Clamp(screenPos.y, minY, maxY);
-        }
-
-        Show(screenPos, string.Format(positiveFormat, delta));
-    }
+    //  HandleScoreAt 함수는 완전히 제거되었습니다.
 
     private void HandleScoreNoPos(int delta)
     {
         if (delta <= 0 || popupPrefab == null || canvasRoot == null) return;
-        // 위치 정보가 없으면 화면 중앙 약간 위
-        Vector2 screenPos = new Vector2(Screen.width * 0.5f, Screen.height * 0.6f) + screenOffset;
+
+        // 모든 점수를 오른쪽 상단 (화면 너비의 80%, 높이의 85% 지점) 위치로 지정합니다.
+        // screenOffset은 인스펙터에서 0으로 설정해야 합니다.
+        Vector2 screenPos = new Vector2(Screen.width * 0.8f, Screen.height * 0.85f) + screenOffset;
+
         Show(screenPos, string.Format(positiveFormat, delta));
     }
 
@@ -106,7 +64,6 @@ public class CJS_Script_ScorePopupSpawner : MonoBehaviour
         var cg = ui.GetComponent<CanvasGroup>();
         if (cg == null) cg = ui.gameObject.AddComponent<CanvasGroup>();
 
-        // 스크린 → 캔버스 로컬 변환
         RectTransformUtility.ScreenPointToLocalPointInRectangle(
             canvasRoot, screenPosition, null, out var localPos);
         var rt = ui.rectTransform;
@@ -140,4 +97,5 @@ public class CJS_Script_ScorePopupSpawner : MonoBehaviour
 
         Destroy(ui.gameObject);
     }
+
 }
