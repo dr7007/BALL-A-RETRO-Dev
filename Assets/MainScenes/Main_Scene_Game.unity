@@ -4032,6 +4032,8 @@ MonoBehaviour:
   txtRerollInfo: {fileID: 451944360}
   btnSkip: {fileID: 451944363}
   maxReroll: 5
+  ballCon: {fileID: 0}
+  pickCount: 0
 --- !u!114 &451944360 stripped
 MonoBehaviour:
   m_CorrespondingSourceObject: {fileID: 7966731642081129128, guid: 4243788a455ed2c4481b0dd83ad407cd, type: 3}
@@ -4464,11 +4466,14 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   glitchDuration: 4
+  glitchTimeScale: 1
   fireworkDuration: 2
   finalUIScript: {fileID: 1924571551}
   fireworkObject: {fileID: 1521159021}
   gameOverCutsceneId: Ending2
   gameClearCutsceneId: Ending1
+  lobbyBtn: {fileID: 1902710065}
+  resetBtn: {fileID: 1902710063}
 --- !u!114 &514345462
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13121,6 +13126,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fe87c0e1cc204ed48ad3b37840f39efc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &1902710063 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6960316115280559461, guid: ee7faca580eaeba41a6e47ed728592fd, type: 3}
+  m_PrefabInstance: {fileID: 1902710058}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1902710064
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -13143,6 +13159,17 @@ MonoBehaviour:
   gameMode: Classic
   level: 1
   autoSubmitOnShow: 1
+--- !u!114 &1902710065 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 1811456885264984505, guid: ee7faca580eaeba41a6e47ed728592fd, type: 3}
+  m_PrefabInstance: {fileID: 1902710058}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4e29b1a8efbd4b44bb3f3716e73f07ff, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!114 &1913963757
 MonoBehaviour:
   m_ObjectHideFlags: 0

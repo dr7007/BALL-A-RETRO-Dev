@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using System.Collections;
 using PSH;
 using UnityEngine.UI;
@@ -52,7 +52,7 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
         yield return new WaitForSecondsRealtime(glitchDuration);
 
         // 2. 대사 시작 직전에 시간 완전 정지!
-        Time.timeScale = 0f;
+        Time.timeScale = 1f;
 
         // 3. [순서 변경] 최종 UI 패널을 먼저 켜서 대사창이 보이게 함
         if (finalUIScript) finalUIScript.ShowGameOverPanel();
@@ -75,7 +75,7 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
         yield return new WaitForSecondsRealtime(fireworkDuration);
 
         // 2. 시간 완전 정지
-        Time.timeScale = 0f;
+        Time.timeScale = 1f;
 
         // 3. [순서 변경] 최종 UI 패널 먼저 켜기
         if (finalUIScript) finalUIScript.ShowGameClearPanel();
