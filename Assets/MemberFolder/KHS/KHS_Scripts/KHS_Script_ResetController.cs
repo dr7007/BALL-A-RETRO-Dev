@@ -20,6 +20,11 @@ public class KHS_Script_ResetController : MonoBehaviour
 
     void Update()
     {
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            && Input.GetKeyDown(KeyCode.R))
+        {
+            GameResetFunc();
+        }
         //if(isClear)
         //{
         //    if (Input.GetKeyDown(KeyCode.R))

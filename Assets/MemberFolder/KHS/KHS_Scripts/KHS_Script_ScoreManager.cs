@@ -414,6 +414,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void GameResultJudge()
     {
         Debug.LogError("라운드종료 결과 판정중!!!");
+
+
         Debug.LogWarning($"최종 스코어 : {curScore}");
 
         int finalScore = curScore;
@@ -424,6 +426,11 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             Round_Clear?.Invoke();
             return;
         }
+
+        foreach (var score in currentgameScores)
+            if (score > finalScore) finalScore = score;
+
+        FinalUserScore = finalScore;
 
         // 2) 게임오버 흐름
         OnGameOver?.Invoke();
