@@ -7,11 +7,16 @@ public class KHS_Script_CameraManager : MonoBehaviour
 {
     public static event Action<Camera> CameraChangeEvt;
     public static event Action<bool> MonitorEvt;
+    public static event Action RoundStartEvt;
 
     public GameObject[] cameraGos;
 
     [SerializeField] 
     private float moveDuration = 2f; // 이동 시간
+
+    [SerializeField]
+    private KHS_Script_ScoreManager scoreManager;
+
 
     private Vector3 cameraInitPos = Vector3.zero;
     private Quaternion cameraInitRot = Quaternion.identity;
@@ -22,6 +27,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     private void Start()
     {
+        scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
         isMain = true;
     }
     private void Update()
@@ -83,7 +89,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
             moveCoroutine = null;
         }
         // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[2].transform, cameraTargetPos, cameraTargetRot, moveDuration, _DialogueUI));
+        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[2].transform, cameraTargetPos, cameraTargetRot, moveDuration, () => _DialogueUI?.Play("Intro")));
 
         // cameraGos[0]은 비활성화
         cameraGos[0].SetActive(false);
@@ -107,7 +113,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
         }
 
         // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, cameraTargetPos, cameraTargetRot, moveDuration));
+        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, cameraTargetPos, cameraTargetRot, moveDuration, OnCameraReturnComplete));
 
         // cameraGos[0]은 비활성화
         cameraGos[2].SetActive(false);
@@ -130,7 +136,31 @@ public class KHS_Script_CameraManager : MonoBehaviour
     {
         MonitorOn(_dialogueUI);
     }
-    private IEnumerator MoveCameraSmooth(Transform cam, Vector3 targetPos, Quaternion targetRot, float duration, PSH_Script_DialogueUI _DialogueUI = null)
+
+    private void OnCameraReturnComplete()
+    {
+        StartCoroutine(PlayRoundAndStartGame());
+    }
+    private IEnumerator PlayRoundAndStartGame()
+    {
+        Debug.Log("[Round] 표시 시작");
+
+        // Round 이미지 연출 호출 (UI 매니저에서 처리 중이라면 여기에 연결)
+        var roundUI = FindAnyObjectByType<KHS_Script_UIImgFunc>();
+        if (roundUI != null)
+        {
+            roundUI.StartRoundFunc(scoreManager.RoundRespone() - 1);
+            Debug.Log("[Round] 라운드 연출 실행 중...");
+        }
+
+        // 연출 시간 대기 (필요 시 roundUI에서 대기시간 가져오기)
+        yield return new WaitForSeconds(2f);
+
+        Debug.Log("[Round] 표시 완료, 게임 시작!");
+        RoundStartEvt?.Invoke(); // 게임 로직 쪽에서 이 이벤트 받아서 시작 처리
+    }
+
+    private IEnumerator MoveCameraSmooth(Transform cam, Vector3 targetPos, Quaternion targetRot, float duration, Action onComplete = null)
     {
         Debug.Log("[CameraTransition] MoveCameraSmooth 시작");
         Vector3 startPos = cam.position;
@@ -151,10 +181,6 @@ public class KHS_Script_CameraManager : MonoBehaviour
         moveCoroutine = null;
 
         Debug.Log("[CameraTransition] MoveCameraSmooth 완료");
-
-        if (_DialogueUI != null)
-        {
-            _DialogueUI.Play("Intro");
-        }
+        onComplete?.Invoke();
     }
 }
