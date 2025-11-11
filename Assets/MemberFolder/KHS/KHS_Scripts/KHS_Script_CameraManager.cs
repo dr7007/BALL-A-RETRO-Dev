@@ -28,17 +28,10 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private void Start()
     {
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
-        isMain = true;
     }
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.M))
-        {
-            if(isMain)
-                SubCamOn();
-            else
-                MainCamOn();
-        }
+
     }
 
     private void OnEnable()
@@ -58,18 +51,18 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MainCamOn()
     {
-        isMain = true;
         CameraChangeEvt.Invoke(cameraGos[0].GetComponent<Camera>());
         cameraGos[0].SetActive(true);
         cameraGos[1].SetActive(false);
+        cameraGos[3].SetActive(false);
     }
-    public void SubCamOn()
+    public void SubCamOn(int _idx)
     {
-        isMain = false;
-        CameraChangeEvt.Invoke(cameraGos[1].GetComponent<Camera>());
+        CameraChangeEvt.Invoke(cameraGos[_idx].GetComponent<Camera>());
         cameraGos[0].SetActive(false);
-        cameraGos[1].SetActive(true);
+        cameraGos[_idx].SetActive(true);
     }
+
     public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
     {
         MonitorEvt?.Invoke(true);

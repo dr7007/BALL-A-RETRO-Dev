@@ -117,9 +117,9 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
         Debug.Log($"special Blocker 생성 여부 {on_Special_Func} | 생성 확률 {special_Chance * 100}%");
     }
 
-    public void SpecialBlockerGenerate()
+    public void SpecialBlockerGenerate(int _idx)
     {
-        if (on_Special_Func)
+        if (on_Special_Func || _idx == 1)
         {
             Debug.Log($"로그라이크 선택지 동작 | Special Blocker 발동 확률: {special_Chance * 100f}%");
 

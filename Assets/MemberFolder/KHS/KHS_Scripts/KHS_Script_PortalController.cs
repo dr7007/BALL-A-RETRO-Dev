@@ -4,7 +4,7 @@ using UnityEngine;
 
 public class KHS_Script_PortalController : MonoBehaviour
 {
-    public static event Action portalEvt;
+    public static event Action<int> portalEvt;
 
     [Header("출구 포탈 지정")]
     [Tooltip("공이 튀어나갈 출구 포탈")]
@@ -13,6 +13,8 @@ public class KHS_Script_PortalController : MonoBehaviour
     [Header("포탈 사용 횟수")]
     [Tooltip("포탈을 사용할 수 있는 횟수, -1로 설정하면 무제한")]
     [SerializeField] private int activationCount = -1;
+    [Tooltip("포탈과 맞물리는 카메라 홀더의 인덱스")]
+    [SerializeField] private int portalIndex = -1;
 
     // 내부 상태 변수
     public bool isActivated = true; // 포탈이 공을 받아들일 수 있는 상태인지 확인
@@ -117,7 +119,7 @@ public class KHS_Script_PortalController : MonoBehaviour
 
     private IEnumerator TeleportSequenceCoroutine()
     {
-        portalEvt.Invoke();
+        portalEvt.Invoke(portalIndex);
         yield return new WaitForSeconds(2f);
     }
 
