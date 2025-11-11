@@ -66,7 +66,6 @@ namespace PSH
         {
 
             // KHS_Script_ResetController의 OnReset과 유사한 역할입니다.
-            OnSceneLoadStart?.Invoke();
             GlitchEffect_RendererFeature.IsEnabled = false;
             if (currentLoadingCoroutine != null)
             {
@@ -130,6 +129,7 @@ namespace PSH
                 loadingPanel.SetActive(false);
             }
             currentLoadingCoroutine = null;
+            OnSceneLoadStart?.Invoke();
         }
 
 #if UNITY_EDITOR
