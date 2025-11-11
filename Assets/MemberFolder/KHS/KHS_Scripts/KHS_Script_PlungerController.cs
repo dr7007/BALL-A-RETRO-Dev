@@ -31,11 +31,13 @@ public class KHS_Script_PlungerController : MonoBehaviour
     {
         KHS_Script_CameraManager.MonitorEvt += PlungerStopFunc;
         PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
+        PSH_Script_SceneLoader.OnSceneLoadStart += NoIntroExceptionFunc;
     }
     private void OnDisable()
     {
         KHS_Script_CameraManager.MonitorEvt -= PlungerStopFunc;
         PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
+        PSH_Script_SceneLoader.OnSceneLoadStart -= NoIntroExceptionFunc;
     }
 
     private void Start()
