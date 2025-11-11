@@ -6398,9 +6398,9 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   roundImgGos: []
-  openDuration: 1
-  closeDuration: 0.6
-  holdDuration: 2
+  openDuration: 0.6
+  closeDuration: 0.4
+  holdDuration: 1
 --- !u!114 &898141023
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -9863,6 +9863,7 @@ PrefabInstance:
     m_RemovedComponents: []
     m_RemovedGameObjects:
     - {fileID: 4253998830929722523, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+    - {fileID: 8669052812213947085, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
     m_AddedGameObjects:
     - targetCorrespondingSourceObject: {fileID: 522774600791421566, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       insertIndex: -1

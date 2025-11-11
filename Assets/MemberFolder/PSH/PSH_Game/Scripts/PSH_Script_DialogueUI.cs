@@ -129,7 +129,7 @@ namespace PSH
 
         public void Update()
         {
-            if (idx != -1 && Input.GetKeyDown(KeyCode.Space))
+            if (idx != -1 && Input.anyKeyDown)
             {
                 if (currentLines.Count == 0) return;
                 if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
