@@ -24,6 +24,8 @@ namespace PSH
         public static PSH_Script_SceneLoader Instance { get; private set; }
 
         private Coroutine currentLoadingCoroutine = null;
+        public static event Action OnSceneLoadStart;
+
 
         private void Awake()
         {
@@ -62,11 +64,14 @@ namespace PSH
         // 💡 [수정] bool 파라미터를 다시 받습니다. 기본값은 true
         public void LoadSceneAsyncByName(string sceneName, bool showLoadingPanel = true)
         {
+            // 💡 [추가] 씬 로드가 시작된다고 "방송"합니다!
+            // KHS_Script_ResetController의 OnReset과 유사한 역할입니다.
+            OnSceneLoadStart?.Invoke();
+
             if (currentLoadingCoroutine != null)
             {
                 StopCoroutine(currentLoadingCoroutine);
             }
-            // 💡 코루틴에도 bool 값을 넘겨줍니다.
             currentLoadingCoroutine = StartCoroutine(LoadSceneCoroutine(sceneName, showLoadingPanel));
         }
 
