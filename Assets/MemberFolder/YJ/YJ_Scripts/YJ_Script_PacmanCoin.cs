@@ -38,9 +38,14 @@ public class YJ_Script_PacManCoin : MonoBehaviour
         }
     }
 
-    public void ResetCoin()
+    public void ActivateCoin()
     {
         isCollected = false;
         gameObject.SetActive(true);
+    }
+
+    public void DesactivateCoin()
+    {
+        gameObject.SetActive(false);
     }
 }
