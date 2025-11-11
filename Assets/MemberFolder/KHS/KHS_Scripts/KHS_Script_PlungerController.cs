@@ -41,6 +41,13 @@ public class KHS_Script_PlungerController : MonoBehaviour
         PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
         PSH_Script_SceneLoader.OnSceneLoadStart -= NoIntroExceptionFunc;
     }
+    private void Awake()
+    {
+        // 씬 로드 초기에 가장 먼저 구독
+        PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
+        PSH_Script_SceneLoader.OnSceneLoadStart += NoIntroExceptionFunc;
+    }
+
 
     private void Start()
     {
@@ -73,11 +80,13 @@ public class KHS_Script_PlungerController : MonoBehaviour
 
     private void PlungerStopFunc(bool _start)
     {
+        Debug.LogWarning("일단 플런저 너 멈춰봐");
         isLock = _start;
     }
 
     private void NoIntroExceptionFunc()
     {
+        Debug.LogWarning("아니 멈추지 마");
         isLock = false;
     }
     private void Launch()
@@ -118,5 +127,11 @@ public class KHS_Script_PlungerController : MonoBehaviour
             isBallReady = false;
             ballRigidbody = null;
         }
+    }
+    private void OnDestroy()
+    {
+        // Awake에서 구독한 건 OnDestroy에서 해제 (OnDisable보다 확실)
+        PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
+        PSH_Script_SceneLoader.OnSceneLoadStart -= NoIntroExceptionFunc;
     }
 }

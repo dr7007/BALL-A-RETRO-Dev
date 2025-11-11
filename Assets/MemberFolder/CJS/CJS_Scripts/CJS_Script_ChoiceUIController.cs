@@ -95,6 +95,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (panelRoot != null) panelRoot.SetActive(true);
         Time.timeScale = 0f;
 
+        PickCountBonusFunc();
         SetChoiceButtonsVisible(true);
         UpdateRerollUI();
         RefreshCards();
@@ -163,15 +164,13 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         roller.PushPicked(picked);                      // 효과 적용
         CJS_Script_ChoiceState.I?.Add(picked);         // ★ 선택 스냅샷 기록(아이콘 포함)
 
-        if (pickCount < 0)
+        if (pickCount <= 1)
         {
             Hide();
         }
         else
-        {
             pickCount--;
-        }
-            busy = false;
+        busy = false;
     }
 
     private void OnClickReroll()

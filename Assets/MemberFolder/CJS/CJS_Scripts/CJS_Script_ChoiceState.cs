@@ -6,21 +6,27 @@ public class CJS_Script_ChoiceState : MonoBehaviour
 {
     public static CJS_Script_ChoiceState I { get; private set; }
 
-    // 인스펙터에 안 보이게
     private readonly List<CJS_ChoiceSnapshot> picked = new();
     public IReadOnlyList<CJS_ChoiceSnapshot> Picked => picked;
 
     public event Action<CJS_ChoiceSnapshot> OnPicked;
+    public event Action OnCleared; 
 
     void Awake()
     {
         if (I != null && I != this) { Destroy(gameObject); return; }
         I = this;
         DontDestroyOnLoad(gameObject);
-        picked.Clear(); // 플레이 진입 시 항상 초기화
+        picked.Clear(); // 첫 진입 시 초기화
     }
 
-    public void ResetForNewRun() => picked.Clear();
+    /// 새 런/로비 복귀/닉네임 재설정 등에서 호출
+    public void ResetForNewRun()
+    {
+        picked.Clear();
+        OnCleared?.Invoke(); 
+        Debug.Log("[ChoiceState] cleared for new run");
+    }
 
     public CJS_ChoiceSnapshot Add(CJS_ChoiceData d)
     {
