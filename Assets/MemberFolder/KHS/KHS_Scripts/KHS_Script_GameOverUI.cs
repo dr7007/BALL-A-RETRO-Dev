@@ -58,8 +58,8 @@ public class KHS_Script_GameOverUI : MonoBehaviour
     public void ShowGameClearPanel()
     {
         Debug.Log("🚨 [GameOverUI] 감독의 지시로 최종 패널 활성화 (Game Clear)");
-        if (gameUICanvas) gameUICanvas.enabled = false;
-        if (gameClearUIObj) gameClearUIObj.SetActive(true);
+        //if (gameUICanvas) gameUICanvas.enabled = false;
+        //if (gameClearUIObj) gameClearUIObj.SetActive(true);
     }
 
     // (인트로 관련 로직은 그대로 유지)

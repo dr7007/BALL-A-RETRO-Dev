@@ -39,6 +39,8 @@ namespace PSH
         [SerializeField] string csvFileName = "dialogues";
         [SerializeField] float charInterval = 0.04f;
 
+
+
         private List<string> currentLines = new();
         private List<Sprite> currentSprites = null;
         private Image currentActiveImage = null;
@@ -127,7 +129,7 @@ namespace PSH
 
         public void Update()
         {
-            if (idx != -1 && Input.anyKeyDown)
+            if (idx != -1 && Input.GetKeyDown(KeyCode.Space))
             {
                 if (currentLines.Count == 0) return;
                 if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
@@ -176,9 +178,11 @@ namespace PSH
             currentActiveText = null;
             idx = -1;
             currentCutsceneId = null;
+  
 
             // 감독에게 보고 (인트로가 끝났을 때도 보고는 해야 함)
             OnDialogueComplete?.Invoke(finishedId);
+
         }
 
         // 🔍 [강력해진 CSV 로더]

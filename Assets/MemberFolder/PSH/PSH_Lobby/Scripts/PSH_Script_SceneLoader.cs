@@ -64,10 +64,10 @@ namespace PSH
         // 💡 [수정] bool 파라미터를 다시 받습니다. 기본값은 true
         public void LoadSceneAsyncByName(string sceneName, bool showLoadingPanel = true)
         {
-            // 💡 [추가] 씬 로드가 시작된다고 "방송"합니다!
+
             // KHS_Script_ResetController의 OnReset과 유사한 역할입니다.
             OnSceneLoadStart?.Invoke();
-
+            GlitchEffect_RendererFeature.IsEnabled = false;
             if (currentLoadingCoroutine != null)
             {
                 StopCoroutine(currentLoadingCoroutine);
@@ -96,7 +96,7 @@ namespace PSH
         private IEnumerator LoadSceneCoroutine(string sceneName, bool showPanel)
         {
             float startTime = Time.time;
-
+            GlitchEffect_RendererFeature.IsEnabled = false;
             // 💡 [수정] showPanel이 true일 때만 켜고 끕니다.
             if (loadingPanel != null && showPanel)
             {
