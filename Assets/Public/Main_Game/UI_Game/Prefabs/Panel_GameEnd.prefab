@@ -1368,7 +1368,7 @@ MonoBehaviour:
   onClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1979079568422624772}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: PSH_Script_GameEndUI, Assembly-CSharp
         m_MethodName: OpenRankingPen
         m_Mode: 1
@@ -1397,7 +1397,6 @@ GameObject:
   - component: {fileID: 2234477729400121104}
   - component: {fileID: 1989841299962042570}
   - component: {fileID: 3422857026197708371}
-  - component: {fileID: 1979079568422624772}
   m_Layer: 5
   m_Name: Panel_GameEnd
   m_TagString: Untagged
@@ -1463,19 +1462,6 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &1979079568422624772
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 2664174225888983932}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 498741425e6f6994593478d859ae1126, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  panel_Rank: {fileID: 0}
 --- !u!1 &2785528489450921163
 GameObject:
   m_ObjectHideFlags: 0
