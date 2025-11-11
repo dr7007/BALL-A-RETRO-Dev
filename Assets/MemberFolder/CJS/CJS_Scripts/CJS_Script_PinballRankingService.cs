@@ -8,34 +8,75 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     [SerializeField] private string baseUrl = "http://localhost/pinball";
     [SerializeField] private string apiKey = "CHANGE_ME_STRONG_KEY";
 
-    // 싱글톤
+    // ── Singleton ────────────────────────────────────────────────────────────
     private static CJS_Script_PinballRankingService instance;
-    public static CJS_Script_PinballRankingService Instance => instance;
+    public static CJS_Script_PinballRankingService Instance
+    {
+        get
+        {
+            if (instance == null || instance.Equals(null))
+                EnsureInstance(); // 항상 존재 보장
+            return instance;
+        }
+    }
 
-    // Player nickname
+    /// <summary>싱글톤 인스턴스가 준비되면 알림 (Awake에서 호출)</summary>
+    public static event System.Action<CJS_Script_PinballRankingService> InstanceReady;
+
+    /// Resources 경로: Assets/Resources/Services/RankingService.prefab (선택)
+    private const string ResourcesPrefabPath = "Services/RankingService";
+
+    private static void EnsureInstance()
+    {
+        // 1) 기존 찾기(비활성 포함)
+        var existing = Object.FindObjectOfType<CJS_Script_PinballRankingService>(true);
+        if (existing != null)
+        {
+            instance = existing;
+            DontDestroyOnLoad(instance.gameObject);
+            return;
+        }
+
+        // 2) Resources 프리팹에서 생성(있으면)
+        var prefab = Resources.Load<GameObject>(ResourcesPrefabPath);
+        if (prefab != null)
+        {
+            var go = Object.Instantiate(prefab);
+            instance = go.GetComponent<CJS_Script_PinballRankingService>();
+            if (!instance) instance = go.AddComponent<CJS_Script_PinballRankingService>();
+            DontDestroyOnLoad(instance.gameObject);
+            return;
+        }
+
+        // 3) 최후: 빈 GO 생성
+        {
+            var go = new GameObject("RankingService");
+            instance = go.AddComponent<CJS_Script_PinballRankingService>();
+            DontDestroyOnLoad(instance.gameObject);
+        }
+    }
+
+    void Awake()
+    {
+        if (instance != null && instance != this)
+        {
+            // 중복 생성 시 새걸 자멸시킴 (씬에 프리팹이 있어도 안전)
+            Destroy(gameObject);
+            return;
+        }
+        instance = this;
+        DontDestroyOnLoad(gameObject);
+        InstanceReady?.Invoke(this);
+
+        Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
+    }
+
+    // ── Player nickname ──────────────────────────────────────────────────────
     public string Nickname
     {
         get => PlayerPrefs.GetString("nickname", "");
         set { PlayerPrefs.SetString("nickname", value); PlayerPrefs.Save(); }
     }
-
-    void Awake()
-    {
-        // 싱글톤 보장 + 유지
-        if (instance != null && instance != this)
-        {
-            Debug.LogWarning("[RankingService] Duplicate detected, destroying new instance.");
-            Destroy(gameObject);
-            return;
-        }
-
-        instance = this;
-        DontDestroyOnLoad(gameObject);
-
-        Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
-    }
-
-    // ---- Public API ---------------------------------------------------------
 
     public void SetNicknameAndStart(string nick)
     {
@@ -44,6 +85,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         RegisterNickname(null, err => Debug.LogWarning("[RegisterNickname] fail: " + err));
     }
 
+    // ── Public API ───────────────────────────────────────────────────────────
     public void RegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
         StartCoroutine(CoRegisterNickname(onDone, onFail));
@@ -64,8 +106,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         StartCoroutine(CoFetch(gameMode, level, onDone, onFail));
     }
 
-    // ---- Coroutines ---------------------------------------------------------
-
+    // ── Coroutines ───────────────────────────────────────────────────────────
     private IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
         if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
@@ -76,12 +117,10 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
         var url = $"{baseUrl}/register_nickname.php";
         Debug.Log($"[Register] url={url} nickname='{Nickname}'");
-
         using (var req = UnityWebRequest.Post(url, f))
         {
             yield return req.SendWebRequest();
             Debug.Log($"[Register] HTTP={req.responseCode} text={req.downloadHandler.text}");
-
             if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
 
             RegisterResp resp = null;
@@ -110,12 +149,10 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
         var url = $"{baseUrl}/submit_score.php";
         Debug.Log($"[Submit] url={url} nick='{Nickname}' score={score} mode='{gameMode}' level={level}");
-
         using (var req = UnityWebRequest.Post(url, f))
         {
             yield return req.SendWebRequest();
             Debug.Log($"[Submit] HTTP={req.responseCode} text={req.downloadHandler.text}");
-
             if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
 
             SubmitResp resp = null;
@@ -140,12 +177,10 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
         var url = $"{baseUrl}/get_leaderboard.php";
         Debug.Log($"[Leaderboard] url={url} mode='{gameMode}' level={level}");
-
         using (var req = UnityWebRequest.Post(url, f))
         {
             yield return req.SendWebRequest();
             Debug.Log($"[Leaderboard] HTTP={req.responseCode} text={req.downloadHandler.text}");
-
             if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
 
             LbResp resp = null;
