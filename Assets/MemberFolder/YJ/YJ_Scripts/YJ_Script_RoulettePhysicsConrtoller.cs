@@ -1,10 +1,29 @@
 using System;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 
 public class YJ_Script_RoulettePhysicsController : MonoBehaviour
 {
+    public enum SlotColor
+    {
+        None, // 유효하지 않음 (-1)
+        Green,
+        Red,
+        Black
+    }
+
+    [Header("슬롯 색상 설정")]
+    [Tooltip("초록색(0, 00)에 해당하는 숫자들을 입력하세요.")]
+    public List<int> greenSlotNumbers;
+
+    [Tooltip("빨간색에 해당하는 숫자들을 입력하세요.")]
+    public List<int> redSlotNumbers;
+
+    [Tooltip("검은색에 해당하는 숫자들을 입력하세요.")]
+    public List<int> blackSlotNumbers;
+
     [Header("회전 설정")]
     [Tooltip("초기 상태: 룰렛이 도는 속도 (초당 각도)")]
     public float constantSpinSpeed = -90f;
@@ -21,6 +40,8 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
     [SerializeField]
     private MeshRenderer numberRenderer;
     private MeshCollider plateCollider;
+
+    public static event Action<int, SlotColor> OnRouletteResult;
 
     private void Start()
     {
@@ -78,6 +99,23 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
         }
     }
 
+    private SlotColor GetColorFromNumber(int number)
+    {
+        if (greenSlotNumbers.Contains(number))
+        {
+            return SlotColor.Green;
+        }
+        if (redSlotNumbers.Contains(number))
+        {
+            return SlotColor.Red;
+        }
+        if (blackSlotNumbers.Contains(number))
+        {
+            return SlotColor.Black;
+        }
+        return SlotColor.None; // -1 (경계선) 또는 목록에 없는 숫자
+    }
+
     private IEnumerator SlowDownAndStop()
     {
         float timer = 0f;
@@ -94,9 +132,12 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
             yield return null;
         }
 
-        Debug.Log($"--- 룰렛 결과: {lastKnownSlotNumber} ---");
-        //OnRouletteResult?.Invoke(lastKnownSlotNumber);
-        scoreManager.AddScore(lastKnownSlotNumber);
+        SlotColor resultColor = GetColorFromNumber(lastKnownSlotNumber);
+
+        Debug.Log($"--- 룰렛 결과: {lastKnownSlotNumber} ({resultColor}) ---");
+        //OnRouletteResult?.Invoke(lastKnownSlotNumber, resultColor);
+
+        scoreManager.AddScore(lastKnownSlotNumber); // 기본값: 룰렛 숫자를 기존 스코어에 더함(로그라이크 선택지로 변형 가능)
 
         // 점수 계산 후 2초 대기
         yield return new WaitForSeconds(2.0f);
