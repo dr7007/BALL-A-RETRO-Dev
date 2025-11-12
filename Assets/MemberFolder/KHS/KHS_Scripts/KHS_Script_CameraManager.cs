@@ -28,6 +28,10 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private void Start()
     {
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
+        cameraInitPos = cameraGos[0].transform.position;
+        cameraInitRot = cameraGos[0].transform.rotation;
+        cameraTargetPos = cameraGos[2].transform.position;
+        cameraTargetRot = cameraGos[2].transform.rotation;
     }
     private void Update()
     {
@@ -66,14 +70,11 @@ public class KHS_Script_CameraManager : MonoBehaviour
     public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
     {
         MonitorEvt?.Invoke(true);
-        // 목표 위치 (cameraGos[2] 원래 위치) 저장
-        cameraTargetPos = cameraGos[2].transform.position;
-        cameraTargetRot = cameraGos[2].transform.rotation;
 
         // cameraGos[2]를 활성화하고 이동 시작점(cameraGos[0] 위치)으로 설정
         cameraGos[2].SetActive(true);
-        cameraGos[2].transform.position = cameraGos[0].transform.position;
-        cameraGos[2].transform.rotation = cameraGos[0].transform.rotation;
+        cameraGos[2].transform.position = cameraInitPos;
+        cameraGos[2].transform.rotation = cameraInitRot;
 
         // 기존 코루틴이 돌고 있다면 중단
         if (moveCoroutine != null)
@@ -89,14 +90,11 @@ public class KHS_Script_CameraManager : MonoBehaviour
     }
     public void MonitorOff()
     {
-        // 목표 위치 (cameraGos[0] 원래 위치) 저장
-        cameraTargetPos = cameraGos[0].transform.position;
-        cameraTargetRot = cameraGos[0].transform.rotation;
 
         // cameraGos[0]를 활성화하고 이동 시작점(cameraGos[2] 위치)으로 설정
         cameraGos[0].SetActive(true);
-        cameraGos[0].transform.position = cameraGos[2].transform.position;
-        cameraGos[0].transform.rotation = cameraGos[2].transform.rotation;
+        cameraGos[0].transform.position = cameraTargetPos;
+        cameraGos[0].transform.rotation = cameraTargetRot;
 
         // 기존 코루틴이 돌고 있다면 중단
         if (moveCoroutine != null)
@@ -106,7 +104,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
         }
 
         // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, cameraTargetPos, cameraTargetRot, moveDuration, OnCameraReturnComplete));
+        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, cameraInitPos, cameraInitRot, moveDuration, OnCameraReturnComplete));
 
         // cameraGos[0]은 비활성화
         cameraGos[2].SetActive(false);

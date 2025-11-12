@@ -343,7 +343,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     [Header("스코어 정보")]
     public int curScore = 0;
-    public int targetScore = 5000;
+    public int targetScore = 0;
+    public int[] targetScores = new int[3];
     public float multiplier = 1.0f;
     public int FinalUserScore = 0;
 
@@ -384,6 +385,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         ChangingMainCam();
         curScore = 0;
         numOfBounce = 0;
+        targetScore = targetScores[currentRound - 1];
     }
 
     private void OnEnable()
@@ -458,11 +460,6 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         numOfBounce = 0;
     }
 
-    private IEnumerator DeathEffectWaitingCoroutine()
-    {
-        yield return new WaitForSeconds(2.0f);
-
-    }
     private void FliperBallCollision(Collision _collision)
     {
         if (numOfBounce >= maxBounce) maxBounce = numOfBounce;
@@ -522,8 +519,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (currentRound < goalRound)
         {
             currentgameScores[currentRound - 1] = curScore;
-            currentRound++;
-            targetScore += targetScore;
+            targetScore = targetScores[currentRound++];
             NextRoundInit();
         }
         else
