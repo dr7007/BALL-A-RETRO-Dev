@@ -16,6 +16,7 @@ namespace PSH
         [Header("Scene Objects")]
         [Tooltip("눈 뜨는 효과 오브젝트")]
         [SerializeField] private PSH_Script_EyeOpenEffect eyeOpenEffect;
+        [SerializeField] private GameObject eyeopenOBJ;
         [Tooltip("게임 시작 후 켜질 메인 게임 캔버스 (HUD)")]
 
         [SerializeField] private int repeatCount = 7;
@@ -59,6 +60,7 @@ namespace PSH
                 {
                     eyeOpenEffect.SetOpenImmediate();
                     eyeOpenEffect.gameObject.SetActive(false);
+                    eyeopenOBJ.gameObject.SetActive(false);
                 }
 
 
@@ -88,7 +90,7 @@ namespace PSH
             // 인트로 대사가 끝났다면 메인 캔버스를 켭니다.
             if (cutsceneId == "Intro")
             {
-
+                eyeopenOBJ.gameObject.SetActive(false);
             }
         }
     
