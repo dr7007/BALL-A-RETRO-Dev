@@ -295,6 +295,7 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
     }
     private void ChangeCameraFunc(Camera _cam)
     {
+        Debug.LogError($"ChangeCameraFunc {_cam.name}");
         cam = _cam;
 
         // 룰렛 카메라일 경우 - 기능 일시 정지

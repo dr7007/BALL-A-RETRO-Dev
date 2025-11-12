@@ -4,25 +4,24 @@ using UnityEngine;
 [RequireComponent(typeof(TMP_InputField))]
 public class CJS_Script_NickLimiter : MonoBehaviour
 {
-    public bool allowDigits = false;   // ¼ıÀÚ Çã¿ëÇÏ·Á¸é Ã¼Å©
-    public bool autoUppercase = true;  // ÀÚµ¿ ´ë¹®ÀÚ º¯È¯
+    public bool allowDigits = false;   // ìˆ«ì í—ˆìš©í•˜ë ¤ë©´ ì²´í¬
+    public bool autoUppercase = true;  // ìë™ ëŒ€ë¬¸ì ë³€í™˜
 
     TMP_InputField input;
 
     void Awake()
     {
         input = GetComponent<TMP_InputField>();
-        input.characterLimit = 3;                  //  3±ÛÀÚ ÇÏµå Á¦ÇÑ
-        input.onValidateInput += ValidateChar;     //  ½Ç½Ã°£ ÇÊÅÍ
+        input.characterLimit = 8;                  //  8ê¸€ì í•˜ë“œ ì œí•œ
+        input.onValidateInput += ValidateChar;     //  ì‹¤ì‹œê°„ í•„í„°
     }
 
     char ValidateChar(string text, int charIndex, char added)
     {
-        if (text.Length >= 3) return '\0';
+        if (text.Length >= 8) return '\0';
         char c = autoUppercase ? char.ToUpperInvariant(added) : added;
 
-        if (c >= 'A' && c <= 'Z') return c;       // ¿µ¹® ´ë¹®ÀÚ¸¸
-        if (allowDigits && char.IsDigit(c)) return c;
-        return '\0';                               // ±× ¿Ü Â÷´Ü
+        if (char.IsLetterOrDigit(c)) return c;       // ì˜ë¬¸ ëŒ€ë¬¸ìë§Œ
+        return '\0';                               // ê·¸ ì™¸ ì°¨ë‹¨
     }
 }

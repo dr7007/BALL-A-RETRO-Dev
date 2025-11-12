@@ -27,6 +27,7 @@ public class KHS_Script_UIToFinal : MonoBehaviour
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
+        
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
     }
 

@@ -27,6 +27,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     private void Start()
     {
+        MainCamOn();
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
         cameraInitPos = cameraGos[0].transform.position;
         cameraInitRot = cameraGos[0].transform.rotation;
@@ -55,6 +56,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MainCamOn()
     {
+        Debug.LogError($"CameraReturnMain [MainCamOn]");
         CameraChangeEvt.Invoke(cameraGos[0].GetComponent<Camera>());
         cameraGos[0].SetActive(true);
         cameraGos[1].SetActive(false);
@@ -62,6 +64,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
     }
     public void SubCamOn(int _idx)
     {
+        Debug.LogError($"CameraChange : ({_idx}) [SubCamOn]");
         CameraChangeEvt.Invoke(cameraGos[_idx].GetComponent<Camera>());
         cameraGos[0].SetActive(false);
         cameraGos[_idx].SetActive(true);

@@ -92,6 +92,7 @@ public class KHS_Script_PortalController : MonoBehaviour
         rb.transform.position = exitPortal.spawnPoint.position;
         rb.gameObject.SetActive(true);
 
+        Debug.LogError("일단 포탈 이벤트는 떴습니다 여러분");
         portalEndEvt?.Invoke();
 
         // 기본 방향은 출구 포탈의 정면 방향을 기준으로 랜덤화
