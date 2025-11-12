@@ -17,10 +17,22 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     [Tooltip("공을 사출하는 힘")]
     [SerializeField] private float launchForce = 10f;
 
+    [Header("VFX 설정")]
+    [Tooltip("활성화 시 켤 이펙트 게임 오브젝트")]
+    [SerializeField] private GameObject gravityEffectObject;
+
     // 내부 상태 변수
     private bool isBallCaptured = false;
     public bool isActivated = false;
     public bool isForceActive = false;
+
+    private void Awake()
+    {
+        if (gravityEffectObject != null)
+        {
+            gravityEffectObject.SetActive(false);
+        }
+    }
 
     // 에디터에서 중력 범위를 하늘색 선으로 표시
     private void OnDrawGizmosSelected()
@@ -83,6 +95,10 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     public void SetActivated(bool value)
     {
         isActivated = value;
+        if (gravityEffectObject != null)
+        {
+            gravityEffectObject.SetActive(value);
+        }
     }
 
 
