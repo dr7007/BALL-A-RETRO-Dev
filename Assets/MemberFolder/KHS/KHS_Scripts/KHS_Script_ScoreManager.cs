@@ -383,7 +383,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     void Start()
     {
-        for (int i = 0; i < goalRound; i++) currentgameScores.SetValue(0, i);
+        //for (int i = 0; i < goalRound; i++) currentgameScores.SetValue(0, i);
         ChangingMainCam();
         curScore = 0;
         numOfBounce = 0;
