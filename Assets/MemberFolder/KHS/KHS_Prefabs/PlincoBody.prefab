@@ -890,7 +890,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2882956833376617062}
-  m_Mesh: {fileID: 4537128409903104299, guid: 3e9da1f6e47f62a47b112315977fa43e, type: 3}
+  m_Mesh: {fileID: 4537128409903104299, guid: f70edf3794a99914eb44e85cdc30850d, type: 3}
 --- !u!23 &6564185830235144994
 MeshRenderer:
   m_ObjectHideFlags: 0
@@ -2407,6 +2407,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   exitPortal: {fileID: 0}
   activationCount: -1
+  portalIndex: -1
   isActivated: 1
   randomSpeedRange: {x: 5, y: 15}
   randomAngleRange: 45

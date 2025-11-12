@@ -1,6 +1,5 @@
 using UnityEngine;
-using UnityEngine.UI;   // LayoutRebuilder
-using System.Linq;
+using UnityEngine.UI;
 
 public class CJS_Script_ChoiceSummaryUI : MonoBehaviour
 {
@@ -9,10 +8,20 @@ public class CJS_Script_ChoiceSummaryUI : MonoBehaviour
 
     void OnEnable()
     {
-        Rebuild();   // ★ 패널이 활성화될 때마다 자동 갱신
+        Rebuild();   // 패널이 활성화될 때마다 자동 갱신
+
+        var s = CJS_Script_ChoiceState.I;
+        if (s != null) s.OnCleared += Rebuild;                
+        KHS_Script_ResetController.OnReset += Rebuild;        
     }
 
-    /// 외부에서도 호출 가능하도록 공개 메서드
+    void OnDisable()
+    {
+        var s = CJS_Script_ChoiceState.I;
+        if (s != null) s.OnCleared -= Rebuild;
+        KHS_Script_ResetController.OnReset -= Rebuild;
+    }
+
     public void Rebuild()
     {
         if (!grid || !slotPrefab)
@@ -21,29 +30,21 @@ public class CJS_Script_ChoiceSummaryUI : MonoBehaviour
             return;
         }
 
-        // 1) 기존 항목 제거
         for (int i = grid.childCount - 1; i >= 0; --i)
             Destroy(grid.GetChild(i).gameObject);
 
-        // 2) 상태 가져오기(싱글톤이 null이면 씬에서 찾아봄)
         var state = CJS_Script_ChoiceState.I ?? FindObjectOfType<CJS_Script_ChoiceState>(true);
         var list = state != null ? state.Picked : null;
 
-        if (list == null)
+        if (list != null)
         {
-            Debug.LogWarning("[SummaryUI] ChoiceState or Picked list is null");
-            ForceLayoutRefresh();
-            return;
+            foreach (var snap in list)
+            {
+                var slot = Instantiate(slotPrefab, grid);
+                slot.Bind(snap);
+            }
         }
 
-        // 3) 슬롯 생성
-        foreach (var snap in list)
-        {
-            var slot = Instantiate(slotPrefab, grid);
-            slot.Bind(snap);
-        }
-
-        // 4) 레이아웃/캔버스 강제 갱신(닫았다 열어야 보이는 현상 방지)
         ForceLayoutRefresh();
     }
 

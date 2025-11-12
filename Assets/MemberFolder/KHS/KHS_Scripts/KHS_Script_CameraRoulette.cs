@@ -9,6 +9,20 @@ public class KHS_Script_CameraRoulette : MonoBehaviour
 
     private bool followInRoulette = true; // 룰렛 카메라 모드인지 여부
 
+    private void OnEnable()
+    {
+        KHS_Script_PortalController.portalEndEvt += BallTrackingOn;
+        KHS_Script_PlincoFunction.ReturnPortalEvt += BallTrackingOff;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_PortalController.portalEndEvt -= BallTrackingOn;
+        KHS_Script_PlincoFunction.ReturnPortalEvt -= BallTrackingOff;
+    }
+    private void Start()
+    {
+        followInRoulette = false;
+    }
     void LateUpdate()
     {
         if (!followInRoulette || ball == null) return;
@@ -23,5 +37,14 @@ public class KHS_Script_CameraRoulette : MonoBehaviour
         transform.position = Vector3.Lerp(transform.position, targetPos, Time.deltaTime * followSpeed);
 
         // 카메라 회전은 고정 (transform.rotation 유지)
+    }
+
+    private void BallTrackingOn()
+    {
+        followInRoulette = true;
+    }
+    private void BallTrackingOff()
+    {
+        followInRoulette = false;
     }
 }
