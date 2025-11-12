@@ -35,10 +35,22 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
         SetButtonsState(false);
     }
 
-    private void OnEnable() { KHS_Script_ScoreManager.OnGameOver += StartGameOverSequence; KHS_Script_ScoreManager.OnGameClear += StartGameClearSequence; PSH_Script_DialogueUI.OnDialogueComplete += HandleDialogueComplete; }
-    private void OnDisable() { KHS_Script_ScoreManager.OnGameOver -= StartGameOverSequence; KHS_Script_ScoreManager.OnGameClear -= StartGameClearSequence; PSH_Script_DialogueUI.OnDialogueComplete -= HandleDialogueComplete; }
+    private void OnEnable() 
+    { 
+        KHS_Script_ScoreManager.OnGameOver += StartGameOverSequence;
+        KHS_Script_ScoreManager.OnGameClear += StartGameClearSequence;
+        PSH_Script_DialogueUI.OnDialogueComplete += HandleDialogueComplete;
+    }
+    private void OnDisable() 
+    { 
+        KHS_Script_ScoreManager.OnGameOver -= StartGameOverSequence; 
+        KHS_Script_ScoreManager.OnGameClear -= StartGameClearSequence; 
+        PSH_Script_DialogueUI.OnDialogueComplete -= HandleDialogueComplete; }
 
-    private void StartGameOverSequence() { StartCoroutine(GameOverRoutine()); }
+    private void StartGameOverSequence() 
+    { 
+        StartCoroutine(GameOverRoutine()); 
+    }
     private void StartGameClearSequence() { StartCoroutine(GameClearRoutine()); }
 
     // --- [연출 1] 게임 오버 시퀀스 (글리치 -> 대사) ---
@@ -51,16 +63,15 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
         Time.timeScale = glitchTimeScale;
         yield return new WaitForSecondsRealtime(glitchDuration);
 
-        // 2. 대사 시작 직전에 시간 완전 정지!
         Time.timeScale = 1f;
 
-        // 3. [순서 변경] 최종 UI 패널을 먼저 켜서 대사창이 보이게 함
-        if (finalUIScript) finalUIScript.ShowGameOverPanel();
+        // 3. [순서 변경] 최종 UI 패널을 먼저 켜서 대사창이 보이게 함 취소
+        //if (finalUIScript) finalUIScript.ShowGameOverPanel();
 
         // 4. 버튼 비활성화 (패널이 켜진 *후에* 실행)
         SetButtonsState(false);
-        lobbyBtn.gameObject.SetActive(false);
-        resetBtn.gameObject.SetActive(false);
+        //lobbyBtn.gameObject.SetActive(false);
+        //resetBtn.gameObject.SetActive(false);
         // 5. 대사 재생
         PSH_Script_DialogueUI.Instance.Play(gameOverCutsceneId);
     }
@@ -74,16 +85,16 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
         if (fireworkObject) fireworkObject.SetActive(true);
         yield return new WaitForSecondsRealtime(fireworkDuration);
 
-        // 2. 시간 완전 정지
+
         Time.timeScale = 1f;
 
         // 3. [순서 변경] 최종 UI 패널 먼저 켜기
-        if (finalUIScript) finalUIScript.ShowGameClearPanel();
+       // if (finalUIScript) finalUIScript.ShowGameClearPanel();
 
         // 4. 버튼 비활성화
         SetButtonsState(false);
-        lobbyBtn.gameObject.SetActive(false);
-        resetBtn.gameObject.SetActive(false);
+        //lobbyBtn.gameObject.SetActive(false);
+        //resetBtn.gameObject.SetActive(false);
         // 5. 대사 재생
         PSH_Script_DialogueUI.Instance.Play(gameClearCutsceneId);
     }
@@ -96,8 +107,9 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
             // 게임오버 대사 끝 -> 글리치 끄고 버튼 활성화
             GlitchEffect_RendererFeature.IsEnabled = false;
             SetButtonsState(true);
-            lobbyBtn.gameObject.SetActive(true);
-            resetBtn.gameObject.SetActive(true);
+            if (finalUIScript) finalUIScript.ShowGameOverPanel();
+            //lobbyBtn.gameObject.SetActive(true);
+            //resetBtn.gameObject.SetActive(true);
         }
         else if (finishedCutsceneId == gameClearCutsceneId)
         {
@@ -117,8 +129,9 @@ public class PSH_Script_GameOverSequenceDirector : MonoBehaviour
 
         // 글리치가 끝난 후 버튼 활성화
         SetButtonsState(true);
-        lobbyBtn.gameObject.SetActive(true);
-        resetBtn.gameObject.SetActive(true);
+        if (finalUIScript) finalUIScript.ShowGameClearPanel();
+        //lobbyBtn.gameObject.SetActive(true);
+        //resetBtn.gameObject.SetActive(true);
     }
 
     // [수정] 버튼 활성화/비활성화를 안전하게 처리하는 헬퍼 함수
