@@ -2,6 +2,8 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using static UnityEngine.EventSystems.EventTrigger;
+
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
 #endif
@@ -131,6 +133,7 @@ namespace PSH
             currentLoadingCoroutine = null;
             OnSceneLoadStart?.Invoke();
         }
+
 
 #if UNITY_EDITOR
         /// <summary>

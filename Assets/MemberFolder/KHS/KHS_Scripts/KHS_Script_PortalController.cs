@@ -5,6 +5,7 @@ using UnityEngine;
 public class KHS_Script_PortalController : MonoBehaviour
 {
     public static event Action<int> portalEvt;
+    public static event Action portalEndEvt;
 
     [Header("출구 포탈 지정")]
     [Tooltip("공이 튀어나갈 출구 포탈")]
@@ -90,6 +91,8 @@ public class KHS_Script_PortalController : MonoBehaviour
         // 출구 웜홀의 스폰 위치로 공을 이동시키고 다시 보이게 함
         rb.transform.position = exitPortal.spawnPoint.position;
         rb.gameObject.SetActive(true);
+
+        portalEndEvt?.Invoke();
 
         // 기본 방향은 출구 포탈의 정면 방향을 기준으로 랜덤화
         Vector3 baseDir = exitPortal.transform.right;

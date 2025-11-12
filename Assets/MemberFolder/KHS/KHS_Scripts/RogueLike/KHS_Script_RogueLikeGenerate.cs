@@ -1,3 +1,4 @@
+using System.Collections;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -26,11 +27,18 @@ public class KHS_Script_RogueLikeGenerate : MonoBehaviour
 
     private void RogueLikeGenerateTime()
     {
-        button.onClick.Invoke();
+        StartCoroutine(WaitDeathEffect());
     }
 
     private void GameOverUnactiveUI()
     {
         transform.parent.gameObject.SetActive(false);
     }
+
+    private IEnumerator WaitDeathEffect()
+    {
+        yield return null;
+        button.onClick.Invoke();
+    }
+
 }

@@ -320,6 +320,7 @@
 //    }
 //}
 using System;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -411,10 +412,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         Round_Clear -= RoundClearAfter;
     }
 
+    
     private void GameResultJudge()
     {
         Debug.LogError("라운드종료 결과 판정중!!!");
-
 
         Debug.LogWarning($"최종 스코어 : {curScore}");
 
@@ -457,6 +458,11 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         numOfBounce = 0;
     }
 
+    private IEnumerator DeathEffectWaitingCoroutine()
+    {
+        yield return new WaitForSeconds(2.0f);
+
+    }
     private void FliperBallCollision(Collision _collision)
     {
         if (numOfBounce >= maxBounce) maxBounce = numOfBounce;
@@ -606,5 +612,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         }
     }
 
+    public int ResponceFinal()
+    {
+        return currentRound;
+    }
 }
 

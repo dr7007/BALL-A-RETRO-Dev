@@ -1,6 +1,7 @@
 using System;
 using UnityEngine;
-using PSH; // DialogueUI 이벤트를 받기 위해
+using PSH;
+using System.Collections; // DialogueUI 이벤트를 받기 위해
 
 namespace PSH
 {
@@ -16,8 +17,11 @@ namespace PSH
         [Tooltip("눈 뜨는 효과 오브젝트")]
         [SerializeField] private PSH_Script_EyeOpenEffect eyeOpenEffect;
         [Tooltip("게임 시작 후 켜질 메인 게임 캔버스 (HUD)")]
-     
 
+        [SerializeField] private int repeatCount = 7;
+        [SerializeField] private float interval = 0.1f; // 반복 주기(초)
+
+        [SerializeField]
         // 이 씬의 인트로가 이미 한 번 재생되었는지 확인하는 static 변수
         private static bool hasPlayedIntro = false;
 
@@ -59,7 +63,7 @@ namespace PSH
 
 
                 // 3. 이벤트 전파
-                NoIntroStartEvt?.Invoke();
+                StartCoroutine(RepeatEventCoroutine());
             }
             else
             {
@@ -86,6 +90,17 @@ namespace PSH
             {
 
             }
+        }
+    
+    private IEnumerator RepeatEventCoroutine()
+        {
+            for (int i = 0; i < repeatCount; i++)
+            {
+                NoIntroStartEvt?.Invoke(); // 이벤트 발생
+                yield return new WaitForSeconds(interval);
+            }
+
+            Debug.Log("이벤트 반복 종료");
         }
     }
 }

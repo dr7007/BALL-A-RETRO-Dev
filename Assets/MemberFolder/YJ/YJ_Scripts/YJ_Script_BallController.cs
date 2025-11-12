@@ -96,7 +96,8 @@ public class YJ_Script_BallController : MonoBehaviour
             rigidBody.linearVelocity = pacManDirection * pacManSpeed;
         }
 
-        if (Input.GetKeyDown(KeyCode.Q))
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            && Input.GetKeyDown(KeyCode.Q))
         {
                 rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
         }

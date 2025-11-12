@@ -8,6 +8,7 @@ public class KHS_Script_ResetController : MonoBehaviour
     public static event Action OnReset;
     public string gameSceneName;
     public string lobbySceneName;
+    public Canvas buttonCanvas;
 
     private bool isClear = false;
 
@@ -23,25 +24,30 @@ public class KHS_Script_ResetController : MonoBehaviour
         {
             GameResetFunc();
         }
-        //if(isClear)
-        //{
-        //    if (Input.GetKeyDown(KeyCode.R))
-        //    {
-        //        GameResetFunc();
-        //    }
-        //    else if (Input.anyKeyDown)
-        //    {
-        //        GameGoToLobbyFunc();
-        //    }
-        //}
-        //else
-        //{
-        //    if (Input.GetKeyDown(KeyCode.R))
-        //    {
-        //        GameResetFunc();
-        //    }
-        //}
-    }
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            && Input.GetKeyDown(KeyCode.M))
+        {
+            ButtonSwitch();
+        }
+            //if(isClear)
+            //{
+            //    if (Input.GetKeyDown(KeyCode.R))
+            //    {
+            //        GameResetFunc();
+            //    }
+            //    else if (Input.anyKeyDown)
+            //    {
+            //        GameGoToLobbyFunc();
+            //    }
+            //}
+            //else
+            //{
+            //    if (Input.GetKeyDown(KeyCode.R))
+            //    {
+            //        GameResetFunc();
+            //    }
+            //}
+        }
 
     private void OnEnable()
     {
@@ -79,5 +85,9 @@ public class KHS_Script_ResetController : MonoBehaviour
         Debug.Log("[Reset] Go Lobby");
         PSH_Script_GameSceneDirector.ResetIntroFlag();
         PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
+    }
+    private void ButtonSwitch()
+    {
+        buttonCanvas.enabled = !buttonCanvas.enabled;
     }
 }
