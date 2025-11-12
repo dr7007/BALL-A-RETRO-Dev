@@ -15167,6 +15167,11 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9048829527735109506, guid: b601630c0d218a641b6705996525e2dd, type: 3}
   m_PrefabInstance: {fileID: 217568822}
   m_PrefabAsset: {fileID: 0}
+--- !u!4 &220683410 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 5673589864492483393, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 2146651755}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &223043181
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -112535,10 +112540,10 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0.7071068, y: -0, z: -0, w: 0.7071068}
   m_LocalPosition: {x: -0.038000107, y: 0.23000042, z: -1.7410002}
-  m_LocalScale: {x: 50, y: 50.00004, z: 50.00004}
+  m_LocalScale: {x: 50, y: 50.000023, z: 50.000023}
   m_ConstrainProportionsScale: 1
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 220683410}
   m_LocalEulerAnglesHint: {x: 90, y: 0, z: 0}
 --- !u!23 &1562261925
 MeshRenderer:
@@ -156645,14 +156650,6 @@ PrefabInstance:
       propertyPath: m_Enabled
       value: 0
       objectReference: {fileID: 0}
-    - target: {fileID: 1955983175263685014, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 2.0031247
-      objectReference: {fileID: 0}
-    - target: {fileID: 1955983175263685014, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1.563532
-      objectReference: {fileID: 0}
     - target: {fileID: 2190302751165597484, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: exitPortal
       value: 
@@ -156668,14 +156665,6 @@ PrefabInstance:
     - target: {fileID: 3327137806361491935, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: m_Enabled
       value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3819546446084074676, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1.9701248
-      objectReference: {fileID: 0}
-    - target: {fileID: 3819546446084074676, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 1.0325321
       objectReference: {fileID: 0}
     - target: {fileID: 3844123848236262626, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: m_IsActive
@@ -156709,14 +156698,6 @@ PrefabInstance:
       propertyPath: camSwitch
       value: 
       objectReference: {fileID: 2129130759}
-    - target: {fileID: 5664834757070439478, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: 1.9381249
-      objectReference: {fileID: 0}
-    - target: {fileID: 5664834757070439478, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 2.071532
-      objectReference: {fileID: 0}
     - target: {fileID: 5699657805846844586, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: m_LocalPosition.x
       value: 0
@@ -156781,18 +156762,6 @@ PrefabInstance:
       propertyPath: m_IsActive
       value: 1
       objectReference: {fileID: 0}
-    - target: {fileID: 8105885223403823670, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.x
-      value: -0.001
-      objectReference: {fileID: 0}
-    - target: {fileID: 8105885223403823670, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.y
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 8105885223403823670, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_LocalPosition.z
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 8611591517855002161, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: exitPortal
       value: 
@@ -156803,7 +156772,10 @@ PrefabInstance:
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
-    m_AddedGameObjects: []
+    m_AddedGameObjects:
+    - targetCorrespondingSourceObject: {fileID: 5673589864492483393, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1562261924}
     m_AddedComponents:
     - targetCorrespondingSourceObject: {fileID: 1392752243628455106, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       insertIndex: 4
@@ -156928,7 +156900,6 @@ SceneRoots:
   - {fileID: 2146651755}
   - {fileID: 1158955178}
   - {fileID: 1990495379}
-  - {fileID: 1562261924}
   - {fileID: 1238325827}
   - {fileID: 1941946726}
   - {fileID: 1705505538}
