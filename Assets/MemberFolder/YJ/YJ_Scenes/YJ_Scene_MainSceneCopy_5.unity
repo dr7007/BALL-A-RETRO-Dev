@@ -8606,15 +8606,15 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: 'targetScores.Array.data[0]'
-      value: 500
+      value: 2000
       objectReference: {fileID: 0}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: 'targetScores.Array.data[1]'
-      value: 9000
+      value: 4000
       objectReference: {fileID: 0}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: 'targetScores.Array.data[2]'
-      value: 27000
+      value: 16000
       objectReference: {fileID: 0}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: currentgameScores.Array.size
@@ -11964,6 +11964,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4839648204704783126, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+      propertyPath: targetScoreUI
+      value: 
+      objectReference: {fileID: 1565012243}
     - target: {fileID: 5095148503218483019, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -28926,20 +28930,58 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40d3bf5c4a2197b48b66dc5da1cc2e3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  bgmSource: {fileID: 366032747}
-  sfxSource: {fileID: 366032746}
+  bgmSource: {fileID: 0}
+  sfxSource: {fileID: 0}
+  sfxLoopSource: {fileID: 0}
   bgmMain: {fileID: 8300000, guid: 1c64bd3a6ecc5c4409e8aa874c7315bf, type: 3}
   sfxBallLaunch: {fileID: 8300000, guid: 2c5292ba5cf254919a6b9e2b18e04f49, type: 3}
-  sfxObstacleHit: {fileID: 8300000, guid: 19f89c6e740e7447f9e12a8310d3e973, type: 3}
+  sfxObstacleHit: {fileID: 8300000, guid: 3e14f5f148739d441872ced2fe312692, type: 3}
   sfxClear: {fileID: 8300000, guid: 2667a0a008b044e218b63df62e2be749, type: 3}
-  sfxGameOver: {fileID: 8300000, guid: 4b4dd7245f6104c8c8eb07ccf6b386ed, type: 3}
-  sfxFlipperPress: {fileID: 8300000, guid: d46323e22e74e46baa241cbf48c85671, type: 3}
-  sfxFlipperRelease: {fileID: 0}
+  sfxGameOver: {fileID: 8300000, guid: 92f809ca157e3784f8362679e1e6ab9a, type: 3}
+  sfxFlipperPress: {fileID: 8300000, guid: 91c8b150605f2b34aa4344a7f53ec2f2, type: 3}
+  sfxFlipperHitBall: {fileID: 8300000, guid: d46323e22e74e46baa241cbf48c85671, type: 3}
+  flipperHitPitchRange: {x: 0.95, y: 1.05}
+  flipperHitCooldown: 0.03
+  flipperHitVolCurve:
+    serializedVersion: 2
+    m_Curve:
+    - serializedVersion: 3
+      time: 0
+      value: 0
+      inSlope: 1.0654472
+      outSlope: 1.0654472
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0
+      outWeight: 0.33333334
+    - serializedVersion: 3
+      time: 1.0458374
+      value: 1.1142845
+      inSlope: 1.0654472
+      outSlope: 1.0654472
+      tangentMode: 34
+      weightedMode: 0
+      inWeight: 0.33333334
+      outWeight: 0
+    m_PreInfinity: 2
+    m_PostInfinity: 2
+    m_RotationOrder: 4
+  sfxPortalEnter: {fileID: 8300000, guid: 05adee3550f225a4fb0b985d03553d4e, type: 3}
+  sfxPortalExit: {fileID: 0}
+  sfxRailRideLoop: {fileID: 8300000, guid: 9fa7b1838d23c51428c3f3ace732f709, type: 3}
   bgmVolume: 0.2
   sfxVolume: 0.6
   playBgmOnStart: 1
+  sfxLoopVolume: 0.7
+  sfxLoopPitch: 1
+  loopFadeInSeconds: 0.05
+  loopFadeOutSeconds: 0.12
   hitCooldown: 0.03
   flipperPitchRange: {x: 0.97, y: 1.03}
+  portalCooldown: 0.03
+  portalPitchRange: {x: 0.98, y: 1.02}
+  flipperPressDecisionWindow: 0.08
+  pressedHitGrace: 0.12
 --- !u!114 &366032749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -42446,7 +42488,7 @@ MonoBehaviour:
   ballCon: {fileID: 7600752139250908836}
   ballUI:
   - {fileID: 996176898}
-  - {fileID: 0}
+  - {fileID: 1411041253}
   blockerHolderGo: {fileID: 6824330186255777804}
   plincoColliderGo: {fileID: 510197023499019991}
   plincoUI: {fileID: 1186839299}
@@ -112756,6 +112798,17 @@ Transform:
   m_CorrespondingSourceObject: {fileID: 9048829527735109506, guid: b601630c0d218a641b6705996525e2dd, type: 3}
   m_PrefabInstance: {fileID: 1564123962}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &1565012243 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 4728944094736861012, guid: cfdc09fbd6e3ae94fa7a204156ac064b, type: 3}
+  m_PrefabInstance: {fileID: 151199858}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4688fdb7df04437aeb418b961361dc5, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1001 &1565602246
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -125642,42 +125695,22 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 2003876389098644, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 828615395843330472, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: mainCam
       value: 
       objectReference: {fileID: 1526102487}
-    - target: {fileID: 1480315951410180367, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 2190302751165597484, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: exitPortal
       value: 
       objectReference: {fileID: 7754779565818888370}
-    - target: {fileID: 2553735801452161822, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 2870919175087693836, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3327137806361491935, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 3844123848236262626, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 4176445773062911139, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
+    - target: {fileID: 3205674720452803827, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+      propertyPath: camSwitch
+      value: 
+      objectReference: {fileID: 1526102490}
+    - target: {fileID: 3818234626065620732, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+      propertyPath: camSwitch
+      value: 
+      objectReference: {fileID: 1526102490}
     - target: {fileID: 4827374937332681905, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: mainCam
       value: 
@@ -125686,14 +125719,6 @@ PrefabInstance:
       propertyPath: camSwitch
       value: 
       objectReference: {fileID: 1526102490}
-    - target: {fileID: 5208501766775661116, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 5248035980412427068, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_Enabled
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 5284160524945673784, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: mainCam
       value: 
@@ -125750,77 +125775,19 @@ PrefabInstance:
       propertyPath: mainCam
       value: 
       objectReference: {fileID: 1526102487}
-    - target: {fileID: 6138880171437880114, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 6612189773831523522, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 7776516632211240250, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: mainCam
       value: 
       objectReference: {fileID: 1526102487}
-    - target: {fileID: 7992829571013502308, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 8611591517855002161, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: exitPortal
       value: 
       objectReference: {fileID: 1819377711}
-    - target: {fileID: 8669052812213947085, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      propertyPath: m_IsActive
-      value: 0
-      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents:
-    - targetCorrespondingSourceObject: {fileID: 1392752243628455106, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      insertIndex: 4
-      addedObject: {fileID: 1756852209}
-    - targetCorrespondingSourceObject: {fileID: 196028114896030200, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-      insertIndex: 4
-      addedObject: {fileID: 1756852208}
+    m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
---- !u!1 &1756852206 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 196028114896030200, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-  m_PrefabInstance: {fileID: 1756852205}
-  m_PrefabAsset: {fileID: 0}
---- !u!1 &1756852207 stripped
-GameObject:
-  m_CorrespondingSourceObject: {fileID: 1392752243628455106, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
-  m_PrefabInstance: {fileID: 1756852205}
-  m_PrefabAsset: {fileID: 0}
---- !u!114 &1756852208
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1756852206}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 343ebe0a8d9276141a9dcfaa6cab3c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  camSwitch: {fileID: 1526102490}
---- !u!114 &1756852209
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1756852207}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 343ebe0a8d9276141a9dcfaa6cab3c45, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  camSwitch: {fileID: 1526102490}
 --- !u!1001 &1757566527
 PrefabInstance:
   m_ObjectHideFlags: 0
