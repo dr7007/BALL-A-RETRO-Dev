@@ -1,7 +1,9 @@
 using System.Linq;
 using UnityEngine;
 using UnityEngine.Events;
-
+// (이름은 아무거나 상관없지만, 가독성을 위해 만듭니다)
+[System.Serializable]
+public class IntUnityEvent : UnityEvent<int> { }
 public class YJ_Script_DropTargetManager : MonoBehaviour
 {
     [Header("타겟 유형")]
@@ -32,6 +34,13 @@ public class YJ_Script_DropTargetManager : MonoBehaviour
 
     // 이전 상태를 기억할 변수 추가
     private bool b_AllTargetsWereDown = false;
+    
+    // --- 추가된 부분 ---
+    [Space(5)]
+    [Header("개별 타겟 이벤트 (토글용)")]
+    [Tooltip("개별 타겟이 맞을 때마다 호출됩니다. (int: 현재까지 맞은 타겟 수)")]
+    public IntUnityEvent OnTargetHitCountChanged; // int 값을 전달할 수 있는 새 이벤트
+    // --- 여기까지 ---
 
     private void Awake()
     {
@@ -50,24 +59,53 @@ public class YJ_Script_DropTargetManager : MonoBehaviour
     // 자식 타겟이 공에 맞았을 때 호출될 함수
     public void HandleTargetHit(YJ_Script_DropTargetController hitTarget)
     {
-        // 맞은 타겟의 사운드 재생
-        hitTarget.PlayHitSound();
-
-        // 드롭 타겟으로 설정된 경우, 비활성화 명령
-        if (isDropTargets)
+         // --- 1. 이미 맞은 타겟인지 '먼저' 확인 ---
+        // (IsDesactivated()는 타겟의 현재 상태를 물어보는 것입니다)
+        if (hitTarget.IsDesactivated())
         {
-            hitTarget.Desactivate_Object();
+            // 이미 비활성화된(이미 맞은) 타겟을 또 맞췄다면,
+            // 중복 이벤트를 막기 위해 아무것도 하지 않고 즉시 종료합니다.
+            return;
         }
 
-        // 타겟이 맞을 때마다 모든 타겟의 상태를 검사
+        // --- 2. (신규 타격 확정) 사운드 재생 및 비활성화 ---
+        hitTarget.PlayHitSound();
+
+        if (isDropTargets)
+        {
+            // 타겟을 비활성화시킵니다.
+            hitTarget.Desactivate_Object();
+
+            // --- 3. (중요) 비활성화 '시킨 후'에 카운트 계산 및 이벤트 호출 ---
+            // GetDeactivatedTargetCount()는 방금 맞은 타겟을 '포함한' 개수를 반환합니다.
+            int currentHitCount = GetDeactivatedTargetCount();
+            
+            Debug.Log($"타겟 히트! 현재 카운트: {currentHitCount}"); // 디버그 로그 추가
+            
+            OnTargetHitCountChanged.Invoke(currentHitCount);
+        }
+        
+        /* * (참고) 기존의 중복되고 순서가 꼬인 로직은 모두 제거했습니다.
+         */
+
+        // --- 4. 모든 타겟이 맞았는지 최종 확인 (블랙홀 용) ---
         CheckAllTargetsState();
     }
 
+    // 현재 비활성화된(맞은) 타겟의 '총 개수'를 반환하는 함수
+    public int GetDeactivatedTargetCount()
+    {
+        if (targets == null) return 0;
+        
+        // Linq를 사용하여 비활성화된 타겟의 '개수(Count)'를 셉니다.
+        return targets.Count(target => target.IsDesactivated());
+    }
+    
     // 모든 타겟이 비활성화 상태인지 확인하는 함수
     public bool AreAllTargetsDesactivated()
     {
+        if (targets == null) return false; // 방어 코드
         // Linq를 사용하여 "모든(All) 타겟이 비활성화(IsDesactivated) 상태인가?"를 한 줄로 검사
-        // targets 배열의 모든 요소가 IsDesactivated() == true를 만족하면 true 반환
         return targets.All(target => target.IsDesactivated());
     }
 
@@ -114,6 +152,7 @@ public class YJ_Script_DropTargetManager : MonoBehaviour
             OnTargetsActivated.Invoke();
         }
         b_AllTargetsWereDown = false; // 상태 강제 갱신
+        OnTargetHitCountChanged.Invoke(0);
     }
 
     // 외부에서 모든 타겟을 비활성화시킬 때 사용
@@ -135,5 +174,10 @@ public class YJ_Script_DropTargetManager : MonoBehaviour
             OnAllTargetsDeactivated.Invoke();
         }
         b_AllTargetsWereDown = true; // 상태 강제 갱신
+
+        if (targets != null)
+        {
+            OnTargetHitCountChanged.Invoke(targets.Length);
+        }
     }
 }
