@@ -137,7 +137,7 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
         Debug.Log($"--- 룰렛 결과: {lastKnownSlotNumber} ({resultColor}) ---");
         //OnRouletteResult?.Invoke(lastKnownSlotNumber, resultColor);
 
-        scoreManager.AddScore(lastKnownSlotNumber); // 기본값: 룰렛 숫자를 기존 스코어에 더함(로그라이크 선택지로 변형 가능)
+        scoreManager.AddScore(lastKnownSlotNumber * 100); // 룰렛 숫자의 100배를 기존 스코어에 더함(로그라이크 선택지로 변형 가능)
 
         // 점수 계산 후 2초 대기
         yield return new WaitForSeconds(2.0f);
