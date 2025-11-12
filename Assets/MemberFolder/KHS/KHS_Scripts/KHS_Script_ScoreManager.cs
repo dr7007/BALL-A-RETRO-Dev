@@ -319,6 +319,7 @@
 //        }
 //    }
 //}
+using PSH;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -399,6 +400,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision += FliperBallCollision;
         Round_Clear += RoundClearAfter;
+        PSH_Script_SceneLoader.OnSceneLoadStart += TargetScoreInit;
     }
 
     private void OnDisable()
@@ -412,9 +414,13 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision -= FliperBallCollision;
         Round_Clear -= RoundClearAfter;
+        PSH_Script_SceneLoader.OnSceneLoadStart -= TargetScoreInit;
     }
 
-    
+    private void TargetScoreInit()
+    {
+        targetScore = targetScores[0];
+    }
     private void GameResultJudge()
     {
         Debug.LogError("라운드종료 결과 판정중!!!");

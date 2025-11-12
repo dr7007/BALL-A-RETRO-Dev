@@ -88,8 +88,6 @@ public class KHS_Script_UIImgFunc : MonoBehaviour
 
         // 닫기 코루틴 실행
         yield return StartCoroutine(StartCloseCoroutine(_round));
-
-        Time.timeScale = 1f;
     }
     private IEnumerator StartCloseCoroutine(int _round)
     {
@@ -114,6 +112,7 @@ public class KHS_Script_UIImgFunc : MonoBehaviour
 
         // 비활성화
         roundImgGos[_round].SetActive(false);
+        Time.timeScale = 1f;
         RoundUIEvt?.Invoke(false);
         yield break;
     }

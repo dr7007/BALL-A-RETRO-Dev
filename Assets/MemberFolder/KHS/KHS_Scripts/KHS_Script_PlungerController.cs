@@ -1,6 +1,7 @@
 using UnityEngine;
 using System;
-using PSH; // [ADD] 이벤트 선언용
+using PSH;
+using System.Collections; // [ADD] 이벤트 선언용
 
 public class KHS_Script_PlungerController : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
         KHS_Script_UIImgFunc.RoundUIEvt += PlungerStopFunc;
         PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
         PSH_Script_SceneLoader.OnSceneLoadStart += NoIntroExceptionFunc;
+        PSH_Script_DialogueUI.DialogueWaitingEvt += PlungerStopFunc;
     }
     private void OnDisable()
     {
@@ -40,6 +42,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
         KHS_Script_UIImgFunc.RoundUIEvt -= PlungerStopFunc;
         PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
         PSH_Script_SceneLoader.OnSceneLoadStart -= NoIntroExceptionFunc;
+        PSH_Script_DialogueUI.DialogueWaitingEvt -= PlungerStopFunc;
     }
     private void Awake()
     {
@@ -80,8 +83,22 @@ public class KHS_Script_PlungerController : MonoBehaviour
 
     private void PlungerStopFunc(bool _start)
     {
-        Debug.LogWarning("일단 플런저 너 멈춰봐");
-        isLock = _start;
+        if (!_start)
+        {
+            Debug.LogError("1초낭비 진입");
+            StartCoroutine(SpaceBarLock());
+        }
+        else
+        {
+            Debug.LogWarning($"일단 플런저 너 멈춰봐{_start}");
+            isLock = _start;
+        }
+    }
+
+    private IEnumerator SpaceBarLock()
+    {
+        yield return new WaitForSeconds(2.0f);
+        isLock = false;
     }
 
     private void NoIntroExceptionFunc()

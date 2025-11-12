@@ -13,6 +13,8 @@ namespace PSH
         public static event Action<string> DialogueEvt;
         public static event Action<string> OnDialogueComplete;
 
+        public static event Action<bool> DialogueWaitingEvt;
+
         public static PSH_Script_DialogueUI Instance { get; private set; }
 
         [Header("Intro UI Set")]
@@ -185,7 +187,7 @@ namespace PSH
 
             // 감독에게 보고 (인트로가 끝났을 때도 보고는 해야 함)
             OnDialogueComplete?.Invoke(finishedId);
-
+            DialogueWaitingEvt?.Invoke(false);
         }
 
         // 🔍 [강력해진 CSV 로더]
@@ -251,6 +253,7 @@ namespace PSH
             else
             {
                 Debug.Log($"✅ [DialogueUI] '{id}' 대사 로드 성공: 총 {result.Count}줄");
+                DialogueWaitingEvt?.Invoke(true);
             }
 
             return result;
