@@ -53,6 +53,13 @@ public class YJ_Script_PacManExit : MonoBehaviour
     private void OnDisable()
     {
         KHS_Script_BallOutController.BallOutEvt -= ResetTrigger;
+
+        // 재생 중일 수 있는 레일 루프 사운드 정리
+        if (CJS_Script_AudioDirector.I != null)
+            CJS_Script_AudioDirector.I.StopRailRideLoop();
+
+        if (railTimeline != null)
+            railTimeline.stopped -= OnRailRideEnd;
     }
 
     private void ResetTrigger()
@@ -84,6 +91,10 @@ public class YJ_Script_PacManExit : MonoBehaviour
                 currentMoverVelocity = Vector3.zero;
                 isTrackingVelocity = true;
 
+                // 레일 탑승 사운드 시작
+                if (CJS_Script_AudioDirector.I != null)
+                    CJS_Script_AudioDirector.I.PlayRailRideLoop();
+
                 // 4. 타임라인 재생
                 railTimeline.Play();
                 railTimeline.stopped += OnRailRideEnd;
@@ -94,6 +105,10 @@ public class YJ_Script_PacManExit : MonoBehaviour
     private void OnRailRideEnd(PlayableDirector director)
     {
         isTrackingVelocity = false;
+
+        // 레일 루프 사운드 정지
+        if (CJS_Script_AudioDirector.I != null)
+            CJS_Script_AudioDirector.I.StopRailRideLoop();
 
         if (capturedBall != null)
         {
