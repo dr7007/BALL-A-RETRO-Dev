@@ -8593,10 +8593,6 @@ PrefabInstance:
       value: 
       objectReference: {fileID: 1902710064}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
-      propertyPath: targetScore
-      value: 100
-      objectReference: {fileID: 0}
-    - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: cameraShaker
       value: 
       objectReference: {fileID: 2141493585}
@@ -75237,7 +75233,7 @@ MonoBehaviour:
     m_Bits: 1
   m_VolumeTrigger: {fileID: 0}
   m_VolumeFrameworkUpdateModeOption: 2
-  m_RenderPostProcessing: 0
+  m_RenderPostProcessing: 1
   m_Antialiasing: 0
   m_AntialiasingQuality: 2
   m_StopNaN: 0
@@ -106157,7 +106153,7 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1940371929}
     - targetCorrespondingSourceObject: {fileID: 5438821765045842394, guid: 60530decade40794dab00e0ed0f67939, type: 3}
-      insertIndex: 1
+      insertIndex: 0
       addedObject: {fileID: 644720644}
     - targetCorrespondingSourceObject: {fileID: 3126391118927068209, guid: 60530decade40794dab00e0ed0f67939, type: 3}
       insertIndex: 1

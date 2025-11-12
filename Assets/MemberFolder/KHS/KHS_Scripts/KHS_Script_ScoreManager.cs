@@ -385,7 +385,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         ChangingMainCam();
         curScore = 0;
         numOfBounce = 0;
-        targetScore = targetScores[currentRound - 1];
+        targetScore = targetScores[0];
     }
 
     private void OnEnable()
