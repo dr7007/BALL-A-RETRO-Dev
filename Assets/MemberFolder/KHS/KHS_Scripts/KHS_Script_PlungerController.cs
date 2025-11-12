@@ -31,23 +31,21 @@ public class KHS_Script_PlungerController : MonoBehaviour
     {
         KHS_Script_CameraManager.MonitorEvt += PlungerStopFunc;
         KHS_Script_UIImgFunc.RoundUIEvt += PlungerStopFunc;
-        PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
-        PSH_Script_SceneLoader.OnSceneLoadStart += NoIntroExceptionFunc;
+        // (PSH 계열 이벤트는 Awake에서만 구독)
     }
     private void OnDisable()
     {
         KHS_Script_CameraManager.MonitorEvt -= PlungerStopFunc;
         KHS_Script_UIImgFunc.RoundUIEvt -= PlungerStopFunc;
-        PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
-        PSH_Script_SceneLoader.OnSceneLoadStart -= NoIntroExceptionFunc;
+        // (PSH 계열 이벤트 해제는 OnDestroy에서 처리)
     }
+
     private void Awake()
     {
         // 씬 로드 초기에 가장 먼저 구독
         PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
         PSH_Script_SceneLoader.OnSceneLoadStart += NoIntroExceptionFunc;
     }
-
 
     private void Start()
     {
@@ -89,11 +87,13 @@ public class KHS_Script_PlungerController : MonoBehaviour
         Debug.LogWarning("아니 멈추지 마");
         isLock = false;
     }
+
     private void Launch()
     {
         if (ballRigidbody != null)
         {
-            ballRigidbody.AddForce(Vector3.forward * currentForce, ForceMode.Impulse);
+            // 플런저가 향하는 방향 기준으로 발사
+            ballRigidbody.AddForce(transform.forward * currentForce, ForceMode.Impulse);
         }
         currentForce = minForce;
 
@@ -128,6 +128,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
             ballRigidbody = null;
         }
     }
+
     private void OnDestroy()
     {
         // Awake에서 구독한 건 OnDestroy에서 해제 (OnDisable보다 확실)

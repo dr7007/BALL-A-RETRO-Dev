@@ -53,6 +53,13 @@ public class YJ_Script_RouletteEntrance : MonoBehaviour
     private void OnDisable()
     {
         KHS_Script_BallOutController.BallOutEvt -= ResetTrigger;
+
+        // 씬 전환/비활성화 중 루프 사운드가 남지 않도록 정리
+        if (CJS_Script_AudioDirector.I != null)
+            CJS_Script_AudioDirector.I.StopRailRideLoop();
+
+        if (railTimeline != null)
+            railTimeline.stopped -= OnRailRideEnd;
     }
 
     private void ResetTrigger()
@@ -80,6 +87,10 @@ public class YJ_Script_RouletteEntrance : MonoBehaviour
                 currentMoverVelocity = Vector3.zero;
                 isTrackingVelocity = true;
 
+                // 2-1. 레일 주행 루프 사운드 시작
+                if (CJS_Script_AudioDirector.I != null)
+                    CJS_Script_AudioDirector.I.PlayRailRideLoop();
+
                 // 3. 타임라인 재생
                 railTimeline.Play();
                 railTimeline.stopped += OnRailRideEnd;
@@ -90,6 +101,10 @@ public class YJ_Script_RouletteEntrance : MonoBehaviour
     private void OnRailRideEnd(PlayableDirector director)
     {
         isTrackingVelocity = false;
+
+        // 루프 사운드 정지
+        if (CJS_Script_AudioDirector.I != null)
+            CJS_Script_AudioDirector.I.StopRailRideLoop();
 
         if (capturedBall != null)
         {
