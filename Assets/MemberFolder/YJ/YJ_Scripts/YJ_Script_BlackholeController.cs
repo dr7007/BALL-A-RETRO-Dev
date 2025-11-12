@@ -17,6 +17,10 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     [Tooltip("공을 사출하는 힘")]
     [SerializeField] private float launchForce = 10f;
 
+    [Header("설정")]
+    [Tooltip("이 코인을 먹었을 때 추가할 점수")]
+    public int launchScore = 3000;
+
     [Header("VFX 설정")]
     [Tooltip("활성화 시 켤 이펙트 게임 오브젝트")]
     [SerializeField] private GameObject gravityEffectObject;
@@ -26,12 +30,19 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     public bool isActivated = false;
     public bool isForceActive = false;
 
+    private KHS_Script_ScoreManager scoreManager;
+
     private void Awake()
     {
         if (gravityEffectObject != null)
         {
             gravityEffectObject.SetActive(false);
         }
+    }
+
+    private void Start()
+    {
+        scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
     }
 
     // 에디터에서 중력 범위를 하늘색 선으로 표시
@@ -150,5 +161,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
 
         isActivated = false;
         isBallCaptured = false;
+
+        scoreManager.AddScore(launchScore);
     }
 }
