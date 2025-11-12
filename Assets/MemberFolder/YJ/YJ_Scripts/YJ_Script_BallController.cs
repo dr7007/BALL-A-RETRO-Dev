@@ -53,6 +53,22 @@ public class YJ_Script_BallController : MonoBehaviour
     private Vector3 initBallPos = Vector3.zero;
     private Transform originParent;
 
+    [Header("Rolling Sound")]
+    [Tooltip("공 자체에 붙은 오디오소스")]
+    [SerializeField] private AudioSource rollingSource;
+    [Tooltip("굴러가는 루프 클립(핀볼 모드 기본)")]
+    [SerializeField] private AudioClip sfxRollingLoop;
+    [Tooltip("팩맨 맵 전용 루프 클립(비워두면 위 클립 재사용)")]
+    [SerializeField] private AudioClip sfxRollingLoopPacman;
+    [Range(0f, 1f)][SerializeField] private float rollingBaseVolume = 0.35f;
+    [SerializeField] private float rollingStartSpeed = 0.4f;   // 이 속도 이상이면 시작
+    [SerializeField] private float rollingStopSpeed = 0.2f;   // 이 속도 미만이면 정지
+    [SerializeField] private float rollingMaxSpeed = 12f;    // 볼륨/피치 맵핑 상한
+    [SerializeField] private float rollingFadeInSec = 0.08f;
+    [SerializeField] private float rollingFadeOutSec = 0.15f;
+    [SerializeField] private Vector2 rollingPitchRange = new Vector2(0.9f, 1.25f);
+    private Coroutine rollingFadeCo;
+
     void Start()
     {
         initBallCount = BallCount;
@@ -62,6 +78,15 @@ public class YJ_Script_BallController : MonoBehaviour
         defaultConstraints = rigidBody.constraints; // 평소의 Y축 고정 상태 저장
         originParent = transform.parent;
         currentMode = ControlMode.Pinball;
+
+        // 롤링 소스 기본 초기화
+        if (rollingSource != null)
+        {
+            rollingSource.loop = true;
+            rollingSource.playOnAwake = false;
+            if (rollingSource.clip == null) rollingSource.clip = sfxRollingLoop;
+            rollingSource.volume = 0f;
+        }
     }
 
     void Update()
@@ -99,8 +124,10 @@ public class YJ_Script_BallController : MonoBehaviour
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
             && Input.GetKeyDown(KeyCode.Q))
         {
-                rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
+            rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
         }
+
+        UpdateRollingSound();
     }
 
     private void OnEnable()
@@ -120,6 +147,8 @@ public class YJ_Script_BallController : MonoBehaviour
         KHS_Script_ScoreManager.Next_Round_Init -= KHS_BallReset;
         KHS_Script_ScoreManager.OnGameClear -= KHS_BallUnactive;
         KHS_Script_ScoreManager.OnGameOver -= KHS_BallUnactive;
+
+        StopRollingImmediate();
     }
 
     private void OnCollisionEnter(Collision collision)
@@ -159,6 +188,7 @@ public class YJ_Script_BallController : MonoBehaviour
         rigidBody.linearVelocity = Vector3.zero;
         currentMode = ControlMode.Pinball;
         rigidBody.constraints = defaultConstraints;
+        StopRollingImmediate();
     }
 
     public int GetBallCount() => BallCount;
@@ -231,6 +261,7 @@ public class YJ_Script_BallController : MonoBehaviour
             rigidBody.linearVelocity = Vector3.zero;
 
             pacManDirection = Vector3.forward;
+            StopRollingImmediate();
         }
         else
         {
@@ -251,6 +282,7 @@ public class YJ_Script_BallController : MonoBehaviour
         transform.localPosition = Vector3.zero;
 
         Debug.Log("레일 기차에 탑승 (캡처됨)");
+        StopRollingImmediate();
     }
 
     public void ReleaseAndUnparent()
@@ -281,6 +313,7 @@ public class YJ_Script_BallController : MonoBehaviour
         rigidBody.linearVelocity = finalVelocity;
 
         Debug.Log($"3D 낙하 모드 해제됨 (초기 속도: {initialVelocity})");
+        StopRollingImmediate();
     }
 
     public void Enter2DMode(float targetYLevel)
@@ -321,5 +354,90 @@ public class YJ_Script_BallController : MonoBehaviour
     private void KHS_BallUnactive()
     {
         gameObject.SetActive(false);
+        StopRollingImmediate();
+    }
+
+    // ───────── Rolling sound control ─────────
+    private void UpdateRollingSound()
+    {
+        if (rollingSource == null || sfxRollingLoop == null) return;
+
+        bool is2D = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) != 0;
+
+        // 평면 속도만 사용
+        Vector3 v = rigidBody.linearVelocity;
+        float planarSpeed = new Vector2(v.x, v.z).magnitude;
+
+        // 핀볼 2D 모드이거나 팩맨 모드에서, 속도가 기준 이상인 경우 재생
+        bool shouldRoll =
+            (currentMode == ControlMode.Pinball && is2D && planarSpeed >= rollingStartSpeed) ||
+            (currentMode == ControlMode.PacMan && planarSpeed >= rollingStartSpeed);
+
+        // 현재 모드에 맞는 루프 클립 선택
+        AudioClip desiredClip = (currentMode == ControlMode.PacMan && sfxRollingLoopPacman != null)
+            ? sfxRollingLoopPacman
+            : sfxRollingLoop;
+
+        if (shouldRoll)
+        {
+            float t = Mathf.Clamp01(planarSpeed / Mathf.Max(rollingMaxSpeed, 0.01f));
+            float targetVol = rollingBaseVolume * Mathf.Lerp(0.2f, 1f, t);
+            float targetPitch = Mathf.Lerp(rollingPitchRange.x, rollingPitchRange.y, t);
+
+            if (!rollingSource.isPlaying || rollingSource.clip != desiredClip)
+            {
+                if (rollingSource.isPlaying) rollingSource.Stop();
+                rollingSource.clip = desiredClip;
+                rollingSource.pitch = targetPitch;
+                rollingSource.volume = 0f;
+                rollingSource.Play();
+                StartRollingFade(0f, targetVol, rollingFadeInSec);
+            }
+            else
+            {
+                rollingSource.pitch = targetPitch;
+                rollingSource.volume = Mathf.MoveTowards(
+                    rollingSource.volume, targetVol,
+                    Time.fixedDeltaTime * (1f / Mathf.Max(rollingFadeInSec, 0.01f))
+                );
+            }
+        }
+        else if (rollingSource.isPlaying && planarSpeed <= rollingStopSpeed)
+        {
+            StartRollingFade(rollingSource.volume, 0f, rollingFadeOutSec, stopAfter: true);
+        }
+
+        // 핀볼 모드에서 3D 낙하 중이면 강제 정지
+        if (currentMode == ControlMode.Pinball && !is2D && rollingSource.isPlaying)
+        {
+            StartRollingFade(rollingSource.volume, 0f, rollingFadeOutSec, stopAfter: true);
+        }
+    }
+
+    private void StartRollingFade(float from, float to, float seconds, bool stopAfter = false)
+    {
+        if (rollingFadeCo != null) StopCoroutine(rollingFadeCo);
+        rollingFadeCo = StartCoroutine(CoFadeRolling(from, to, seconds, stopAfter));
+    }
+
+    private System.Collections.IEnumerator CoFadeRolling(float from, float to, float seconds, bool stopAfter)
+    {
+        float t = 0f;
+        while (t < seconds)
+        {
+            t += Time.unscaledDeltaTime;
+            rollingSource.volume = Mathf.Lerp(from, to, t / Mathf.Max(seconds, 0.0001f));
+            yield return null;
+        }
+        rollingSource.volume = to;
+        if (stopAfter) rollingSource.Stop();
+    }
+
+    private void StopRollingImmediate()
+    {
+        if (rollingSource == null) return;
+        if (rollingFadeCo != null) StopCoroutine(rollingFadeCo);
+        rollingSource.Stop();
+        rollingSource.volume = 0f;
     }
 }

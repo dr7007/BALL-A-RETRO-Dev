@@ -11,7 +11,7 @@ public class YJ_Script_RailEntrance : MonoBehaviour
 
     [Tooltip("RailMover에 붙어있는 Playable Director")]
     public PlayableDirector railTimeline; // 'RailMover' 연결
-    
+
     [Header("카메라 설정")]
     [Tooltip("2층 레이어 관리를 위한 카메라")]
     public Camera mainCam;
@@ -45,41 +45,44 @@ public class YJ_Script_RailEntrance : MonoBehaviour
     private void OnTriggerEnter(Collider other)
     {
         if (!other.CompareTag("Ball")) return;
-
         var ball = other.GetComponent<YJ_Script_BallController>();
         if (!ball) return;
 
-        mainCam.cullingMask |= (1 << LayerMask.NameToLayer("2F"));   // mainCam의 cullingMask에 2F 레이어 추가
+        mainCam.cullingMask |= (1 << LayerMask.NameToLayer("2F"));
 
-        // 1) 공을 레일에 태움
         capturedBall = ball;
         ball.CaptureAndParent(railMover);
 
-        // 2) 타임라인 재생 & 종료 콜백
         railTimeline.stopped += OnRailRideEnd;
+
+        // ★ 레일 루프 시작
+        CJS_Script_AudioDirector.I?.PlayRailRideLoop();
+
         railTimeline.Play();
 
         if (oneTimeUse)
             GetComponent<Collider>().enabled = false;
     }
 
-    // 3) 타임라인 종료 시
     private void OnRailRideEnd(PlayableDirector director)
     {
         railTimeline.stopped -= OnRailRideEnd;
 
+        // ★ 레일 루프 정지
+        CJS_Script_AudioDirector.I?.StopRailRideLoop();
+
         if (capturedBall != null)
         {
-            // 5. 공을 '기차'에서 내려서 낙하하게 함
             capturedBall.ReleaseForFalling(Vector3.zero, false);
-
             capturedBall = null;
         }
 
-        // 레일 주행 끝 = 2층 미로 시작 → 탑뷰 카메라로 스위치\
         if (isHoleClosed && camSwitch && is2FEntrance)
-        { 
+        {
             camSwitch.ToMaze();
         }
     }
+
+
+
 }
