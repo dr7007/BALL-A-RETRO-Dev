@@ -128,17 +128,23 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 bool activate = Random.value < special_Chance;
                 blocker.isSpecial = activate;
 
-                if (blocker.TryGetComponent<Renderer>(out var renderer))
+                if (blocker.transform.childCount > 0)
                 {
-                    var mat = renderer.material; // 인스턴스화됨
-                    if (activate)
+                    var renderers = blocker.transform.GetChild(0).GetComponentsInChildren<Renderer>();
+                    if (renderers.Length != 0)
                     {
-                        Debug.Log("스페셜이 켜지긴 했음");
-                        mat.EnableKeyword("_EMISSION");
-                    }
-                    else
-                    {
-                        mat.DisableKeyword("_EMISSION");
+                        foreach (var renderer in renderers)
+                        {
+                            var mat = renderer.material; // 인스턴스화됨
+                            if (activate)
+                            {
+                                mat.EnableKeyword("_EMISSION");
+                            }
+                            else
+                            {
+                                mat.DisableKeyword("_EMISSION");
+                            }
+                        }
                     }
                 }
             }
@@ -151,10 +157,18 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
             foreach (var blocker in blockerDMs)
             {
                 blocker.isSpecial = false;
-                if (blocker.TryGetComponent<Renderer>(out var renderer))
+
+                if (blocker.transform.childCount > 0)
                 {
-                    var mat = renderer.material;
-                    mat.DisableKeyword("_EMISSION");
+                    var renderers = blocker.transform.GetChild(0).GetComponentsInChildren<Renderer>();
+                    if (renderers.Length != 0)
+                    {
+                        foreach (var renderer in renderers)
+                        {
+                            var mat = renderer.material;
+                            mat.DisableKeyword("_EMISSION");
+                        }
+                    }
                 }
             }
 

@@ -1,3 +1,4 @@
+using System;
 using UnityEngine;
 using UnityEngine.UI; // UI 이미지를 쓰려면 필요
 
@@ -7,7 +8,15 @@ public class PSH_Script_CheckmarkUI : MonoBehaviour
     public Toggle checkmark1;
     public Toggle checkmark2;
     public Toggle checkmark3;
-    
+
+    private void OnEnable()
+    {
+        KHS_Script_BallOutController.BallOutEvt += ResetCheckmark;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_BallOutController.BallOutEvt -= ResetCheckmark;
+    }
     void Start()
     {
         // 이 스크립트가(UI가) 켜지자마자, 
@@ -27,5 +36,9 @@ public class PSH_Script_CheckmarkUI : MonoBehaviour
         if(checkmark1) checkmark1.isOn = (hitCount >= 1);
         if(checkmark2) checkmark2.isOn = (hitCount >= 2);
         if(checkmark3) checkmark3.isOn = (hitCount >= 3);
+    }
+    private void ResetCheckmark()
+    {
+        UpdateCheckmarks(0);
     }
 }
