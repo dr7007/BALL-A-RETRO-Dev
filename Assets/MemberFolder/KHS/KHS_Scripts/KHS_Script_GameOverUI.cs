@@ -51,7 +51,7 @@ public class KHS_Script_GameOverUI : MonoBehaviour
     {
         Debug.Log("🚨 [GameOverUI] 감독의 지시로 최종 패널 활성화 (Game Over)");
         //if (gameUICanvas) gameUICanvas.enabled = false;
-        //if (gameOverUIObj) gameOverUIObj.SetActive(true);
+        if (gameOverUIObj) gameOverUIObj.SetActive(true);
     }
 
     // 💡 [감독 전용]
@@ -59,7 +59,7 @@ public class KHS_Script_GameOverUI : MonoBehaviour
     {
         Debug.Log("🚨 [GameOverUI] 감독의 지시로 최종 패널 활성화 (Game Clear)");
         //if (gameUICanvas) gameUICanvas.enabled = false;
-        //if (gameClearUIObj) gameClearUIObj.SetActive(true);
+        if (gameClearUIObj) gameClearUIObj.SetActive(true);
     }
 
     // (인트로 관련 로직은 그대로 유지)

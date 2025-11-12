@@ -108,7 +108,10 @@ namespace PSH
                 currentActiveImage = endingImage;
                 currentSprites = ending2Sprites;
             }
+            //else if(cutsceneId == "Round1")
+            //{
 
+            //}
             if (currentActivePanel != null && currentActiveText != null)
             {
                 currentActivePanel.SetActive(true);
