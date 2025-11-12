@@ -29,6 +29,11 @@ public class KHS_Script_ResetController : MonoBehaviour
         {
             ButtonSwitch();
         }
+        if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
+            && Input.GetKeyDown(KeyCode.L))
+        {
+            GameGoToLobbyFunc();
+        }
             //if(isClear)
             //{
             //    if (Input.GetKeyDown(KeyCode.R))
