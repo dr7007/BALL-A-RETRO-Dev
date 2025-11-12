@@ -339,6 +339,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // 이펙트용 이벤트
     public static event Action<int> OnScoreGained;
     public static event Action<int, Vector3> OnScoreGainedAt;
+    public static event Action<bool> PlungerDeathWait;
 
     public static KHS_Script_ScoreManager Instance { get; private set; }
 
@@ -420,6 +421,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void TargetScoreInit()
     {
         targetScore = targetScores[0];
+        UILateUpdate.Invoke();
     }
     private void GameResultJudge()
     {
@@ -526,7 +528,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         {
             currentgameScores[currentRound - 1] = curScore;
             targetScore = targetScores[currentRound++];
-            NextRoundInit();
+            StartCoroutine(NextRoundInit());
         }
         else
         {
@@ -566,8 +568,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         }
     }
 
-    private void NextRoundInit()
+    private IEnumerator NextRoundInit()
     {
+        PlungerDeathWait?.Invoke(false);
+        yield return new WaitForSeconds(1.0f);
         curScore = 0;
         numOfBounce = 0;
         ChangingMainCam();

@@ -7,6 +7,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
 {
     // [ADD] 공 발사 이벤트(사운드 연동)
     public static event Action OnBallLaunched;
+    public static event Action TestTScoreUpdateEvt;
 
     [Header("발사 설정")]
     [Tooltip("최소 발사 힘")]
@@ -35,6 +36,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
         PSH_Script_GameSceneDirector.NoIntroStartEvt += NoIntroExceptionFunc;
         PSH_Script_SceneLoader.OnSceneLoadStart += NoIntroExceptionFunc;
         PSH_Script_DialogueUI.DialogueWaitingEvt += PlungerStopFunc;
+        KHS_Script_ScoreManager.PlungerDeathWait += PlungerStopFunc;
     }
     private void OnDisable()
     {
@@ -43,6 +45,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
         PSH_Script_GameSceneDirector.NoIntroStartEvt -= NoIntroExceptionFunc;
         PSH_Script_SceneLoader.OnSceneLoadStart -= NoIntroExceptionFunc;
         PSH_Script_DialogueUI.DialogueWaitingEvt -= PlungerStopFunc;
+        KHS_Script_ScoreManager.PlungerDeathWait -= PlungerStopFunc;
     }
 
     private void Start()
@@ -90,12 +93,14 @@ public class KHS_Script_PlungerController : MonoBehaviour
 
     private IEnumerator SpaceBarLock()
     {
+        TestTScoreUpdateEvt?.Invoke();
         yield return new WaitForSeconds(2.0f);
         isLock = false;
     }
 
     private void NoIntroExceptionFunc()
     {
+        TestTScoreUpdateEvt?.Invoke();
         Debug.LogWarning("아니 멈추지 마");
         isLock = false;
     }
