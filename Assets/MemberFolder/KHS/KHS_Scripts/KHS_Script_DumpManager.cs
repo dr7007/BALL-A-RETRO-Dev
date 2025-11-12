@@ -50,6 +50,13 @@ public class KHS_Script_DumpManager : MonoBehaviour
             OnBallTrigger?.Invoke(_collider);
             StartCoroutine(ReleaseBall(_collider));
 
+            OnScore?.Invoke(bumpScore);
+
+            if (isSpecial)
+            {
+                bumpScore += 5;
+            }
+
             // [ADD] 트리거 충돌 근사 지점 방송
             Vector3 hit = _collider.ClosestPoint(transform.position);
             if (hit == transform.position) hit += transform.forward * 0.01f;
