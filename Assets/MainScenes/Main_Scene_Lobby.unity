@@ -607,6 +607,18 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6570265127811539656, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
+      value: 
+      objectReference: {fileID: 543551190}
+    - target: {fileID: 6570265127811539656, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: OnClick_QuitGame
+      objectReference: {fileID: 0}
+    - target: {fileID: 6570265127811539656, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: PSH.PSH_Script_LobbyUIManager, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 6895693985371169903, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -648,6 +660,17 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+--- !u!114 &543551190 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 6092786664975596656, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+  m_PrefabInstance: {fileID: 543551189}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: dbf21f832bb66f241922900a27803316, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1343315127 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 554690805587450776, guid: 011b21873dd7e3d45902121e6053e9c8, type: 3}
