@@ -210,19 +210,19 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         // 1. 유저가 누른 키에 따라 '시도할 방향'을 결정
         Vector3 tryDirection = Vector3.zero;
-        if (Input.GetKeyDown(KeyCode.W))
+        if (Input.GetKeyDown(KeyCode.W) || Input.GetKeyDown(KeyCode.UpArrow))
         {
             tryDirection = Vector3.forward;
         }
-        else if (Input.GetKeyDown(KeyCode.S))
+        else if (Input.GetKeyDown(KeyCode.S) || Input.GetKeyDown(KeyCode.DownArrow))
         {
             tryDirection = Vector3.back;
         }
-        else if (Input.GetKeyDown(KeyCode.A))
+        else if (Input.GetKeyDown(KeyCode.A) || Input.GetKeyDown(KeyCode.LeftArrow))
         {
             tryDirection = Vector3.left;
         }
-        else if (Input.GetKeyDown(KeyCode.D))
+        else if (Input.GetKeyDown(KeyCode.D) || Input.GetKeyDown(KeyCode.RightArrow))
         {
             tryDirection = Vector3.right;
         }

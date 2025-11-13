@@ -69,7 +69,7 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 AddBlockerBounce(0.3f);
                 break;
             case 2:
-                PlincoMultipierInhence(1);
+                PlincoMultipierInhence(3);
                 break;
             case 3:
                 AddSpecialBlocker(0.1f);

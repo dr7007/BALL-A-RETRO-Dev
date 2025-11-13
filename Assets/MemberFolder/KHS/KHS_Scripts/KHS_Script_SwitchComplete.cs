@@ -1,5 +1,6 @@
 using System;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class KHS_Script_SwitchComplete : MonoBehaviour
 {
@@ -7,6 +8,8 @@ public class KHS_Script_SwitchComplete : MonoBehaviour
 
     [SerializeField]
     private ChangeSpriteRenderer[] csRenderers;
+    [SerializeField]
+    private Toggle[] toggles;
 
     public bool isComplete = false;
     private int curMount = 0;
@@ -21,6 +24,10 @@ public class KHS_Script_SwitchComplete : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
+        for (int i = 0; i < csRenderers.Length; i++)
+        {
+            toggles[i].isOn = csRenderers[i].On;
+        }
         foreach(var csRenderer in csRenderers)
         {
             if(csRenderer.On)
@@ -41,5 +48,6 @@ public class KHS_Script_SwitchComplete : MonoBehaviour
         }
         else
             curMount = 0;
+        
     }
 }

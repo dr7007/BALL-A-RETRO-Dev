@@ -19,6 +19,11 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
     private bool init_delay = false;
     private bool isForced = false;
 
+    [Space(5)]
+    [Header("개별 타겟 이벤트 (토글용)")]
+    [Tooltip("개별 타겟이 맞을 때마다 호출됩니다. (int: 현재까지 맞은 타겟 수)")]
+    public IntUnityEvent OnTargetHitCountChanged; // int 값을 전달할 수 있는 새 이벤트
+
     private void OnEnable()
     {
         // 공이 아웃되면 뚜껑을 닫는 함수(ResetDropHole)를 연결
@@ -55,8 +60,11 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
 
         for (int i = 0; i < receivers.Length; i++)
         {
-            if(receivers[i].LEDCheck())
+            if (receivers[i].LEDCheck())
+            {
                 ledOnMount++;
+                OnTargetHitCountChanged?.Invoke(ledOnMount);
+            }
         }
         
         if(ledOnMount >= 5)
@@ -69,13 +77,6 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
                 Debug.Log("오브젝트가 활성화 되었습니다!");
                 HoleCoverActiveEvt.Invoke();
             }
-
-            foreach (var  receiver in receivers)
-            {
-                receiver.ResetLED();
-                receiver.GetComponent<ChangeSpriteRenderer>().F_ChangeSprite_Off();
-            }
-            ledOnMount = 0;
         }
         else
         {

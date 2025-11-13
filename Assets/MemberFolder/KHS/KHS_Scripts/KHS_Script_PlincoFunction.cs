@@ -84,6 +84,6 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
 
     public void AddScoreMulti(int _multi)
     {
-        scoreMulti += _multi;
+        scoreMulti *= _multi;
     }
 }
