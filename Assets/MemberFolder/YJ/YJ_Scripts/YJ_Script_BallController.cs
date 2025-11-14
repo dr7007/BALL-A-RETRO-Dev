@@ -62,12 +62,16 @@ public class YJ_Script_BallController : MonoBehaviour
     [SerializeField] private AudioClip sfxRollingLoopPacman;
     [Range(0f, 1f)][SerializeField] private float rollingBaseVolume = 0.35f;
     [SerializeField] private float rollingStartSpeed = 0.4f;   // 이 속도 이상이면 시작
-    [SerializeField] private float rollingStopSpeed = 0.2f;   // 이 속도 미만이면 정지
-    [SerializeField] private float rollingMaxSpeed = 12f;    // 볼륨/피치 맵핑 상한
+    [SerializeField] private float rollingStopSpeed = 0.2f;    // 이 속도 미만이면 정지
+    [SerializeField] private float rollingMaxSpeed = 12f;       // 볼륨/피치 맵핑 상한
     [SerializeField] private float rollingFadeInSec = 0.08f;
     [SerializeField] private float rollingFadeOutSec = 0.15f;
     [SerializeField] private Vector2 rollingPitchRange = new Vector2(0.9f, 1.25f);
     private Coroutine rollingFadeCo;
+
+    // 실제 이동량 기반으로 속도 샘플링(정지 시 사운드 차단)
+    private Vector3 _prevPos;
+    private float _planarSpeedSmoothed = 0f;
 
     void Start()
     {
@@ -87,6 +91,9 @@ public class YJ_Script_BallController : MonoBehaviour
             if (rollingSource.clip == null) rollingSource.clip = sfxRollingLoop;
             rollingSource.volume = 0f;
         }
+
+        _prevPos = transform.position;
+        _planarSpeedSmoothed = 0f;
     }
 
     void Update()
@@ -126,6 +133,12 @@ public class YJ_Script_BallController : MonoBehaviour
         {
             rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
         }
+
+        // 실제 이동 속도 샘플링(정지 판정 안정화)
+        Vector3 dp = transform.position - _prevPos;
+        float actualPlanarSpeed = new Vector2(dp.x, dp.z).magnitude / Mathf.Max(Time.fixedDeltaTime, 0.0001f);
+        _planarSpeedSmoothed = Mathf.Lerp(_planarSpeedSmoothed, actualPlanarSpeed, 0.25f);
+        _prevPos = transform.position;
 
         UpdateRollingSound();
     }
@@ -364,9 +377,8 @@ public class YJ_Script_BallController : MonoBehaviour
 
         bool is2D = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) != 0;
 
-        // 평면 속도만 사용
-        Vector3 v = rigidBody.linearVelocity;
-        float planarSpeed = new Vector2(v.x, v.z).magnitude;
+        // 실제 이동 기반 평면 속도 사용(미세진동으로 인한 오작동 방지)
+        float planarSpeed = _planarSpeedSmoothed;
 
         // 핀볼 2D 모드이거나 팩맨 모드에서, 속도가 기준 이상인 경우 재생
         bool shouldRoll =
