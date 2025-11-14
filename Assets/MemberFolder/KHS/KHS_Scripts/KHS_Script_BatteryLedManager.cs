@@ -19,6 +19,8 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
     private bool init_delay = false;
     private bool isForced = false;
 
+    private bool hasAwardedScore = false;
+
     [Space(5)]
     [Header("개별 타겟 이벤트 (토글용)")]
     [Tooltip("개별 타겟이 맞을 때마다 호출됩니다. (int: 현재까지 맞은 타겟 수)")]
@@ -69,17 +71,22 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
         
         if(ledOnMount >= 5)
         {
-            scoreManager.AddScore(3000);
-
-            if (goEnable != null)
+            if (!hasAwardedScore)
             {
-                goEnable.SetActive(true);
-                Debug.Log("오브젝트가 활성화 되었습니다!");
-                HoleCoverActiveEvt.Invoke();
+                scoreManager.AddScore(3000);
+                hasAwardedScore = true;
+
+                if (goEnable != null)
+                {
+                    goEnable.SetActive(true);
+                    Debug.Log("오브젝트가 활성화 되었습니다!");
+                    HoleCoverActiveEvt.Invoke();
+                }
             }
         }
         else
         {
+            hasAwardedScore = false;
             ledOnMount = 0;
         }
     }
