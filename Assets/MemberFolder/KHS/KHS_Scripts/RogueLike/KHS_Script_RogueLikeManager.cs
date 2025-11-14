@@ -128,23 +128,17 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 bool activate = Random.value < special_Chance;
                 blocker.isSpecial = activate;
 
-                if (blocker.transform.childCount > 0)
+                if (blocker.TryGetComponent<Renderer>(out var renderer))
                 {
-                    var renderers = blocker.transform.GetChild(0).GetComponentsInChildren<Renderer>();
-                    if (renderers.Length != 0)
+                    var mat = renderer.material; // 인스턴스화됨
+                    if (activate)
                     {
-                        foreach (var renderer in renderers)
-                        {
-                            var mat = renderer.material; // 인스턴스화됨
-                            if (activate)
-                            {
-                                mat.EnableKeyword("_EMISSION");
-                            }
-                            else
-                            {
-                                mat.DisableKeyword("_EMISSION");
-                            }
-                        }
+                        Debug.Log("스페셜이 켜지긴 했음");
+                        mat.EnableKeyword("_EMISSION");
+                    }
+                    else
+                    {
+                        mat.DisableKeyword("_EMISSION");
                     }
                 }
             }
