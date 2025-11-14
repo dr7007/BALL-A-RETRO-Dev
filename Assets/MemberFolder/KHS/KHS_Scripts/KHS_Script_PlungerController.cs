@@ -17,17 +17,19 @@ public class KHS_Script_PlungerController : MonoBehaviour
     [SerializeField] private float maxForce = 50f;
 
     [Tooltip("최대 힘까지 도달하는 시간 (초)")]
-    [SerializeField] private float chargeTime = 2f;
+    [SerializeField] public float chargeTime = 2f;
 
     // 내부 변수
     private float currentForce;
     [SerializeField]
     private Rigidbody ballRigidbody;
     [SerializeField]
-    private bool isBallReady = false;
+    public bool isBallReady = false;
 
     [SerializeField]
     private bool isLock = false;
+
+    public float currentGaze = 0f;
 
     private void OnEnable()
     {
@@ -58,6 +60,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
     {
         if (!isBallReady)
         {
+            StartCoroutine(WaitAndZero());
             return;
         }
         if (!isLock)
@@ -67,6 +70,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
                 if (currentForce < maxForce)
                 {
                     currentForce += (maxForce - minForce) / chargeTime * Time.deltaTime;
+                    currentGaze = currentForce / maxForce;  // 힘 증가 속도에 맞게 증가
                 }
             }
 
@@ -76,7 +80,11 @@ public class KHS_Script_PlungerController : MonoBehaviour
             }
         }
     }
-
+    private IEnumerator WaitAndZero()
+    {
+        yield return new WaitForSeconds(1f);
+        currentGaze = 0f;
+    }
     private void PlungerStopFunc(bool _start)
     {
         if (!_start)
