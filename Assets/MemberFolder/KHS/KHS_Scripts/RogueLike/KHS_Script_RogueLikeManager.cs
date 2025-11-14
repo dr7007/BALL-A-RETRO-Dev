@@ -87,7 +87,7 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
                 ClosetheHole(7);
                 break;
             case 8:
-                BallAdditive(3);
+                BallAdditive(2);
                 break;
         }
     }
