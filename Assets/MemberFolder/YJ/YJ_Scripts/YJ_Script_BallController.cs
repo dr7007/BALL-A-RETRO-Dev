@@ -369,11 +369,18 @@ public class YJ_Script_BallController : MonoBehaviour
         gameObject.SetActive(false);
         StopRollingImmediate();
     }
-
-    // ───────── Rolling sound control ─────────
+// ───────── Rolling sound control ─────────
     private void UpdateRollingSound()
     {
         if (rollingSource == null || sfxRollingLoop == null) return;
+
+        // [추가된 부분 1] 사운드 매니저(AudioDirector)의 현재 효과음 볼륨 가져오기
+        float globalSfxVolume = 1f;
+        if (CJS_Script_AudioDirector.I != null)
+        {
+            // AudioDirector에 저장된 현재 효과음 볼륨값 (0.0 ~ 1.0)
+            globalSfxVolume = CJS_Script_AudioDirector.I.sfxVolume; 
+        }
 
         bool is2D = (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) != 0;
 
@@ -393,8 +400,13 @@ public class YJ_Script_BallController : MonoBehaviour
         if (shouldRoll)
         {
             float t = Mathf.Clamp01(planarSpeed / Mathf.Max(rollingMaxSpeed, 0.01f));
-            float targetVol = rollingBaseVolume * Mathf.Lerp(0.2f, 1f, t);
+            // [수정된 부분 2] 최종 볼륨 계산에 globalSfxVolume(슬라이더 값)을 곱함
+            // 원래 식: rollingBaseVolume * 속도비례값
+            // 수정 식: rollingBaseVolume * 속도비례값 * 전체볼륨설정값
+            float targetVol = rollingBaseVolume * Mathf.Lerp(0.2f, 1f, t) * globalSfxVolume;
+            
             float targetPitch = Mathf.Lerp(rollingPitchRange.x, rollingPitchRange.y, t);
+            Debug.Log($"볼륨계산: 기본({rollingBaseVolume}) x 속도변수({t}) x 설정값({globalSfxVolume}) = 결과({targetVol})");
 
             if (!rollingSource.isPlaying || rollingSource.clip != desiredClip)
             {
@@ -408,6 +420,7 @@ public class YJ_Script_BallController : MonoBehaviour
             else
             {
                 rollingSource.pitch = targetPitch;
+                // MoveTowards로 부드럽게 볼륨 변화
                 rollingSource.volume = Mathf.MoveTowards(
                     rollingSource.volume, targetVol,
                     Time.fixedDeltaTime * (1f / Mathf.Max(rollingFadeInSec, 0.01f))
@@ -426,7 +439,7 @@ public class YJ_Script_BallController : MonoBehaviour
         }
     }
 
-    private void StartRollingFade(float from, float to, float seconds, bool stopAfter = false)
+      private void StartRollingFade(float from, float to, float seconds, bool stopAfter = false)
     {
         if (rollingFadeCo != null) StopCoroutine(rollingFadeCo);
         rollingFadeCo = StartCoroutine(CoFadeRolling(from, to, seconds, stopAfter));
