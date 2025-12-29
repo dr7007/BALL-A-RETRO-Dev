@@ -28,6 +28,9 @@ public class CJS_Script_VFXDirector : MonoBehaviour
 
     private void SpawnHitVfx(Vector3 pos)
     {
+        // [수정] UI 브릿지에서 설정한 이펙트 활성화 여부 체크
+        if (!PSH_Script_UI_SoundBridge.IsVfxEnabled) return;
+
         if (obstacleHitVfx == null) return;
         var go = Instantiate(obstacleHitVfx, pos, Quaternion.identity);
         if (autoDestroySeconds > 0f) Destroy(go, autoDestroySeconds);
@@ -35,6 +38,9 @@ public class CJS_Script_VFXDirector : MonoBehaviour
 
     private void SpawnDeathVfx()
     {
+        // [수정] UI 브릿지에서 설정한 이펙트 활성화 여부 체크
+        if (!PSH_Script_UI_SoundBridge.IsVfxEnabled) return;
+
         if (deathVfx == null) return;
         Vector3 pos = ballTransform != null ? ballTransform.position : Vector3.zero;
         var go = Instantiate(deathVfx, pos, Quaternion.identity);
