@@ -24,14 +24,14 @@ public class KHS_Script_CloseObjController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += CloseObjReset;
         KHS_Script_BallOutController.BallOutEvt += CloseObjReset;
-        KHS_Script_ScoreManager.Next_Round_Init += CloseObjReset;
+        //KHS_Script_ScoreManager.Next_Round_Init += CloseObjReset;
     }
 
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= CloseObjReset;
         KHS_Script_BallOutController.BallOutEvt -= CloseObjReset;
-        KHS_Script_ScoreManager.Next_Round_Init -= CloseObjReset;
+        //KHS_Script_ScoreManager.Next_Round_Init -= CloseObjReset;
     }
 
     private void CloseObjReset()

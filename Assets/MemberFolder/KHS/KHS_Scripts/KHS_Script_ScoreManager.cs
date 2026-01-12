@@ -332,6 +332,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public static event Action Round_Clear;
     public static event Action Next_Round_Init;
     public static event Action UILateUpdate;
+    public static event Action Boss_Round_Init;
 
     public static event Action<int> OnGameOverWithScore;
     public static event Action<int> OnGameClearWithScore;
@@ -358,6 +359,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [Header("Round Infomation")]
     [SerializeField] private int goalRound = 0;
     [SerializeField] private int currentRound = 0;
+    [SerializeField] private int bossRound = -1;
+    [SerializeField] private int bossRoundIdx = 0;
+    [SerializeField] private bool isBossStage = false;
+    [SerializeField] private int[] bossRoundInfos = new int[1];
     [SerializeField] private int[] currentgameScores;
 
     [Header("결과 연동")]
@@ -487,8 +492,16 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // 새 API (권장)
     public void AddScoreAt(int value, Vector3 worldPos)
     {
-        curScore += value;
-
+        if (!isBossStage)
+        {
+            curScore += value;
+            if (curScore >= targetScore)
+            {
+                Debug.Log("목표점수 달성! Round_Clear 즉시 호출");
+                Round_Clear?.Invoke();
+                return;
+            }
+        }
         OnScoreGained?.Invoke(Mathf.RoundToInt(value * multiplier));
         OnScoreGainedAt?.Invoke(Mathf.RoundToInt(value * multiplier), worldPos);
 
@@ -527,8 +540,16 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (currentRound < goalRound)
         {
             currentgameScores[currentRound - 1] = curScore;
-            targetScore = targetScores[currentRound++];
-            StartCoroutine(NextRoundInit());
+            if (bossRound == -1 || bossRound != currentRound + 1)
+            {
+                targetScore = targetScores[currentRound++];
+                StartCoroutine(NextRoundInit());
+            }
+            else
+            {
+                targetScore = bossRoundInfos[bossRoundIdx++];
+                StartCoroutine(BossRoundInit());
+            }
         }
         else
         {
@@ -570,12 +591,20 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private IEnumerator NextRoundInit()
     {
-        PlungerDeathWait?.Invoke(false);
-        yield return new WaitForSeconds(1.0f);
-        curScore = 0;
-        numOfBounce = 0;
+        //PlungerDeathWait?.Invoke(false);
+        //yield return new WaitForSeconds(1.0f);
+        //curScore = 0;
+        //numOfBounce = 0;
+        yield return new WaitForSeconds(0.2f);
         ChangingMainCam();
         Next_Round_Init?.Invoke();
+    }
+    private IEnumerator BossRoundInit()
+    {
+        PlungerDeathWait?.Invoke(false);
+        yield return new WaitForSeconds(1.0f);
+        ChangingMainCam();
+        Boss_Round_Init?.Invoke();
     }
 
     private void ChangingSubCam(int _idx)
@@ -595,12 +624,12 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         Debug.Log("BallOut 감지됨 - 점수 및 라운드 상태 판단 중");
 
-        if (curScore >= targetScore)
-        {
-            Debug.Log("목표점수 달성! Round_Clear 즉시 호출");
-            Round_Clear?.Invoke();
-            return;
-        }
+        //if (curScore >= targetScore)
+        //{
+        //    Debug.Log("목표점수 달성! Round_Clear 즉시 호출");
+        //    Round_Clear?.Invoke();
+        //    return;
+        //}
 
         int remain = ball.GetBallCount() - 1;
         if (remain > 0)

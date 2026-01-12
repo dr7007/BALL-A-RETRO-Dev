@@ -37,7 +37,8 @@ public class KHS_Script_RogueLikeGenerate : MonoBehaviour
 
     private IEnumerator WaitDeathEffect()
     {
-        yield return null;
+        Debug.Log("너 호출되지????");
+        yield return new WaitForSeconds(1.0f);
         button.onClick.Invoke();
     }
 
