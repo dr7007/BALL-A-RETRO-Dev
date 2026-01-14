@@ -1,40 +1,36 @@
 using System;
 using UnityEngine;
 using PSH;
-using System.Collections; // DialogueUI 이벤트를 받기 위해
+using System.Collections;
 
 namespace PSH
 {
-    /// <summary>
-    /// 게임 씬의 시작 시퀀스를 지휘합니다. (예: 인트로 애니메이션 -> 대사 시작 -> 메인 UI 켜기)
-    /// </summary>
     public class PSH_Script_GameSceneDirector : MonoBehaviour
     {
         public static event Action<PSH_Script_DialogueUI> OpeningEyeEvt;
         public static event Action NoIntroStartEvt;
 
+        [Header("Scene Mode")]
+        [Tooltip("튜토리얼 씬이라면 이 체크박스를 체크하세요! 인트로가 안 나옵니다.")]
+        [SerializeField] private bool isTutorialScene = false; // 👈 새로 추가됨
+
         [Header("Scene Objects")]
-        [Tooltip("눈 뜨는 효과 오브젝트")]
         [SerializeField] private PSH_Script_EyeOpenEffect eyeOpenEffect;
         [SerializeField] private GameObject eyeopenOBJ;
-        [Tooltip("게임 시작 후 켜질 메인 게임 캔버스 (HUD)")]
-
+        
+        [Header("Settings")]
         [SerializeField] private int repeatCount = 7;
-        [SerializeField] private float interval = 0.1f; // 반복 주기(초)
+        [SerializeField] private float interval = 0.1f;
 
-        [SerializeField]
-        // 이 씬의 인트로가 이미 한 번 재생되었는지 확인하는 static 변수
         private static bool hasPlayedIntro = false;
 
         public static void ResetIntroFlag()
         {
             hasPlayedIntro = false;
-            Debug.Log("[GameSceneDirector] 인트로 플래그 리셋 완료.");
         }
 
         private void OnEnable()
         {
-            // 인트로 대사가 끝나는 타이밍을 알기 위해 구독
             PSH_Script_DialogueUI.DialogueEvt += HandleDialogueEvent;
         }
 
@@ -47,33 +43,39 @@ namespace PSH
         {
             PSH_Script_DialogueUI dialogueUI = PSH_Script_DialogueUI.Instance;
 
-            if (dialogueUI == null) Debug.LogError("GameSceneDirector: DialogueUI Instance 없음!");
-            if (eyeOpenEffect == null) Debug.LogError("GameSceneDirector: EyeOpenEffect 할당 안됨!");
+           // 1. 튜토리얼 씬일 경우 (체크박스 V)
+            if (isTutorialScene)
+            {
+                Debug.Log("[Director] 튜토리얼 모드 진입");
 
+                // 방해되는 연출 끄기
+                if (eyeOpenEffect) eyeOpenEffect.gameObject.SetActive(false);
+                if (eyeopenOBJ) eyeopenOBJ.gameObject.SetActive(false);
+
+                // ★ [핵심] 튜토리얼 첫 대사 실행! (CSV 키값: Tutorial_Intro)
+                dialogueUI.Play("Tutorial_Intro"); 
+                
+                return; // 여기서 종료 (아래 인트로 로직 실행 X)
+            }
+
+            // 2. 인트로를 이미 본 경우 (게임 씬 재진입 등)
             if (hasPlayedIntro)
             {
-                // --- [케이스 1] 인트로 스킵 (재시도 등) ---
-                Debug.Log("[GameSceneDirector] 인트로 스킵 -> 바로 게임 시작");
-
-                // 1. 연출용 오브젝트 정리
+                Debug.Log("[Director] 인트로 스킵 -> 게임 시작");
                 if (eyeOpenEffect)
                 {
                     eyeOpenEffect.SetOpenImmediate();
                     eyeOpenEffect.gameObject.SetActive(false);
                     eyeopenOBJ.gameObject.SetActive(false);
                 }
-
-
-                // 3. 이벤트 전파
                 StartCoroutine(RepeatEventCoroutine());
             }
+            // 3. 진짜 처음 (인트로 재생)
             else
             {
-                // --- [케이스 2] 인트로 재생 시작 ---
-                Debug.Log("[GameSceneDirector] 인트로 시퀀스 시작");
+                Debug.Log("[Director] 인트로 시퀀스 시작");
                 hasPlayedIntro = true;
 
-                // 눈 뜨기 효과 시작 -> 완료되면 DialogueUI가 이어받음
                 if (eyeOpenEffect)
                 {
                     eyeOpenEffect.OnEyeOpenComplete += () => {
@@ -84,25 +86,32 @@ namespace PSH
             }
         }
 
-        // DialogueUI로부터 대사가 끝났다는 신호를 받음
         private void HandleDialogueEvent(string cutsceneId)
         {
-            // 인트로 대사가 끝났다면 메인 캔버스를 켭니다.
             if (cutsceneId == "Intro")
             {
                 eyeopenOBJ.gameObject.SetActive(false);
             }
+            // ★ [추가] 튜토리얼 대사가 끝났을 때의 행동 정의
+            else if (cutsceneId == "Tutorial_Intro")
+            {
+                Debug.Log("튜토리얼 첫 대사 끝! -> 이제 조작 가이드 활성화");
+                
+                // 예시: 플레이어 움직임 락 해제하기
+                // PlayerController.Instance.CanMove = true; 
+                
+                // 예시: 다음 목표 지점 화살표 켜기
+                // tutorialGuideArrow.SetActive(true);
+            }
         }
     
-    private IEnumerator RepeatEventCoroutine()
+        private IEnumerator RepeatEventCoroutine()
         {
             for (int i = 0; i < repeatCount; i++)
             {
-                NoIntroStartEvt?.Invoke(); // 이벤트 발생
+                NoIntroStartEvt?.Invoke();
                 yield return new WaitForSeconds(interval);
             }
-
-            Debug.Log("이벤트 반복 종료");
         }
     }
 }
