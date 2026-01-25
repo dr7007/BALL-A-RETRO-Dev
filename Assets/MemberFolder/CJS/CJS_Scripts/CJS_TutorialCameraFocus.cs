@@ -28,7 +28,9 @@ public class CJS_TutorialCameraFocus : MonoBehaviour
 
     public void FocusTo(Transform target)
     {
+        if (!cam) cam = Camera.main;
         if (!cam || !target) return;
+
         if (!_captured) CaptureOriginal();
 
         StopAllCoroutines();
@@ -37,6 +39,7 @@ public class CJS_TutorialCameraFocus : MonoBehaviour
 
     public void Restore()
     {
+        if (!cam) cam = Camera.main;
         if (!cam || !_captured) return;
 
         StopAllCoroutines();
@@ -62,7 +65,6 @@ public class CJS_TutorialCameraFocus : MonoBehaviour
             cam.fieldOfView = Mathf.Lerp(startFov, fov, t);
             yield return null;
         }
-
     }
 
     public void ReEnableDisabled()
