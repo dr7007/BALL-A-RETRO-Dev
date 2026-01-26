@@ -16,11 +16,11 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     [Header("Input Keys (튜토리얼 표시용)")]
     public KeyCode leftFlipperKey = KeyCode.Z;
-    public KeyCode rightFlipperKey = KeyCode.Slash;
+    public KeyCode rightFlipperKey = KeyCode.Slash; 
 
     [Header("Optional Gates")]
-    public KHS_Script_PlungerController plunger; // 여기에 연결(없으면 Find)
-    public Collider railEntranceTrigger;         // 막고 싶으면 연결(선택)
+    public KHS_Script_PlungerController plunger; 
+    public Collider railEntranceTrigger;         
 
     private Step _step = Step.Intro;
     private bool _leftDone, _rightDone;
@@ -43,7 +43,6 @@ public class CJS_TutorialDirector : MonoBehaviour
         // Step4 전까지 플런저 잠금
         if (plunger) plunger.tutorialForceLock = true;
 
-        // (선택) 튜토리얼 중엔 2F 입구 막기
         if (railEntranceTrigger) railEntranceTrigger.enabled = false;
 
         GoToStep(Step.Intro);
@@ -54,7 +53,6 @@ public class CJS_TutorialDirector : MonoBehaviour
         switch (_step)
         {
             case Step.Intro:
-                // 아무 키나 누르면 다음(또는 UI 버튼으로 바꿔도 됨)
                 if (Input.anyKeyDown) GoToStep(Step.Flippers);
                 break;
 
@@ -67,13 +65,11 @@ public class CJS_TutorialDirector : MonoBehaviour
                 break;
 
             case Step.Entrance2F:
-                // 여기서는 "설명만" 하고, 플레이어가 확인 키를 누르면 다음
-                // (원하면 여기서 '장애물 5개 맞추기' 실제 카운트 방식으로 바꿔줄 수 있어)
                 if (Input.anyKeyDown) GoToStep(Step.Plunger);
                 break;
 
             case Step.Plunger:
-                // Space로 발사하면 OnBallLaunched 이벤트로 완료 처리됨
+                // Space 발사는 OnBallLaunched 이벤트로 완료 처리
                 break;
         }
     }
@@ -81,7 +77,6 @@ public class CJS_TutorialDirector : MonoBehaviour
     private void GoToStep(Step next)
     {
         _step = next;
-
         if (!focus) return;
 
         switch (_step)
@@ -89,22 +84,21 @@ public class CJS_TutorialDirector : MonoBehaviour
             case Step.Intro:
                 focus.CaptureOriginal();
                 focus.Restore();
+
                 if (tutorialText)
                     tutorialText.text =
-                        "?? 게임 설명\n" +
+                        "게임 설명\n" +
                         "핀볼(1F)에서 점수를 올리고, 조건을 달성하면 2F로 진입할 수 있어요.\n" +
                         "아무 키나 눌러 계속…";
                 break;
 
             case Step.Flippers:
                 _leftDone = _rightDone = false;
+
                 if (focusFlippers) focus.FocusTo(focusFlippers);
 
                 if (tutorialText)
-                    tutorialText.text =
-                        "?? 플리퍼 조작\n" +
-                        $"왼쪽: [{leftFlipperKey}] / 오른쪽: [{rightFlipperKey}]\n" +
-                        "두 키를 한 번씩 눌러보세요!";
+                    tutorialText.text = $"( {leftFlipperKey} / {rightFlipperKey} 를 누르세요! )";
                 break;
 
             case Step.Entrance2F:
@@ -112,8 +106,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
                 if (tutorialText)
                     tutorialText.text =
-                        "?? 2층 입장\n" +
-                        "장애물 5개를 맞추면 2F 입장이 가능해져요.\n" +
+                        "( 장애물 5개를 맞추면 2층 입장 가능! )\n" +
                         "아무 키나 눌러 계속…";
                 break;
 
@@ -124,9 +117,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                 if (plunger) plunger.tutorialForceLock = false;
 
                 if (tutorialText)
-                    tutorialText.text =
-                        "?? 공 발사\n" +
-                        "Space를 눌러 공을 발사하면 튜토리얼이 시작됩니다!";
+                    tutorialText.text = "( Space 를 눌러 공을 발사하세요! )";
                 break;
 
             case Step.Done:
@@ -143,7 +134,6 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     private void EndTutorial()
     {
-        // (선택) 2F 입구 다시 열기
         if (railEntranceTrigger) railEntranceTrigger.enabled = true;
 
         // 카메라 원복 + 비활성 스크립트 다시 켜기
@@ -153,7 +143,7 @@ public class CJS_TutorialDirector : MonoBehaviour
             focus.ReEnableDisabled();
         }
 
-        if (tutorialText) tutorialText.text = ""; // 또는 패널 끄기
+        if (tutorialText) tutorialText.text = "";
         Debug.Log("[Tutorial] Done");
     }
 }
