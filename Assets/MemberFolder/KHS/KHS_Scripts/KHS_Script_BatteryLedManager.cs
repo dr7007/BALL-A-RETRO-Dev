@@ -96,7 +96,7 @@ public class KHS_Script_BatteryLedManager : MonoBehaviour
         if (goEnable != null && !isForced)
         {
             goEnable.SetActive(false);
-            HoleCoverUnActiveEvt.Invoke();
+            //HoleCoverUnActiveEvt.Invoke();
         }
     }
 

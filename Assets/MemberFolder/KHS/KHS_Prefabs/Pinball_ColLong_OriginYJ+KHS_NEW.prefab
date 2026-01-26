@@ -31159,12 +31159,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a888b586a94161740824eb3acf2f6414, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  tutorialForceLock: 0
   minForce: 1
   maxForce: 20
   chargeTime: 2
   ballRigidbody: {fileID: 0}
   isBallReady: 0
   isLock: 0
+  currentGaze: 0
 --- !u!65 &555102166799243620
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -38567,6 +38569,9 @@ MonoBehaviour:
   - {fileID: 769663654385428320}
   - {fileID: 8440235750302750163}
   goEnable: {fileID: 3666815041458096366}
+  OnTargetHitCountChanged:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2329878745059992306
 GameObject:
   m_ObjectHideFlags: 0
@@ -86179,6 +86184,7 @@ MonoBehaviour:
   - {fileID: 7927748749673459592}
   - {fileID: 2330136959238157353}
   - {fileID: 6303673441209749831}
+  toggles: []
   isComplete: 0
 --- !u!1 &5104829385000069674
 GameObject:

@@ -36,7 +36,15 @@ namespace PSH
         [SerializeField] private List<Sprite> ending1Sprites = new List<Sprite>();
         [Tooltip("Ending2(오버) 대사 순서에 맞춰 보여줄 스프라이트들")]
         [SerializeField] private List<Sprite> ending2Sprites = new List<Sprite>();
-
+        [Header("Tutorial Sprites")]
+        [Tooltip("Tutorial_Intro 대사 순서에 맞춘 이미지")]
+        [SerializeField] private List<Sprite> tutIntroSprites = new List<Sprite>();
+        
+        [Tooltip("Tutorial_Flipper 대사 순서에 맞춘 이미지")]
+        [SerializeField] private List<Sprite> tutFlipperSprites = new List<Sprite>();
+        
+        [Tooltip("Tutorial_Space 대사 순서에 맞춘 이미지")]
+        [SerializeField] private List<Sprite> tutSpaceSprites = new List<Sprite>();
         [Header("Data")]
         [SerializeField] string csvFileName = "dialogues";
         [SerializeField] float charInterval = 0.04f;
@@ -87,14 +95,49 @@ namespace PSH
             currentSprites = null;
             currentActiveImage = null;
 
-            if (cutsceneId == "Intro")
+           // 1. 인트로 패널을 쓰는 경우 (Intro + Tutorial)
+            if (cutsceneId == "Intro" || cutsceneId.Contains("Tutorial"))
             {
                 currentActivePanel = introPanelRoot;
                 currentActiveText = introText;
                 currentActiveImage = introImage;
-                currentSprites = introSprites;
+                
+                // 🔴 [스프라이트 연결 부분 수정]
+                if (cutsceneId == "Intro") 
+                {
+                    currentSprites = introSprites;
+                }
+                else if (cutsceneId == "Tutorial_Intro") 
+                {
+                    currentSprites = tutIntroSprites;
+                }
+                else if (cutsceneId == "Tutorial_Flipper") 
+                {
+                    currentSprites = tutFlipperSprites;
+                }
+                else if (cutsceneId == "Tutorial_Space") 
+                {
+                    currentSprites = tutSpaceSprites;
+                }
+                
+                // 튜토리얼은 시간 멈추지 않게 하거나, 필요하면 여기서 조정
                 originalTimeScale = Time.timeScale;
-                Time.timeScale = 0f;
+                Time.timeScale = 0f; 
+            }
+            // 2. 엔딩 패널 쓰는 경우
+            else if (cutsceneId == "Ending1")
+            {
+                currentActivePanel = endingPanelRoot;
+                currentActiveText = endingText;
+                currentActiveImage = endingImage;
+                currentSprites = ending1Sprites;
+            }
+            else if (cutsceneId == "Ending2")
+            {
+                currentActivePanel = endingPanelRoot;
+                currentActiveText = endingText;
+                currentActiveImage = endingImage;
+                currentSprites = ending2Sprites;
             }
             else if (cutsceneId == "Ending1")
             {
@@ -163,17 +206,18 @@ namespace PSH
 
         private void EndDialogue()
         {
-            // 💡 [수정] 대사가 끝난 ID를 먼저 저장합니다.
             string finishedId = currentCutsceneId;
 
-            // 💡 [수정] "Intro"일 때만 패널을 끄고, "Ending1/2"일 때는 끄지 않습니다.
-            if (finishedId == "Intro")
+            // 🔴 [수정 포인트 2] 여기도 || finishedId.Contains("Tutorial") 추가!
+            if (finishedId == "Intro" || finishedId.Contains("Tutorial"))
             {
                 if (currentActivePanel) currentActivePanel.SetActive(false);
                 Time.timeScale = originalTimeScale;
-                DialogueEvt?.Invoke("Intro");
+                
+                // 튜토리얼 키값 그대로 이벤트를 보내야 Director가 받음
+                DialogueEvt?.Invoke(finishedId); 
             }
-            // (else: "Ending1" or "Ending2" - 패널을 끄지 않고 놔둡니다.)
+            // (else: Ending은 패널 안 끔)
 
             // 상태 초기화
             currentLines.Clear();
@@ -183,9 +227,7 @@ namespace PSH
             currentActiveText = null;
             idx = -1;
             currentCutsceneId = null;
-  
 
-            // 감독에게 보고 (인트로가 끝났을 때도 보고는 해야 함)
             OnDialogueComplete?.Invoke(finishedId);
             DialogueWaitingEvt?.Invoke(false);
         }
@@ -197,7 +239,7 @@ namespace PSH
             TextAsset ta = Resources.Load<TextAsset>(csvFileName);
             if (ta == null)
             {
-                Debug.LogError($"🚨 [DialogueUI] Resources 폴더에 '{csvFileName}' 파일이 없습니다!");
+                Debug.LogError($"[DialogueUI] Resources 폴더에 '{csvFileName}' 파일이 없습니다!");
                 return result;
             }
 
@@ -244,15 +286,15 @@ namespace PSH
 
             if (result.Count == 0)
             {
-                // 🚨 범인 색출: 도대체 파일에 어떤 키값들이 있었는지 콘솔에 다 불어버립니다.
+                //  범인 색출: 도대체 파일에 어떤 키값들이 있었는지 콘솔에 다 불어버립니다.
                 string keysList = string.Join(", ", foundKeys);
-                Debug.LogError($"🚨 [DialogueUI] '{id}' 대사를 한 줄도 못 찾았습니다!");
-                Debug.LogError($"🔎 CSV 파일에서 발견된 키 목록: [{keysList}]");
-                Debug.LogError("👉 팁: 위 목록에 'Intro'가 없다면 CSV 파일 인코딩이 깨졌거나 오타가 있는 것입니다.");
+                Debug.LogError($" [DialogueUI] '{id}' 대사를 한 줄도 못 찾았습니다!");
+                Debug.LogError($" CSV 파일에서 발견된 키 목록: [{keysList}]");
+                Debug.LogError(" 팁: 위 목록에 'Intro'가 없다면 CSV 파일 인코딩이 깨졌거나 오타가 있는 것입니다.");
             }
             else
             {
-                Debug.Log($"✅ [DialogueUI] '{id}' 대사 로드 성공: 총 {result.Count}줄");
+                Debug.Log($" [DialogueUI] '{id}' 대사 로드 성공: 총 {result.Count}줄");
                 DialogueWaitingEvt?.Invoke(true);
             }
 
