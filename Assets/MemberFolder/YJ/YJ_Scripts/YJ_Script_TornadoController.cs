@@ -13,6 +13,9 @@ public class YJ_Script_TornadoController : MonoBehaviour
     [Tooltip("분당 회전수 (RPM)")]
     [SerializeField] private float rpm = 400f;
 
+    [Tooltip("무작위 힘의 세기")]
+    [SerializeField] private float randomKickForce = 2f;
+
     [Tooltip("회전 방향")]
     [SerializeField] private RotationDirection direction = RotationDirection.Clockwise;
 
@@ -55,6 +58,20 @@ public class YJ_Script_TornadoController : MonoBehaviour
         //   -> 물리 엔진이 이 속도로 회전하도록 유지하며, 
         //      다른 물체(공)와 충돌 시 이 속도를 계산에 반영.
         rb.angularVelocity = targetAngularVelocity;
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        if (collision.gameObject.CompareTag("Ball"))
+        {
+            Rigidbody ballRb = collision.rigidbody;
+            if (ballRb != null)
+            {
+                // 공의 현재 진행 방향에 무작위 회전 벡터를 더해 새로운 힘을 가함
+                Vector3 randomDir = Quaternion.Euler(0, UnityEngine.Random.Range(-30f, 30f), 0) * collision.contacts[0].normal;
+                ballRb.AddForce(randomDir * randomKickForce, ForceMode.Impulse);
+            }
+        }
     }
 
     // 외부에서 RPM을 변경할 때 사용할 메소드
