@@ -9,6 +9,10 @@ public class KHS_Script_PlungerController : MonoBehaviour
     public static event Action OnBallLaunched;
     public static event Action TestTScoreUpdateEvt;
 
+    //추가 튜토리얼용
+    [Header("Tutorial")]
+    public bool tutorialForceLock = false;
+
     [Header("발사 설정")]
     [Tooltip("최소 발사 힘")]
     [SerializeField] private float minForce = 1f;
@@ -63,6 +67,9 @@ public class KHS_Script_PlungerController : MonoBehaviour
             StartCoroutine(WaitAndZero());
             return;
         }
+        //추가 튜토리얼용
+        if (tutorialForceLock) return;
+
         if (!isLock)
         {
             if (Input.GetKey(KeyCode.Space))
