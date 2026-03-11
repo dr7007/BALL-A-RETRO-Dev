@@ -25,7 +25,7 @@ public class KHS_Script_FliperController : MonoBehaviour
     private bool lastFlipperActive = false;
     private float lastFlipperEndTime = 0f;
     [SerializeField] 
-    private float lastFlipperActiveDuration = 0.25f; // 마지막 한 번 유지시간 (0.25초 정도 추천)
+    private float lastFlipperActiveDuration = 0.75f; // 마지막 한 번 유지시간 (0.25초 정도 추천)
 
     private void OnEnable()
     {
@@ -42,28 +42,51 @@ public class KHS_Script_FliperController : MonoBehaviour
 
     private void OffFliper(Collision collision)
     {
-        isCollision = false;
-    }
-    private void OnFliper(Collision collision)
-    {
         // 유예 시간 내에는 무시
         if (Time.time - lastFliperUseTime < fliperCooldown)
             return;
 
-        // 키 입력 시만 카운트 감소
-        else if (Input.GetKey(flippers[0].inputKey) || Input.GetKey(flippers[1].inputKey))
+        if (Input.GetKey(flippers[0].inputKey) || Input.GetKey(flippers[1].inputKey))
         {
-            // 마지막 1회일 경우 → 감소 후에도 한 번은 강제 활성 유지
             if (fliper_Count == 1)
             {
                 lastFlipperActive = true;
                 lastFlipperEndTime = Time.time + lastFlipperActiveDuration;
+                fliper_Count--;
+                FliperCountChangeEvt?.Invoke();
             }
 
-            fliper_Count--;
-            lastFliperUseTime = Time.time; // 시간 갱신
-            FliperCountChangeEvt?.Invoke();
+            else if (fliper_Count > 0)
+            {
+                fliper_Count--;
+                lastFliperUseTime = Time.time; // 시간 갱신
+                FliperCountChangeEvt?.Invoke();
+            }
         }
+            isCollision = false;
+    }
+    private void OnFliper(Collision collision)
+    {
+        //// 유예 시간 내에는 무시
+        //if (Time.time - lastFliperUseTime < fliperCooldown)
+        //    return;
+
+        //// 키 입력 시만 카운트 감소
+        //// To Do : 현재 구조에서 플리퍼 구분이 안되어 공과 플리퍼 2개 중 반대편에 맞다아있을때 동작해서 추가적으로 감소하는 현상 발생
+        //// 수정 요함
+        //else if (Input.GetKey(flippers[0].inputKey) || Input.GetKey(flippers[1].inputKey))
+        //{
+        //    // 마지막 1회일 경우 → 감소 후에도 한 번은 강제 활성 유지
+        //    if (fliper_Count == 1)
+        //    {
+        //        lastFlipperActive = true;
+        //        lastFlipperEndTime = Time.time + lastFlipperActiveDuration;
+        //    }
+
+        //    fliper_Count--;
+        //    lastFliperUseTime = Time.time; // 시간 갱신
+        //    FliperCountChangeEvt?.Invoke();
+        //}
 
         isCollision = true;
     }
