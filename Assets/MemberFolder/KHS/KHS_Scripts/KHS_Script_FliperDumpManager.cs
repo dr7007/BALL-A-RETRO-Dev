@@ -36,12 +36,4 @@ public class KHS_Script_FliperDumpManager : MonoBehaviour
         Debug.Log("OffCollision 판정");
         OffFliperCollision?.Invoke(_collision);
     }
-
-    private void OnEnable() { OnFliperCollision += OnFliperShot; }
-    private void OnDisable() { OnFliperCollision -= OnFliperShot; }
-
-    private void OnFliperShot(Collision _collision)
-    {
-        Debug.Log("OnFliperShot 조건");
-    }
 }
