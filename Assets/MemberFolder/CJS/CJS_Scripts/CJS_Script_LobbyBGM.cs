@@ -3,7 +3,7 @@ using UnityEngine;
 [RequireComponent(typeof(AudioSource))]
 public class CJS_Script_LobbyBGM : MonoBehaviour
 {
-    public static CJS_Script_LobbyBGM I;   // (¿É¼Ç) Àü¿ª Á¢±Ù¿ë
+    public static CJS_Script_LobbyBGM I;   // (ï¿½É¼ï¿½) ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½Ù¿ï¿½
 
     [Header("Clip & Options")]
     public AudioClip bgmClip;
@@ -11,10 +11,10 @@ public class CJS_Script_LobbyBGM : MonoBehaviour
     public bool loop = true;
     public bool playOnAwake = true;
 
-    [Tooltip("Ã¼Å©ÇÏ¸é ¾À ÀüÈ¯¿¡µµ ÆÄ±«µÇÁö ¾Ê°í °è¼Ó Àç»ıµË´Ï´Ù.")]
+    [Tooltip("Ã¼Å©ï¿½Ï¸ï¿½ ï¿½ï¿½ ï¿½ï¿½È¯ï¿½ï¿½ï¿½ï¿½ ï¿½Ä±ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½Ê°ï¿½ ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Ë´Ï´ï¿½.")]
     public bool persistBetweenScenes = false;
 
-    [Header("Fade (¿É¼Ç)")]
+    [Header("Fade (ï¿½É¼ï¿½)")]
     public float fadeInSeconds = 0.75f;
     public float fadeOutSeconds = 0.5f;
 
@@ -23,19 +23,22 @@ public class CJS_Script_LobbyBGM : MonoBehaviour
 
     void Awake()
     {
+        // ì²´í¬ ì—¬ë¶€ì™€ ìƒê´€ì—†ì´ ë¬´ì¡°ê±´ Iì— ìì‹ ì„ í• ë‹¹í•˜ë„ë¡ ìˆ˜ì •
+        if (I != null && I != this) { Destroy(gameObject); return; }
+        I = this;
+
         if (persistBetweenScenes)
         {
-            if (I != null && I != this) { Destroy(gameObject); return; }
-            I = this;
             DontDestroyOnLoad(gameObject);
         }
 
         src = GetComponent<AudioSource>();
-        src.playOnAwake = false;    // ¼öµ¿À¸·Î Á¦¾î (ÆäÀÌµå ÀÎ °¡´É)
+        src.playOnAwake = false;
         src.loop = loop;
         src.clip = bgmClip;
         src.volume = 0f;
     }
+        
 
     void Start()
     {
@@ -84,7 +87,7 @@ public class CJS_Script_LobbyBGM : MonoBehaviour
 
         while (t < duration)
         {
-            t += Time.unscaledDeltaTime; // Time.timeScale°ú ¹«°ü
+            t += Time.unscaledDeltaTime; // Time.timeScaleï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½
             src.volume = Mathf.Lerp(start, target, duration <= 0f ? 1f : t / duration);
             yield return null;
         }
