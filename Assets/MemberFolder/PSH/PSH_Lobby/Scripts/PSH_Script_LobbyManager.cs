@@ -20,7 +20,6 @@ namespace PSH
         [SerializeField] private GameObject inputEmailPrefab;
         [SerializeField] private GameObject RnakingPanel;
 
-
         private PSH_Script_SceneLoader sceneLoader;
 
         private void Awake()
