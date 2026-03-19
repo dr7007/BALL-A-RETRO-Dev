@@ -67,9 +67,15 @@ public class YJ_Script_TornadoController : MonoBehaviour
             Rigidbody ballRb = collision.rigidbody;
             if (ballRb != null)
             {
-                // 공의 현재 진행 방향에 무작위 회전 벡터를 더해 새로운 힘을 가함
-                Vector3 randomDir = Quaternion.Euler(0, UnityEngine.Random.Range(-30f, 30f), 0) * collision.contacts[0].normal;
-                ballRb.AddForce(randomDir * randomKickForce, ForceMode.Impulse);
+                Vector3 currentVel = ballRb.linearVelocity;
+                currentVel.y = 0;
+                ballRb.linearVelocity = currentVel;
+
+                float randomAngle = UnityEngine.Random.Range(-25f, 25f);
+                Vector3 pushDir = Quaternion.Euler(0, randomAngle, 0) * collision.contacts[0].normal;
+
+                float kickForce = 5f;
+                ballRb.AddForce(pushDir * kickForce, ForceMode.Impulse);
             }
         }
     }

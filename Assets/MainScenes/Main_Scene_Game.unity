@@ -23241,7 +23241,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: -1.4130001, y: 0.1, z: 0.7350001}
-  m_LocalScale: {x: 0.2, y: 0.05, z: 0.2}
+  m_LocalScale: {x: 0.2, y: 0.2, z: 0.2}
   m_ConstrainProportionsScale: 0
   m_Children: []
   m_Father: {fileID: 1211435494}
@@ -23260,7 +23260,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   rpm: 400
   randomKickForce: 2
-  direction: 0
+  direction: 1
 --- !u!54 &280896990
 Rigidbody:
   m_ObjectHideFlags: 0
@@ -30804,8 +30804,15 @@ MonoBehaviour:
   sfxGameOver: {fileID: 8300000, guid: 92f809ca157e3784f8362679e1e6ab9a, type: 3}
   sfxFlipperPress: {fileID: 8300000, guid: 91c8b150605f2b34aa4344a7f53ec2f2, type: 3}
   sfxFlipperHitBall: {fileID: 8300000, guid: d46323e22e74e46baa241cbf48c85671, type: 3}
+  sfxPortalEnter: {fileID: 8300000, guid: 05adee3550f225a4fb0b985d03553d4e, type: 3}
+  sfxPortalExit: {fileID: 0}
+  sfxRailRideLoop: {fileID: 8300000, guid: 9fa7b1838d23c51428c3f3ace732f709, type: 3}
+  bgmVolume: 0.2
+  sfxVolume: 0.6
+  playBgmOnStart: 1
+  loopFadeInSeconds: 0.05
+  loopFadeOutSeconds: 0.12
   flipperHitPitchRange: {x: 0.95, y: 1.05}
-  flipperHitCooldown: 0.03
   flipperHitVolCurve:
     serializedVersion: 2
     m_Curve:
@@ -30830,22 +30837,6 @@ MonoBehaviour:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
-  sfxPortalEnter: {fileID: 8300000, guid: 05adee3550f225a4fb0b985d03553d4e, type: 3}
-  sfxPortalExit: {fileID: 0}
-  sfxRailRideLoop: {fileID: 8300000, guid: 9fa7b1838d23c51428c3f3ace732f709, type: 3}
-  bgmVolume: 0.2
-  sfxVolume: 0.6
-  playBgmOnStart: 1
-  sfxLoopVolume: 0.7
-  sfxLoopPitch: 1
-  loopFadeInSeconds: 0.05
-  loopFadeOutSeconds: 0.12
-  hitCooldown: 0.03
-  flipperPitchRange: {x: 0.97, y: 1.03}
-  portalCooldown: 0.03
-  portalPitchRange: {x: 0.98, y: 1.02}
-  flipperPressDecisionWindow: 0.08
-  pressedHitGrace: 0.12
 --- !u!114 &366032749
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -136592,6 +136583,10 @@ PrefabInstance:
     - target: {fileID: 972511360101009613, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 1049426181514191654, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+      propertyPath: acceleration
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 1112890470833908481, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       propertyPath: bumpScore
