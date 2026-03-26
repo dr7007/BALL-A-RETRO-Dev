@@ -14,7 +14,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class SH_Script_MaterialTintColor : MonoBehaviour {
+public class PSH_Script_MaterialTintColor : MonoBehaviour {
     
     private Material material;
     private Color materialTintColor;
