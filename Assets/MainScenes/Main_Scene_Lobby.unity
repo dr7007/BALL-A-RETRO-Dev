@@ -643,6 +643,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: Canvas_Lobby
       objectReference: {fileID: 0}
+    - target: {fileID: 7790365074762135579, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 960
+      objectReference: {fileID: 0}
+    - target: {fileID: 7907013475989646217, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
+      propertyPath: m_AnchoredPosition.x
+      value: 960
+      objectReference: {fileID: 0}
     - target: {fileID: 8630417773715382560, guid: 1c4d65ecf68092a499b9f2fb2ed0316b, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -675,6 +683,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbf21f832bb66f241922900a27803316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!1 &1294274863
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 1294274865}
+  - component: {fileID: 1294274864}
+  m_Layer: 0
+  m_Name: SteamManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &1294274864
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294274863}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ef4bffeda13d7a748973ff9204401c07, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+--- !u!4 &1294274865
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1294274863}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 12.455797, y: 6.894932, z: 84.56}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &1343315127 stripped
 GameObject:
   m_CorrespondingSourceObject: {fileID: 554690805587450776, guid: 011b21873dd7e3d45902121e6053e9c8, type: 3}
@@ -1125,3 +1177,4 @@ SceneRoots:
   - {fileID: 543551189}
   - {fileID: 1499458197}
   - {fileID: 158746413}
+  - {fileID: 1294274865}
