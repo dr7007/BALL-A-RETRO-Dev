@@ -96,4 +96,5 @@ public class PSH_Script_ResolutionSettings : MonoBehaviour
             Screen.SetResolution(Screen.width, Screen.height, targetMode);
         }
     }
+    
 }

@@ -128,6 +128,8 @@ namespace PSH
 
             if (cutsceneId == "Intro")
             {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
                 currentActivePanel = introPanelRoot;
                 currentActiveText = introText;
                 currentActiveImage = introImage;
@@ -137,6 +139,8 @@ namespace PSH
             }
             else if (cutsceneId == "Ending1")
             {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
                 currentActivePanel = endingPanelRoot;
                 currentActiveText = endingText;
                 currentActiveImage = endingImage;
@@ -144,6 +148,8 @@ namespace PSH
             }
             else if (cutsceneId == "Ending2")
             {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
                 currentActivePanel = endingPanelRoot;
                 currentActiveText = endingText;
                 currentActiveImage = endingImage;
@@ -152,6 +158,8 @@ namespace PSH
 
             if (currentActivePanel != null && currentActiveText != null)
             {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
                 currentActivePanel.SetActive(true);
                 Canvas canvas = currentActivePanel.GetComponent<Canvas>();
                 if (canvas != null) canvas.enabled = true;
@@ -202,6 +210,8 @@ namespace PSH
 
             if (finishedId == "Intro")
             {
+                Cursor.visible = false;
+                Cursor.lockState = CursorLockMode.Locked;
                 if (currentActivePanel) currentActivePanel.SetActive(false);
                 Time.timeScale = originalTimeScale;
                 DialogueEvt?.Invoke("Intro");

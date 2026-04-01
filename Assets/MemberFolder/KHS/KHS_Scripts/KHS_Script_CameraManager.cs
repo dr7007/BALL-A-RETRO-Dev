@@ -112,6 +112,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
         // cameraGos[0]은 비활성화
         cameraGos[2].SetActive(false);
         MonitorEvt?.Invoke(false);
+
     }
     public void MonitorOffAfterDialogue(string _str)
     {
@@ -123,17 +124,23 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOnButton()
     {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         MonitorOn(null);
     }
     
     public void MonitorOnBeforeDialogue(PSH_Script_DialogueUI _dialogueUI)
     {
+        Cursor.visible = true;
+        Cursor.lockState = CursorLockMode.None;
         MonitorOn(_dialogueUI);
     }
 
     private void OnCameraReturnComplete()
     {
         StartCoroutine(PlayRoundAndStartGame());
+        Cursor.visible = false;
+        Cursor.lockState = CursorLockMode.Locked;
     }
     private IEnumerator PlayRoundAndStartGame()
     {
@@ -175,6 +182,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
         moveCoroutine = null;
 
         Debug.Log("[CameraTransition] MoveCameraSmooth 완료");
+        
         onComplete?.Invoke();
     }
 }
