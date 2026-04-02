@@ -12,9 +12,12 @@ public class KHS_Script_BumperEffect : MonoBehaviour
     public GameObject obj_Led;             // LED 오브젝트
     private ChangeSpriteRenderer ledRenderer; // LED 제어용 스크립트 (ChangeSpriteRenderer)
 
+    [Header("Combo Manager 연결")]
+    public YJ_Script_BumperComboManager comboManager; // 콤보 매니저 연결 슬롯
+
     [SerializeField]
     private bool isBlink = false;
-    private bool lightenable = false;
+    public bool lightenable = false;
 
     private void Start()
     {
@@ -41,6 +44,7 @@ public class KHS_Script_BumperEffect : MonoBehaviour
     {
         if(ledRenderer != null)
         {
+            lightenable = false;
             ledRenderer.F_ChangeSprite_Off();
         }
     }
@@ -62,6 +66,7 @@ public class KHS_Script_BumperEffect : MonoBehaviour
             {
                 lightenable = true;
                 ledRenderer.F_ChangeSprite_On();
+                comboManager?.CheckCombo(); // 켜졌을 때 매니저에 콤보 확인 요청
             }
             else if(lightenable == true)
             {
@@ -95,12 +100,22 @@ public class KHS_Script_BumperEffect : MonoBehaviour
             {
                 lightenable = true;
                 ledRenderer.F_ChangeSprite_On();
+                comboManager?.CheckCombo(); // 켜졌을 때 매니저에 콤보 확인 요청
             }
             else if (lightenable == true)
             {
                 lightenable = false;
                 ledRenderer.F_ChangeSprite_Off();
             }
+        }
+    }
+
+    public void ForceTurnOffComboLight() // 콤보 매니저가 세 범퍼가 모두 켜졌을 때 강제로 불을 끄기 위한 함수
+    {
+        lightenable = false;
+        if (ledRenderer != null)
+        {
+            ledRenderer.F_ChangeSprite_Off();
         }
     }
 }
