@@ -481,19 +481,21 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             ? ballTransformFallback.position
             : (cameraShaker != null ? cameraShaker.transform.position : Vector3.zero);
 
-        AddScoreAt(Mathf.RoundToInt(value * multiplier), pos);
+        AddScoreAt(value, pos);
     }
 
     // 새 API (권장)
     public void AddScoreAt(int value, Vector3 worldPos)
     {
-        curScore += value;
+        int finalScore = Mathf.RoundToInt(value * multiplier);
 
-        OnScoreGained?.Invoke(Mathf.RoundToInt(value * multiplier));
-        OnScoreGainedAt?.Invoke(Mathf.RoundToInt(value * multiplier), worldPos);
+        curScore += finalScore;
 
-        if (shakeOnScore && cameraShaker != null && Mathf.RoundToInt(value * multiplier) > 0)
-            cameraShaker.OnScored(Mathf.RoundToInt(value * multiplier));
+        OnScoreGained?.Invoke(finalScore);
+        OnScoreGainedAt?.Invoke(finalScore, worldPos);
+
+        if (shakeOnScore && cameraShaker != null && finalScore > 0)
+            cameraShaker.OnScored(finalScore);
     }
 
     public void MultiplyScore(int value)
