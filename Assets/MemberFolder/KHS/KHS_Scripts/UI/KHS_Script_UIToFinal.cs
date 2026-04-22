@@ -47,6 +47,6 @@ public class KHS_Script_UIToFinal : MonoBehaviour
 
         timeMTmp.text = $"{m}";
         timeSTmp.text = $"{s}";
-        roundTmp.text = $"{scoreManager.ResponceFinal()}";
+        roundTmp.text = $"{scoreManager.RoundRespone()}";
     }
 }

@@ -342,7 +342,7 @@ public class KHS_Script_ScoreManager_Test : MonoBehaviour
     public static event Action<int, Vector3> OnScoreGainedAt;
     public static event Action<bool> PlungerDeathWait;
 
-    public static KHS_Script_ScoreManager Instance { get; private set; }
+    public static KHS_Script_ScoreManager_Test Instance { get; private set; }
 
     [Header("스코어 정보")]
     public int curScore = 0;

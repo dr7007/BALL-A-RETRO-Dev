@@ -327,6 +327,148 @@ using UnityEngine;
 
 public class KHS_Script_ScoreManager : MonoBehaviour
 {
+
+    #region RoundState_Setting
+    public enum RoundState
+    {
+        None,
+        Playing,        // 일반 플레이
+        RoundClear,     // 클리어 연출/UI
+        NextRoundInit,  // 다음 라운드 준비
+        GameOver,
+        GameClear
+    }
+
+    private RoundState currentState = RoundState.None;
+
+    private void ChangeState(RoundState newState)
+    {
+        currentState = newState;
+
+        switch (currentState)
+        {
+            case RoundState.Playing:
+                OnEnterPlaying();
+                break;
+
+            case RoundState.RoundClear:
+                OnEnterRoundClear();
+                break;
+
+            case RoundState.NextRoundInit:
+                StartCoroutine(CoNextRoundInit());
+                break;
+
+            case RoundState.GameOver:
+                OnEnterGameOver();
+                break;
+
+            case RoundState.GameClear:
+                OnEnterGameClear();
+                break;
+        }
+    }
+    private void OnEnterPlaying()
+    {
+        Debug.Log("Playing 상태 진입");
+    }
+    private void OnEnterRoundClear()
+    {
+        Debug.Log("Round Clear!");
+
+        // 1️⃣ UI 먼저
+        UILateUpdate?.Invoke();
+        // 필요하면 전용 UI 이벤트 추가 가능
+
+        // 2️⃣ 외부 시스템 알림
+        Round_Clear?.Invoke();
+
+        // 3️⃣ 다음 상태로 이동
+        ChangeState(RoundState.NextRoundInit);
+    }
+
+    private IEnumerator CoNextRoundInit()
+    {
+        PlungerDeathWait?.Invoke(false);
+
+        yield return new WaitForSeconds(1.0f);
+
+        if (currentRound < goalRound)
+        {
+            currentgameScores[currentRound - 1] = curScore;
+
+            targetScore = targetScores[currentRound++];
+
+            ChangingMainCam();
+            Next_Round_Init?.Invoke();
+
+            ChangeState(RoundState.Playing);
+        }
+        else
+        {
+            ChangeState(RoundState.GameClear);
+        }
+    }
+    private void OnEnterGameOver()
+    {
+        int finalScore = curScore;
+
+        foreach (var score in currentgameScores)
+            if (score > finalScore) finalScore = score;
+
+        FinalUserScore = finalScore;
+
+        OnGameOver?.Invoke();
+        OnGameOverWithScore?.Invoke(finalScore);
+
+        if (gameOverUI != null)
+        {
+            gameOverUI.SetFinalScore(finalScore);
+            gameOverUI.Show(finalScore);
+        }
+        // UI가 없거나 auto-submit이 꺼졌으면 직접 제출
+        if (rankingService != null && (gameOverUI == null || !gameOverUI.autoSubmitOnShow))
+        {
+            rankingService.SubmitScore(finalScore, gameMode, level,
+                onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
+                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
+            );
+        }
+
+        curScore = 0;
+    }
+    private void OnEnterGameClear()
+    {
+        int finalScore = curScore;
+
+        foreach (var score in currentgameScores)
+            if (score > finalScore) finalScore = score;
+
+        FinalUserScore = finalScore;
+
+        OnGameClear?.Invoke();
+        OnGameClearWithScore?.Invoke(finalScore);
+
+        if (gameOverUI != null)
+        {
+            gameOverUI.SetFinalScore(finalScore);
+            gameOverUI.Show(finalScore);
+        }
+        // UI가 없거나 auto-submit이 꺼졌으면 직접 제출
+        if (rankingService != null && (gameOverUI == null || !gameOverUI.autoSubmitOnShow))
+        {
+            rankingService.SubmitScore(finalScore, gameMode, level,
+                onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
+                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
+            );
+        }
+
+        curScore = 0;
+    }
+
+    #endregion
+
+
     public static event Action OnGameOver;
     public static event Action OnGameClear;
     public static event Action Round_Clear;
@@ -385,36 +527,34 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         for (int i = 0; i < goalRound; i++) currentgameScores.SetValue(0, i);
         ChangingMainCam();
-        curScore = 0;
-        numOfBounce = 0;
+
+        currentRound = 1;
         targetScore = targetScores[0];
+
+        ChangeState(RoundState.Playing);
     }
 
     private void OnEnable()
     {
         KHS_Script_ResetController.OnReset += ScoreReset;
-        YJ_Script_BallController.GameOverEvt += GameResultJudge;
         KHS_Script_DumpManager.OnBallTrigger += BallTrigger;
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
         KHS_Script_DumpManager.OnScore += AddScore;
         KHS_Script_PortalController.portalEvt += ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision += FliperBallCollision;
-        Round_Clear += RoundClearAfter;
         PSH_Script_SceneLoader.OnSceneLoadStart += TargetScoreInit;
     }
 
     private void OnDisable()
     {
         KHS_Script_ResetController.OnReset -= ScoreReset;
-        YJ_Script_BallController.GameOverEvt -= GameResultJudge;
         KHS_Script_DumpManager.OnBallTrigger -= BallTrigger;
         KHS_Script_DumpManager.OnBallCollision -= BallCollision;
         KHS_Script_DumpManager.OnScore -= AddScore;
         KHS_Script_PortalController.portalEvt -= ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision -= FliperBallCollision;
-        Round_Clear -= RoundClearAfter;
         PSH_Script_SceneLoader.OnSceneLoadStart -= TargetScoreInit;
     }
 
@@ -422,50 +562,6 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         targetScore = targetScores[0];
         UILateUpdate.Invoke();
-    }
-    private void GameResultJudge()
-    {
-        Debug.LogError("라운드종료 결과 판정중!!!");
-
-        Debug.LogWarning($"최종 스코어 : {curScore}");
-
-        int finalScore = curScore;
-
-        // 1) 목표 달성 시 라운드 클리어 후 종료
-        if (curScore >= targetScore)
-        {
-            Round_Clear?.Invoke();
-            return;
-        }
-
-        foreach (var score in currentgameScores)
-            if (score > finalScore) finalScore = score;
-
-        FinalUserScore = finalScore;
-
-        // 2) 게임오버 흐름
-        OnGameOver?.Invoke();
-        OnGameOverWithScore?.Invoke(finalScore);
-
-        // UI 표시(숫자 즉시 반영 + 패널 열기)
-        if (gameOverUI != null)
-        {
-            gameOverUI.SetFinalScore(finalScore);
-            gameOverUI.Show(finalScore); // autoSubmitOnShow가 true면 여기서 서버 제출
-        }
-
-        // UI가 없거나 auto-submit이 꺼졌으면 직접 제출
-        if (rankingService != null && (gameOverUI == null || !gameOverUI.autoSubmitOnShow))
-        {
-            rankingService.SubmitScore(finalScore, gameMode, level,
-                onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
-                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
-            );
-        }
-
-        // 3) 정리
-        curScore = 0;
-        numOfBounce = 0;
     }
 
     private void FliperBallCollision(Collision _collision)
@@ -487,8 +583,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // 새 API (권장)
     public void AddScoreAt(int value, Vector3 worldPos)
     {
-        int finalScore = Mathf.RoundToInt(value * multiplier);
+        if (currentState != RoundState.Playing)
+            return;
 
+        int finalScore = Mathf.RoundToInt(value * multiplier);
         curScore += finalScore;
 
         OnScoreGained?.Invoke(finalScore);
@@ -496,6 +594,11 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
         if (shakeOnScore && cameraShaker != null && finalScore > 0)
             cameraShaker.OnScored(finalScore);
+
+        if (curScore >= targetScore)
+        {
+            ChangeState(RoundState.RoundClear);
+        }
     }
 
     public void MultiplyScore(int value)
@@ -595,34 +698,21 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     public void HandleBallOut(YJ_Script_BallController ball)
     {
-        Debug.Log("BallOut 감지됨 - 점수 및 라운드 상태 판단 중");
-
-        if (curScore >= targetScore)
-        {
-            Debug.Log("목표점수 달성! Round_Clear 즉시 호출");
-            Round_Clear?.Invoke();
+        if (currentState != RoundState.Playing)
             return;
-        }
 
         int remain = ball.GetBallCount() - 1;
+
         if (remain > 0)
         {
-            Debug.Log($"목표점수 미달. 잔여 볼 {remain}개. 다음 볼로 진행");
             ball.SetBallCount(remain);
             ball.SendMessage("KHS_BallReset", SendMessageOptions.DontRequireReceiver);
-            UILateUpdate.Invoke();
+            UILateUpdate?.Invoke();
         }
         else
         {
-            Debug.Log("볼 소진! Game Over 처리 → GameResultJudge 직접 호출");  // 추가 로그
-            GameResultJudge();                                              // 핵심: 직접 호출
-                                                                            // (이벤트는 선택) OnGameOver?.Invoke(); OnGameOverWithScore?.Invoke(curScore);
+            ChangeState(RoundState.GameOver);
         }
-    }
-
-    public int ResponceFinal()
-    {
-        return currentRound;
     }
 }
 
