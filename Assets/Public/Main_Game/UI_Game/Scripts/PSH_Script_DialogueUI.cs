@@ -37,6 +37,10 @@ namespace PSH
         [SerializeField] private List<Sprite> ending1Sprites = new List<Sprite>();
         [Tooltip("Ending2(오버) 대사 순서에 맞춰 보여줄 스프라이트들")]
         [SerializeField] private List<Sprite> ending2Sprites = new List<Sprite>();
+        
+        [Header("Tutorial UI Set (Optional)")]
+        [Tooltip("튜토리얼 대사용 스프라이트")]
+        [SerializeField] private List<Sprite> tutorialSprites = new List<Sprite>();
 
         [Header("Data")]
         [Tooltip("Localization 창에서 만든 String Table의 이름")]
@@ -137,6 +141,17 @@ namespace PSH
                 originalTimeScale = Time.timeScale;
                 Time.timeScale = 0f;
             }
+            else if (cutsceneId == "Tutorial") // 🔴 추가된 튜토리얼 분기
+            {
+                Cursor.visible = true;
+                Cursor.lockState = CursorLockMode.None;
+                currentActivePanel = introPanelRoot; // 인트로와 같은 UI를 쓴다고 가정
+                currentActiveText = introText;
+                currentActiveImage = introImage;
+                currentSprites = tutorialSprites;
+                originalTimeScale = Time.timeScale;
+                Time.timeScale = 0f; // 대사 중 시간 멈춤
+            }
             else if (cutsceneId == "Ending1")
             {
                 Cursor.visible = true;
@@ -175,16 +190,55 @@ namespace PSH
             }
         }
 
+        // public void Update()
+        // {
+        //     if (idx != -1 && Input.anyKeyDown)
+        //     {
+        //         if (currentLines.Count == 0) return;
+        //         if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
+        //         else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
+        //     }
+        // }
         public void Update()
         {
-            if (idx != -1 && Input.anyKeyDown)
+            if (idx != -1 && currentLines.Count > 0)
             {
-                if (currentLines.Count == 0) return;
-                if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
-                else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
+                // 🔴 마우스 클릭이 들어왔는데, 그게 UI 버튼 위에서 누른 거라면?
+                if (Input.GetMouseButtonDown(0)) 
+                {
+                    if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
+                    {
+                        // 대사를 스킵하는 건 인스펙터 OnClick에 연결된 SkipDialogue()가 알아서 할 테니,
+                        // 여기서는 Update문이 밑으로 흘러가지 않게 막아주기만 합니다!
+                        return; 
+                    }
+                }
+
+                // 3. 기존의 대사 넘기기 로직
+                if (Input.anyKeyDown)
+                {
+                    if (isTyping) 
+                    { 
+                        StopCoroutine(typingCo); 
+                        if (currentActiveText) currentActiveText.text = currentLines[idx]; 
+                        isTyping = false; 
+                    }
+                    else 
+                    { 
+                        idx++; 
+                        if (idx < currentLines.Count) 
+                        { 
+                            UpdateDialogueImage(); 
+                            StartTyping(currentLines[idx]); 
+                        } 
+                        else 
+                        { 
+                            EndDialogue(); 
+                        } 
+                    }
+                }
             }
         }
-
         public void OnPointerClick(PointerEventData _)
         {
             if (idx == -1 || currentLines.Count == 0) return;
@@ -208,13 +262,13 @@ namespace PSH
         {
             string finishedId = currentCutsceneId;
 
-            if (finishedId == "Intro")
+            if (finishedId == "Intro" || finishedId == "Tutorial")
             {
                 Cursor.visible = false;
                 Cursor.lockState = CursorLockMode.Locked;
                 if (currentActivePanel) currentActivePanel.SetActive(false);
                 Time.timeScale = originalTimeScale;
-                DialogueEvt?.Invoke("Intro");
+                DialogueEvt?.Invoke(finishedId);
             }
 
             currentLines.Clear();
@@ -267,5 +321,22 @@ namespace PSH
 
         private void StartTyping(string text) { if (typingCo != null) StopCoroutine(typingCo); typingCo = StartCoroutine(TypeRoutine(text)); }
         private IEnumerator TypeRoutine(string text) { isTyping = true; if (currentActiveText) { currentActiveText.text = ""; foreach (char c in text) { currentActiveText.text += c; yield return new WaitForSecondsRealtime(charInterval); } } isTyping = false; }
+        public void SkipDialogue()
+        {
+            // 대사 진행 중이 아니면 무시
+            if (idx == -1 || currentLines.Count == 0) return;
+
+            Debug.Log("[DialogueUI] 대사 전체 스킵!");
+
+            // 진행 중인 타이핑 코루틴 강제 정지
+            if (isTyping)
+            {
+                StopCoroutine(typingCo);
+                isTyping = false;
+            }
+
+            // 바로 대사를 종료시키고 다음 흐름(튜토리얼 등)으로 넘김
+            EndDialogue();
+        }
     }
 }

@@ -3,6 +3,7 @@ using UnityEngine;
 using PSH;
 using System.Collections; // DialogueUI 이벤트를 받기 위해
 
+
 namespace PSH
 {
     /// <summary>
@@ -26,6 +27,8 @@ namespace PSH
         // 이 씬의 인트로가 이미 한 번 재생되었는지 확인하는 static 변수
         private static bool hasPlayedIntro = false;
 
+        private CJS_TutorialDirector cjsTutorial;
+
         public static void ResetIntroFlag()
         {
             hasPlayedIntro = false;
@@ -42,10 +45,15 @@ namespace PSH
         {
             PSH_Script_DialogueUI.DialogueEvt -= HandleDialogueEvent;
         }
+        private void Awake()
+        {
+            cjsTutorial = UnityEngine.Object.FindFirstObjectByType<CJS_TutorialDirector>();
+        }
 
         private void Start()
         {
             PSH_Script_DialogueUI dialogueUI = PSH_Script_DialogueUI.Instance;
+            
 
             if (dialogueUI == null) Debug.LogError("GameSceneDirector: DialogueUI Instance 없음!");
             if (eyeOpenEffect == null) Debug.LogError("GameSceneDirector: EyeOpenEffect 할당 안됨!");

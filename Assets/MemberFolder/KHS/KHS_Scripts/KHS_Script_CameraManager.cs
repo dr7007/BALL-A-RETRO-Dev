@@ -2,6 +2,7 @@ using PSH;
 using System;
 using System.Collections;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class KHS_Script_CameraManager : MonoBehaviour
 {
@@ -79,30 +80,62 @@ public class KHS_Script_CameraManager : MonoBehaviour
         cameraGos[_idx].SetActive(true);
     }
 
+    // public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
+    // {
+    //     MonitorEvt?.Invoke(true);
+
+    //     // cameraGos[2]를 활성화하고 이동 시작점(cameraGos[0] 위치)으로 설정
+    //     cameraGos[2].SetActive(true);
+    //     cameraGos[2].transform.position = cameraInitPos;
+    //     cameraGos[2].transform.rotation = cameraInitRot;
+
+    //     // 기존 코루틴이 돌고 있다면 중단
+    //     if (moveCoroutine != null)
+    //     {
+    //         StopCoroutine(moveCoroutine);
+    //         moveCoroutine = null;
+    //     }
+    //     // 부드럽게 이동 코루틴 시작
+    //     moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[2].transform, cameraTargetPos, cameraTargetRot, moveDuration, () => _DialogueUI?.Play("Intro")));
+
+    //     // cameraGos[0]은 비활성화
+    //     cameraGos[0].SetActive(false);
+    // }
+
+    //psh이 튜토리얼 대사치게할려고 수정함
     public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
     {
         MonitorEvt?.Invoke(true);
 
-        // cameraGos[2]를 활성화하고 이동 시작점(cameraGos[0] 위치)으로 설정
         cameraGos[2].SetActive(true);
         cameraGos[2].transform.position = cameraInitPos;
         cameraGos[2].transform.rotation = cameraInitRot;
 
-        // 기존 코루틴이 돌고 있다면 중단
         if (moveCoroutine != null)
         {
             StopCoroutine(moveCoroutine);
             moveCoroutine = null;
         }
-        // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[2].transform, cameraTargetPos, cameraTargetRot, moveDuration, () => _DialogueUI?.Play("Intro")));
 
-        // cameraGos[0]은 비활성화
+        string currentScene = SceneManager.GetActiveScene().name;
+        
+        // 씬 이름에 "Tutorial"이라는 단어가 포함되어 있기만 하면 튜토리얼로 간주!
+        // (예: "CJS_Scene_Tutorial", "PSH_TutorialTest" 모두 정상 작동)
+        string dialogueKey = currentScene.Contains("Tutorial") ? "Tutorial" : "Intro";
+
+        moveCoroutine = StartCoroutine(MoveCameraSmooth(
+            cameraGos[2].transform, 
+            cameraTargetPos, 
+            cameraTargetRot, 
+            moveDuration, 
+            () => _DialogueUI?.Play(dialogueKey) 
+        ));
+
         cameraGos[0].SetActive(false);
     }
     public void MonitorOff()
     {
-
+        Debug.LogWarning("[CameraManager] MonitorOff 호출됨!\n호출한 사람:\n" + System.Environment.StackTrace);
         // cameraGos[0]를 활성화하고 이동 시작점(cameraGos[2] 위치)으로 설정
         cameraGos[0].SetActive(true);
         cameraGos[0].transform.position = cameraTargetPos;
@@ -125,7 +158,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
     }
     public void MonitorOffAfterDialogue(string _str)
     {
-        if(_str == "Intro")
+        if(_str == "Intro" || _str =="Tutorial" )
         {
             MonitorOff();
         }

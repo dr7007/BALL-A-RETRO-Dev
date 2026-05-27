@@ -20,6 +20,10 @@ namespace PSH
         [SerializeField] private GameObject inputEmailPrefab;
         [SerializeField] private GameObject RnakingPanel;
 
+        [Header("Tutorial Settings")]
+        [Tooltip("튜토리얼 씬의 이름")]
+        [SerializeField] private string tutorialSceneName = "TutorialScene";
+
         private PSH_Script_SceneLoader sceneLoader;
 
         private void Awake()
@@ -96,6 +100,23 @@ namespace PSH
             Application.Quit();
         }
 
+        public void OnClick_Tutorial()
+        {
+            if (sceneLoader == null)
+            {
+                Debug.LogError("SceneLoader가 없습니다.");
+                return;
+            }
+            
+            if (string.IsNullOrEmpty(tutorialSceneName))
+            {
+                Debug.LogError("튜토리얼 씬 이름이 비어있습니다.");
+                return;
+            }
+
+            Debug.Log("튜토리얼 씬으로 이동합니다.");
+            sceneLoader.LoadSceneAsyncByName(tutorialSceneName);
+        }
     }
 }
 

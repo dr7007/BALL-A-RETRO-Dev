@@ -6,57 +6,57 @@ public class CJS_Script_CameraShaker : MonoBehaviour
     public enum AmplitudeMode { Linear, Curve }
 
     [Header("Target")]
-    [Tooltip("Èçµé ´ë»ó. ºñ¿öµÎ¸é ÀÌ ½ºÅ©¸³Æ®°¡ ºÙÀº TransformÀ» »ç¿ë")]
+    [Tooltip("í”ë“¤ ëŒ€ìƒ. ë¹„ì›Œë‘ë©´ ì´ ìŠ¤í¬ë¦½íŠ¸ê°€ ë¶™ì€ Transformì„ ì‚¬ìš©")]
     public Transform target;
 
     [Header("Basic")]
-    [Tooltip("±âº» Èçµé¸² Áö¼Ó ½Ã°£(ÃÊ)")]
+    [Tooltip("ê¸°ë³¸ í”ë“¤ë¦¼ ì§€ì† ì‹œê°„(ì´ˆ)")]
     [Min(0f)] public float baseDuration = 0.25f;
 
-    [Tooltip("³ëÀÌÁî ÁÖÆÄ¼ö(°ªÀÌ Å¬¼ö·Ï ºü¸£°Ô ¶³¸²)")]
+    [Tooltip("ë…¸ì´ì¦ˆ ì£¼íŒŒìˆ˜(ê°’ì´ í´ìˆ˜ë¡ ë¹ ë¥´ê²Œ ë–¨ë¦¼)")]
     [Min(0f)] public float frequency = 30f;
 
-    [Tooltip("ÀüÃ¼ °­µµ ½ºÄÉÀÏ(¸ğµç Èçµé¸²¿¡ °öÇØÁü)")]
+    [Tooltip("ì „ì²´ ê°•ë„ ìŠ¤ì¼€ì¼(ëª¨ë“  í”ë“¤ë¦¼ì— ê³±í•´ì§)")]
     [Min(0f)] public float globalIntensity = 1f;
 
-    [Tooltip("Å¸ÀÓ½ºÄÉÀÏ 0¿¡¼­µµ Èçµé¸®·Á¸é Ã¼Å©")]
+    [Tooltip("íƒ€ì„ìŠ¤ì¼€ì¼ 0ì—ì„œë„ í”ë“¤ë¦¬ë ¤ë©´ ì²´í¬")]
     public bool useUnscaledTime = false;
 
     [Header("Amplitude Mapping (Score -> Amplitude)")]
     public AmplitudeMode amplitudeMode = AmplitudeMode.Linear;
 
-    [Tooltip("[Linear] Á¡¼ö/scoreUnit ´ç Áõ°¡·®")]
+    [Tooltip("[Linear] ì ìˆ˜/scoreUnit ë‹¹ ì¦ê°€ëŸ‰")]
     [Min(0f)] public float amplitudePerUnit = 0.08f;
 
-    [Tooltip("[Linear] 1 À¯´ÖÀ¸·Î °£ÁÖÇÒ Á¡¼ö")]
+    [Tooltip("[Linear] 1 ìœ ë‹›ìœ¼ë¡œ ê°„ì£¼í•  ì ìˆ˜")]
     [Min(1f)] public float scoreUnit = 100f;
 
-    [Tooltip("[Linear] ÃÖ¼Ò/ÃÖ´ë ÁøÆø Å¬·¥ÇÁ")]
+    [Tooltip("[Linear] ìµœì†Œ/ìµœëŒ€ ì§„í­ í´ë¨í”„")]
     [Min(0f)] public float minAmplitude = 0.02f;
     [Min(0f)] public float maxAmplitude = 1.2f;
 
-    [Tooltip("[Curve] ÀÌ Á¡¼ö ÀÌ»óÀÌ¸é 1.0À¸·Î Á¤±ÔÈ­ (CurveÀÇ X=1)")]
+    [Tooltip("[Curve] ì´ ì ìˆ˜ ì´ìƒì´ë©´ 1.0ìœ¼ë¡œ ì •ê·œí™” (Curveì˜ X=1)")]
     [Min(1f)] public float curveMaxScore = 2000f;
 
-    [Tooltip("[Curve] X=Á¤±ÔÈ­µÈ Á¡¼ö(0~1), Y=ÁøÆø(0~1). ÃÖÁ¾ ÁøÆø = Y * maxAmplitude")]
+    [Tooltip("[Curve] X=ì •ê·œí™”ëœ ì ìˆ˜(0~1), Y=ì§„í­(0~1). ìµœì¢… ì§„í­ = Y * maxAmplitude")]
     public AnimationCurve amplitudeCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
 
     [Header("Falloff")]
-    [Tooltip("½Ã°£¿¡ µû¸¥ °¨¼è(0~1 ±¸°£). Y°¡ 1¿¡¼­ 0À¸·Î °¨¼ÒÇÏµµ·Ï ¼³Á¤ ±ÇÀå")]
+    [Tooltip("ì‹œê°„ì— ë”°ë¥¸ ê°ì‡ (0~1 êµ¬ê°„). Yê°€ 1ì—ì„œ 0ìœ¼ë¡œ ê°ì†Œí•˜ë„ë¡ ì„¤ì • ê¶Œì¥")]
     public AnimationCurve falloff = new AnimationCurve(
         new Keyframe(0f, 1f, 0f, -3f),
         new Keyframe(1f, 0f, 0f, 0f)
     );
 
     [Header("Stacking")]
-    [Tooltip("½¦ÀÌÅ©°¡ ÁøÇà ÁßÀÏ ¶§ »õ·Î È£ÃâµÇ¸é °­µµ¸¦ ´©ÀûÇÒÁö ¿©ºÎ")]
+    [Tooltip("ì‰ì´í¬ê°€ ì§„í–‰ ì¤‘ì¼ ë•Œ ìƒˆë¡œ í˜¸ì¶œë˜ë©´ ê°•ë„ë¥¼ ëˆ„ì í• ì§€ ì—¬ë¶€")]
     public bool accumulate = true;
 
     private Vector3 _baseLocalPos;
     private Coroutine _routine;
     private float _timeSeedX, _timeSeedY;
 
-    // ´©Àû°ª (accumulate=trueÀÏ ¶§ »ç¿ë)
+    // ëˆ„ì ê°’ (accumulate=trueì¼ ë•Œ ì‚¬ìš©)
     private float _accumulatedAmplitude = 0f;
     private float _accumulatedDuration = 0f;
 
@@ -65,14 +65,14 @@ public class CJS_Script_CameraShaker : MonoBehaviour
         if (target == null) target = transform;
         _baseLocalPos = target.localPosition;
 
-        // Perlin ³ëÀÌÁî ½ÃÀÛ ½Ãµå
+        // Perlin ë…¸ì´ì¦ˆ ì‹œì‘ ì‹œë“œ
         _timeSeedX = Random.value * 1000f;
         _timeSeedY = Random.value * 1000f;
     }
 
     void OnDisable()
     {
-        // ºñÈ°¼º ½Ã ¿øÀ§Ä¡(ÇÃ·¹ÀÌ Á¾·á ½Ã Èçµé¸²¸¸ Á¤¸®)
+        // ë¹„í™œì„± ì‹œ ì›ìœ„ì¹˜(í”Œë ˆì´ ì¢…ë£Œ ì‹œ í”ë“¤ë¦¼ë§Œ ì •ë¦¬)
         if (target != null) target.localPosition = _baseLocalPos;
         _routine = null;
         _accumulatedAmplitude = 0f;
@@ -80,7 +80,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
     }
 
     /// <summary>
-    /// Á¡¼ö¿¡ µû¶ó ÀÚµ¿À¸·Î ÁøÆø °è»ê ÈÄ ½¦ÀÌÅ©
+    /// ì ìˆ˜ì— ë”°ë¼ ìë™ìœ¼ë¡œ ì§„í­ ê³„ì‚° í›„ ì‰ì´í¬
     /// </summary>
     public void OnScored(int points)
     {
@@ -89,7 +89,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
     }
 
     /// <summary>
-    /// ¿øÇÏ´Â ÁøÆø/Áö¼ÓÀ¸·Î Á÷Á¢ ½¦ÀÌÅ©
+    /// ì›í•˜ëŠ” ì§„í­/ì§€ì†ìœ¼ë¡œ ì§ì ‘ ì‰ì´í¬
     /// </summary>
     public void Shake(float amplitude, float duration)
     {
@@ -98,7 +98,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
         amplitude = Mathf.Max(0f, amplitude) * Mathf.Max(0f, globalIntensity);
         duration = Mathf.Max(0f, duration);
 
-        // ¸Å¹ø ÇöÀç À§Ä¡¸¦ ±âÁØÁ¡À¸·Î Ä¸Ã³ ¡æ ½ÇÇà Áß Ä«¸Ş¶ó°¡ ¹Ù²î¾îµµ Á¤»ó º¹¿ø
+        // ë§¤ë²ˆ í˜„ì¬ ìœ„ì¹˜ë¥¼ ê¸°ì¤€ì ìœ¼ë¡œ ìº¡ì²˜ â†’ ì‹¤í–‰ ì¤‘ ì¹´ë©”ë¼ê°€ ë°”ë€Œì–´ë„ ì •ìƒ ë³µì›
         _baseLocalPos = target.localPosition;
 
         if (_routine == null)
@@ -107,13 +107,13 @@ public class CJS_Script_CameraShaker : MonoBehaviour
         }
         else if (accumulate)
         {
-            // ÁøÇà ÁßÀÌ¸é °­µµ/½Ã°£À» º¸°­
+            // ì§„í–‰ ì¤‘ì´ë©´ ê°•ë„/ì‹œê°„ì„ ë³´ê°•
             _accumulatedAmplitude += amplitude;
             _accumulatedDuration = Mathf.Max(_accumulatedDuration, duration);
         }
         else
         {
-            // »õ·Î ½ÃÀÛ
+            // ìƒˆë¡œ ì‹œì‘
             StopCoroutine(_routine);
             target.localPosition = _baseLocalPos;
             _routine = StartCoroutine(ShakeRoutine(amplitude, duration));
@@ -131,7 +131,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
             float dt = useUnscaledTime ? Time.unscaledDeltaTime : Time.deltaTime;
             t += dt;
 
-            // ´©Àû ¹İ¿µ(ÀÖ´Ù¸é)
+            // ëˆ„ì  ë°˜ì˜(ìˆë‹¤ë©´)
             if (_accumulatedAmplitude > 0f)
             {
                 currentAmp += _accumulatedAmplitude;
@@ -143,7 +143,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
             float normalized = useDuration > 0f ? Mathf.Clamp01(t / useDuration) : 1f;
             float mul = falloff.Evaluate(normalized);
 
-            // Perlin ³ëÀÌÁî ±â¹İ ¿ÀÇÁ¼Â
+            // Perlin ë…¸ì´ì¦ˆ ê¸°ë°˜ ì˜¤í”„ì…‹
             float timeFactor = (useUnscaledTime ? Time.unscaledTime : Time.time) * frequency;
             float nx = (Mathf.PerlinNoise(_timeSeedX, timeFactor) * 2f - 1f);
             float ny = (Mathf.PerlinNoise(_timeSeedY, timeFactor) * 2f - 1f);
@@ -155,7 +155,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
             yield return null;
         }
 
-        // ³¡³ª¸é ±âÁØ À§Ä¡·Î º¹¿ø
+        // ëë‚˜ë©´ ê¸°ì¤€ ìœ„ì¹˜ë¡œ ë³µì›
         target.localPosition = _baseLocalPos;
         _routine = null;
     }
