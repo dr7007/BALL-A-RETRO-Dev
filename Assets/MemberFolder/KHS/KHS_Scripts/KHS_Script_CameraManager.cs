@@ -9,6 +9,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
     public static event Action<bool> MonitorEvt;
     public static event Action RoundStartEvt;
 
+    public static bool IsRoundCameraReady { get; private set; } = true;
+
     public GameObject[] cameraGos;
 
     [SerializeField] 
@@ -17,6 +19,12 @@ public class KHS_Script_CameraManager : MonoBehaviour
     [SerializeField]
     private KHS_Script_ScoreManager scoreManager;
 
+    [SerializeField]
+    private CJS_Script_CameraFollowBall cameraFollow;
+
+    private Vector3 followCameraSavedPos;
+    private Quaternion followCameraSavedRot;
+    private bool followCameraWasActive;
 
     private Vector3 cameraInitPos = Vector3.zero;
     private Quaternion cameraInitRot = Quaternion.identity;
@@ -24,6 +32,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private Quaternion cameraTargetRot = Quaternion.identity;
     private Coroutine moveCoroutine;
     private bool isMain = true;
+
+    private bool isRoundCameraReturning = false;
 
     private bool isRoundFlow = false;
     private bool isFirstRound = true;
@@ -81,12 +91,37 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
     {
+        // ==========================================
+        // Monitor 연출 직전 Follow 상태 저장
+        // ==========================================
+
+        if (cameraFollow != null)
+        {
+            followCameraSavedPos =
+                cameraGos[0].transform.position;
+
+            followCameraSavedRot =
+                cameraGos[0].transform.rotation;
+
+            followCameraWasActive =
+                true;
+
+            cameraFollow.PauseFollowForMonitor();
+        }
+
         MonitorEvt?.Invoke(true);
 
         // cameraGos[2]를 활성화하고 이동 시작점(cameraGos[0] 위치)으로 설정
         cameraGos[2].SetActive(true);
-        cameraGos[2].transform.position = cameraInitPos;
-        cameraGos[2].transform.rotation = cameraInitRot;
+        // 현재 메인 카메라의 실제 위치/회전을 가져온다.
+        Transform mainCamera =
+            cameraGos[0].transform;
+
+        cameraGos[2].transform.position =
+            mainCamera.position;
+
+        cameraGos[2].transform.rotation =
+            mainCamera.rotation;
 
         // 기존 코루틴이 돌고 있다면 중단
         if (moveCoroutine != null)
@@ -133,6 +168,11 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOnButton()
     {
+        Debug.LogError(
+        $"[CAMERA 1] MonitorOnButton 호출 / " +
+        $"TimeScale = {Time.timeScale}"
+    );
+
         Cursor.visible = true;
         Cursor.lockState = CursorLockMode.None;
         MonitorOn(null);
@@ -146,6 +186,39 @@ public class KHS_Script_CameraManager : MonoBehaviour
     }
     private void OnCameraReturnComplete()
     {
+        // ==========================================
+        // Monitor 연출 종료
+        // ==========================================
+
+        if (cameraFollow != null)
+        {
+            // 현재 CameraManager가 복귀시킨
+            // 정상적인 핀볼 카메라 포즈를 기준으로
+            // Follow의 기준값을 다시 저장
+            cameraFollow.RefreshDefaultPose();
+
+            // Follow 상태 복구
+            cameraFollow.ResumeFollowAfterMonitor(
+                cameraGos[0].transform.position,
+                cameraGos[0].transform.rotation
+            );
+        }
+
+        // RoundClear → RoundUI → Monitor 복귀가 끝난 경우
+        if (isRoundCameraReturning)
+        {
+            isRoundCameraReturning = false;
+
+            Debug.Log("[Camera] RoundClear 카메라 복귀 완료 → 게임 재개");
+
+            Time.timeScale = 1f;
+
+            RoundStartEvt?.Invoke();
+
+            return;
+        }
+
+        //최초 게임 시작시
         if (isFirstRound)
         {
             isFirstRound = false;
@@ -186,6 +259,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private void OnRoundClear()
     {
         Debug.Log("[Round] UI 먼저 실행");
+        IsRoundCameraReady = false;
 
         isRoundFlow = true;
 
@@ -198,7 +272,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     private void StartCameraTransition()
     {
-        MonitorOff(); // 기존 로직 재사용
+        MonitorOn(); // 기존 로직 재사용
     }
     private void OnRoundUIEvent(bool isActive)
     {
@@ -208,7 +282,14 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
             isRoundFlow = false; // 반드시 초기화
 
-            StartCameraTransition();
+            // RoundClear 이후의 UI 종료임을 기록
+            isRoundCameraReturning = true;
+
+            //StartCameraTransition();
+            IsRoundCameraReady = true;
+            return;
         }
+        
+        Time.timeScale = 1f;
     }
 }

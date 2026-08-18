@@ -112,7 +112,7 @@ public class KHS_Script_UIImgFunc : MonoBehaviour
 
         // 비활성화
         roundImgGos[_round].SetActive(false);
-        Time.timeScale = 1f;
+        //Time.timeScale = 1f;
         RoundUIEvt?.Invoke(false);
         yield break;
     }

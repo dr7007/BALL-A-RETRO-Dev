@@ -147,7 +147,7 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset += KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt += KHS_GameOverBall;
-        KHS_Script_ScoreManager.Next_Round_Init += KHS_BallReset;
+        //KHS_Script_ScoreManager.Next_Round_Init += KHS_BallReset;
         KHS_Script_ScoreManager.OnGameClear += KHS_BallUnactive;
         KHS_Script_ScoreManager.OnGameOver += KHS_BallUnactive;
     }
@@ -157,7 +157,7 @@ public class YJ_Script_BallController : MonoBehaviour
     {
         KHS_Script_ResetController.OnReset -= KHS_BallReset;
         KHS_Script_BallOutController.BallOutEvt -= KHS_GameOverBall;
-        KHS_Script_ScoreManager.Next_Round_Init -= KHS_BallReset;
+        //KHS_Script_ScoreManager.Next_Round_Init -= KHS_BallReset;
         KHS_Script_ScoreManager.OnGameClear -= KHS_BallUnactive;
         KHS_Script_ScoreManager.OnGameOver -= KHS_BallUnactive;
 

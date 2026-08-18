@@ -321,4 +321,86 @@ public class CJS_Script_CameraFollowBall : MonoBehaviour
         // 정상적인 카메라 전환 시 팔로우 재개
         StartFollow();
     }
+
+    // ── KHS Write ────────────────────────────────────────────────────────────────
+    public void PauseFollowForMonitor()
+    {
+        _following = false;
+        _velZ = 0f;
+
+        StopAllCoroutines();
+    }
+
+
+    public void ResumeFollowAfterMonitor(
+        Vector3 restoredPosition,
+        Quaternion restoredRotation)
+    {
+        // 카메라의 연출 이전 상태 복구
+        transform.position = restoredPosition;
+        transform.rotation = restoredRotation;
+
+        // SmoothDamp의 이전 속도 제거
+        _velZ = 0f;
+
+        // 현재 카메라 회전값을 기준으로
+        // Follow 위치를 다시 계산
+        if (ball != null)
+        {
+            Vector3 desiredWorld =
+                ComputeDesiredWorldPosition();
+
+            if (zMode == ZAxisMode.WorldZ)
+            {
+                float targetZ = desiredWorld.z;
+
+                if (useMinZClamp)
+                    targetZ = Mathf.Max(targetZ, minWorldZ);
+
+                transform.position =
+                    new Vector3(
+                        _defaultPos.x,
+                        _defaultPos.y,
+                        targetZ
+                    );
+            }
+            else
+            {
+                Vector3 desiredLocal =
+                    transform.parent
+                        ? transform.parent.InverseTransformPoint(desiredWorld)
+                        : desiredWorld;
+
+                float targetLZ = desiredLocal.z;
+
+                if (useMinZClamp)
+                    targetLZ = Mathf.Max(targetLZ, minLocalZ);
+
+                transform.localPosition =
+                    new Vector3(
+                        transform.localPosition.x,
+                        transform.localPosition.y,
+                        targetLZ
+                    );
+            }
+        }
+
+        // 마지막에 Follow 활성화
+        _following = true;
+    }
+    public void RefreshDefaultPose()
+    {
+        _defaultPos = transform.position;
+        _defaultRot = transform.rotation;
+
+        if (cam == null)
+            cam = GetComponent<Camera>();
+
+        if (cam != null)
+            _defaultFOV = cam.fieldOfView;
+
+        _defaultSaved = true;
+
+        _velZ = 0f;
+    }
 }

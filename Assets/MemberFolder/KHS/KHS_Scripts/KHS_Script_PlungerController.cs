@@ -89,7 +89,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
     }
     private IEnumerator WaitAndZero()
     {
-        yield return new WaitForSeconds(1f);
+        yield return new WaitForSeconds(0.1f);
         currentGaze = 0f;
     }
     private void PlungerStopFunc(bool _start)
@@ -109,8 +109,19 @@ public class KHS_Script_PlungerController : MonoBehaviour
     private IEnumerator SpaceBarLock()
     {
         TestTScoreUpdateEvt?.Invoke();
-        yield return new WaitForSeconds(2.0f);
+
+        Debug.LogWarning(
+            $"SpaceBarLock 시작 / TimeScale = {Time.timeScale}"
+        );
+
+        // Time.timeScale과 관계없이 실제 시간 기준으로 0.7초 대기
+        yield return new WaitForSecondsRealtime(0.7f);
+
         isLock = false;
+
+        Debug.LogWarning(
+            $"SpaceBarLock 종료 / TimeScale = {Time.timeScale}"
+        );
     }
 
     private void NoIntroExceptionFunc()
