@@ -376,14 +376,14 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         Debug.Log("Round Clear!");
 
-        // 1️⃣ UI 먼저
+        // 1️. UI 먼저
         UILateUpdate?.Invoke();
         // 필요하면 전용 UI 이벤트 추가 가능
 
-        // 2️⃣ 외부 시스템 알림
+        // 2️. 외부 시스템 알림
         Round_Clear?.Invoke();
 
-        // 3️⃣ 다음 상태로 이동
+        // 3️. 다음 상태로 이동
         ChangeState(RoundState.NextRoundInit);
     }
 
@@ -391,7 +391,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         PlungerDeathWait?.Invoke(false);
 
-        yield return new WaitForSeconds(1.0f);
+        yield return new WaitUntil(
+        () => KHS_Script_CameraManager.IsRoundCameraReady
+    );
 
         if (currentRound < goalRound)
         {
@@ -676,7 +678,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private IEnumerator NextRoundInit()
     {
         PlungerDeathWait?.Invoke(false);
-        yield return new WaitForSeconds(1.0f);
+        yield return null;
         curScore = 0;
         numOfBounce = 0;
         ChangingMainCam();

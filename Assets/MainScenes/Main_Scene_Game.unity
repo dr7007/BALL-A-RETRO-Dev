@@ -8868,6 +8868,10 @@ PrefabInstance:
       value: 6000
       objectReference: {fileID: 0}
     - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
+      propertyPath: 'targetScores.Array.data[3]'
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: currentgameScores.Array.size
       value: 3
       objectReference: {fileID: 0}
@@ -38407,6 +38411,10 @@ PrefabInstance:
       propertyPath: m_AnchoredPosition.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 4255537597354812136, guid: 4243788a455ed2c4481b0dd83ad407cd, type: 3}
+      propertyPath: m_PresetInfoIsWorld
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4257910665975637793, guid: 4243788a455ed2c4481b0dd83ad407cd, type: 3}
       propertyPath: m_fontSize
       value: 39
@@ -50919,6 +50927,10 @@ PrefabInstance:
     m_TransformParent: {fileID: 0}
     m_Modifications:
     - target: {fileID: 566714112755611645, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      propertyPath: cameraFollow
+      value: 
+      objectReference: {fileID: 1526102489}
+    - target: {fileID: 566714112755611645, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       propertyPath: moveDuration
       value: 0.5
       objectReference: {fileID: 0}
@@ -51022,6 +51034,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 1526102490}
+    - targetCorrespondingSourceObject: {fileID: 3551252318420137491, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 1526102491}
     - targetCorrespondingSourceObject: {fileID: 8813813386238103888, guid: 31bd7d9494fb9c946bdd23a88e9241a9, type: 3}
       insertIndex: -1
       addedObject: {fileID: 2141493585}
@@ -120434,7 +120449,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1526102488}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 9084dbaa740fa824a92045432f917c67, type: 3}
   m_Name: 
@@ -120474,6 +120489,39 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   mainCam: {fileID: 1526102487}
   mazeCam: {fileID: 1073802522}
+--- !u!114 &1526102491
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1526102488}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e549289e5f0a3cc4fb3f520781b509da, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ball: {fileID: 7600752139250908834}
+  ballTag: Ball
+  cam: {fileID: 1526102487}
+  followOnLaunch: 1
+  returnOnBallOutOrGameEnd: 1
+  followSpace: 0
+  camAxesOffset: {x: 0, y: 1.5, z: -1.8}
+  worldOffset: {x: 0, y: 1.5, z: -1.6}
+  lockXY: 1
+  lockRotation: 1
+  zMode: 0
+  useMinZClamp: 1
+  minWorldZ: -0.39
+  minLocalZ: -0.39
+  positionSmoothTimeZ: 0.15
+  lookAtLerpSpeed: 6
+  lookAtBall: 0
+  zoomFOV: 50
+  zoomInTime: 0.25
+  zoomOutTime: 0.35
+  firstSnapFactor: 0.35
 --- !u!1001 &1526726495
 PrefabInstance:
   m_ObjectHideFlags: 0
