@@ -19,284 +19,532 @@ public class KHS_Script_CameraManager : MonoBehaviour
     [SerializeField]
     private KHS_Script_ScoreManager scoreManager;
 
+    //[SerializeField]
+    //private CJS_Script_CameraFollowBall cameraFollow;
     [SerializeField]
-    private CJS_Script_CameraFollowBall cameraFollow;
-    
     private KHS_Script_CameraController cameraController;
 
-    private Vector3 followCameraSavedPos;
-    private Quaternion followCameraSavedRot;
-    private bool followCameraWasActive;
+    // =========================================================
+    // Monitor Camera
+    // =========================================================
 
-    private Vector3 cameraInitPos = Vector3.zero;
-    private Quaternion cameraInitRot = Quaternion.identity;
-    private Vector3 cameraTargetPos = Vector3.zero;
-    private Quaternion cameraTargetRot = Quaternion.identity;
+    private Vector3 cameraInitPos;
+    private Quaternion cameraInitRot;
+
+    private Vector3 cameraTargetPos;
+    private Quaternion cameraTargetRot;
+
+
     private Coroutine moveCoroutine;
-    private bool isMain = true;
+
+
+    // =========================================================
+    // Round Flow
+    // =========================================================
 
     private bool isRoundCameraReturning = false;
 
     private bool isRoundFlow = false;
+
     private bool isFirstRound = true;
+
+
+    // =========================================================
+    // Unity
+    // =========================================================
 
     private void Start()
     {
-        MainCamOn();
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
-        cameraInitPos = cameraGos[0].transform.position;
-        cameraInitRot = cameraGos[0].transform.rotation;
-        cameraTargetPos = cameraGos[2].transform.position;
-        cameraTargetRot = cameraGos[2].transform.rotation;
-    }
-    private void Update()
-    {
 
+        // 반드시 현재 Main Camera의 실제 초기 자세를 저장
+        MainCamOn();
+
+        cameraInitPos =
+            cameraGos[0].transform.position;
+
+        cameraInitRot =
+            cameraGos[0].transform.rotation;
+
+        cameraTargetPos =
+            cameraGos[2].transform.position;
+
+        cameraTargetRot =
+            cameraGos[2].transform.rotation;
+
+
+        Debug.Log(
+            $"[CameraManager] 초기 Main Pose\n" +
+            $"Pos : {cameraInitPos}\n" +
+            $"Rot : {cameraInitRot.eulerAngles}"
+        );
     }
+
 
     private void OnEnable()
     {
         KHS_Script_ScoreManager.Round_Clear += OnRoundClear;
         KHS_Script_UIImgFunc.RoundUIEvt += OnRoundUIEvent;
-
         KHS_Script_PortalController.portalEvt += SubCamOn;
         KHS_Script_PlincoFunction.ReturnPortalEvt += MainCamOn;
+
+
         PSH_Script_GameSceneDirector.OpeningEyeEvt += MonitorOnBeforeDialogue;
         PSH_Script_DialogueUI.DialogueEvt += MonitorOffAfterDialogue;
     }
+
+
     private void OnDisable()
     {
         KHS_Script_ScoreManager.Round_Clear -= OnRoundClear;
         KHS_Script_UIImgFunc.RoundUIEvt -= OnRoundUIEvent;
-
         KHS_Script_PortalController.portalEvt -= SubCamOn;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= MainCamOn;
+
         PSH_Script_GameSceneDirector.OpeningEyeEvt -= MonitorOnBeforeDialogue;
         PSH_Script_DialogueUI.DialogueEvt -= MonitorOffAfterDialogue;
     }
 
+
+    // =========================================================
+    // Main Camera
+    // =========================================================
+
     public void MainCamOn()
     {
-        Debug.LogError($"CameraReturnMain [MainCamOn]");
-        CameraChangeEvt.Invoke(cameraGos[0].GetComponent<Camera>());
+        Camera mainCamera = cameraGos[0].GetComponent<Camera>();
+
+        CameraChangeEvt?.Invoke(mainCamera);
+
         cameraGos[0].SetActive(true);
+
         cameraGos[1].SetActive(false);
+
         cameraGos[3].SetActive(false);
+
+
+        Debug.Log("[CameraManager] Main Camera ON");
     }
-    public void SubCamOn(int _idx)
+
+
+    // =========================================================
+    // Sub Camera
+    // =========================================================
+
+    public void SubCamOn(int index)
     {
-        Debug.LogError($"CameraChange : ({_idx}) [SubCamOn]");
-        CameraChangeEvt.Invoke(cameraGos[_idx].GetComponent<Camera>());
+        Camera subCamera = cameraGos[index].GetComponent<Camera>();
+
+
+        CameraChangeEvt?.Invoke(subCamera);
+
         cameraGos[0].SetActive(false);
-        cameraGos[_idx].SetActive(true);
+
+        cameraGos[index].SetActive(true);
+
+
+        Debug.Log($"[CameraManager] Sub Camera ON : {index}");
     }
 
-    public void MonitorOn(PSH_Script_DialogueUI _DialogueUI = null)
+
+    // =========================================================
+    // Monitor ON
+    // =========================================================
+
+    public void MonitorOn(PSH_Script_DialogueUI dialogueUI = null)
     {
-        // ==========================================
-        // Monitor 연출 직전 Follow 상태 저장
-        // ==========================================
+        Debug.Log("[CameraManager] MonitorOn");
 
-        if (cameraFollow != null)
+
+        // -----------------------------------------------------
+        // 1. Controller에게 현재 플레이 카메라 상태 저장 요청
+        // -----------------------------------------------------
+
+        if (cameraController != null)
         {
-            followCameraSavedPos =
-                cameraGos[0].transform.position;
-
-            followCameraSavedRot =
-                cameraGos[0].transform.rotation;
-
-            followCameraWasActive =
-                true;
-
-            cameraFollow.PauseFollowForMonitor();
+            cameraController.BeginMonitor();
         }
+
+
+        // -----------------------------------------------------
+        // 2. Monitor 이벤트
+        // -----------------------------------------------------
 
         MonitorEvt?.Invoke(true);
 
-        // cameraGos[2]를 활성화하고 이동 시작점(cameraGos[0] 위치)으로 설정
+
+        // -----------------------------------------------------
+        // 3. Monitor Camera 활성화
+        // -----------------------------------------------------
+
         cameraGos[2].SetActive(true);
-        // 현재 메인 카메라의 실제 위치/회전을 가져온다.
-        Transform mainCamera =
-            cameraGos[0].transform;
 
-        cameraGos[2].transform.position =
-            mainCamera.position;
 
-        cameraGos[2].transform.rotation =
-            mainCamera.rotation;
+        Transform mainCamera = cameraGos[0].transform;
 
-        // 기존 코루틴이 돌고 있다면 중단
-        if (moveCoroutine != null)
-        {
-            StopCoroutine(moveCoroutine);
-            moveCoroutine = null;
-        }
-        // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[2].transform, cameraTargetPos, cameraTargetRot, moveDuration, () => _DialogueUI?.Play("Intro")));
 
-        // cameraGos[0]은 비활성화
+        // 현재 메인 카메라 위치에서 시작
+        cameraGos[2].transform.position = mainCamera.position;
+
+        cameraGos[2].transform.rotation = mainCamera.rotation;
+
+
+        // -----------------------------------------------------
+        // 4. 기존 Transition 제거
+        // -----------------------------------------------------
+
+        StopMoveCoroutine();
+
+
+        // -----------------------------------------------------
+        // 5. Monitor로 이동
+        // -----------------------------------------------------
+
+        moveCoroutine = 
+            StartCoroutine(
+                MoveCameraSmooth(
+                    cameraGos[2].transform,
+                    cameraTargetPos,
+                    cameraTargetRot,
+                    moveDuration,
+                    () => {dialogueUI?.Play("Intro");}
+                )
+            );
+
+
+        // -----------------------------------------------------
+        // 6. Main Camera 비활성화
+        // -----------------------------------------------------
+
         cameraGos[0].SetActive(false);
     }
+
+
+    // =========================================================
+    // Monitor OFF
+    // =========================================================
+
     public void MonitorOff()
     {
+        Debug.Log("[CameraManager] MonitorOff");
 
-        // cameraGos[0]를 활성화하고 이동 시작점(cameraGos[2] 위치)으로 설정
+
+        // -----------------------------------------------------
+        // 1. Main Camera 활성화
+        // -----------------------------------------------------
+
         cameraGos[0].SetActive(true);
-        cameraGos[0].transform.position = cameraTargetPos;
-        cameraGos[0].transform.rotation = cameraTargetRot;
 
 
-        // 기존 코루틴이 돌고 있다면 중단
-        if (moveCoroutine != null)
+        // -----------------------------------------------------
+        // 2. 기존 Transition 중단
+        // -----------------------------------------------------
+
+        StopMoveCoroutine();
+
+
+        // -----------------------------------------------------
+        // 3. 어디로 돌아갈지 결정
+        // -----------------------------------------------------
+
+        Vector3 returnPos;
+        Quaternion returnRot;
+
+
+        if (cameraController != null && cameraController.HasMonitorSavedPose())
         {
-            StopCoroutine(moveCoroutine);
-            moveCoroutine = null;
+            returnPos = cameraController.GetMonitorSavedPosition();
+
+            returnRot = cameraController.GetMonitorSavedRotation();
+        }
+        else
+        {
+            // 안전장치
+            returnPos = cameraInitPos;
+
+            returnRot = cameraInitRot;
         }
 
-        // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, followCameraSavedPos, followCameraSavedRot, moveDuration, OnCameraReturnComplete));
 
-        // cameraGos[0]은 비활성화
+        Debug.Log(
+            $"[CameraManager] Monitor Return\n" +
+            $"Pos : {returnPos}\n" +
+            $"Rot : {returnRot.eulerAngles}"
+        );
+
+
+        // -----------------------------------------------------
+        // 4. Monitor Camera에서 Main Camera로 이동
+        // -----------------------------------------------------
+
+        cameraGos[0].transform.position = cameraGos[2].transform.position;
+
+        cameraGos[0].transform.rotation = cameraGos[2].transform.rotation;
+
+
+        // -----------------------------------------------------
+        // 5. Main Camera 이동 시작
+        // -----------------------------------------------------
+
+        moveCoroutine =
+            StartCoroutine(
+                MoveCameraSmooth(
+                    cameraGos[0].transform,
+                    returnPos,
+                    returnRot,
+                    moveDuration,
+                    OnCameraReturnComplete
+                )
+            );
+
+
+        // -----------------------------------------------------
+        // 6. Monitor Camera 비활성화
+        // -----------------------------------------------------
+
         cameraGos[2].SetActive(false);
-        cameraFollow.ResumeFollowAfterMonitor(followCameraSavedPos, followCameraSavedRot);
-        MonitorEvt?.Invoke(false);
 
+
+        MonitorEvt?.Invoke(false);
     }
-    public void MonitorOffAfterDialogue(string _str)
+
+
+    // =========================================================
+    // Dialogue
+    // =========================================================
+
+    public void MonitorOffAfterDialogue(string str)
     {
-        if(_str == "Intro")
+        if (str == "Intro")
         {
             MonitorOff();
         }
     }
 
+
     public void MonitorOnButton()
     {
-        Debug.LogError(
-        $"[CAMERA 1] MonitorOnButton 호출 / " +
-        $"TimeScale = {Time.timeScale}"
-    );
-
         Cursor.visible = true;
+
         Cursor.lockState = CursorLockMode.None;
+
         MonitorOn(null);
     }
-    
-    public void MonitorOnBeforeDialogue(PSH_Script_DialogueUI _dialogueUI)
+
+
+    public void MonitorOnBeforeDialogue(PSH_Script_DialogueUI dialogueUI)
     {
         Cursor.visible = true;
+
         Cursor.lockState = CursorLockMode.None;
-        MonitorOn(_dialogueUI);
+
+        MonitorOn(dialogueUI);
     }
+
+
+    // =========================================================
+    // Camera Return Complete
+    // =========================================================
+
     private void OnCameraReturnComplete()
     {
-        // ==========================================
-        // Monitor 연출 종료
-        // ==========================================
+        Debug.Log("[CameraManager] Main Camera 복귀 완료");
 
-        if (cameraFollow != null)
+
+        // -----------------------------------------------------
+        // 가장 중요
+        // 여기서 Follow를 다시 활성화
+        // -----------------------------------------------------
+
+        if (cameraController != null)
         {
-            //// 현재 CameraManager가 복귀시킨
-            //// 정상적인 핀볼 카메라 포즈를 기준으로
-            //// Follow의 기준값을 다시 저장
-            //cameraFollow.RefreshDefaultPose();
-
-            //// Follow 상태 복구
-            //cameraFollow.ResumeFollowAfterMonitor(
-            //    cameraGos[0].transform.position,
-            //    cameraGos[0].transform.rotation
-            //);
-            
+            cameraController.EndMonitor();
         }
 
-        
 
-        // RoundClear → RoundUI → Monitor 복귀가 끝난 경우
+        // -----------------------------------------------------
+        // RoundClear 이후 복귀
+        // -----------------------------------------------------
+
         if (isRoundCameraReturning)
         {
             isRoundCameraReturning = false;
 
-            Debug.Log("[Camera] RoundClear 카메라 복귀 완료 → 게임 재개");
+            IsRoundCameraReady = true;
 
             Time.timeScale = 1f;
+
+
+            Debug.Log(
+                "[CameraManager] " +
+                "RoundClear 카메라 복귀 완료 → 게임 재개"
+            );
+
 
             RoundStartEvt?.Invoke();
 
             return;
         }
 
-        //최초 게임 시작시
+
+        // -----------------------------------------------------
+        // 최초 게임 시작
+        // -----------------------------------------------------
+
         if (isFirstRound)
         {
             isFirstRound = false;
 
+
             var roundUI = FindAnyObjectByType<KHS_Script_UIImgFunc>();
-            roundUI.StartRoundFunc(scoreManager.RoundRespone() - 1);
+
+
+            if (roundUI != null)
+            {
+                roundUI.StartRoundFunc(scoreManager.RoundRespone() - 1);
+            }
+
 
             return;
         }
 
+
         RoundStartEvt?.Invoke();
     }
 
+
+    // =========================================================
+    // Camera Transition
+    // =========================================================
+
     private IEnumerator MoveCameraSmooth(Transform cam, Vector3 targetPos, Quaternion targetRot, float duration, Action onComplete = null)
     {
-        Debug.Log("[CameraTransition] MoveCameraSmooth 시작");
+        Debug.Log("[CameraTransition] 시작");
+
+
         Vector3 startPos = cam.position;
+
         Quaternion startRot = cam.rotation;
+
+
         float elapsed = 0f;
+
 
         while (elapsed < duration)
         {
             elapsed += Time.unscaledDeltaTime;
-            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration); // 부드러운 곡선 보간
-            cam.position = Vector3.Lerp(startPos, targetPos, t);
-            cam.rotation = Quaternion.Slerp(startRot, targetRot, t); // 회전도 부드럽게 보간
+
+
+            float t = Mathf.SmoothStep(0f, 1f, elapsed / duration);
+
+
+            cam.position =
+                Vector3.Lerp(
+                    startPos,
+                    targetPos,
+                    t
+                );
+
+
+            cam.rotation =
+                Quaternion.Slerp(
+                    startRot,
+                    targetRot,
+                    t
+                );
+
+
             yield return null;
         }
 
-        cam.position = targetPos; // 정확히 목표 위치에 맞추기
+
+        cam.position = targetPos;
+
         cam.rotation = targetRot;
+
+
         moveCoroutine = null;
 
-        Debug.Log("[CameraTransition] MoveCameraSmooth 완료");
-        
+
+        Debug.Log("[CameraTransition] 완료");
+
+
         onComplete?.Invoke();
     }
+
+
+    private void StopMoveCoroutine()
+    {
+        if (moveCoroutine != null)
+        {
+            StopCoroutine(moveCoroutine);
+
+            moveCoroutine = null;
+        }
+    }
+
+
+    // =========================================================
+    // Round Clear
+    // =========================================================
+
     private void OnRoundClear()
     {
         Debug.Log("[Round] UI 먼저 실행");
+
+
         IsRoundCameraReady = false;
 
         isRoundFlow = true;
 
+
         var roundUI = FindAnyObjectByType<KHS_Script_UIImgFunc>();
+
+
         if (roundUI != null)
         {
             roundUI.StartRoundFunc(scoreManager.RoundRespone() - 1);
         }
     }
 
-    private void StartCameraTransition()
-    {
-        MonitorOn(); // 기존 로직 재사용
-    }
+
+    // =========================================================
+    // Round UI Event
+    // =========================================================
+
     private void OnRoundUIEvent(bool isActive)
     {
         if (!isActive && isRoundFlow)
         {
-            Debug.Log("[Camera] Round UI 종료 → 카메라 이동 시작");
+            Debug.Log("[Camera] Round UI 종료");
 
-            isRoundFlow = false; // 반드시 초기화
 
-            // RoundClear 이후의 UI 종료임을 기록
+            isRoundFlow = false;
+
             isRoundCameraReturning = true;
 
-            //StartCameraTransition();
+
+            // 여기서는 MonitorOn을 호출하지 않는다.
+            //
+            // 기존에 이 부분에서
+            // StartCameraTransition();
+            // 를 호출하면
+            //
+            // RoundClear
+            // → RoundUI
+            // → Monitor
+            //
+            // 흐름이 되어버릴 수 있음.
+
+
             IsRoundCameraReady = true;
+
+
             return;
         }
-        
+
+
+        // 최초 Round UI 종료
         Time.timeScale = 1f;
     }
 }

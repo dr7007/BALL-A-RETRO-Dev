@@ -34,16 +34,13 @@ public class KHS_Script_CameraController : MonoBehaviour
     public bool followOnLaunch = true;
     public bool returnOnBallOutOrGameEnd = true;
 
-    public FollowSpace followSpace =
-        FollowSpace.CameraAxesOffset;
+    public FollowSpace followSpace = FollowSpace.CameraAxesOffset;
 
     [Tooltip("카메라축 기준 오프셋 (Right, Up, Forward)")]
-    public Vector3 camAxesOffset =
-        new Vector3(0f, 0.9f, -1.8f);
+    public Vector3 camAxesOffset = new Vector3(0f, 0.9f, -1.8f);
 
     [Tooltip("월드 좌표 오프셋")]
-    public Vector3 worldOffset =
-        new Vector3(0f, 1.2f, -1.6f);
+    public Vector3 worldOffset = new Vector3(0f, 1.2f, -1.6f);
 
     // =========================================================
     // Axis
@@ -53,8 +50,7 @@ public class KHS_Script_CameraController : MonoBehaviour
     public bool lockXY = true;
     public bool lockRotation = true;
 
-    public ZAxisMode zMode =
-        ZAxisMode.WorldZ;
+    public ZAxisMode zMode = ZAxisMode.WorldZ;
 
     // =========================================================
     // Bounds
@@ -157,47 +153,39 @@ public class KHS_Script_CameraController : MonoBehaviour
     {
         KHS_Script_PlungerController.OnBallLaunched += HandleLaunched;
 
-        KHS_Script_CameraManager.CameraChangeEvt +=
-            ChangeCameraFunc;
+        KHS_Script_CameraManager.CameraChangeEvt += ChangeCameraFunc;
 
         if (returnOnBallOutOrGameEnd)
         {
-            KHS_Script_BallOutController.BallOutEvt +=
-                ReturnToDefault;
+            KHS_Script_BallOutController.BallOutEvt += ReturnToDefault;
 
-            KHS_Script_ScoreManager.OnGameOver +=
-                ReturnToDefault;
+            KHS_Script_ScoreManager.OnGameOver += ReturnToDefault;
 
-            KHS_Script_ScoreManager.OnGameClear +=
-                ReturnToDefault;
+            KHS_Script_ScoreManager.OnGameClear += ReturnToDefault;
         }
     }
 
 
     private void OnDisable()
     {
-        KHS_Script_PlungerController.OnBallLaunched -=
-            HandleLaunched;
+        KHS_Script_PlungerController.OnBallLaunched -= HandleLaunched;
 
-        KHS_Script_CameraManager.CameraChangeEvt -=
-            ChangeCameraFunc;
+        KHS_Script_CameraManager.CameraChangeEvt -= ChangeCameraFunc;
 
         if (returnOnBallOutOrGameEnd)
         {
-            KHS_Script_BallOutController.BallOutEvt -=
-                ReturnToDefault;
+            KHS_Script_BallOutController.BallOutEvt -= ReturnToDefault;
 
-            KHS_Script_ScoreManager.OnGameOver -=
-                ReturnToDefault;
+            KHS_Script_ScoreManager.OnGameOver -= ReturnToDefault;
 
-            KHS_Script_ScoreManager.OnGameClear -=
-                ReturnToDefault;
+            KHS_Script_ScoreManager.OnGameClear -= ReturnToDefault;
         }
     }
     private void LateUpdate()
     {
-        // ★ Monitor / 다른 카메라 연출 중에는
-        // Follow가 절대로 Transform을 건드리지 않는다.
+        // Monitor
+        // 다른 카메라 연출 중에는
+        // Controller가 절대로 Transform을 건드리지 않는다.
         if (_monitorPaused)
             return;
 
@@ -207,8 +195,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         if (ball == null)
             return;
 
-        Vector3 desiredWorld =
-            ComputeDesiredWorldPosition();
+        Vector3 desiredWorld = ComputeDesiredWorldPosition();
 
 
         // -----------------------------------------------------
@@ -217,17 +204,14 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         if (zMode == ZAxisMode.WorldZ)
         {
-            float targetZ =
-                desiredWorld.z;
+            float targetZ = desiredWorld.z;
 
             if (useMinZClamp)
             {
-                targetZ =
-                    Mathf.Max(targetZ, minWorldZ);
+                targetZ = Mathf.Max(targetZ, minWorldZ);
             }
 
-            float newZ =
-                Mathf.SmoothDamp(
+            float newZ = Mathf.SmoothDamp(
                     transform.position.z,
                     targetZ,
                     ref _velZ,
@@ -236,8 +220,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
             if (useMinZClamp)
             {
-                newZ =
-                    Mathf.Max(newZ, minWorldZ);
+                newZ = Mathf.Max(newZ, minWorldZ);
             }
 
             transform.position =
@@ -261,22 +244,17 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         else
         {
-            Vector3 desiredLocal =
-                transform.parent != null
-                    ? transform.parent.InverseTransformPoint(
-                        desiredWorld)
-                    : desiredWorld;
+            Vector3 desiredLocal = 
+                transform.parent != null ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
 
-            float targetLZ =
-                desiredLocal.z;
+            float targetLZ = desiredLocal.z;
 
             if (useMinZClamp)
             {
-                targetLZ =
-                    Mathf.Max(targetLZ, minLocalZ);
+                targetLZ = Mathf.Max(targetLZ, minLocalZ);
             }
 
-            float newLZ =
+            float newLZ = 
                 Mathf.SmoothDamp(
                     transform.localPosition.z,
                     targetLZ,
@@ -286,8 +264,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
             if (useMinZClamp)
             {
-                newLZ =
-                    Mathf.Max(newLZ, minLocalZ);
+                newLZ = Mathf.Max(newLZ, minLocalZ);
             }
 
             transform.localPosition =
@@ -305,9 +282,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         if (!lockRotation && lookAtBall)
         {
-            Vector3 dir =
-                ball.position -
-                transform.position;
+            Vector3 dir = ball.position - transform.position;
 
             if (dir.sqrMagnitude > 0.0001f)
             {
@@ -360,8 +335,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         SaveDefaultPose();
 
-        Vector3 desiredWorld =
-            ComputeDesiredWorldPosition();
+        Vector3 desiredWorld = ComputeDesiredWorldPosition();
 
 
         if (zMode == ZAxisMode.WorldZ)
@@ -392,10 +366,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         else
         {
             Vector3 desiredLocal =
-                transform.parent != null
-                    ? transform.parent.InverseTransformPoint(
-                        desiredWorld)
-                    : desiredWorld;
+                transform.parent != null ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
 
             float snapLZ =
                 Mathf.Lerp(
@@ -452,11 +423,9 @@ public class KHS_Script_CameraController : MonoBehaviour
         );
 
         // 현재 카메라의 실제 상태를 저장
-        _monitorSavedPos =
-            transform.position;
+        _monitorSavedPos = transform.position;
 
-        _monitorSavedRot =
-            transform.rotation;
+        _monitorSavedRot = transform.rotation;
 
         _monitorPoseSaved = true;
 
@@ -502,9 +471,7 @@ public class KHS_Script_CameraController : MonoBehaviour
     {
         if (!_monitorPoseSaved)
         {
-            Debug.LogWarning(
-                "[CameraFollow] 저장된 Monitor Pose가 없습니다."
-            );
+            Debug.LogWarning("[CameraFollow] 저장된 Monitor Pose가 없습니다.");
 
             _monitorPaused = false;
 
@@ -514,11 +481,9 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         // Monitor 연출이 끝난 후
         // 저장해둔 실제 플레이 카메라 자세를 적용
-        transform.position =
-            _monitorSavedPos;
+        transform.position = _monitorSavedPos;
 
-        transform.rotation =
-            _monitorSavedRot;
+        transform.rotation = _monitorSavedRot;
 
 
         // 이전 SmoothDamp 속도 제거
@@ -526,11 +491,9 @@ public class KHS_Script_CameraController : MonoBehaviour
 
 
         // 여기서 현재 자세를 새로운 기준 자세로 확정
-        _defaultPos =
-            _monitorSavedPos;
+        _defaultPos = _monitorSavedPos;
 
-        _defaultRot =
-            _monitorSavedRot;
+        _defaultRot = _monitorSavedRot;
 
         _defaultSaved = true;
 
@@ -543,9 +506,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         // 중요한 부분
         // 바로 Follow를 켜지 않고 한 프레임 뒤에 켠다.
-        StartCoroutine(
-            ResumeFollowNextFrame()
-        );
+        StartCoroutine(ResumeFollowNextFrame());
     }
 
 
@@ -559,13 +520,11 @@ public class KHS_Script_CameraController : MonoBehaviour
         {
             // 현재 올바른 카메라 회전값을 기준으로
             // 공의 위치를 다시 계산
-            Vector3 desiredWorld =
-                ComputeDesiredWorldPosition();
+            Vector3 desiredWorld = ComputeDesiredWorldPosition();
 
             if (zMode == ZAxisMode.WorldZ)
             {
-                float targetZ =
-                    desiredWorld.z;
+                float targetZ = desiredWorld.z;
 
                 if (useMinZClamp)
                 {
@@ -585,14 +544,10 @@ public class KHS_Script_CameraController : MonoBehaviour
             }
             else
             {
-                Vector3 desiredLocal =
-                    transform.parent != null
-                        ? transform.parent.InverseTransformPoint(
-                            desiredWorld)
-                        : desiredWorld;
+                Vector3 desiredLocal = 
+                    transform.parent != null ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
 
-                float targetLZ =
-                    desiredLocal.z;
+                float targetLZ = desiredLocal.z;
 
                 if (useMinZClamp)
                 {
@@ -616,9 +571,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         _following = true;
 
-        Debug.Log(
-            "[CameraFollow] Follow 재개 완료"
-        );
+        Debug.Log("[CameraFollow] Follow 재개 완료");
     }
 
 
@@ -628,19 +581,16 @@ public class KHS_Script_CameraController : MonoBehaviour
 
     public void RefreshDefaultPose()
     {
-        _defaultPos =
-            transform.position;
+        _defaultPos = transform.position;
 
-        _defaultRot =
-            transform.rotation;
+        _defaultRot = transform.rotation;
 
         if (cam == null)
             cam = GetComponent<Camera>();
 
         if (cam != null)
         {
-            _defaultFOV =
-                cam.fieldOfView;
+            _defaultFOV = cam.fieldOfView;
         }
 
         _defaultSaved = true;
@@ -666,8 +616,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         if (zMode == ZAxisMode.WorldZ)
         {
-            float targetZ =
-                _defaultPos.z;
+            float targetZ = _defaultPos.z;
 
             if (useMinZClamp)
             {
@@ -741,16 +690,13 @@ public class KHS_Script_CameraController : MonoBehaviour
         if (newCamera == null)
             return;
 
-        Debug.Log(
-            $"[CameraFollow] Camera Change → {newCamera.name}"
-        );
+        Debug.Log($"[CameraFollow] Camera Change → {newCamera.name}");
 
         cam = newCamera;
 
 
         // Roulette Camera
-        if (newCamera.gameObject.name ==
-            "RouletteCamera")
+        if (newCamera.gameObject.name == "RouletteCamera")
         {
             _following = false;
 
@@ -787,26 +733,14 @@ public class KHS_Script_CameraController : MonoBehaviour
         if (ball == null)
             return transform.position;
 
-        if (followSpace ==
-            FollowSpace.WorldSpaceOffset)
+        if (followSpace == FollowSpace.WorldSpaceOffset)
         {
-            return ball.position +
-                   worldOffset;
+            return ball.position + worldOffset;
         }
 
+        Transform ax = transform;
 
-        Transform ax =
-            transform;
-
-        return ball.position
-             + ax.right *
-               camAxesOffset.x
-
-             + ax.up *
-               camAxesOffset.y
-
-             + ax.forward *
-               camAxesOffset.z;
+        return ball.position + ax.right * camAxesOffset.x + ax.up * camAxesOffset.y + ax.forward * camAxesOffset.z;
     }
 
 
@@ -815,19 +749,14 @@ public class KHS_Script_CameraController : MonoBehaviour
         if (_defaultSaved)
             return;
 
-        _defaultPos =
-            transform.position;
+        _defaultPos = transform.position;
 
-        _defaultRot =
-            transform.rotation;
+        _defaultRot = transform.rotation;
 
         if (cam == null)
             cam = Camera.main;
 
-        _defaultFOV =
-            cam != null
-                ? cam.fieldOfView
-                : 60f;
+        _defaultFOV = cam != null ? cam.fieldOfView : 60f;
 
         _defaultSaved = true;
     }
@@ -837,10 +766,7 @@ public class KHS_Script_CameraController : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(ballTag))
         {
-            GameObject go =
-                GameObject.FindWithTag(
-                    ballTag
-                );
+            GameObject go = GameObject.FindWithTag(ballTag);
 
             if (go != null)
                 ball = go.transform;
@@ -849,10 +775,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
         if (ball == null)
         {
-            var bc =
-                FindAnyObjectByType<
-                    YJ_Script_BallController
-                >();
+            var bc = FindAnyObjectByType<YJ_Script_BallController>();
 
             if (bc != null)
                 ball = bc.transform;
@@ -870,12 +793,9 @@ public class KHS_Script_CameraController : MonoBehaviour
     // Coroutines
     // =========================================================
 
-    private IEnumerator CoReturnZ_World(
-        float targetZ,
-        float duration)
+    private IEnumerator CoReturnZ_World(float targetZ,float duration)
     {
-        float startZ =
-            transform.position.z;
+        float startZ = transform.position.z;
 
         float elapsed = 0f;
 
@@ -883,14 +803,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            float t =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    Mathf.Clamp01(
-                        elapsed / duration
-                    )
-                );
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
 
             float z =
                 Mathf.Lerp(
@@ -900,11 +813,7 @@ public class KHS_Script_CameraController : MonoBehaviour
                 );
 
             if (useMinZClamp)
-                z =
-                    Mathf.Max(
-                        z,
-                        minWorldZ
-                    );
+                z = Mathf.Max(z, minWorldZ);
 
             transform.position =
                 new Vector3(
@@ -925,30 +834,16 @@ public class KHS_Script_CameraController : MonoBehaviour
     }
 
 
-    private IEnumerator CoReturnZ_Local(
-        float keepX,
-        float keepY,
-        Vector3 defaultWorld,
-        float duration)
+    private IEnumerator CoReturnZ_Local(float keepX, float keepY, Vector3 defaultWorld, float duration)
     {
-        float startZ =
-            transform.localPosition.z;
+        float startZ = transform.localPosition.z;
 
-        float targetLZ =
-            transform.parent != null
-                ? transform.parent
-                    .InverseTransformPoint(
-                        defaultWorld
-                    ).z
-                : defaultWorld.z;
+        float targetLZ = 
+            transform.parent != null ? transform.parent.InverseTransformPoint(defaultWorld).z : defaultWorld.z;
 
         if (useMinZClamp)
         {
-            targetLZ =
-                Mathf.Max(
-                    targetLZ,
-                    minLocalZ
-                );
+            targetLZ = Mathf.Max(targetLZ, minLocalZ);
         }
 
         float elapsed = 0f;
@@ -957,14 +852,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            float t =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    Mathf.Clamp01(
-                        elapsed / duration
-                    )
-                );
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
 
             float z =
                 Mathf.Lerp(
@@ -975,11 +863,7 @@ public class KHS_Script_CameraController : MonoBehaviour
 
             if (useMinZClamp)
             {
-                z =
-                    Mathf.Max(
-                        z,
-                        minLocalZ
-                    );
+                z = Mathf.Max(z, minLocalZ);
             }
 
             transform.localPosition =
@@ -1001,12 +885,9 @@ public class KHS_Script_CameraController : MonoBehaviour
     }
 
 
-    private IEnumerator CoReturnRot(
-        Quaternion targetRot,
-        float duration)
+    private IEnumerator CoReturnRot(Quaternion targetRot, float duration)
     {
-        Quaternion start =
-            transform.rotation;
+        Quaternion start = transform.rotation;
 
         float elapsed = 0f;
 
@@ -1014,14 +895,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            float t =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    Mathf.Clamp01(
-                        elapsed / duration
-                    )
-                );
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
 
             transform.rotation =
                 Quaternion.Slerp(
@@ -1033,15 +907,11 @@ public class KHS_Script_CameraController : MonoBehaviour
             yield return null;
         }
 
-        transform.rotation =
-            targetRot;
+        transform.rotation = targetRot;
     }
 
 
-    private IEnumerator CoZoom(
-        float from,
-        float to,
-        float duration)
+    private IEnumerator CoZoom(float from, float to, float duration)
     {
         if (cam == null)
             yield break;
@@ -1058,14 +928,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         {
             elapsed += Time.deltaTime;
 
-            float t =
-                Mathf.SmoothStep(
-                    0f,
-                    1f,
-                    Mathf.Clamp01(
-                        elapsed / duration
-                    )
-                );
+            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
 
             cam.fieldOfView =
                 Mathf.Lerp(
