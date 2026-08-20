@@ -21,6 +21,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     [SerializeField]
     private CJS_Script_CameraFollowBall cameraFollow;
+    
+    private KHS_Script_CameraController cameraController;
 
     private Vector3 followCameraSavedPos;
     private Quaternion followCameraSavedRot;
@@ -143,6 +145,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
         cameraGos[0].transform.position = cameraTargetPos;
         cameraGos[0].transform.rotation = cameraTargetRot;
 
+
         // 기존 코루틴이 돌고 있다면 중단
         if (moveCoroutine != null)
         {
@@ -151,10 +154,11 @@ public class KHS_Script_CameraManager : MonoBehaviour
         }
 
         // 부드럽게 이동 코루틴 시작
-        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, cameraInitPos, cameraInitRot, moveDuration, OnCameraReturnComplete));
+        moveCoroutine = StartCoroutine(MoveCameraSmooth(cameraGos[0].transform, followCameraSavedPos, followCameraSavedRot, moveDuration, OnCameraReturnComplete));
 
         // cameraGos[0]은 비활성화
         cameraGos[2].SetActive(false);
+        cameraFollow.ResumeFollowAfterMonitor(followCameraSavedPos, followCameraSavedRot);
         MonitorEvt?.Invoke(false);
 
     }
@@ -192,17 +196,20 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
         if (cameraFollow != null)
         {
-            // 현재 CameraManager가 복귀시킨
-            // 정상적인 핀볼 카메라 포즈를 기준으로
-            // Follow의 기준값을 다시 저장
-            cameraFollow.RefreshDefaultPose();
+            //// 현재 CameraManager가 복귀시킨
+            //// 정상적인 핀볼 카메라 포즈를 기준으로
+            //// Follow의 기준값을 다시 저장
+            //cameraFollow.RefreshDefaultPose();
 
-            // Follow 상태 복구
-            cameraFollow.ResumeFollowAfterMonitor(
-                cameraGos[0].transform.position,
-                cameraGos[0].transform.rotation
-            );
+            //// Follow 상태 복구
+            //cameraFollow.ResumeFollowAfterMonitor(
+            //    cameraGos[0].transform.position,
+            //    cameraGos[0].transform.rotation
+            //);
+            
         }
+
+        
 
         // RoundClear → RoundUI → Monitor 복귀가 끝난 경우
         if (isRoundCameraReturning)
