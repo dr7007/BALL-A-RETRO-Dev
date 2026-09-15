@@ -96,7 +96,7 @@ public class SteamManager : MonoBehaviour {
 			// Once you get a Steam AppID assigned by Valve, you need to replace AppId_t.Invalid with it and
 			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
 			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
-			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
+			if (SteamAPI.RestartAppIfNecessary(new AppId_t(1797363))) {
 				Debug.Log("[Steamworks.NET] Shutting down because RestartAppIfNecessary returned true. Steam will restart the application.");
 
 				Application.Quit();
@@ -120,7 +120,19 @@ public class SteamManager : MonoBehaviour {
 		// Valve's documentation for this is located here:
 		// https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
 		m_bInitialized = SteamAPI.Init();
-		if (!m_bInitialized) {
+
+        Debug.Log($"[Steamworks.NET] SteamAPI Initialized: {m_bInitialized}");
+
+        if (m_bInitialized)
+        {
+            Debug.Log($"[Steamworks.NET] Current AppID: {SteamUtils.GetAppID()}");
+        }
+        else
+        {
+            Debug.LogError("[Steamworks.NET] SteamAPI_Init() failed.");
+            return;
+        }
+        if (!m_bInitialized) {
 			Debug.LogError("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
 
 			return;
