@@ -346,6 +346,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public bool IsRecordChallenge { get; private set; }
     public bool HasEnded => currentState == RoundState.GameOver || currentState == RoundState.GameClear;
     public bool IsClearResult => currentState == RoundState.GameClear;
+    public bool IsPlaying => currentState == RoundState.Playing;
     public int FinalTargetScore { get; private set; }
 
     private void ChangeState(RoundState newState)

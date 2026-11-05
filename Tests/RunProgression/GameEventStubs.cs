@@ -26,12 +26,23 @@ public static class KHS_Script_FliperDumpManager
 }
 public static class KHS_Script_PortalController { public static event Action<int> portalEvt; }
 public static class KHS_Script_PlincoFunction { public static event Action ReturnPortalEvt; }
-public static class KHS_Script_PlungerController { public static event Action TestTScoreUpdateEvt; }
+public class KHS_Script_PlungerController : MonoBehaviour
+{
+    public static event Action TestTScoreUpdateEvt;
+    public bool isBallReady, tutorialForceLock;
+}
+public static class KHS_Script_UIImgFunc
+{
+    public static event Action<bool> RoundUIEvt;
+    public static void SetOpen(bool open) => RoundUIEvt?.Invoke(open);
+}
 namespace PSH { public static class PSH_Script_SceneLoader { public static event Action OnSceneLoadStart; } }
 namespace PSH { public static class PSH_Script_GameSceneDirector { public static event Action NoIntroStartEvt; } }
 public static class GlitchEffect_RendererFeature { public static bool IsEnabled; }
 public class KHS_Script_CameraManager : MonoBehaviour
 {
+    public static event Action<bool> MonitorEvt;
+    public static void SetMonitor(bool open) => MonitorEvt?.Invoke(open);
     public static bool IsRoundCameraReady = true;
     public GameObject[] cameraGos;
 }

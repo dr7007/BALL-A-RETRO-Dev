@@ -139863,6 +139863,9 @@ PrefabInstance:
       insertIndex: -1
       addedObject: {fileID: 1505284081}
     m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 4350033908507850495, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 7600752139250908840}
     - targetCorrespondingSourceObject: {fileID: 1392752243628455106, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
       insertIndex: 4
       addedObject: {fileID: 1756852209}
@@ -170985,6 +170988,48 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c63469011cb2e2447b281709fabb33dc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+--- !u!114 &7600752139250908840
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1756852210}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a4f5072948cb4c8794b05c93c0e165af, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  zones:
+  - label: Right wall lower bend
+    anchor: {fileID: 7600752139250908841}
+    localBounds:
+      m_Center: {x: -0.05489827, y: 0.025, z: 0.00891399}
+      m_Extent: {x: 0.036202605, y: 0.016, z: 0.03331998}
+    localPushDirection: {x: -0.25036727, y: 0, z: 0.96815093}
+    localRecoveryPosition: {x: -0.10459624, y: 0.025, z: 0.09588588}
+  plunger: {fileID: 7600752139250908842}
+  stuckSeconds: 3
+  recoverySeconds: 2
+  movementRadius: 0.18
+  pushSpeed: 0.8
+  clearance: 0.01
+--- !u!4 &7600752139250908841 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 2005573871944780519, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 1756852205}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &7600752139250908842 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 8874198624550802991, guid: f7c15334b70e8e844a194f7335745b3a, type: 3}
+  m_PrefabInstance: {fileID: 1756852205}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a888b586a94161740824eb3acf2f6414, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
   m_ObjectHideFlags: 0

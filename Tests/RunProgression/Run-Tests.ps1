@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [switch]$Baseline,
+    [switch]$IncludeBallRescue,
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
 $ErrorActionPreference = 'Stop'
@@ -63,6 +64,11 @@ foreach ($source in $unchangedSources) { Copy-Item -LiteralPath "$sourceRoot/$so
 if (!$Baseline) { Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_RunStatusUI.cs" -Destination "$outputPath/Assets/Runtime" }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/RunProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
+if ($IncludeBallRescue) {
+    if ($Baseline) { throw 'Ball rescue requires the current run state API.' }
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_BallAutoRescue.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Tests/BallRescue/BallAutoRescueTests.cs" -Destination "$outputPath/Assets/Tests"
+}
 Copy-Item -LiteralPath "$sourceRoot/Assets/TextMesh Pro" -Destination "$outputPath/Assets/TextMesh Pro" -Recurse
 Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Font" -Destination "$outputPath/Assets/Fonts" -Recurse
 $null = New-Item -ItemType Directory -Path "$outputPath/Assets/Localization"
@@ -72,7 +78,8 @@ foreach ($name in @('UITable Shared Data.asset', 'UITable_ko.asset', 'UITable_en
 @{ name = 'BallARetro.RunUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/RunUnderTest.asmdef" -Encoding utf8
 @{ name = 'BallARetro.RunProgressionTests'; references = @('BallARetro.RunUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RunProgressionTests.asmdef" -Encoding utf8
 if ($Baseline) { '-define:BASELINE' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
-$arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', 'RunProgressionTests', '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
+$testFilter = if ($IncludeBallRescue) { 'RunProgressionTests;BallAutoRescueTests' } else { 'RunProgressionTests' }
+$arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $testFilter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Output "Test project: $outputPath; Unity process: $($process.Id)"
 $process.WaitForExit()

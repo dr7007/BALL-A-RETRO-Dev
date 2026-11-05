@@ -13,6 +13,10 @@ public class YJ_Script_BallController : MonoBehaviour
     }
     private ControlMode currentMode = ControlMode.Pinball;
 
+    public bool CanAutoRescue => isActiveAndEnabled && currentMode == ControlMode.Pinball
+        && rigidBody != null && !rigidBody.isKinematic
+        && (rigidBody.constraints & RigidbodyConstraints.FreezePositionY) != 0;
+
     [Header("팩맨 모드 속도")]
     [SerializeField]
     private float pacManSpeed = 3f; // 팩맨 모드일 때의 이동 속도
