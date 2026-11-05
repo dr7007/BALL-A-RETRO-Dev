@@ -8,27 +8,27 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     [SerializeField] private string baseUrl = "http://localhost/pinball";
     [SerializeField] private string apiKey = "CHANGE_ME_STRONG_KEY";
 
-    // ¦¡¦¡ Singleton ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ Singleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private static CJS_Script_PinballRankingService instance;
     public static CJS_Script_PinballRankingService Instance
     {
         get
         {
             if (instance == null || instance.Equals(null))
-                EnsureInstance(); // Ç×»ó Á¸Àç º¸Àå
+                EnsureInstance(); // í•­ìƒ ì¡´ì¬ ë³´ì¥
             return instance;
         }
     }
 
-    /// <summary>½Ì±ÛÅæ ÀÎ½ºÅÏ½º°¡ ÁØºñµÇ¸é ¾Ë¸² (Awake¿¡¼­ È£Ãâ)</summary>
+    /// <summary>ì‹±ê¸€í†¤ ì¸ìŠ¤í„´ìŠ¤ê°€ ì¤€ë¹„ë˜ë©´ ì•Œë¦¼ (Awakeì—ì„œ í˜¸ì¶œ)</summary>
     public static event System.Action<CJS_Script_PinballRankingService> InstanceReady;
 
-    /// Resources °æ·Î: Assets/Resources/Services/RankingService.prefab (¼±ÅÃ)
+    /// Resources ê²½ë¡œ: Assets/Resources/Services/RankingService.prefab (ì„ íƒ)
     private const string ResourcesPrefabPath = "Services/RankingService";
 
     private static void EnsureInstance()
     {
-        // 1) ±âÁ¸ Ã£±â(ºñÈ°¼º Æ÷ÇÔ)
+        // 1) ê¸°ì¡´ ì°¾ê¸°(ë¹„í™œì„± í¬í•¨)
         var existing = Object.FindObjectOfType<CJS_Script_PinballRankingService>(true);
         if (existing != null)
         {
@@ -37,7 +37,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
             return;
         }
 
-        // 2) Resources ÇÁ¸®ÆÕ¿¡¼­ »ı¼º(ÀÖÀ¸¸é)
+        // 2) Resources í”„ë¦¬íŒ¹ì—ì„œ ìƒì„±(ìˆìœ¼ë©´)
         var prefab = Resources.Load<GameObject>(ResourcesPrefabPath);
         if (prefab != null)
         {
@@ -48,7 +48,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
             return;
         }
 
-        // 3) ÃÖÈÄ: ºó GO »ı¼º
+        // 3) ìµœí›„: ë¹ˆ GO ìƒì„±
         {
             var go = new GameObject("RankingService");
             instance = go.AddComponent<CJS_Script_PinballRankingService>();
@@ -60,7 +60,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     {
         if (instance != null && instance != this)
         {
-            // Áßº¹ »ı¼º ½Ã »õ°É ÀÚ¸ê½ÃÅ´ (¾À¿¡ ÇÁ¸®ÆÕÀÌ ÀÖ¾îµµ ¾ÈÀü)
+            // ì¤‘ë³µ ìƒì„± ì‹œ ìƒˆê±¸ ìë©¸ì‹œí‚´ (ì”¬ì— í”„ë¦¬íŒ¹ì´ ìˆì–´ë„ ì•ˆì „)
             Destroy(gameObject);
             return;
         }
@@ -71,7 +71,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
     }
 
-    // ¦¡¦¡ Player nickname ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ Player nickname â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public string Nickname
     {
         get => PlayerPrefs.GetString("nickname", "");
@@ -85,7 +85,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         RegisterNickname(null, err => Debug.LogWarning("[RegisterNickname] fail: " + err));
     }
 
-    // ¦¡¦¡ Public API ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ Public API â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     public void RegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
         StartCoroutine(CoRegisterNickname(onDone, onFail));
@@ -106,10 +106,16 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         StartCoroutine(CoFetch(gameMode, level, onDone, onFail));
     }
 
-    // ¦¡¦¡ Coroutines ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€ Coroutines â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     private IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
         if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
+        if (BallARetroPlatform.UsesPersonalRecords)
+        {
+            yield return null;
+            onDone?.Invoke();
+            yield break;
+        }
 
         WWWForm f = new WWWForm();
         f.AddField("nickname", Nickname);
@@ -138,6 +144,14 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
                                  System.Action<SubmitResp> onDone,
                                  System.Action<string> onFail)
     {
+        if (score < 0) { onFail?.Invoke("Score must not be negative."); yield break; }
+        if (BallARetroPlatform.UsesPersonalRecords)
+        {
+            var rows = BallARetroPersonalRecordStore.Submit(Nickname, score, gameMode, level);
+            yield return null;
+            onDone?.Invoke(new SubmitResp { ok = true, your_score = score, rank = 1, top10 = rows, msg = "Personal best saved on this device." });
+            yield break;
+        }
         if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
 
         WWWForm f = new WWWForm();
@@ -170,6 +184,13 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
                                 System.Action<LbResp> onDone,
                                 System.Action<string> onFail)
     {
+        if (BallARetroPlatform.UsesPersonalRecords)
+        {
+            var rows = BallARetroPersonalRecordStore.Read(Nickname, gameMode, level);
+            yield return null;
+            onDone?.Invoke(new LbResp { ok = true, top10 = rows, msg = "Personal best on this device." });
+            yield break;
+        }
         WWWForm f = new WWWForm();
         if (!string.IsNullOrEmpty(gameMode)) f.AddField("game_mode", gameMode);
         if (level > 0) f.AddField("level", level);

@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [switch]$IncludeHover,
     [switch]$IncludeEffects,
+    [switch]$IncludePersonalRecords,
     [string]$PythonPath = 'python',
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
@@ -13,6 +14,7 @@ $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Runtime", 
 $lock = Get-Content -LiteralPath "$sourceRoot/Packages/packages-lock.json" -Raw | ConvertFrom-Json
 $dependencies = [ordered]@{}
 $pending = [Collections.Generic.Queue[string]]::new()
+if ($IncludePersonalRecords) { $pending.Enqueue('com.unity.modules.unitywebrequest') }
 @('com.unity.ugui', 'com.unity.render-pipelines.universal', 'com.unity.test-framework', 'com.unity.modules.audio', 'com.unity.modules.animation', 'com.unity.modules.uielements', 'com.unity.modules.screencapture', 'com.unity.modules.physics', 'com.unity.modules.particlesystem') | ForEach-Object { $pending.Enqueue($_) }
 while ($pending.Count -gt 0) {
     $name = $pending.Dequeue()
@@ -53,6 +55,12 @@ if ($IncludeEffects) {
         Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/PSH/PSH_Shaders/$_", "$sourceRoot/Assets/MemberFolder/PSH/PSH_Shaders/$_.meta" -Destination "$outputPath/Assets/EffectShaders"
     }
     $filter += ';EffectSettingsTests'
+}
+if ($IncludePersonalRecords) {
+    Copy-Item "$sourceRoot/Assets/Public/Platform/*.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_PinballRankingService.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_Models.cs", "$sourceRoot/Assets/Scripts/Steamworks.NET/SteamManager.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/PersonalRecordTests.cs" -Destination "$outputPath/Assets/Tests"
+    $filter += ';PersonalRecordTests'
 }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

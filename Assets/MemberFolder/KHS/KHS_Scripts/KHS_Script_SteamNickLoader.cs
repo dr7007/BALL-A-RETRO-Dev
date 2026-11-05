@@ -1,5 +1,4 @@
 using TMPro;
-using Unity.VisualScripting;
 using UnityEngine;
 
 public class KHS_Script_SteamNickLoader : MonoBehaviour
@@ -14,13 +13,14 @@ public class KHS_Script_SteamNickLoader : MonoBehaviour
     private void Awake()
     {
         steamManager = FindAnyObjectByType<SteamManager>();
-        inputField = GetComponent<TMP_InputField>();
+        if (inputField == null) inputField = GetComponent<TMP_InputField>();
     }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
     {
-        str = steamManager.GetSteamNickname();
+        if (BallARetroPlatform.IsSteamBuild && steamManager != null)
+            str = steamManager.GetSteamNickname();
     }
 
     // Update is called once per frame
@@ -31,7 +31,7 @@ public class KHS_Script_SteamNickLoader : MonoBehaviour
 
     public void FillInputFieldToSteamNickname()
     {
-        if (str == "Unknown" || string.IsNullOrEmpty(str)) return;
+        if (!BallARetroPlatform.IsSteamBuild || inputField == null || str == "Unknown" || string.IsNullOrEmpty(str)) return;
 
         inputField.text = str;
     }

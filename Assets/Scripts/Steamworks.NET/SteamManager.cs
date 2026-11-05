@@ -5,7 +5,7 @@
 //
 // Version: 1.0.13
 
-#if !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
+#if !BALLARETRO_STEAM || BALLARETRO_STOVE || !(UNITY_STANDALONE_WIN || UNITY_STANDALONE_LINUX || UNITY_STANDALONE_OSX || STEAMWORKS_WIN || STEAMWORKS_LIN_OSX)
 #define DISABLESTEAMWORKS
 #endif
 
@@ -184,6 +184,7 @@ public class SteamManager : MonoBehaviour {
         return SteamFriends.GetPersonaName();
     }
 #else
+	public string GetSteamNickname() => "Unknown";
 	public static bool Initialized {
 		get {
 			return false;
