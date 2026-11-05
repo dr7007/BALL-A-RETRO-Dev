@@ -67,6 +67,52 @@ public class EffectSettingsTests
         inactive.SetActive(true);
         Assert.That(inactive.GetComponent<Renderer>().forceRenderingOff, Is.True);
     }
+    [TestCase(false)]
+    [TestCase(true)]
+    public void BallWithMeshAndTrail_OnlyTrailIsHidden(bool startWithEffectsDisabled)
+    {
+        // Same component order as the Ball in Pinball_ColLong_OriginYJ+KHS_NEW:
+        // MeshRenderer first, TrailRenderer later, both on the same GameObject.
+        var ball = Child("Ball", typeof(MeshFilter), typeof(MeshRenderer),
+            typeof(SphereCollider), typeof(Rigidbody), typeof(TrailRenderer));
+        var body = ball.GetComponent<MeshRenderer>();
+        var trail = ball.GetComponent<TrailRenderer>();
+        ball.GetComponent<Rigidbody>().isKinematic = true;
+        if (startWithEffectsDisabled) PSH_Script_EffectSettings.SetEnabled(false);
+        PSH_Script_EffectSettings.ApplyToHierarchy(root);
+        PSH_Script_EffectSettings.SetEnabled(false);
+        Assert.That(body.forceRenderingOff, Is.False, "Effects OFF must never hide the ball mesh.");
+        Assert.That(trail.forceRenderingOff, Is.True, "Effects OFF must hide the trail itself.");
+        Assert.That(body.enabled, Is.True);
+        Assert.That(ball.GetComponent<SphereCollider>().enabled, Is.True);
+
+        // Re-registration and reactivation while OFF must retain the same targets.
+        PSH_Script_EffectSettings.ApplyToHierarchy(root);
+        ball.SetActive(false);
+        ball.SetActive(true);
+        Assert.That(body.forceRenderingOff, Is.False);
+        Assert.That(trail.forceRenderingOff, Is.True);
+        PSH_Script_EffectSettings.SetEnabled(true);
+        Assert.That(body.forceRenderingOff, Is.False);
+        Assert.That(trail.forceRenderingOff, Is.False);
+    }
+    [UnityTest] public IEnumerator EffectSuppressionWhilePaused_DoesNotHideMesh_AndRestoresTrailState()
+    {
+        var ball = Child("Ball", typeof(MeshRenderer), typeof(TrailRenderer));
+        var body = ball.GetComponent<MeshRenderer>();
+        var trail = ball.GetComponent<TrailRenderer>();
+        trail.forceRenderingOff = true;
+        PSH_Script_EffectSettings.ApplyToHierarchy(root);
+        Time.timeScale = 0;
+        PSH_Script_EffectSettings.SetEnabled(false);
+        trail.forceRenderingOff = false; // Another effect script tries to show it this frame.
+        yield return null;
+        Assert.That(body.forceRenderingOff, Is.False);
+        Assert.That(trail.forceRenderingOff, Is.True);
+        PSH_Script_EffectSettings.SetEnabled(true);
+        Assert.That(body.forceRenderingOff, Is.False);
+        Assert.That(trail.forceRenderingOff, Is.True, "Restore the trail's original hidden state.");
+    }
     [Test] public void RestoringEffects_PreservesPreviouslyHiddenRendererAndLight()
     {
         var go = Child("Hidden", typeof(ParticleSystem), typeof(Light));

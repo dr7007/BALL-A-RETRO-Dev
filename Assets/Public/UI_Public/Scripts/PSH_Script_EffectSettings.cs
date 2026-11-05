@@ -71,8 +71,7 @@ public static class PSH_Script_EffectSettings
     {
         foreach (var renderer in root.GetComponentsInChildren<Renderer>(true))
         {
-            if (!(renderer is ParticleSystemRenderer) && !(renderer is TrailRenderer) &&
-                renderer.GetType().Name != "VFXRenderer") continue;
+            if (!PSH_Script_EffectVisibility.IsEffectRenderer(renderer)) continue;
             if (!renderer.TryGetComponent<PSH_Script_EffectVisibility>(out _))
                 renderer.gameObject.AddComponent<PSH_Script_EffectVisibility>();
             foreach (var light in renderer.GetComponentsInChildren<Light>(true))
