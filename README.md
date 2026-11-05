@@ -16,14 +16,14 @@ Unity Version : Unity 6.0 (6000.0.60f1) [안정성 이슈로 변경]
 Unity의 `BALL-A-RETRO > Build > STOVE Review (Windows)`에서 출력 파일을 선택합니다.
 플랫폼 선택은 빌드별 추가 define으로 전달하므로 프로젝트의 기본 설정을 바꾸지 않습니다.
 
-Steam은 `Assets/Resources/Release/SteamSettings.asset`에 실제 게임 App ID를 입력한 뒤
+Steam App ID는 `Assets/Resources/Release/SteamSettings.asset`에 `5193980`으로 설정했습니다.
 `BALL-A-RETRO > Build > Steam (Windows)`를 사용합니다. 기본값 0과 테스트 ID 480은
 출시용으로 허용하지 않습니다. Steam 출력 폴더에는 개발용 `steam_appid.txt`가 없어야 합니다.
 Editor에서 Steam을 시험할 때만 `BALLARETRO_STEAM` define과 실제 ID를 담은 개발용
 `steam_appid.txt`를 사용하고, 시험 후 define을 제거하면 스토브 기본 모드로 돌아갑니다.
 
 Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현재 계정에서 읽습니다.
-현재 실제 게임 App ID가 설정되지 않았으므로 실제 계정 연결 검증은 남아 있습니다.
+실제 Steam 클라이언트 계정으로 연결하는 검증은 남아 있습니다.
 기존 Steam 온라인 랭킹 서버의 운영·서버 인증 검증도 별도로 필요합니다.
 언어 추가 및 시스템창의 언어 전환은 후속 작업입니다. 번역 자체에는 Steam 키가 필요하지 않습니다.
 

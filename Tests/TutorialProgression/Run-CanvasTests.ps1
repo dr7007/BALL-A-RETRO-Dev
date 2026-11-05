@@ -71,7 +71,7 @@ if ($IncludeSteamLogin) {
     Copy-Item -LiteralPath "$sourceRoot/Tests/SteamLogin/SteamIdentityTests.cs" -Destination "$outputPath/Assets/Tests"
     $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Resources/Release", "$outputPath/Assets/Editor"
     # A synthetic ID is used exclusively with the fake Steam client, outside the game project.
-    (Get-Content -LiteralPath "$sourceRoot/Assets/Resources/Release/SteamSettings.asset" -Raw).Replace('steamAppId: 0', 'steamAppId: 123456') | Set-Content -LiteralPath "$outputPath/Assets/Resources/Release/SteamSettings.asset" -Encoding utf8
+    (Get-Content -LiteralPath "$sourceRoot/Assets/Resources/Release/SteamSettings.asset" -Raw) -replace 'steamAppId: \d+', 'steamAppId: 123456' | Set-Content -LiteralPath "$outputPath/Assets/Resources/Release/SteamSettings.asset" -Encoding utf8
     Copy-Item -LiteralPath "$sourceRoot/Assets/Editor/BallARetroReleaseBuild.cs" -Destination "$outputPath/Assets/Editor"
     '-define:BALLARETRO_STEAM' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8
     $filter += ';SteamIdentityTests'
