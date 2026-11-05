@@ -1,0 +1,531 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e9620f8c34305754d8cc9a7e49e852d9, type: 3}
+  m_Name: UITable_ja
+  m_EditorClassIdentifier:
+  m_LocaleId:
+    m_Code: ja
+  m_SharedData: {fileID: 11400000, guid: fc31785794dd60e4e991dd4343e4a88d, type: 2}
+  m_Metadata:
+    m_Items: []
+  m_TableData:
+  - m_Id: 14400438669312
+    m_Localized: "ロビーBGM音量"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 14400438669313
+    m_Localized: "ゲームBGM音量"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374166212608
+    m_Localized: "効果音の音量"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374166212609
+    m_Localized: "視覚効果"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374166212610
+    m_Localized: "言語 (Language)"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406912
+    m_Localized: "解像度"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406913
+    m_Localized: "画面モード"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406914
+    m_Localized: "基本操作"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406915
+    m_Localized: "[A] [D] - ボールを左右に移動"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406916
+    m_Localized: "[Z] [/] - 左右のフリッパー"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406917
+    m_Localized: "[Space] - ボールを発射"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406918
+    m_Localized: "[左クリック] - 強化を選択"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406919
+    m_Localized: "残り回数"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406920
+    m_Localized: "ボールの残り回数"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406921
+    m_Localized: "フリッパーの残り回数"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406922
+    m_Localized: "基本操作を説明します。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406923
+    m_Localized: "[Z] と [/] を押してください。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406924
+    m_Localized: "障害物を5つ倒すと2階へ進めます！\n何かキーを押して続ける…"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406925
+    m_Localized: "[Space] を押してボールを発射！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406926
+    m_Localized: "選択肢をクリックして強化しましょう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 12374170406927
+    m_Localized: "目標スコア達成！ゲームを始めましょう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000001
+    m_Localized: "目標の{0:N0}点を達成！\nハイスコアに挑戦しよう！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000002
+    m_Localized: "ゲームオーバー · ボールを使い切りました"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000003
+    m_Localized: "ゲームオーバー · フリッパーを使い切り、ボールが落ちました"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000004
+    m_Localized: "最終スコア {0:N0}点 · 目標 {1:N0}点を達成"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000005
+    m_Localized: "目標未達 · {0:N0} / {1:N0}点（あと{2:N0}点）"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000006
+    m_Localized: "クリア · 記録挑戦終了（ボール切れ）"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 15000000000007
+    m_Localized: "クリア · 記録挑戦終了（フリッパー回数切れ）"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000000
+    m_Localized: "視覚効果の詳細設定"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000001
+    m_Localized: "効果を個別に選ぶか、まとめてオフにできます。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000002
+    m_Localized: "標準 · すべてオン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000003
+    m_Localized: "光刺激を軽減 · すべてオフ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000004
+    m_Localized: "標準 · すべての効果がオン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000005
+    m_Localized: "光刺激を軽減 · すべての効果がオフ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000006
+    m_Localized: "カスタム · 選んだ効果のみオン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000007
+    m_Localized: "カメラの揺れ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000008
+    m_Localized: "衝突・花火のパーティクル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000009
+    m_Localized: "ボールの軌跡"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000010
+    m_Localized: "閃光・エフェクト照明"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000011
+    m_Localized: "グリッチ・画面アニメーション"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000012
+    m_Localized: "光のにじみ・画面効果"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000013
+    m_Localized: "設定に戻る"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000014
+    m_Localized: "一部"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000015
+    m_Localized: "詳細設定"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000016
+    m_Localized: "フルスクリーン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000017
+    m_Localized: "ボーダーレス"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000018
+    m_Localized: "ウィンドウ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000019
+    m_Localized: "設定"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000020
+    m_Localized: "遊び方\n1階のピンボールで得点し、条件を満たすと2階へ進めます。\n何かキーを押して続ける…"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000021
+    m_Localized: "{0} と {1} をそれぞれ押してください！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000022
+    m_Localized: "障害物を5つ倒すと2階へ進めます！\n何かキーを押して続ける…"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000023
+    m_Localized: "Spaceを押してボールを発射！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000024
+    m_Localized: "完了"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000025
+    m_Localized: "押してみよう"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000026
+    m_Localized: "{0}点を目指そう！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000027
+    m_Localized: "目標スコア達成！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000028
+    m_Localized: "{0}\n{1}: {2} / {3}: {4}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000029
+    m_Localized: "チュートリアル完了！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000030
+    m_Localized: "{0}点を達成し、両方のフリッパーも練習できました！\nロビーに戻るか、ゲームを始めましょう。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000031
+    m_Localized: "もう一度挑戦しよう！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000032
+    m_Localized: "{0}点に届く前にボールが落ちてしまいました。\nもう一度挑戦しましょう！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000033
+    m_Localized: "発射した後、{0} と {1} のフリッパーを1回ずつ使いましょう！\n目標スコアと両方の練習を達成すると完了です。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000034
+    m_Localized: "ゲーム開始"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000035
+    m_Localized: "チュートリアル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000036
+    m_Localized: "リトライ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000037
+    m_Localized: "ロビーへ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000038
+    m_Localized: "記録を見る"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000039
+    m_Localized: "更新"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000040
+    m_Localized: "引き直す"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000041
+    m_Localized: "スキップ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000042
+    m_Localized: "ゲームを終了"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000043
+    m_Localized: "はい"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000044
+    m_Localized: "いいえ"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000045
+    m_Localized: "閉じる"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000046
+    m_Localized: "終了しますか？\n記録はプレイ終了時に保存されます。\n今やめると今回の記録は保存されません。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000047
+    m_Localized: "スコア: "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000048
+    m_Localized: "ラウンド "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000049
+    m_Localized: "残りボール: "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000050
+    m_Localized: "フリッパー回数: "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000051
+    m_Localized: "回数"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000052
+    m_Localized: "強化"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000053
+    m_Localized: "達成条件"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000054
+    m_Localized: "1階の安全装置を狙う"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000055
+    m_Localized: "ブラックホールの標的を狙う"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000056
+    m_Localized: "2階入口のLEDバンパーを狙う"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000057
+    m_Localized: "補助発射台を再起動"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000058
+    m_Localized: "2階のコイン生成標的を狙う"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000059
+    m_Localized: "生成"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000060
+    m_Localized: "分"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000061
+    m_Localized: "秒"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000062
+    m_Localized: "ハイスコア"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000063
+    m_Localized: "ベスト記録"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000064
+    m_Localized: "順位:"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000065
+    m_Localized: "順位        名前       スコア"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000066
+    m_Localized: "名前                    スコア"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000067
+    m_Localized: "記録の保存待ち"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000068
+    m_Localized: "記録を保存中…"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000069
+    m_Localized: "自分のスコア: {0:N0}\n自分の順位: #{1}"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000070
+    m_Localized: "記録を保存できませんでした。もう一度お試しください。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000071
+    m_Localized: "ニックネーム: "
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000072
+    m_Localized: "ニックネームを入力"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000073
+    m_Localized: "文字と数字で8文字まで入力できます。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000074
+    m_Localized: "Steamを起動してログインしてください"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000075
+    m_Localized: "残り{0}回"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000076
+    m_Localized: "コモン"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000077
+    m_Localized: "ノーマル"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000078
+    m_Localized: "レア"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000079
+    m_Localized: "エピック"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000080
+    m_Localized: "レジェンダリー"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000081
+    m_Localized: "ボーナス得点強化"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000082
+    m_Localized: "ボーナスマップのチップの山の得点が5倍になります。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000083
+    m_Localized: "チップの反発力強化"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000084
+    m_Localized: "ボーナスマップのチップの山の反発力が上がります。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000085
+    m_Localized: "ボーナス倍率強化"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000086
+    m_Localized: "ボーナスマップ下部エリアの倍率が3倍になります。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000087
+    m_Localized: "黄金チップのチャンス"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000088
+    m_Localized: "ボーナスマップに黄金のチップの山が出現しやすくなります。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000089
+    m_Localized: "獲得スコアアップ！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000090
+    m_Localized: "すべての獲得スコアが20%増えます！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000091
+    m_Localized: "危険な切り札"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000092
+    m_Localized: "制御不能な切り札を発動します！"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000093
+    m_Localized: "補充の時間"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000094
+    m_Localized: "フリッパーの使用回数が5回増えます。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000095
+    m_Localized: "2階への通行証"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000096
+    m_Localized: "条件を満たさずに2階へ進めます。"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000097
+    m_Localized: "ディーラーの慈悲"
+    m_Metadata:
+      m_Items: []
+  - m_Id: 16000000000098
+    m_Localized: "ボールが2回分増えます。\nラウンドクリア時に残ったボールは強化の選択回数に加算されます。"
+    m_Metadata:
+      m_Items: []
+  references:
+    version: 2
+    RefIds: []
