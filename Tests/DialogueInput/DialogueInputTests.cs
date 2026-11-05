@@ -29,11 +29,15 @@ public class DialogueInputTests
     private int completed;
     private string finishedId;
     private float oldTimeScale;
+    private bool oldCursorVisible;
+    private CursorLockMode oldCursorLock;
 
     [SetUp]
     public void SetUp()
     {
         oldTimeScale = Time.timeScale;
+        oldCursorVisible = Cursor.visible;
+        oldCursorLock = Cursor.lockState;
         Time.timeScale = 0.75f;
         var settings = Keep(ScriptableObject.CreateInstance<LocalizationSettings>());
         LocalizationSettings.Instance = settings;
@@ -79,7 +83,8 @@ public class DialogueInputTests
         objects.Clear();
         LocalizationSettings.Instance = null;
         Time.timeScale = oldTimeScale;
-        Cursor.lockState = CursorLockMode.None;
+        Cursor.lockState = oldCursorLock;
+        Cursor.visible = oldCursorVisible;
     }
 
     [TestCase("Ending2")]
@@ -163,6 +168,130 @@ public class DialogueInputTests
         Click(endingPanel);
         Assert.That(introText.text, Is.EqualTo("F"));
         Assert.That(completed, Is.EqualTo(1));
+    }
+
+    [TestCase("Ending1")]
+    [TestCase("Ending2")]
+    public void ClosingSettingsKeepsEndingClickable(string id)
+    {
+        var menu = MakeSettingsMenu();
+        KHS_Script_ScoreManager.EndGame(id);
+        dialogue.Play(id);
+        for (int i = 0; i < 3; ++i)
+        {
+            menu.ToggleMenu();
+            Assert.That(menu.panelSetting.activeSelf, Is.True);
+            Assert.That(Time.timeScale, Is.Zero);
+            menu.ToggleMenu();
+            Assert.That(menu.panelSetting.activeSelf, Is.False);
+            AssertClickableCursor();
+            Assert.That(endingText.text, Is.EqualTo("F"), "Menu toggles must not advance the ending.");
+        }
+        Click(endingPanel);
+        Assert.That(endingText.text, Is.EqualTo("First line."));
+        Click(endingPanel);
+        Click(endingPanel);
+        Click(endingPanel);
+        Assert.That(completed, Is.EqualTo(1));
+        Assert.That(finishedId, Is.EqualTo(id));
+    }
+
+    [TestCase("Ending1")]
+    [TestCase("Ending2")]
+    public void ClosingSettingsKeepsFinishedResultClickable(string id)
+    {
+        var menu = MakeSettingsMenu();
+        KHS_Script_ScoreManager.EndGame(id);
+        dialogue.Play(id);
+        dialogue.SkipDialogue();
+        var resultButton = MakeButton(endingPanel.transform);
+        int resultClicks = 0;
+        resultButton.onClick.AddListener(() => resultClicks++);
+        menu.ToggleMenu();
+        menu.ToggleMenu();
+        AssertClickableCursor();
+        Click(resultButton.gameObject);
+        Assert.That(resultClicks, Is.EqualTo(1));
+        Assert.That(completed, Is.EqualTo(1));
+    }
+
+    [TestCase("Intro")]
+    [TestCase("Tutorial")]
+    public void ClosingSettingsPreservesPausedDialogue(string id)
+    {
+        var menu = MakeSettingsMenu();
+        dialogue.Play(id);
+        menu.ToggleMenu();
+        menu.ToggleMenu();
+        Assert.That(Time.timeScale, Is.Zero, "Closing settings must not resume a paused dialogue.");
+        AssertClickableCursor();
+        Click(introPanel);
+        Assert.That(introText.text, Is.EqualTo("First line."));
+        dialogue.SkipDialogue();
+        Assert.That(Time.timeScale, Is.EqualTo(0.75f));
+    }
+
+    [TestCase(1f)]
+    [TestCase(0.35f)]
+    public void ClosingSettingsRestoresGameplayCursorAndSpeed(float speed)
+    {
+        var menu = MakeSettingsMenu();
+        Time.timeScale = speed;
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        // Batchmode has no focused Game view and may report None even after
+        // requesting Locked. Verify restoration of the actual pre-menu state.
+        CursorLockMode gameplayLock = Cursor.lockState;
+        menu.ToggleMenu();
+        AssertClickableCursor();
+        menu.ToggleMenu();
+        Assert.That(Cursor.visible, Is.False);
+        Assert.That(Cursor.lockState, Is.EqualTo(gameplayLock));
+        Assert.That(Time.timeScale, Is.EqualTo(speed));
+    }
+
+    [Test]
+    public void ClosingSettingsPreservesVisibleCursorWithoutGameEndEvent()
+    {
+        var menu = MakeSettingsMenu();
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
+        menu.ToggleMenu();
+        menu.ToggleMenu();
+        AssertClickableCursor(); // Lobby, explanation popup or a choice screen.
+    }
+
+    [TestCase("Ending1")]
+    [TestCase("Ending2")]
+    public void GameEndsWhileSettingsAreOpenKeepsCursorAvailable(string id)
+    {
+        var menu = MakeSettingsMenu();
+        Cursor.lockState = CursorLockMode.Locked;
+        Cursor.visible = false;
+        menu.ToggleMenu();
+        // Ending sequences use real-time waits and can finish while settings are open.
+        KHS_Script_ScoreManager.EndGame(id);
+        dialogue.Play(id);
+        menu.ToggleMenu();
+        AssertClickableCursor();
+        Click(endingPanel);
+        Assert.That(endingText.text, Is.EqualTo("First line."));
+    }
+
+    private PSH_Script_SettingController MakeSettingsMenu()
+    {
+        var go = Keep(new GameObject("Settings controller"));
+        var menu = go.AddComponent<PSH_Script_SettingController>();
+        menu.panelSetting = new GameObject("System window");
+        menu.panelSetting.transform.SetParent(go.transform, false);
+        menu.panelSetting.SetActive(false);
+        return menu;
+    }
+
+    private static void AssertClickableCursor()
+    {
+        Assert.That(Cursor.visible, Is.True, "The UI still needs a visible pointer.");
+        Assert.That(Cursor.lockState, Is.EqualTo(CursorLockMode.None), "The pointer must be free to reach UI buttons.");
     }
 
     private void Click(GameObject target, PointerEventData.InputButton button = PointerEventData.InputButton.Left)

@@ -16,6 +16,9 @@ public class PSH_Script_SettingController : MonoBehaviour
     // [추가] PSH 스크립트가 스스로 게임 종료 여부를 기억할 변수
     private bool isGameEnded = false;
     private bool isSettingOpen = false;
+    private float timeScaleBeforeMenu;
+    private bool cursorVisibleBeforeMenu;
+    private CursorLockMode cursorLockBeforeMenu;
     private void OnEnable()
     {
         KHS_Script_ScoreManager.OnGameClear += SetGameEndedTrue;
@@ -50,14 +53,22 @@ public class PSH_Script_SettingController : MonoBehaviour
     {
         if (panelSetting == null) return;
 
+        if (!isSettingOpen)
+        {
+            // 대사/선택창/로비 등 메뉴를 열기 전 화면의 입력 및 일시정지 상태를 보존한다.
+            timeScaleBeforeMenu = Time.timeScale;
+            cursorVisibleBeforeMenu = Cursor.visible;
+            cursorLockBeforeMenu = Cursor.lockState;
+        }
+
         isSettingOpen = !isSettingOpen;
         panelSetting.SetActive(isSettingOpen);
 
         if (isSettingOpen)
         {
             Time.timeScale = 0f; 
-            Cursor.visible = true;
             Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
             
             // [추가] 메뉴가 열릴 때 씬을 판별해서 버튼 활성화 상태를 업데이트
             UpdateButtonVisibility();
@@ -67,10 +78,10 @@ public class PSH_Script_SettingController : MonoBehaviour
         }
         else
         {
-            Time.timeScale = 1f;
-            // 게임 환경에 맞춰 아래 주석을 조절하세요.
-             Cursor.visible = false; 
-             Cursor.lockState = CursorLockMode.Locked; 
+            Time.timeScale = timeScaleBeforeMenu;
+            // 메뉴가 열린 사이 게임이 끝났어도 엔딩 대사와 결과 버튼을 클릭할 수 있어야 한다.
+            Cursor.lockState = isGameEnded ? CursorLockMode.None : cursorLockBeforeMenu;
+            Cursor.visible = isGameEnded || cursorVisibleBeforeMenu;
         }
     }
     private void UpdateButtonVisibility()

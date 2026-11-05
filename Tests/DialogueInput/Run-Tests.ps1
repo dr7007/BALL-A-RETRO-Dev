@@ -33,14 +33,20 @@ while ($pending.Count -gt 0) {
 @{ dependencies = $dependencies } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$outputPath/Packages/manifest.json" -Encoding utf8
 Copy-Item -LiteralPath "$sourceRoot/ProjectSettings/ProjectVersion.txt", "$sourceRoot/ProjectSettings/ProjectSettings.asset" -Destination "$outputPath/ProjectSettings"
 
-$scriptPath = 'Assets/Public/Main_Game/UI_Game/Scripts'
-if ($Baseline) {
-    $oldSource = & git -C $sourceRoot show "HEAD:$scriptPath/PSH_Script_DialogueUI.cs"
-    if ($LASTEXITCODE -ne 0) { throw 'Could not read baseline source from HEAD.' }
-    $oldSource | Set-Content -LiteralPath "$outputPath/Assets/Runtime/PSH_Script_DialogueUI.cs" -Encoding utf8
-} else {
-    Get-ChildItem -LiteralPath "$sourceRoot/$scriptPath" -Filter 'PSH_Script_Dialogue*.cs' | Copy-Item -Destination "$outputPath/Assets/Runtime"
+$runtimeSources = @(
+    'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_DialogueUI.cs',
+    'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_DialogueClickForwarder.cs',
+    'Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_SettingController.cs'
+)
+foreach ($source in $runtimeSources) {
+    if ($Baseline) {
+        $oldSource = & git -C $sourceRoot show "HEAD:$source"
+        if ($LASTEXITCODE -ne 0) { throw "Could not read baseline source from HEAD: $source" }
+        $fileName = Split-Path $source -Leaf
+        $oldSource | Set-Content -LiteralPath "$outputPath/Assets/Runtime/$fileName" -Encoding utf8
+    } else { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 }
+Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/DialogueInputTests.cs" -Destination "$outputPath/Assets/Tests"
 @{ name = 'BallARetro.DialogueUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/DialogueUnderTest.asmdef" -Encoding utf8
 @{ name = 'BallARetro.DialogueInputTests'; references = @('BallARetro.DialogueUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/DialogueInputTests.asmdef" -Encoding utf8
