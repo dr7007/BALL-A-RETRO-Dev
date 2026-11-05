@@ -37,6 +37,13 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     private Coroutine moveCoroutine;
 
+    // 추적 Controller의 Transform은 CameraHolder일 수 있다.
+    // 실제 플레이 카메라의 월드 자세는 Manager가 별도로 보관한다.
+    private Vector3 monitorReturnPos;
+    private Quaternion monitorReturnRot;
+    private bool monitorActive;
+    private bool monitorReturning;
+
 
     // =========================================================
     // Round Flow
@@ -153,7 +160,19 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOn(PSH_Script_DialogueUI dialogueUI = null)
     {
+        if (monitorActive)
+            return;
+
+        monitorActive = true;
         Debug.Log("[CameraManager] MonitorOn");
+
+        Transform mainCamera = cameraGos[0].transform;
+        monitorReturnPos = mainCamera.position;
+        monitorReturnRot = mainCamera.rotation;
+
+        // 기존 씬의 cameraFollow 연결은 새 Controller 필드로 자동 이관되지 않는다.
+        if (cameraController == null)
+            cameraController = mainCamera.GetComponentInParent<KHS_Script_CameraController>(true);
 
 
         // -----------------------------------------------------
@@ -178,9 +197,6 @@ public class KHS_Script_CameraManager : MonoBehaviour
         // -----------------------------------------------------
 
         cameraGos[2].SetActive(true);
-
-
-        Transform mainCamera = cameraGos[0].transform;
 
 
         // 현재 메인 카메라 위치에서 시작
@@ -226,15 +242,16 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOff()
     {
+        if (!monitorActive || monitorReturning)
+            return;
+
+        monitorReturning = true;
         Debug.Log("[CameraManager] MonitorOff");
 
 
         // -----------------------------------------------------
-        // 1. Main Camera 활성화
+        // 1. 복귀가 끝날 때까지 Monitor Camera를 사용한다.
         // -----------------------------------------------------
-
-        cameraGos[0].SetActive(true);
-
 
         // -----------------------------------------------------
         // 2. 기존 Transition 중단
@@ -251,19 +268,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
         Quaternion returnRot;
 
 
-        if (cameraController != null && cameraController.HasMonitorSavedPose())
-        {
-            returnPos = cameraController.GetMonitorSavedPosition();
-
-            returnRot = cameraController.GetMonitorSavedRotation();
-        }
-        else
-        {
-            // 안전장치
-            returnPos = cameraInitPos;
-
-            returnRot = cameraInitRot;
-        }
+        returnPos = monitorReturnPos;
+        returnRot = monitorReturnRot;
 
 
         Debug.Log(
@@ -274,22 +280,18 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
 
         // -----------------------------------------------------
-        // 4. Monitor Camera에서 Main Camera로 이동
+        // 4. Monitor Camera만 저장된 플레이 시점으로 이동한다.
+        // Main Camera의 로컬 위치를 바꾸면 추적 중인 부모와의 간격이 틀어진다.
         // -----------------------------------------------------
 
-        cameraGos[0].transform.position = cameraGos[2].transform.position;
-
-        cameraGos[0].transform.rotation = cameraGos[2].transform.rotation;
-
-
         // -----------------------------------------------------
-        // 5. Main Camera 이동 시작
+        // 5. Monitor Camera 복귀 시작
         // -----------------------------------------------------
 
         moveCoroutine =
             StartCoroutine(
                 MoveCameraSmooth(
-                    cameraGos[0].transform,
+                    cameraGos[2].transform,
                     returnPos,
                     returnRot,
                     moveDuration,
@@ -298,14 +300,6 @@ public class KHS_Script_CameraManager : MonoBehaviour
             );
 
 
-        // -----------------------------------------------------
-        // 6. Monitor Camera 비활성화
-        // -----------------------------------------------------
-
-        cameraGos[2].SetActive(false);
-
-
-        MonitorEvt?.Invoke(false);
     }
 
 
@@ -350,6 +344,11 @@ public class KHS_Script_CameraManager : MonoBehaviour
     {
         Debug.Log("[CameraManager] Main Camera 복귀 완료");
 
+        cameraGos[0].SetActive(true);
+        cameraGos[2].SetActive(false);
+        monitorActive = false;
+        monitorReturning = false;
+
 
         // -----------------------------------------------------
         // 가장 중요
@@ -360,6 +359,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
         {
             cameraController.EndMonitor();
         }
+
+        MonitorEvt?.Invoke(false);
 
 
         // -----------------------------------------------------

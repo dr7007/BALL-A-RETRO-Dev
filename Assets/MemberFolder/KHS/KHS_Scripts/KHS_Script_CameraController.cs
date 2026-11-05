@@ -131,6 +131,7 @@ public class KHS_Script_CameraController : MonoBehaviour
     private Quaternion _monitorSavedRot;
 
     private bool _monitorPoseSaved;
+    private bool _monitorWasFollowing;
 
     // =========================================================
     // Unity
@@ -418,6 +419,9 @@ public class KHS_Script_CameraController : MonoBehaviour
 
     public void BeginMonitor()
     {
+        if (_monitorPaused)
+            return;
+
         Debug.Log(
             "[CameraFollow] BeginMonitor"
         );
@@ -428,6 +432,7 @@ public class KHS_Script_CameraController : MonoBehaviour
         _monitorSavedRot = transform.rotation;
 
         _monitorPoseSaved = true;
+        _monitorWasFollowing = _following;
 
 
         // Follow 완전 정지
@@ -490,88 +495,15 @@ public class KHS_Script_CameraController : MonoBehaviour
         _velZ = 0f;
 
 
-        // 여기서 현재 자세를 새로운 기준 자세로 확정
-        _defaultPos = _monitorSavedPos;
-
-        _defaultRot = _monitorSavedRot;
-
-        _defaultSaved = true;
-
-
         // Monitor 상태 종료
         _monitorPoseSaved = false;
 
         _monitorPaused = false;
 
 
-        // 중요한 부분
-        // 바로 Follow를 켜지 않고 한 프레임 뒤에 켠다.
-        StartCoroutine(ResumeFollowNextFrame());
-    }
-
-
-    private IEnumerator ResumeFollowNextFrame()
-    {
-        // CameraManager의 MoveCameraSmooth가
-        // 완전히 끝난 뒤 다음 프레임까지 기다림
-        yield return null;
-
-        if (ball != null)
-        {
-            // 현재 올바른 카메라 회전값을 기준으로
-            // 공의 위치를 다시 계산
-            Vector3 desiredWorld = ComputeDesiredWorldPosition();
-
-            if (zMode == ZAxisMode.WorldZ)
-            {
-                float targetZ = desiredWorld.z;
-
-                if (useMinZClamp)
-                {
-                    targetZ =
-                        Mathf.Max(
-                            targetZ,
-                            minWorldZ
-                        );
-                }
-
-                transform.position =
-                    new Vector3(
-                        _defaultPos.x,
-                        _defaultPos.y,
-                        targetZ
-                    );
-            }
-            else
-            {
-                Vector3 desiredLocal = 
-                    transform.parent != null ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
-
-                float targetLZ = desiredLocal.z;
-
-                if (useMinZClamp)
-                {
-                    targetLZ =
-                        Mathf.Max(
-                            targetLZ,
-                            minLocalZ
-                        );
-                }
-
-                transform.localPosition =
-                    new Vector3(
-                        transform.localPosition.x,
-                        transform.localPosition.y,
-                        targetLZ
-                    );
-            }
-        }
-
-        _velZ = 0f;
-
-        _following = true;
-
-        Debug.Log("[CameraFollow] Follow 재개 완료");
+        // 기본 자세를 덮어쓰거나 공 위치로 순간 이동하지 않는다.
+        // 진입 전에 추적 중이었다면 LateUpdate의 보간으로 자연스럽게 이어간다.
+        _following = _monitorWasFollowing;
     }
 
 
