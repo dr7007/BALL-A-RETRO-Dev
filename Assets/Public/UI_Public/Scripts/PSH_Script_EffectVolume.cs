@@ -15,15 +15,16 @@ public class PSH_Script_EffectVolume : MonoBehaviour
                 if (effect is Bloom || effect is ChromaticAberration || effect is LensDistortion ||
                     effect is MotionBlur || effect is FilmGrain)
                     originalStates[effect] = effect.active;
-        PSH_Script_EffectSettings.Changed += Apply;
-        Apply(PSH_Script_EffectSettings.IsEnabled);
+        PSH_Script_EffectSettings.Changed += OnSettingsChanged;
+        OnSettingsChanged(false);
     }
     private void OnDisable()
     {
-        PSH_Script_EffectSettings.Changed -= Apply;
+        PSH_Script_EffectSettings.Changed -= OnSettingsChanged;
         Apply(true);
         originalStates.Clear();
     }
+    private void OnSettingsChanged(bool _) => Apply(PSH_Script_EffectSettings.PostProcessingEnabled);
     private void Apply(bool enabled)
     {
         foreach (var pair in originalStates)

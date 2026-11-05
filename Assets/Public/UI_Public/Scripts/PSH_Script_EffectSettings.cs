@@ -7,13 +7,24 @@ using UnityEngine.SceneManagement;
 public static class PSH_Script_EffectSettings
 {
     public const string PreferenceKey = "Settings_VFX_On";
+    public enum Effect { CameraShake, Particles, Trails, Flashes, ScreenEffects, PostProcessing }
+    private static readonly bool[] states = new bool[6];
     private static bool loaded;
-    private static bool enabled = true;
+    // Raised for any category change; the argument reports whether any effect is ON.
     public static event Action<bool> Changed;
     public static bool IsEnabled
     {
-        get { Load(); return enabled; }
+        get { Load(); return Array.Exists(states, value => value); }
     }
+    public static bool AllEnabled { get { Load(); return Array.TrueForAll(states, value => value); } }
+    public static bool CameraShakeEnabled => Get(Effect.CameraShake);
+    public static bool ParticlesEnabled => Get(Effect.Particles);
+    public static bool TrailsEnabled => Get(Effect.Trails);
+    public static bool FlashesEnabled => Get(Effect.Flashes);
+    public static bool ScreenEffectsEnabled => Get(Effect.ScreenEffects);
+    public static bool PostProcessingEnabled => Get(Effect.PostProcessing);
+    public static string KeyFor(Effect effect) => PreferenceKey + "_" + effect;
+    public static bool Get(Effect effect) { Load(); return states[(int)effect]; }
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.SubsystemRegistration)]
     private static void ResetStatics()
@@ -35,28 +46,46 @@ public static class PSH_Script_EffectSettings
     {
         if (loaded) return;
         loaded = true;
-        enabled = PlayerPrefs.GetInt(PreferenceKey, 1) == 1;
-        Shader.SetGlobalFloat("_BallARetroReduceEffects", enabled ? 0f : 1f);
-        ApplyLibrarySettings(enabled);
+        // New profiles default to all ON. Preserve an existing all-OFF preference
+        // when upgrading from the old single switch.
+        int legacyDefault = PlayerPrefs.GetInt(PreferenceKey, 1);
+        foreach (Effect effect in Enum.GetValues(typeof(Effect)))
+            states[(int)effect] = PlayerPrefs.GetInt(KeyFor(effect), legacyDefault) == 1;
+        ApplyRuntimeSettings();
     }
 
     public static void SetEnabled(bool value)
     {
         Load();
-        PlayerPrefs.SetInt(PreferenceKey, value ? 1 : 0);
-        PlayerPrefs.Save();
-        Shader.SetGlobalFloat("_BallARetroReduceEffects", value ? 0f : 1f);
-        ApplyLibrarySettings(value);
-        if (enabled == value) return;
-        enabled = value;
-        Changed?.Invoke(value);
+        for (int i = 0; i < states.Length; i++) states[i] = value;
+        SaveAndApply();
     }
 
-    private static void ApplyLibrarySettings(bool value)
+    public static void Set(Effect effect, bool value)
     {
-        CartoonFX.CFXR_Effect.GlobalDisableCameraShake = !value;
-        CartoonFX.CFXR_Effect.GlobalDisableLights = !value;
-        if (!value)
+        Load();
+        if (states[(int)effect] == value) return;
+        states[(int)effect] = value;
+        SaveAndApply();
+    }
+
+    private static void SaveAndApply()
+    {
+        // Write a complete snapshot so partially migrated profiles stay consistent.
+        foreach (Effect effect in Enum.GetValues(typeof(Effect)))
+            PlayerPrefs.SetInt(KeyFor(effect), states[(int)effect] ? 1 : 0);
+        PlayerPrefs.SetInt(PreferenceKey, IsEnabled ? 1 : 0);
+        PlayerPrefs.Save();
+        ApplyRuntimeSettings();
+        Changed?.Invoke(IsEnabled);
+    }
+
+    private static void ApplyRuntimeSettings()
+    {
+        Shader.SetGlobalFloat("_BallARetroReduceEffects", ScreenEffectsEnabled ? 0f : 1f);
+        CartoonFX.CFXR_Effect.GlobalDisableCameraShake = !CameraShakeEnabled;
+        CartoonFX.CFXR_Effect.GlobalDisableLights = !FlashesEnabled;
+        if (!CameraShakeEnabled)
             foreach (var effect in UnityEngine.Object.FindObjectsByType<CartoonFX.CFXR_Effect>(FindObjectsSortMode.None))
                 effect.cameraShake?.StopShake();
     }

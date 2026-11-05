@@ -8,7 +8,8 @@ public class PSH_Script_EffectVisibility : MonoBehaviour
     private Light targetLight;
     private bool[] wasHidden;
     private bool wasLit;
-    private bool suppressed;
+    private bool[] suppressed;
+    private bool lightSuppressed;
 
     internal static bool IsEffectRenderer(Renderer renderer)
     {
@@ -22,6 +23,7 @@ public class PSH_Script_EffectVisibility : MonoBehaviour
         // suppress effect renderers, never whichever Renderer happens to be first.
         targetRenderers = System.Array.FindAll(GetComponents<Renderer>(), IsEffectRenderer);
         wasHidden = new bool[targetRenderers.Length];
+        suppressed = new bool[targetRenderers.Length];
         targetLight = GetComponent<Light>();
         PSH_Script_EffectSettings.Changed += Apply;
         Apply(PSH_Script_EffectSettings.IsEnabled);
@@ -29,33 +31,45 @@ public class PSH_Script_EffectVisibility : MonoBehaviour
     private void OnDisable()
     {
         PSH_Script_EffectSettings.Changed -= Apply;
-        Apply(true);
+        Refresh(true);
     }
     private void LateUpdate()
     {
-        if (!PSH_Script_EffectSettings.IsEnabled) Apply(false);
+        Refresh(false);
     }
-    private void Apply(bool enabled)
+    private void Apply(bool _) => Refresh(false);
+
+    private void Refresh(bool restore)
     {
-        if (!enabled)
+        for (int i = 0; i < targetRenderers.Length; i++)
         {
-            if (!suppressed)
+            var renderer = targetRenderers[i];
+            if (renderer == null) continue;
+            bool enabled = restore || (renderer is TrailRenderer
+                ? PSH_Script_EffectSettings.TrailsEnabled : PSH_Script_EffectSettings.ParticlesEnabled);
+            if (!enabled)
             {
-                for (int i = 0; i < targetRenderers.Length; i++)
-                    wasHidden[i] = targetRenderers[i] != null && targetRenderers[i].forceRenderingOff;
-                wasLit = targetLight != null && targetLight.enabled;
-                suppressed = true;
+                if (!suppressed[i]) wasHidden[i] = renderer.forceRenderingOff;
+                suppressed[i] = true;
+                renderer.forceRenderingOff = true;
             }
-            foreach (var renderer in targetRenderers)
-                if (renderer != null) renderer.forceRenderingOff = true;
-            if (targetLight != null) targetLight.enabled = false;
+            else if (suppressed[i])
+            {
+                renderer.forceRenderingOff = wasHidden[i];
+                suppressed[i] = false;
+            }
         }
-        else if (suppressed)
+        if (targetLight == null) return;
+        if (!restore && !PSH_Script_EffectSettings.FlashesEnabled)
         {
-            for (int i = 0; i < targetRenderers.Length; i++)
-                if (targetRenderers[i] != null) targetRenderers[i].forceRenderingOff = wasHidden[i];
-            if (targetLight != null) targetLight.enabled = wasLit;
-            suppressed = false;
+            if (!lightSuppressed) wasLit = targetLight.enabled;
+            lightSuppressed = true;
+            targetLight.enabled = false;
+        }
+        else if (lightSuppressed)
+        {
+            targetLight.enabled = wasLit;
+            lightSuppressed = false;
         }
     }
 }

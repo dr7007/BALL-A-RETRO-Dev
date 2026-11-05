@@ -72,9 +72,9 @@ public class CJS_Script_CameraShaker : MonoBehaviour
 
     void OnEnable() => PSH_Script_EffectSettings.Changed += OnEffectsChanged;
 
-    private void OnEffectsChanged(bool enabled)
+    private void OnEffectsChanged(bool _)
     {
-        if (!enabled) StopShake();
+        if (!PSH_Script_EffectSettings.CameraShakeEnabled) StopShake();
     }
 
     void OnDisable()
@@ -110,7 +110,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
     /// </summary>
     public void Shake(float amplitude, float duration)
     {
-        if (target == null || !isActiveAndEnabled || !PSH_Script_EffectSettings.IsEnabled) return;
+        if (target == null || !isActiveAndEnabled || !PSH_Script_EffectSettings.CameraShakeEnabled) return;
 
         amplitude = Mathf.Max(0f, amplitude) * Mathf.Max(0f, globalIntensity);
         duration = Mathf.Max(0f, duration);

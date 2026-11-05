@@ -52,12 +52,15 @@ if ($IncludeEffects) {
     Copy-Item -LiteralPath "$sourceRoot/Assets/JMO Assets/Cartoon FX Remaster/CFXR Assets/Scripts/CFXR_Effect.cs", "$sourceRoot/Assets/JMO Assets/Cartoon FX Remaster/CFXR Assets/Scripts/CFXR_Effect.CameraShake.cs" -Destination "$outputPath/Assets/Runtime"
     Copy-Item "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_Effect*.cs" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_ToggleUIController.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_CameraShaker.cs" -Destination "$outputPath/Assets/Runtime"
-    Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/EffectSettingsTests.cs" -Destination "$outputPath/Assets/Tests"
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_ToggleUIController.cs.meta" -Destination "$outputPath/Assets/Runtime"
+    & $PythonPath "$sourceRoot/Tests/UISettings/Extract-EffectRow.py" "$sourceRoot/Assets/Public/Main_Game/UI_Game/Prefabs/Panel_Setting.prefab" "$outputPath/Assets/EffectSettingsRow.prefab"
+    if ($LASTEXITCODE -ne 0) { throw 'Effects settings row extraction failed.' }
+    Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/EffectSettingsTests.cs", "$sourceRoot/Tests/UISettings/EffectOptionsTests.cs" -Destination "$outputPath/Assets/Tests"
     $null = New-Item -ItemType Directory -Path "$outputPath/Assets/EffectShaders"
     @('ProBuilder Glow.shadergraph', 'S_glitchEffect.shadergraph', 'S_glitchEffect_Canvase.shadergraph', 'S_twisterFace.shadergraph', 'BallARetroEffectTime.hlsl') | ForEach-Object {
         Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/PSH/PSH_Shaders/$_", "$sourceRoot/Assets/MemberFolder/PSH/PSH_Shaders/$_.meta" -Destination "$outputPath/Assets/EffectShaders"
     }
-    $filter += ';EffectSettingsTests'
+    $filter += ';EffectSettingsTests;EffectOptionsTests'
 }
 if ($IncludePersonalRecords -or $IncludeSteamLogin) {
     Copy-Item "$sourceRoot/Assets/Public/Platform/*.cs" -Destination "$outputPath/Assets/Runtime"

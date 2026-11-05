@@ -47,32 +47,34 @@ public class CJS_Script_BallScoreVFX : MonoBehaviour
 
     private void HandleScore(int delta)
     {
-        if (delta <= 0 || !PSH_Script_EffectSettings.IsEnabled) return;
+        if (delta <= 0) return;
 
         float nx = Mathf.Clamp01(delta / Mathf.Max(1f, scoreAtMax));
         float k = Mathf.Clamp01(strengthCurve.Evaluate(nx));
 
         // 파티클 버스트
-        if (burst != null)
+        if (burst != null && PSH_Script_EffectSettings.ParticlesEnabled)
         {
             int cnt = Mathf.RoundToInt(emitAt1 * k);
             if (cnt > 0) burst.Emit(cnt);
         }
 
         // 머티리얼 플래시
-        if (_hasEmission)
+        if (_hasEmission && PSH_Script_EffectSettings.FlashesEnabled)
         {
             StopAllCoroutines();
             StartCoroutine(CoFlash(k));
         }
     }
 
-    private void OnEffectsChanged(bool enabled)
+    private void OnEffectsChanged(bool _)
     {
-        if (enabled) return;
-        StopAllCoroutines();
-        if (_hasEmission) _mat.SetColor("_EmissionColor", _baseEmission);
-        if (burst != null) burst.Clear(true);
+        if (!PSH_Script_EffectSettings.FlashesEnabled)
+        {
+            StopAllCoroutines();
+            if (_hasEmission) _mat.SetColor("_EmissionColor", _baseEmission);
+        }
+        if (!PSH_Script_EffectSettings.ParticlesEnabled && burst != null) burst.Clear(true);
     }
 
     private void OnDestroy()
