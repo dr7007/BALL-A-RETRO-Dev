@@ -179,6 +179,12 @@ namespace PSH
                 Canvas canvas = currentActivePanel.GetComponent<Canvas>();
                 if (canvas != null) canvas.enabled = true;
 
+                // 엔딩 패널은 이 컨트롤러와 다른 Canvas 아래에 있으므로 클릭을 직접 연결합니다.
+                var clickForwarder = currentActivePanel.GetComponent<PSH_Script_DialogueClickForwarder>();
+                if (clickForwarder == null)
+                    clickForwarder = currentActivePanel.AddComponent<PSH_Script_DialogueClickForwarder>();
+                clickForwarder.Bind(this);
+
                 idx = 0;
                 UpdateDialogueImage();
                 StartTyping(currentLines[idx]);
@@ -190,60 +196,53 @@ namespace PSH
             }
         }
 
-        // public void Update()
-        // {
-        //     if (idx != -1 && Input.anyKeyDown)
-        //     {
-        //         if (currentLines.Count == 0) return;
-        //         if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
-        //         else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
-        //     }
-        // }
         public void Update()
         {
-            if (idx != -1 && currentLines.Count > 0)
-            {
-                // 🔴 마우스 클릭이 들어왔는데, 그게 UI 버튼 위에서 누른 거라면?
-                if (Input.GetMouseButtonDown(0)) 
-                {
-                    if (EventSystem.current != null && EventSystem.current.IsPointerOverGameObject())
-                    {
-                        // 대사를 스킵하는 건 인스펙터 OnClick에 연결된 SkipDialogue()가 알아서 할 테니,
-                        // 여기서는 Update문이 밑으로 흘러가지 않게 막아주기만 합니다!
-                        return; 
-                    }
-                }
+            if (idx == -1 || currentLines.Count == 0 || !Input.anyKeyDown) return;
 
-                // 3. 기존의 대사 넘기기 로직
-                if (Input.anyKeyDown)
-                {
-                    if (isTyping) 
-                    { 
-                        StopCoroutine(typingCo); 
-                        if (currentActiveText) currentActiveText.text = currentLines[idx]; 
-                        isTyping = false; 
-                    }
-                    else 
-                    { 
-                        idx++; 
-                        if (idx < currentLines.Count) 
-                        { 
-                            UpdateDialogueImage(); 
-                            StartTyping(currentLines[idx]); 
-                        } 
-                        else 
-                        { 
-                            EndDialogue(); 
-                        } 
-                    }
-                }
+            // 마우스는 EventSystem의 클릭 이벤트에서만 처리해 한 번의 클릭이 두 번 진행되지 않게 합니다.
+            for (int button = 0; button < 7; button++)
+            {
+                if (Input.GetMouseButtonDown(button)) return;
             }
+
+            AdvanceDialogue();
         }
-        public void OnPointerClick(PointerEventData _)
+
+        internal void OnPanelPointerClick(GameObject panel, PointerEventData eventData)
+        {
+            if (panel != currentActivePanel || !panel.activeInHierarchy) return;
+            OnPointerClick(eventData);
+        }
+
+        public void OnPointerClick(PointerEventData eventData)
+        {
+            if (!isActiveAndEnabled || eventData.button != PointerEventData.InputButton.Left) return;
+            AdvanceDialogue();
+        }
+
+        private void AdvanceDialogue()
         {
             if (idx == -1 || currentLines.Count == 0) return;
-            if (isTyping) { StopCoroutine(typingCo); if (currentActiveText) currentActiveText.text = currentLines[idx]; isTyping = false; }
-            else { idx++; if (idx < currentLines.Count) { UpdateDialogueImage(); StartTyping(currentLines[idx]); } else EndDialogue(); }
+            if (isTyping)
+            {
+                if (typingCo != null) StopCoroutine(typingCo);
+                typingCo = null;
+                if (currentActiveText) currentActiveText.text = currentLines[idx];
+                isTyping = false;
+                return;
+            }
+
+            idx++;
+            if (idx < currentLines.Count)
+            {
+                UpdateDialogueImage();
+                StartTyping(currentLines[idx]);
+            }
+            else
+            {
+                EndDialogue();
+            }
         }
 
         private void UpdateDialogueImage()
