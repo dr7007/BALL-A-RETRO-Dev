@@ -14,12 +14,17 @@ public static class KHS_Script_BallOutController
     public static event Action BallOutEvt;
     public static void Drain() => BallOutEvt?.Invoke();
 }
+#if !SCORE_POPUPS
 public static class KHS_Script_DumpManager
 {
     public static event Action<Collider> OnBallTrigger;
     public static event Action<Collision> OnBallCollision;
     public static event Action<int> OnScore;
+    public static event Action<int, Vector3> OnScoreAt;
 }
+#else
+public class YJ_Script_DropTargetController : MonoBehaviour { public void Activate_Object() { } }
+#endif
 public static class KHS_Script_FliperDumpManager
 {
     public static event Action<Collision> OnFliperCollision, OffFliperCollision;
@@ -41,6 +46,8 @@ namespace PSH { public static class PSH_Script_GameSceneDirector { public static
 public static class GlitchEffect_RendererFeature { public static bool IsEnabled; }
 public class KHS_Script_CameraManager : MonoBehaviour
 {
+    public static event Action<Camera> CameraChangeEvt;
+    public static void SetCamera(Camera camera) => CameraChangeEvt?.Invoke(camera);
     public static event Action<bool> MonitorEvt;
     public static void SetMonitor(bool open) => MonitorEvt?.Invoke(open);
     public static bool IsRoundCameraReady = true;

@@ -2,6 +2,7 @@ param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [switch]$Baseline,
     [switch]$IncludeBallRescue,
+    [switch]$IncludeScorePopups,
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
 $ErrorActionPreference = 'Stop'
@@ -33,6 +34,7 @@ while ($pending.Count -gt 0) {
 }
 @{ dependencies = $dependencies } | ConvertTo-Json -Depth 10 | Set-Content -LiteralPath "$outputPath/Packages/manifest.json" -Encoding utf8
 Copy-Item -LiteralPath "$sourceRoot/ProjectSettings/ProjectVersion.txt", "$sourceRoot/ProjectSettings/ProjectSettings.asset" -Destination "$outputPath/ProjectSettings"
+Copy-Item -LiteralPath "$sourceRoot/ProjectSettings/TagManager.asset" -Destination "$outputPath/ProjectSettings"
 
 $runtimeSources = @(
     'Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_ScoreManager.cs',
@@ -69,6 +71,17 @@ if ($IncludeBallRescue) {
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_BallAutoRescue.cs" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Tests/BallRescue/BallAutoRescueTests.cs" -Destination "$outputPath/Assets/Tests"
 }
+if ($IncludeScorePopups) {
+    if ($Baseline) { throw 'Popup tests require the positional scoring event.' }
+    @('Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_DumpManager.cs',
+      'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_ScorePopupSpawner.cs',
+      'Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_PacmanCoin.cs') | ForEach-Object {
+        Copy-Item -LiteralPath "$sourceRoot/$_" -Destination "$outputPath/Assets/Runtime"
+    }
+    Copy-Item -LiteralPath "$sourceRoot/Tests/ScorePopups/ScorePopupTests.cs" -Destination "$outputPath/Assets/Tests"
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Prefebs/UI_ScoreEffect.prefab" -Destination "$outputPath/Assets/ScorePopup.prefab"
+    '-define:SCORE_POPUPS' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8
+}
 Copy-Item -LiteralPath "$sourceRoot/Assets/TextMesh Pro" -Destination "$outputPath/Assets/TextMesh Pro" -Recurse
 Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Font" -Destination "$outputPath/Assets/Fonts" -Recurse
 $null = New-Item -ItemType Directory -Path "$outputPath/Assets/Localization"
@@ -78,7 +91,10 @@ foreach ($name in @('UITable Shared Data.asset', 'UITable_ko.asset', 'UITable_en
 @{ name = 'BallARetro.RunUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/RunUnderTest.asmdef" -Encoding utf8
 @{ name = 'BallARetro.RunProgressionTests'; references = @('BallARetro.RunUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RunProgressionTests.asmdef" -Encoding utf8
 if ($Baseline) { '-define:BASELINE' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
-$testFilter = if ($IncludeBallRescue) { 'RunProgressionTests;BallAutoRescueTests' } else { 'RunProgressionTests' }
+$testClasses = @('RunProgressionTests')
+if ($IncludeBallRescue) { $testClasses += 'BallAutoRescueTests' }
+if ($IncludeScorePopups) { $testClasses += 'ScorePopupTests' }
+$testFilter = $testClasses -join ';'
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $testFilter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Output "Test project: $outputPath; Unity process: $($process.Id)"

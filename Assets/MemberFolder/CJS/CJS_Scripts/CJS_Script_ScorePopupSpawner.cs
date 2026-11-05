@@ -1,18 +1,20 @@
-using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
 
+// Project after the camera controllers have finished following the ball.
+[DefaultExecutionOrder(100)]
 public class CJS_Script_ScorePopupSpawner : MonoBehaviour
 {
     [Header("Bindings")]
-    public RectTransform canvasRoot;            // Overlay Canvas의 RectTransform
-    public RectTransform spawnParent;           // 보통 Canvas 내 빈 RectTransform(비워두면 canvasRoot)
-    public TextMeshProUGUI popupPrefab;         // TMP + (권장) CanvasGroup 포함
-    public Camera worldCamera;                  // 월드→스크린 변환용 (없으면 Camera.main)
+    public RectTransform canvasRoot;
+    public RectTransform spawnParent;
+    public TextMeshProUGUI popupPrefab;
+    public Camera worldCamera;
 
-    [Header("Fallback (No Position Event)")]
-    [Tooltip("OnScoreGained(위치 없음) 수신 시 사용할 스크린 오프셋(픽셀)")]
-    public Vector2 screenOffset = new Vector2(0, 0); // 위치 고정을 위해 기본값을 (0, 0)으로 설정 권장
+    [Header("Position")]
+    [Tooltip("Pixel offset from the hit position on screen.")]
+    public Vector2 screenOffset = Vector2.zero;
 
     [Header("Anim")]
     public float riseDistance = 60f;
@@ -24,78 +26,124 @@ public class CJS_Script_ScorePopupSpawner : MonoBehaviour
     [Header("Style")]
     public string positiveFormat = "+{0}";
 
-    void Awake()
+    private sealed class Popup
     {
-        // 월드 카메라 관련 설정은 더 이상 사용되지 않으므로 제거하거나 그대로 둘 수 있지만,
-        // 현재는 나머지 기능에 영향을 미치지 않으므로 유지
+        public TextMeshProUGUI text;
+        public CanvasGroup group;
+        public Vector3 origin;
+        public bool worldSpace;
+        public float age;
+    }
+
+    private readonly List<Popup> popups = new List<Popup>();
+
+    private void Awake()
+    {
         if (worldCamera == null) worldCamera = Camera.main;
     }
 
-    void OnEnable()
+    private void OnEnable()
     {
-        //  HandleScoreAt 관련 구독 제거
-        KHS_Script_ScoreManager.OnScoreGained += HandleScoreNoPos;
+        KHS_Script_ScoreManager.OnScoreGainedAt += HandleScoreAt;
+        KHS_Script_CameraManager.CameraChangeEvt += ChangeCamera;
+        KHS_Script_ResetController.OnReset += ClearPopups;
     }
 
-    void OnDisable()
+    private void OnDisable()
     {
-        // HandleScoreAt 관련 해지 제거
-        KHS_Script_ScoreManager.OnScoreGained -= HandleScoreNoPos;
+        KHS_Script_ScoreManager.OnScoreGainedAt -= HandleScoreAt;
+        KHS_Script_CameraManager.CameraChangeEvt -= ChangeCamera;
+        KHS_Script_ResetController.OnReset -= ClearPopups;
+        ClearPopups();
     }
 
-    //  HandleScoreAt 함수는 완전히 제거되었습니다.
-
-    private void HandleScoreNoPos(int delta)
+    private void ChangeCamera(Camera camera)
     {
-        if (delta <= 0 || popupPrefab == null || canvasRoot == null) return;
-
-        // 모든 점수를 오른쪽 상단 (화면 너비의 80%, 높이의 85% 지점) 위치로 지정합니다.
-        // screenOffset은 인스펙터에서 0으로 설정해야 합니다.
-        Vector2 screenPos = new Vector2(Screen.width * 0.8f, Screen.height * 0.85f) + screenOffset;
-
-        Show(screenPos, string.Format(positiveFormat, delta));
+        if (worldCamera == camera) return;
+        worldCamera = camera;
+        ClearPopups();
     }
 
-    public void Show(Vector2 screenPosition, string text)
+    private void HandleScoreAt(int delta, Vector3 position)
     {
-        var ui = Instantiate(popupPrefab, spawnParent != null ? spawnParent : canvasRoot);
-        ui.text = text;
-
-        var cg = ui.GetComponent<CanvasGroup>();
-        if (cg == null) cg = ui.gameObject.AddComponent<CanvasGroup>();
-
-        RectTransformUtility.ScreenPointToLocalPointInRectangle(
-            canvasRoot, screenPosition, null, out var localPos);
-        var rt = ui.rectTransform;
-        rt.anchoredPosition = localPos;
-
-        StartCoroutine(CoRun(ui, cg, rt));
+        if (delta <= 0) return;
+        Spawn(position, true, string.Format(positiveFormat, delta));
     }
 
-    private IEnumerator CoRun(TextMeshProUGUI ui, CanvasGroup cg, RectTransform rt)
-    {
-        float t = 0f;
-        Vector2 start = rt.anchoredPosition;
-        Vector2 end = start + new Vector2(0, riseDistance);
+    // Keep the existing explicit screen-position API for other callers.
+    public void Show(Vector2 screenPosition, string text) => Spawn(screenPosition, false, text);
 
-        while (t < duration)
+    private void Spawn(Vector3 origin, bool worldSpace, string text)
+    {
+        var parent = spawnParent != null ? spawnParent : canvasRoot;
+        if (popupPrefab == null || parent == null || duration <= 0f) return;
+        var popup = new Popup { origin = origin, worldSpace = worldSpace };
+        if (!TryGetLocalPosition(popup, parent, out var local)) return;
+
+        popup.text = Instantiate(popupPrefab, parent);
+        popup.text.text = text;
+        popup.text.alignment = TextAlignmentOptions.Center;
+        popup.text.raycastTarget = false;
+        popup.group = popup.text.GetComponent<CanvasGroup>();
+        if (popup.group == null) popup.group = popup.text.gameObject.AddComponent<CanvasGroup>();
+        popup.group.blocksRaycasts = false;
+        popup.group.interactable = false;
+        popup.group.alpha = 1f;
+        popup.text.rectTransform.localPosition = new Vector3(local.x, local.y, 0f);
+        popup.text.rectTransform.localScale = Vector3.one;
+        popups.Add(popup);
+    }
+
+    private bool TryGetLocalPosition(Popup popup, RectTransform parent, out Vector2 local)
+    {
+        local = default;
+        Vector2 screen = popup.origin;
+        if (popup.worldSpace)
         {
-            t += Time.unscaledDeltaTime; // 연출은 실시간 기준
-            float n = Mathf.Clamp01(t / duration);
-            float mk = moveCurve.Evaluate(n);
-            float ak = alphaCurve.Evaluate(n);
-
-            rt.anchoredPosition = Vector2.LerpUnclamped(start, end, mk);
-            cg.alpha = ak;
-
-            // 살짝 스케일 업
-            float scale = 1f + 0.15f * mk;
-            rt.localScale = new Vector3(scale, scale, 1f);
-
-            yield return null;
+            var camera = worldCamera != null && worldCamera.isActiveAndEnabled ? worldCamera : Camera.main;
+            if (camera == null || !camera.isActiveAndEnabled) return false;
+            Vector3 viewport = camera.WorldToViewportPoint(popup.origin);
+            if (viewport.z < camera.nearClipPlane || viewport.z > camera.farClipPlane
+                || viewport.x < 0f || viewport.x > 1f || viewport.y < 0f || viewport.y > 1f) return false;
+            screen = (Vector2)camera.WorldToScreenPoint(popup.origin) + screenOffset;
         }
-
-        Destroy(ui.gameObject);
+        var canvas = parent.GetComponentInParent<Canvas>();
+        if (canvas == null) return false;
+        Camera uiCamera = canvas.rootCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.rootCanvas.worldCamera;
+        return RectTransformUtility.ScreenPointToLocalPointInRectangle(parent, screen, uiCamera, out local);
     }
 
+    private void LateUpdate()
+    {
+        for (int i = popups.Count - 1; i >= 0; i--)
+        {
+            Popup popup = popups[i];
+            popup.age += Time.unscaledDeltaTime;
+            if (popup.text == null || popup.age >= duration)
+            {
+                if (popup.text != null) Destroy(popup.text.gameObject);
+                popups.RemoveAt(i);
+                continue;
+            }
+            var rect = popup.text.rectTransform;
+            if (!TryGetLocalPosition(popup, (RectTransform)rect.parent, out var local))
+            {
+                popup.group.alpha = 0f;
+                continue;
+            }
+            float n = Mathf.Clamp01(popup.age / duration);
+            float move = moveCurve.Evaluate(n);
+            rect.localPosition = new Vector3(local.x, local.y + riseDistance * move, 0f);
+            float scale = 1f + 0.15f * move;
+            rect.localScale = new Vector3(scale, scale, 1f);
+            popup.group.alpha = alphaCurve.Evaluate(n);
+        }
+    }
+
+    private void ClearPopups()
+    {
+        foreach (Popup popup in popups)
+            if (popup.text != null) Destroy(popup.text.gameObject);
+        popups.Clear();
+    }
 }

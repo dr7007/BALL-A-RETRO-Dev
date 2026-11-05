@@ -8791,6 +8791,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 4285035532282353420, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
+      propertyPath: ballTransformFallback
+      value:
+      objectReference: {fileID: 7600752139250908834}
     - target: {fileID: 2687290556061943972, guid: e18163ac920b2b64790dd72c5b469c85, type: 3}
       propertyPath: m_LocalPosition.x
       value: 11.39
@@ -128762,7 +128766,7 @@ MonoBehaviour:
   spawnParent: {fileID: 0}
   popupPrefab: {fileID: 3179440778592371038, guid: 3758ac8e119437f4fa4b1891f3c9a791, type: 3}
   worldCamera: {fileID: 1526102487}
-  screenOffset: {x: 300, y: 70}
+  screenOffset: {x: 0, y: 0}
   riseDistance: 60
   duration: 0.6
   moveCurve:

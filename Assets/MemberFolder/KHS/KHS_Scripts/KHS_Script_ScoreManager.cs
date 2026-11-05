@@ -543,7 +543,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_ResetController.OnReset += ScoreReset;
         KHS_Script_DumpManager.OnBallTrigger += BallTrigger;
         KHS_Script_DumpManager.OnBallCollision += BallCollision;
-        KHS_Script_DumpManager.OnScore += AddScore;
+        KHS_Script_DumpManager.OnScoreAt += AddScoreAt;
         KHS_Script_PortalController.portalEvt += ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt += ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision += FliperBallCollision;
@@ -555,7 +555,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         KHS_Script_ResetController.OnReset -= ScoreReset;
         KHS_Script_DumpManager.OnBallTrigger -= BallTrigger;
         KHS_Script_DumpManager.OnBallCollision -= BallCollision;
-        KHS_Script_DumpManager.OnScore -= AddScore;
+        KHS_Script_DumpManager.OnScoreAt -= AddScoreAt;
         KHS_Script_PortalController.portalEvt -= ChangingSubCam;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= ChangingMainCam;
         KHS_Script_FliperDumpManager.OnFliperCollision -= FliperBallCollision;

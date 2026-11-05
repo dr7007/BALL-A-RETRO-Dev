@@ -26,7 +26,7 @@ public class YJ_Script_PacManCoin : MonoBehaviour
 
             if (scoreManager != null)
             {
-                scoreManager.AddScore(coinScore);
+                scoreManager.AddScoreAt(coinScore, transform.position);
             }
 
             if (collectSound != null)
