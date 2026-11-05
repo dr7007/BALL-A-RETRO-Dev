@@ -98,6 +98,16 @@ public class YJ_Script_BallController : MonoBehaviour
 
     void Update()
     {
+        // 선택지/설정 등으로 물리가 멈춰도 오디오와 unscaled 페이드는 계속 실행됩니다.
+        if (Time.timeScale <= 0f)
+        {
+            StopRollingImmediate();
+            // 재개할 때 정지 전 속도나 일시정지 중 위치 변경을 굴림으로 오인하지 않게 합니다.
+            _prevPos = transform.position;
+            _planarSpeedSmoothed = 0f;
+            return;
+        }
+
         // 팩맨 모드일 때만 키 입력을 받음
         if (currentMode == ControlMode.PacMan)
         {
@@ -447,8 +457,12 @@ public class YJ_Script_BallController : MonoBehaviour
 
     private void StopRollingImmediate()
     {
+        if (rollingFadeCo != null)
+        {
+            StopCoroutine(rollingFadeCo);
+            rollingFadeCo = null;
+        }
         if (rollingSource == null) return;
-        if (rollingFadeCo != null) StopCoroutine(rollingFadeCo);
         rollingSource.Stop();
         rollingSource.volume = 0f;
     }
