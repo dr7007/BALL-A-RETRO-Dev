@@ -3,10 +3,12 @@ param(
     [switch]$IncludeHover,
     [switch]$IncludeEffects,
     [switch]$IncludePersonalRecords,
+    [switch]$IncludeSteamLogin,
     [string]$PythonPath = 'python',
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
 $ErrorActionPreference = 'Stop'
+if ($IncludePersonalRecords -and $IncludeSteamLogin) { throw 'Run STOVE and Steam configurations in separate test projects.' }
 $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $outputPath = [IO.Path]::GetFullPath($OutputRoot)
 if ((Test-Path -LiteralPath "$outputPath/Assets") -or $outputPath.StartsWith($sourceRoot, [StringComparison]::OrdinalIgnoreCase)) { throw 'Use a fresh directory outside the source project.' }
@@ -14,7 +16,7 @@ $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Runtime", 
 $lock = Get-Content -LiteralPath "$sourceRoot/Packages/packages-lock.json" -Raw | ConvertFrom-Json
 $dependencies = [ordered]@{}
 $pending = [Collections.Generic.Queue[string]]::new()
-if ($IncludePersonalRecords) { $pending.Enqueue('com.unity.modules.unitywebrequest') }
+if ($IncludePersonalRecords -or $IncludeSteamLogin) { $pending.Enqueue('com.unity.modules.unitywebrequest') }
 @('com.unity.ugui', 'com.unity.render-pipelines.universal', 'com.unity.test-framework', 'com.unity.modules.audio', 'com.unity.modules.animation', 'com.unity.modules.uielements', 'com.unity.modules.screencapture', 'com.unity.modules.physics', 'com.unity.modules.particlesystem') | ForEach-Object { $pending.Enqueue($_) }
 while ($pending.Count -gt 0) {
     $name = $pending.Dequeue()
@@ -56,11 +58,23 @@ if ($IncludeEffects) {
     }
     $filter += ';EffectSettingsTests'
 }
-if ($IncludePersonalRecords) {
+if ($IncludePersonalRecords -or $IncludeSteamLogin) {
     Copy-Item "$sourceRoot/Assets/Public/Platform/*.cs" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_PinballRankingService.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_Models.cs", "$sourceRoot/Assets/Scripts/Steamworks.NET/SteamManager.cs" -Destination "$outputPath/Assets/Runtime"
+}
+if ($IncludePersonalRecords) {
     Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/PersonalRecordTests.cs" -Destination "$outputPath/Assets/Tests"
     $filter += ';PersonalRecordTests'
+}
+if ($IncludeSteamLogin) {
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_SteamNickLoader.cs", "$sourceRoot/Tests/SteamLogin/SteamApiStub.cs", "$sourceRoot/Assets/Public/Platform/BallARetroSteamSettings.cs.meta" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Tests/SteamLogin/SteamIdentityTests.cs" -Destination "$outputPath/Assets/Tests"
+    $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Resources/Release", "$outputPath/Assets/Editor"
+    # A synthetic ID is used exclusively with the fake Steam client, outside the game project.
+    (Get-Content -LiteralPath "$sourceRoot/Assets/Resources/Release/SteamSettings.asset" -Raw).Replace('steamAppId: 0', 'steamAppId: 123456') | Set-Content -LiteralPath "$outputPath/Assets/Resources/Release/SteamSettings.asset" -Encoding utf8
+    Copy-Item -LiteralPath "$sourceRoot/Assets/Editor/BallARetroReleaseBuild.cs" -Destination "$outputPath/Assets/Editor"
+    '-define:BALLARETRO_STEAM' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8
+    $filter += ';SteamIdentityTests'
 }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

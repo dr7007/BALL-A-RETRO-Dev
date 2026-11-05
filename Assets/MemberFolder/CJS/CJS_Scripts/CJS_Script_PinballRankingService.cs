@@ -74,8 +74,21 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     // ── Player nickname ──────────────────────────────────────────────────────
     public string Nickname
     {
-        get => PlayerPrefs.GetString("nickname", "");
-        set { PlayerPrefs.SetString("nickname", value); PlayerPrefs.Save(); }
+        get
+        {
+            if (BallARetroPlatform.IsSteamBuild)
+                return SteamManager.TryGetLoggedInPlayer(out string name, out _) ? name : string.Empty;
+            return PlayerPrefs.GetString("nickname", "");
+        }
+        set
+        {
+            if (BallARetroPlatform.IsSteamBuild)
+            {
+                if (!SteamManager.TryGetLoggedInPlayer(out string name, out _)) return;
+                value = name;
+            }
+            PlayerPrefs.SetString("nickname", value); PlayerPrefs.Save();
+        }
     }
 
     public void SetNicknameAndStart(string nick)
@@ -107,8 +120,16 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     }
 
     // ── Coroutines ───────────────────────────────────────────────────────────
+    private bool HasRequiredLogin(System.Action<string> onFail)
+    {
+        if (!BallARetroPlatform.IsSteamBuild || SteamManager.TryGetLoggedInPlayer(out _, out _)) return true;
+        onFail?.Invoke("Steam을 실행하고 로그인해주세요.");
+        return false;
+    }
+
     private IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
+        if (!HasRequiredLogin(onFail)) yield break;
         if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
         if (BallARetroPlatform.UsesPersonalRecords)
         {
@@ -144,6 +165,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
                                  System.Action<SubmitResp> onDone,
                                  System.Action<string> onFail)
     {
+        if (!HasRequiredLogin(onFail)) yield break;
         if (score < 0) { onFail?.Invoke("Score must not be negative."); yield break; }
         if (BallARetroPlatform.UsesPersonalRecords)
         {
@@ -184,6 +206,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
                                 System.Action<LbResp> onDone,
                                 System.Action<string> onFail)
     {
+        if (!HasRequiredLogin(onFail)) yield break;
         if (BallARetroPlatform.UsesPersonalRecords)
         {
             var rows = BallARetroPersonalRecordStore.Read(Nickname, gameMode, level);

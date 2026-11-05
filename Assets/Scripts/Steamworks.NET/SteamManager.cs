@@ -79,6 +79,11 @@ public class SteamManager : MonoBehaviour {
 		// We want our SteamManager Instance to persist across scenes.
 		DontDestroyOnLoad(gameObject);
 
+		if (!BallARetroSteamSettings.TryGetAppId(out uint configuredAppId)) {
+			Debug.LogWarning("[Steam] 실제 게임 App ID를 SteamSettings에 입력해야 로그인할 수 있습니다. 테스트 ID 480은 사용하지 않습니다.", this);
+			return;
+		}
+
 		if (!Packsize.Test()) {
 			Debug.LogError("[Steamworks.NET] Packsize Test returned false, the wrong version of Steamworks.NET is being run in this platform.", this);
 		}
@@ -93,10 +98,9 @@ public class SteamManager : MonoBehaviour {
 			// Note that this will run which ever version you have installed in steam. Which may not be the precise executable
 			// we were currently running.
 
-			// Once you get a Steam AppID assigned by Valve, you need to replace AppId_t.Invalid with it and
-			// remove steam_appid.txt from the game depot. eg: "(AppId_t)480" or "new AppId_t(480)".
+			// Use this game's configured release App ID. Remove steam_appid.txt from the Steam depot.
 			// See the Valve documentation for more information: https://partner.steamgames.com/doc/sdk/api#initialization_and_shutdown
-			if (SteamAPI.RestartAppIfNecessary(AppId_t.Invalid)) {
+			if (SteamAPI.RestartAppIfNecessary(new AppId_t(configuredAppId))) {
 				Debug.Log("[Steamworks.NET] Shutting down because RestartAppIfNecessary returned true. Steam will restart the application.");
 
 				Application.Quit();
@@ -123,6 +127,13 @@ public class SteamManager : MonoBehaviour {
 		if (!m_bInitialized) {
 			Debug.LogError("[Steamworks.NET] SteamAPI_Init() failed. Refer to Valve's documentation or the comment above this line for more information.", this);
 
+			return;
+		}
+
+		if (SteamUtils.GetAppID().m_AppId != configuredAppId) {
+			SteamAPI.Shutdown();
+			m_bInitialized = false;
+			Debug.LogError("[Steam] 실행된 App ID가 SteamSettings와 다릅니다. 개발용 steam_appid.txt와 실행 경로를 확인하세요.", this);
 			return;
 		}
 
@@ -175,13 +186,7 @@ public class SteamManager : MonoBehaviour {
 
     public string GetSteamNickname()
 	{
-        if (!SteamManager.Initialized)
-        {
-            Debug.LogWarning("Steam not initialized");
-            return "Unknown";
-        }
-
-        return SteamFriends.GetPersonaName();
+        return TryGetLoggedInPlayer(out string nickname, out _) ? nickname : "Unknown";
     }
 #else
 	public string GetSteamNickname() => "Unknown";
@@ -191,4 +196,21 @@ public class SteamManager : MonoBehaviour {
 		}
 	}
 #endif // !DISABLESTEAMWORKS
+
+	public static bool TryGetLoggedInPlayer(out string nickname, out string steamId) {
+		nickname = string.Empty;
+		steamId = string.Empty;
+#if !DISABLESTEAMWORKS
+		if (!Initialized || !SteamUser.BLoggedOn()) return false;
+		var id = SteamUser.GetSteamID();
+		if (!id.IsValid()) return false;
+		var name = SteamFriends.GetPersonaName();
+		if (string.IsNullOrWhiteSpace(name)) return false;
+		nickname = name;
+		steamId = id.ToString();
+		return true;
+#else
+		return false;
+#endif
+	}
 }
