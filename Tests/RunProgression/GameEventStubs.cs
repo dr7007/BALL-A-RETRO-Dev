@@ -33,6 +33,8 @@ public static class KHS_Script_PortalController { public static event Action<int
 public static class KHS_Script_PlincoFunction { public static event Action ReturnPortalEvt; }
 public class KHS_Script_PlungerController : MonoBehaviour
 {
+    public static event Action OnBallLaunched;
+    public static void Launch() => OnBallLaunched?.Invoke();
     public static event Action TestTScoreUpdateEvt;
     public bool isBallReady, tutorialForceLock;
 }

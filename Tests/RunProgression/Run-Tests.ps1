@@ -3,6 +3,7 @@ param(
     [switch]$Baseline,
     [switch]$IncludeBallRescue,
     [switch]$IncludeScorePopups,
+    [switch]$IncludeTutorial,
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
 $ErrorActionPreference = 'Stop'
@@ -66,6 +67,13 @@ foreach ($source in $unchangedSources) { Copy-Item -LiteralPath "$sourceRoot/$so
 if (!$Baseline) { Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_RunStatusUI.cs" -Destination "$outputPath/Assets/Runtime" }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/RunProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
+if ($IncludeTutorial) {
+    if ($Baseline) { throw 'Tutorial checks require the current flipper event.' }
+    @('CJS_TutorialDirector.cs', 'CJS_TutorialCameraFocus.cs') | ForEach-Object {
+        Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
+    }
+    Copy-Item -LiteralPath "$sourceRoot/Tests/TutorialProgression/TutorialProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
+}
 if ($IncludeBallRescue) {
     if ($Baseline) { throw 'Ball rescue requires the current run state API.' }
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_BallAutoRescue.cs" -Destination "$outputPath/Assets/Runtime"
@@ -94,6 +102,7 @@ if ($Baseline) { '-define:BASELINE' | Set-Content -LiteralPath "$outputPath/Asse
 $testClasses = @('RunProgressionTests')
 if ($IncludeBallRescue) { $testClasses += 'BallAutoRescueTests' }
 if ($IncludeScorePopups) { $testClasses += 'ScorePopupTests' }
+if ($IncludeTutorial) { $testClasses += 'TutorialProgressionTests' }
 $testFilter = $testClasses -join ';'
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $testFilter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

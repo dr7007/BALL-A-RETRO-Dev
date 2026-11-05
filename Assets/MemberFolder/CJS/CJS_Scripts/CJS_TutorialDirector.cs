@@ -26,7 +26,7 @@ public class CJS_TutorialDirector : MonoBehaviour
     public Transform focus2FEntrance;
     public Transform focusPlunger;
 
-    [Header("Input Keys (Æ©Åä¸®¾ó Ç¥½Ã¿ë)")]
+    [Header("Input Keys (íŠœí† ë¦¬ì–¼ í‘œì‹œìš©)")]
     public KeyCode leftFlipperKey = KeyCode.Z;
     public KeyCode rightFlipperKey = KeyCode.Slash;
 
@@ -55,10 +55,17 @@ public class CJS_TutorialDirector : MonoBehaviour
     private bool _rightDone;
     private bool _resultShown;
     private bool _scoreMissionActive;
+    private bool _playedLeft;
+    private bool _playedRight;
+    private string _lastMissionHint;
+    private float _lastPracticeTime;
+
+    private bool HasPracticedFlippers => _playedLeft && _playedRight;
 
     void OnEnable()
     {
         KHS_Script_PlungerController.OnBallLaunched += OnBallLaunched;
+        KHS_Script_FliperController.OnFlipperPressed += OnFlipperPressed;
         KHS_Script_ScoreManager.OnGameOverWithScore += OnGameOverWithScore;
         KHS_Script_ScoreManager.OnGameClearWithScore += OnGameClearWithScore;
     }
@@ -66,12 +73,14 @@ public class CJS_TutorialDirector : MonoBehaviour
     void OnDisable()
     {
         KHS_Script_PlungerController.OnBallLaunched -= OnBallLaunched;
+        KHS_Script_FliperController.OnFlipperPressed -= OnFlipperPressed;
         KHS_Script_ScoreManager.OnGameOverWithScore -= OnGameOverWithScore;
         KHS_Script_ScoreManager.OnGameClearWithScore -= OnGameClearWithScore;
     }
 
     void Start()
     {
+        tutorialSceneName = gameObject.scene.name;
         if (!focus) focus = FindObjectOfType<CJS_TutorialCameraFocus>(true);
         if (!plunger) plunger = FindObjectOfType<KHS_Script_PlungerController>(true);
         if (!scoreManager) scoreManager = FindObjectOfType<KHS_Script_ScoreManager>(true);
@@ -80,10 +89,10 @@ public class CJS_TutorialDirector : MonoBehaviour
 
         BindButtons();
 
-        // Step4 Àü±îÁö ÇÃ·±Àú Àá±İ
+        // Step4 ì „ê¹Œì§€ í”ŒëŸ°ì € ì ê¸ˆ
         if (plunger) plunger.tutorialForceLock = true;
 
-        // Æ©Åä¸®¾ó ÁøÇà Áß 2Ãş ÀÔ±¸ ¸·±â
+        // íŠœí† ë¦¬ì–¼ ì§„í–‰ ì¤‘ 2ì¸µ ì…êµ¬ ë§‰ê¸°
         if (railEntranceTrigger) railEntranceTrigger.enabled = false;
 
         GoToStep(Step.Intro);
@@ -114,7 +123,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                 break;
 
             case Step.Plunger:
-                // Space ¹ß»ç´Â OnBallLaunched ÀÌº¥Æ®·Î Ã³¸®
+                // Space ë°œì‚¬ëŠ” OnBallLaunched ì´ë²¤íŠ¸ë¡œ ì²˜ë¦¬
                 break;
 
             case Step.ScoreMission:
@@ -160,9 +169,9 @@ public class CJS_TutorialDirector : MonoBehaviour
                 if (tutorialText)
                 {
                     tutorialText.text =
-                        "°ÔÀÓ ¼³¸í\n" +
-                        "ÇÉº¼(1F)¿¡¼­ Á¡¼ö¸¦ ¿Ã¸®°í, Á¶°ÇÀ» ´Ş¼ºÇÏ¸é 2F·Î ÁøÀÔÇÒ ¼ö ÀÖ¾î¿ä.\n" +
-                        "¾Æ¹« Å°³ª ´­·¯ °è¼Ó¡¦";
+                        "ê²Œì„ ì„¤ëª…\n" +
+                        "í•€ë³¼(1F)ì—ì„œ ì ìˆ˜ë¥¼ ì˜¬ë¦¬ê³ , ì¡°ê±´ì„ ë‹¬ì„±í•˜ë©´ 2Fë¡œ ì§„ì…í•  ìˆ˜ ìˆì–´ìš”.\n" +
+                        "ì•„ë¬´ í‚¤ë‚˜ ëˆŒëŸ¬ ê³„ì†â€¦";
                 }
                 break;
 
@@ -174,7 +183,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                     focus.FocusTo(focusFlippers);
 
                 if (tutorialText)
-                    tutorialText.text = $"( {leftFlipperKey} / {rightFlipperKey} ¸¦ ´©¸£¼¼¿ä! )";
+                    tutorialText.text = $"( {leftFlipperKey} / {rightFlipperKey} ë¥¼ ëˆ„ë¥´ì„¸ìš”! )";
                 break;
 
             case Step.Entrance2F:
@@ -184,8 +193,8 @@ public class CJS_TutorialDirector : MonoBehaviour
                 if (tutorialText)
                 {
                     tutorialText.text =
-                        "( Àå¾Ö¹° 5°³¸¦ ¸ÂÃß¸é 2Ãş ÀÔÀå °¡´É! )\n" +
-                        "¾Æ¹« Å°³ª ´­·¯ °è¼Ó¡¦";
+                        "( ì¥ì• ë¬¼ 5ê°œë¥¼ ë§ì¶”ë©´ 2ì¸µ ì…ì¥ ê°€ëŠ¥! )\n" +
+                        "ì•„ë¬´ í‚¤ë‚˜ ëˆŒëŸ¬ ê³„ì†â€¦";
                 }
                 break;
 
@@ -197,11 +206,14 @@ public class CJS_TutorialDirector : MonoBehaviour
                     plunger.tutorialForceLock = false;
 
                 if (tutorialText)
-                    tutorialText.text = "( Space ¸¦ ´­·¯ °øÀ» ¹ß»çÇÏ¼¼¿ä! )";
+                    tutorialText.text = "( Space ë¥¼ ëˆŒëŸ¬ ê³µì„ ë°œì‚¬í•˜ì„¸ìš”! )";
                 break;
 
             case Step.ScoreMission:
                 _scoreMissionActive = true;
+                _playedLeft = false;
+                _playedRight = false;
+                _lastMissionHint = null;
 
                 if (focus)
                 {
@@ -212,11 +224,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                 if (railEntranceTrigger)
                     railEntranceTrigger.enabled = true;
 
-                if (tutorialText)
-                {
-                    tutorialText.text =
-                        $"( {tutorialTargetScore}Á¡À» ´Ş¼ºÇÏ¸é Æ©Åä¸®¾ó ¿Ï·á! )";
-                }
+                RefreshMissionHint();
                 break;
 
             case Step.Done:
@@ -241,10 +249,37 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (!_scoreMissionActive) return;
         if (!scoreManager) return;
 
-        if (scoreManager.curScore >= tutorialTargetScore)
+        // Let the last press visibly move the flipper before pausing for the result.
+        if (scoreManager.curScore >= tutorialTargetScore && HasPracticedFlippers
+            && Time.time - _lastPracticeTime >= 0.25f)
         {
             GoToStep(Step.Done);
         }
+        else
+        {
+            RefreshMissionHint();
+        }
+    }
+
+    private void OnFlipperPressed(KeyCode key)
+    {
+        if (!_scoreMissionActive || _resultShown || Time.timeScale <= 0f) return;
+        if (key == leftFlipperKey) _playedLeft = true;
+        if (key == rightFlipperKey) _playedRight = true;
+        if (key == leftFlipperKey || key == rightFlipperKey) _lastPracticeTime = Time.time;
+        CheckScoreMission();
+    }
+
+    private void RefreshMissionHint()
+    {
+        string left = _playedLeft ? "ì™„ë£Œ" : "ëˆŒëŸ¬ë³´ì„¸ìš”";
+        string right = _playedRight ? "ì™„ë£Œ" : "ëˆŒëŸ¬ë³´ì„¸ìš”";
+        string score = scoreManager && scoreManager.curScore >= tutorialTargetScore
+            ? "ëª©í‘œ ì ìˆ˜ ë‹¬ì„±!" : $"{tutorialTargetScore}ì ì„ ë‹¬ì„±í•˜ì„¸ìš”!";
+        string hint = $"{score}\nZ: {left} / Slash: {right}";
+        if (hint == _lastMissionHint) return;
+        _lastMissionHint = hint;
+        if (tutorialText) tutorialText.text = hint;
     }
 
     private void OnGameOverWithScore(int finalScore)
@@ -252,7 +287,7 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (!_scoreMissionActive) return;
         if (_resultShown) return;
 
-        if (finalScore >= tutorialTargetScore)
+        if (finalScore >= tutorialTargetScore && HasPracticedFlippers)
             GoToStep(Step.Done);
         else
             GoToStep(Step.Failed);
@@ -263,7 +298,7 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (!_scoreMissionActive) return;
         if (_resultShown) return;
 
-        if (finalScore >= tutorialTargetScore)
+        if (finalScore >= tutorialTargetScore && HasPracticedFlippers)
             GoToStep(Step.Done);
         else
             GoToStep(Step.Failed);
@@ -279,8 +314,8 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (tutorialText) tutorialText.text = "";
 
         ShowResultPanel(
-            "Æ©Åä¸®¾ó ¿Ï·á!",
-            $"{tutorialTargetScore}Á¡ ´Ş¼º ¼º°ø!\n·Îºñ·Î °¥Áö, ¹Ù·Î °ÔÀÓÇÏ·¯ °¥Áö ¼±ÅÃÇØÁà."
+            "íŠœí† ë¦¬ì–¼ ì™„ë£Œ!",
+            $"{tutorialTargetScore}ì  ë‹¬ì„± ì„±ê³µ!\në¡œë¹„ë¡œ ê°ˆì§€, ë°”ë¡œ ê²Œì„í•˜ëŸ¬ ê°ˆì§€ ì„ íƒí•´ì¤˜."
         );
 
         Debug.Log("[Tutorial] Success");
@@ -296,8 +331,10 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (tutorialText) tutorialText.text = "";
 
         ShowResultPanel(
-            "´Ù½Ã ÇØº¼·¡?",
-            $"{tutorialTargetScore}Á¡¿¡ µµ´ŞÇÏÁö ¸øÇß¾î.\n´Ù½Ã Æ©Åä¸®¾óÀ» ÇÏ°Å³ª, ·Îºñ/°ÔÀÓ¾ÀÀ¸·Î ÀÌµ¿ÇÒ ¼ö ÀÖ¾î."
+            "ë‹¤ì‹œ í•´ë³¼ê¹Œ?",
+            HasPracticedFlippers
+                ? $"{tutorialTargetScore}ì ì— ë„ë‹¬í•˜ê¸° ì „ì— ê³µì´ ë¹ ì¡Œì–´.\në‹¤ì‹œ ë„ì „í•´ë´!"
+                : "ê³µì„ ë°œì‚¬í•œ ë’¤ Zì™€ / í”Œë¦¬í¼ë¥¼ ê°ê° í•œ ë²ˆ ì‚¬ìš©í•´ë´!\nëª©í‘œ ì ìˆ˜ì™€ í”Œë¦¬í¼ ì—°ìŠµì„ ë§ˆì¹˜ë©´ íŠœí† ë¦¬ì–¼ì´ ì™„ë£Œë¼."
         );
 
         Debug.Log("[Tutorial] Failed");
@@ -305,11 +342,19 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     private void ShowResultPanel(string title, string desc)
     {
-        if (resultPanel) resultPanel.SetActive(true);
+        if (resultPanel)
+        {
+            var modal = resultPanel.GetComponent<PSH_Script_ModalCanvas>();
+            if (!modal) modal = resultPanel.AddComponent<PSH_Script_ModalCanvas>();
+            modal.SetSortingOrder(50);
+            resultPanel.SetActive(true);
+        }
         if (resultTitleText) resultTitleText.text = title;
         if (resultDescText) resultDescText.text = desc;
 
         Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
 
     public void RetryTutorial()

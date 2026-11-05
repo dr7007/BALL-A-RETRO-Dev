@@ -5,6 +5,7 @@ public class KHS_Script_FliperController : MonoBehaviour
 {
     public static event Action FliperCountChangeEvt;
     public static event Action OnAnyFlipperPress;
+    public static event Action<KeyCode> OnFlipperPressed;
     public static event Action OnAnyFlipperRelease;
 
     [Header("플리퍼 세팅")]
@@ -119,7 +120,11 @@ public class KHS_Script_FliperController : MonoBehaviour
             if (flipper.rigidbody != null && (fliper_Count > 0 || lastFlipperActive))
             {
                 if (Input.GetKeyDown(flipper.inputKey))
+                {
                     OnAnyFlipperPress?.Invoke();
+                    if (Time.timeScale > 0f)
+                        OnFlipperPressed?.Invoke(flipper.inputKey);
+                }
 
                 if (Input.GetKey(flipper.inputKey))
                 {
