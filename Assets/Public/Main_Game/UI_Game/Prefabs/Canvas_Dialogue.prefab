@@ -225,6 +225,7 @@ GameObject:
   - component: {fileID: 152200161492154873}
   - component: {fileID: 4257647109192787233}
   - component: {fileID: 384280419535453347}
+  - component: {fileID: 2109100000}
   m_Layer: 5
   m_Name: Button_Skip
   m_TagString: Untagged
@@ -714,3 +715,19 @@ MonoBehaviour:
   m_ChildScaleWidth: 0
   m_ChildScaleHeight: 0
   m_ReverseArrangement: 0
+--- !u!114 &2109100000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5009080905726083574}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 305fc2fb9b8731b4ba1ce347d431e241, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  buttonText: {fileID: 0}
+  hoverScale: 1.1
+  scaleDuration: 0.2
+  textHoverColor: {r: 0, g: 1, b: 1, a: 1}

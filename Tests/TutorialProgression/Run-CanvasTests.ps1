@@ -1,5 +1,6 @@
 param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
+    [switch]$IncludeHover,
     [string]$PythonPath = 'python',
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
@@ -33,7 +34,15 @@ Copy-Item -LiteralPath "$sourceRoot/Assets/TextMesh Pro" -Destination "$outputPa
 & $PythonPath "$PSScriptRoot/Extract-UIFixture.py" "$sourceRoot/Assets/MainScenes/Main_Scene_Tutorial.unity" "$outputPath/Assets/TutorialUI.unity"
 if ($LASTEXITCODE -ne 0) { throw 'Fixture extraction failed.' }
 Copy-Item -LiteralPath "$PSScriptRoot/TutorialCanvasTests.cs" -Destination "$outputPath/Assets/Tests"
-$arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', 'TutorialCanvasTests', '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
+@('PSH_Script_BaseButtonHover.cs', 'PSH_Script_CursorManager.cs') | ForEach-Object {
+    Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/$_", "$sourceRoot/Assets/Public/UI_Public/Scripts/$_.meta" -Destination "$outputPath/Assets/Runtime"
+}
+$filter = 'TutorialCanvasTests'
+if ($IncludeHover) {
+    Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/ButtonHoverTests.cs" -Destination "$outputPath/Assets/Tests"
+    $filter += ';ButtonHoverTests'
+}
+$arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Output "Test project: $outputPath; Unity process: $($process.Id)"
 $process.WaitForExit()

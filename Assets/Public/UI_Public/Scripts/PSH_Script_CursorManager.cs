@@ -8,6 +8,7 @@ public class PSH_Script_CursorManager : MonoBehaviour
     [SerializeField] private Texture2D defaultCursor;
     [SerializeField] private Texture2D handCursor; // ư ȣ
     [SerializeField] private Vector2 hotspot = Vector2.zero;
+    private Object handOwner;
 
     private void Awake()
     {
@@ -42,11 +43,23 @@ public class PSH_Script_CursorManager : MonoBehaviour
 
     public void SetDefaultCursor()
     {
+        handOwner = null;
         Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
     }
 
     public void SetHandCursor()
     {
         Cursor.SetCursor(handCursor, hotspot, CursorMode.Auto);
+    }
+
+    public void SetHandCursor(Object owner)
+    {
+        handOwner = owner;
+        SetHandCursor();
+    }
+
+    public void ReleaseHandCursor(Object owner)
+    {
+        if (handOwner == owner) SetDefaultCursor();
     }
 }

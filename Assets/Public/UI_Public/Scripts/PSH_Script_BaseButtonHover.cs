@@ -21,6 +21,10 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
     private Vector3 originalScale;
     private Color originalTextColor;
     private float originalImageAlpha;
+    private Selectable selectable;
+    private bool isHovered;
+    protected bool CanHover => isActiveAndEnabled &&
+        (selectable == null || (selectable.IsActive() && selectable.IsInteractable()));
     
     // --- Coroutine Safe ---
     private Coroutine fadeCoroutine;
@@ -30,6 +34,8 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
     {
         rectTransform = GetComponent<RectTransform>();
         buttonImage = GetComponent<Image>();
+        selectable = GetComponent<Selectable>();
+        if (buttonText == null) buttonText = GetComponentInChildren<TextMeshProUGUI>(true);
 
         originalScale = rectTransform.localScale; 
         if (buttonImage != null)
@@ -41,17 +47,14 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
         {
             originalTextColor = buttonText.color;
         }
-        else
-        {
-            Debug.LogWarning("ButtonText가 연결되지 않았습니다.", this.gameObject);
-        }
     }
 
     // --- 마우스 호버 이벤트 ---
 
     public virtual void OnPointerEnter(PointerEventData eventData)
     {
-        
+        if (!CanHover) return;
+        isHovered = true;
         StartScaleTween(originalScale * hoverScale, scaleDuration); 
 
         if (buttonText != null)
@@ -60,13 +63,14 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
         }
         if (PSH_Script_CursorManager.Instance != null)
         {
-            PSH_Script_CursorManager.Instance.SetHandCursor();
+            PSH_Script_CursorManager.Instance.SetHandCursor(this);
         }
 
     }
 
     public virtual void OnPointerExit(PointerEventData eventData)
     {
+        isHovered = false;
         StartScaleTween(originalScale, scaleDuration); // <--- 이렇게 변경됨
 
         // 2. (고정) TMP 텍스트 복원
@@ -76,12 +80,15 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
         }
         if (PSH_Script_CursorManager.Instance != null)
         {
-            PSH_Script_CursorManager.Instance.SetDefaultCursor();
+            PSH_Script_CursorManager.Instance.ReleaseHandCursor(this);
         }
     }
 
     protected virtual void OnDisable()
     {
+        if (isHovered && PSH_Script_CursorManager.Instance != null)
+            PSH_Script_CursorManager.Instance.ReleaseHandCursor(this);
+        isHovered = false;
         if (fadeCoroutine != null)
         {
             StopCoroutine(fadeCoroutine);
@@ -110,6 +117,11 @@ public class PSH_Script_BaseButtonHover : MonoBehaviour, IPointerEnterHandler, I
             color.a = originalImageAlpha;
             buttonImage.color = color;
         }
+    }
+
+    private void LateUpdate()
+    {
+        if (isHovered && !CanHover) OnPointerExit(null);
     }
 
 

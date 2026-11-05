@@ -4074,6 +4074,7 @@ GameObject:
   - component: {fileID: 5932157437281390913}
   - component: {fileID: 7427913738519276441}
   - component: {fileID: 8519245751908529152}
+  - component: {fileID: 2109100000}
   m_Layer: 5
   m_Name: Image_RankOpen
   m_TagString: Untagged
@@ -4794,3 +4795,19 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5985331021902686733, guid: ea016f339d8f9b74291c243f6eb75a84, type: 3}
   m_PrefabInstance: {fileID: 6115125212620021035}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2109100000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 9078685078798465643}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 305fc2fb9b8731b4ba1ce347d431e241, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  buttonText: {fileID: 0}
+  hoverScale: 1.1
+  scaleDuration: 0.2
+  textHoverColor: {r: 0, g: 1, b: 1, a: 1}

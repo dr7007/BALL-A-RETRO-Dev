@@ -12,6 +12,7 @@ GameObject:
   - component: {fileID: 7270630351803592079}
   - component: {fileID: 433810906033157289}
   - component: {fileID: 3369981629185967469}
+  - component: {fileID: 2109100000}
   m_Layer: 5
   m_Name: Button_Skip
   m_TagString: Untagged
@@ -451,6 +452,7 @@ GameObject:
   - component: {fileID: 3010469704465290429}
   - component: {fileID: 7000737839288140312}
   - component: {fileID: 4576245514197295933}
+  - component: {fileID: 2109100001}
   m_Layer: 5
   m_Name: Button_Retry
   m_TagString: Untagged
@@ -1529,3 +1531,35 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 8392057664352698896, guid: 66636dbde0e43c84eb2b4cd0f062efc2, type: 3}
   m_PrefabInstance: {fileID: 7727682554020354282}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &2109100000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2277968020046650870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 305fc2fb9b8731b4ba1ce347d431e241, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  buttonText: {fileID: 0}
+  hoverScale: 1.1
+  scaleDuration: 0.2
+  textHoverColor: {r: 0, g: 1, b: 1, a: 1}
+--- !u!114 &2109100001
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8031487003160948639}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 305fc2fb9b8731b4ba1ce347d431e241, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  buttonText: {fileID: 0}
+  hoverScale: 1.1
+  scaleDuration: 0.2
+  textHoverColor: {r: 0, g: 1, b: 1, a: 1}

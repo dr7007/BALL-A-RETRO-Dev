@@ -46,6 +46,7 @@ public class PSH_Script_InputFieldHover : PSH_Script_BaseButtonHover, IPointerCl
 
     public override void OnPointerEnter(PointerEventData eventData)
     {
+        if (!CanHover) return;
         base.OnPointerEnter(eventData); 
         
         if (useFadeEffect)
@@ -86,6 +87,7 @@ public class PSH_Script_InputFieldHover : PSH_Script_BaseButtonHover, IPointerCl
 
     public void OnPointerClick(PointerEventData eventData)
     {
-        onClick?.Invoke();
+        if (CanHover && eventData.button == PointerEventData.InputButton.Left)
+            onClick?.Invoke();
     }
 }
