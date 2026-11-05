@@ -3,6 +3,13 @@ using UnityEngine.SceneManagement; // 씬 판별을 위해 추가
 
 public class PSH_Script_SettingController : MonoBehaviour
 {
+    // HUD(0), 대사(3) 위에 시스템창과 확인창만 별도로 올린다.
+    private const int MenuSortingOrder = 100;
+    private static PSH_Script_SettingController openMenu;
+    private static int lastMenuToggleFrame = -1;
+    public static bool IsMenuOpen => openMenu != null && openMenu.isActiveAndEnabled && openMenu.isSettingOpen;
+    public static bool BlocksDialogueKeyboardInput => IsMenuOpen || lastMenuToggleFrame == Time.frameCount;
+
     [Header("설정창 오브젝트 연결")]
     
     [Header("씬 이름 설정")]
@@ -21,12 +28,14 @@ public class PSH_Script_SettingController : MonoBehaviour
     private CursorLockMode cursorLockBeforeMenu;
     private void OnEnable()
     {
+        if (isSettingOpen) openMenu = this;
         KHS_Script_ScoreManager.OnGameClear += SetGameEndedTrue;
         KHS_Script_ScoreManager.OnGameOver += SetGameEndedTrue;
     }
 
     private void OnDisable()
     {
+        if (openMenu == this) openMenu = null;
         KHS_Script_ScoreManager.OnGameClear -= SetGameEndedTrue;
         KHS_Script_ScoreManager.OnGameOver -= SetGameEndedTrue;
     }
@@ -59,9 +68,17 @@ public class PSH_Script_SettingController : MonoBehaviour
             timeScaleBeforeMenu = Time.timeScale;
             cursorVisibleBeforeMenu = Cursor.visible;
             cursorLockBeforeMenu = Cursor.lockState;
+            EnsureModalCanvas(panelSetting, MenuSortingOrder);
+            EnsureModalCanvas(panelWarning, MenuSortingOrder + 1);
         }
 
         isSettingOpen = !isSettingOpen;
+        lastMenuToggleFrame = Time.frameCount;
+        if (isSettingOpen) openMenu = this;
+        else if (openMenu == this) openMenu = null;
+
+        if (!isSettingOpen && panelWarning != null)
+            panelWarning.SetActive(false);
         panelSetting.SetActive(isSettingOpen);
 
         if (isSettingOpen)
@@ -84,6 +101,17 @@ public class PSH_Script_SettingController : MonoBehaviour
             Cursor.visible = isGameEnded || cursorVisibleBeforeMenu;
         }
     }
+
+    private static void EnsureModalCanvas(GameObject panel, int sortingOrder)
+    {
+        if (panel == null) return;
+
+        var modalCanvas = panel.GetComponent<PSH_Script_ModalCanvas>();
+        if (modalCanvas == null) modalCanvas = panel.AddComponent<PSH_Script_ModalCanvas>();
+        modalCanvas.SetSortingOrder(sortingOrder);
+        modalCanvas.enabled = true;
+    }
+
     private void UpdateButtonVisibility()
     {
         if (goToLobbyButton == null) return;

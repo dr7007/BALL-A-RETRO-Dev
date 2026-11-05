@@ -47,11 +47,14 @@ foreach ($source in $runtimeSources) {
     } else { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
+# The baseline settings script does not attach this new component.
+Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_ModalCanvas.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/DialogueInputTests.cs" -Destination "$outputPath/Assets/Tests"
 @{ name = 'BallARetro.DialogueUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/DialogueUnderTest.asmdef" -Encoding utf8
 @{ name = 'BallARetro.DialogueInputTests'; references = @('BallARetro.DialogueUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/DialogueInputTests.asmdef" -Encoding utf8
 
-$arguments = @('-batchmode', '-nographics', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', 'DialogueInputTests', '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
+# Real GraphicRaycaster tests need rendered Canvas depths; do not use -nographics.
+$arguments = @('-batchmode', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', 'DialogueInputTests', '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Output "Test project: $outputPath; Unity process: $($process.Id)"
 $process.WaitForExit()

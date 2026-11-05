@@ -198,6 +198,8 @@ namespace PSH
 
         public void Update()
         {
+            // ESC와 메뉴를 닫은 프레임의 키 입력을 대사 넘기기로 중복 처리하지 않는다.
+            if (Input.GetKeyDown(KeyCode.Escape) || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
             if (idx == -1 || currentLines.Count == 0 || !Input.anyKeyDown) return;
 
             // 마우스는 EventSystem의 클릭 이벤트에서만 처리해 한 번의 클릭이 두 번 진행되지 않게 합니다.
@@ -223,6 +225,7 @@ namespace PSH
 
         private void AdvanceDialogue()
         {
+            if (PSH_Script_SettingController.IsMenuOpen) return;
             if (idx == -1 || currentLines.Count == 0) return;
             if (isTyping)
             {
@@ -322,6 +325,7 @@ namespace PSH
         private IEnumerator TypeRoutine(string text) { isTyping = true; if (currentActiveText) { currentActiveText.text = ""; foreach (char c in text) { currentActiveText.text += c; yield return new WaitForSecondsRealtime(charInterval); } } isTyping = false; }
         public void SkipDialogue()
         {
+            if (PSH_Script_SettingController.IsMenuOpen) return;
             // 대사 진행 중이 아니면 무시
             if (idx == -1 || currentLines.Count == 0) return;
 
