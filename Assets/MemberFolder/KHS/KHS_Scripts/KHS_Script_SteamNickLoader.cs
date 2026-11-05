@@ -1,5 +1,7 @@
 using System.Collections;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine;
 
 public class KHS_Script_SteamNickLoader : MonoBehaviour
@@ -17,6 +19,7 @@ public class KHS_Script_SteamNickLoader : MonoBehaviour
     private void OnEnable()
     {
         if (!BallARetroPlatform.IsSteamBuild || inputField == null) return;
+        LocalizationSettings.SelectedLocaleChanged += RefreshLanguage;
         originalReadOnly = inputField.readOnly;
         inputField.readOnly = true;
         refresh = StartCoroutine(RefreshIdentity());
@@ -24,11 +27,14 @@ public class KHS_Script_SteamNickLoader : MonoBehaviour
 
     private void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= RefreshLanguage;
         if (refresh == null) return;
         StopCoroutine(refresh);
         refresh = null;
         if (inputField != null) inputField.readOnly = originalReadOnly;
     }
+
+    private void RefreshLanguage(Locale _) => FillInputFieldToSteamNickname();
 
     private IEnumerator RefreshIdentity()
     {
@@ -44,7 +50,12 @@ public class KHS_Script_SteamNickLoader : MonoBehaviour
         if (!BallARetroPlatform.IsSteamBuild || inputField == null) return;
         bool loggedIn = SteamManager.TryGetLoggedInPlayer(out string nickname, out _);
         if (inputField.text != nickname) inputField.SetTextWithoutNotify(nickname);
-        if (!loggedIn && inputField.placeholder is TMP_Text placeholder)
-            placeholder.text = "Steam을 실행하고 로그인해주세요";
+        if (inputField.placeholder is TMP_Text placeholder)
+        {
+            string key = loggedIn ? "Nickname_Placeholder" : "Nickname_Steam";
+            var binding = placeholder.GetComponent<PSH_Script_LocalizedText>();
+            if (binding != null) binding.SetKey(key);
+            else placeholder.text = PSH_Script_Localization.Text(key);
+        }
     }
 }

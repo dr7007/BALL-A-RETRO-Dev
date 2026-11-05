@@ -324,6 +324,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000035}
   - component: {fileID: 674198974141172472}
   - component: {fileID: 5262811694421076875}
   - component: {fileID: 7878414562321878741}
@@ -1021,6 +1022,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000034}
   - component: {fileID: 6497418983509844001}
   - component: {fileID: 3171266366620147768}
   - component: {fileID: 6332651054479642784}
@@ -1157,6 +1159,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000036}
   - component: {fileID: 888596743865493631}
   - component: {fileID: 3480201343135975469}
   - component: {fileID: 8032981866269050866}
@@ -2408,6 +2411,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000037}
   - component: {fileID: 6703278175313183343}
   - component: {fileID: 7819883222824458163}
   - component: {fileID: 8795458962667283143}
@@ -3020,6 +3024,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 4711045217438048188}
     m_Modifications:
+    - target: {fileID: 8200000000000000046, guid: ee7faca580eaeba41a6e47ed728592fd, type: 3}
+      propertyPath: key
+      value: Button_Ranking
+      objectReference: {fileID: 0}
     - target: {fileID: 254799639475818278, guid: ee7faca580eaeba41a6e47ed728592fd, type: 3}
       propertyPath: m_AnchorMax.y
       value: 0
@@ -5466,3 +5474,59 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5985331021902686733, guid: ea016f339d8f9b74291c243f6eb75a84, type: 3}
   m_PrefabInstance: {fileID: 8184475500504970032}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8200000000000000035
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1093228591380724097}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: HUD_Score
+  fitText: 1
+--- !u!114 &8200000000000000034
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4166445807913524496}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: HUD_Round
+  fitText: 1
+--- !u!114 &8200000000000000036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4520356029486265329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: HUD_Choices
+  fitText: 1
+--- !u!114 &8200000000000000037
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7711354544810893614}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: HUD_Balls
+  fitText: 1

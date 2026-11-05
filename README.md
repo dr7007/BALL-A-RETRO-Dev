@@ -25,7 +25,27 @@ Editor에서 Steam을 시험할 때만 `BALLARETRO_STEAM` define과 실제 ID를
 Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현재 계정에서 읽습니다.
 실제 Steam 클라이언트 계정으로 연결하는 검증은 남아 있습니다.
 기존 Steam 온라인 랭킹 서버의 운영·서버 인증 검증도 별도로 필요합니다.
-언어 추가 및 시스템창의 언어 전환은 후속 작업입니다. 번역 자체에는 Steam 키가 필요하지 않습니다.
+한국어·영어·일본어는 스토브와 Steam에서 동일하게 지원하며, 번역에는 Steam 키가 필요하지 않습니다.
+
+## 언어 설정
+
+로비·게임·튜토리얼의 시스템창에서 **언어 (Language)**를 선택하면 열린 화면에도 즉시 적용됩니다.
+선택한 언어는 저장되어 다음 실행에도 유지됩니다. 최초 실행은 지원되는 시스템 언어를 사용하고,
+지원하지 않는 언어인 경우 영어로 표시합니다.
+
+- 시스템창, 화면 모드, 이펙트 세부 설정, 로비 버튼과 닉네임 안내.
+- 튜토리얼 설명·연습 진행·성공/실패 안내, 인트로·라운드·엔딩 대사.
+- 점수·남은 공·목표 표시, 강화 선택지 9종과 희귀도·보관함 툴팁·다시 뽑기 횟수.
+- 최고 기록 도전 안내, 종료 사유, 결과·기록 화면 및 나가기 확인창.
+
+언어 변경은 진행 중인 대사 순서, 튜토리얼 연습 기록, 선택한 강화, 점수와 설정값을 초기화하지 않습니다.
+닉네임은 사용자가 입력한 이름 또는 Steam 계정 이름을 그대로 표시합니다.
+
+번역 원본은 `Assets/Resources/ui.csv`와 `Assets/Resources/dialogues.csv`입니다.
+문구를 수정한 뒤 `python Tests/Localization/Sync-Tables.py`로 Unity StringTable을 동기화합니다.
+`--check` 옵션으로 CSV와 에셋의 불일치를 검사할 수 있습니다. 새 UI에는
+`PSH_Script_LocalizedText`와 키를 지정하고, 동적 문구는 `PSH_Script_Localization.Text`를 사용합니다.
+일본어 글자는 Galmuri11 폰트 폴백과 동적 다중 아틀라스로 표시합니다.
 
 ## 재현 가능한 검증
 
@@ -36,6 +56,8 @@ Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현�
 ./Tests/RunProgression/Run-Tests.ps1 -OutputRoot D:/ball-a-retro-validation/gameplay-new -IncludeTutorial -IncludeBallRescue -IncludeScorePopups
 ./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/ui-new -IncludeHover -IncludeEffects -IncludePersonalRecords -PythonPath python
 ./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/steam-new -IncludeSteamLogin -PythonPath python
+./Tests/Localization/Run-Tests.ps1 -OutputRoot D:/ball-a-retro-validation/localization-new
+./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/localized-ui-new -IncludeHover -IncludeEffects -IncludeLocalization -PythonPath python
 ```
 
 각 출력 폴더의 `results.xml`과 `unity.log`에서 결과를 확인합니다. Steam 검증은 실제
@@ -46,6 +68,10 @@ SteamManager와 모의 Steam API를 사용하며 실제 Steam 계정 인증 시�
 실제 프로젝트 소스는 스토브/Steam 양쪽 define으로 C# 컴파일을 확인했습니다.
 이 결과는 전체 플레이어 빌드와 모든 씬의 수동 플레이 검증을 의미하지 않습니다.
 
+다국어 변경 검증: 번역·저장·글꼴 8개, 게임 진행·튜토리얼·대사 전환 26개,
+실제 UI·호버·이펙트 설정 32개 통과. FHD·QHD에서 세 언어의 시스템창과 이펙트창,
+선택지 9종의 글자 잘림, 비활성 화면을 다시 열었을 때의 번역도 확인했습니다.
+
 심사용 빌드에서 확인할 항목:
 
 - 튜토리얼 시작 카메라, 발사 이후 Z와 / 각각 사용, 목표 점수 달성 후 완료창.
@@ -53,6 +79,7 @@ SteamManager와 모의 Steam API를 사용하며 실제 Steam 계정 인증 시�
 - 이펙트 OFF 즉시 적용, 다시 켜기, 로비·게임 이동과 재실행 후 설정 유지.
 - 1920×1080 및 2560×1440에서 튜토리얼 안내와 결과창 표시.
 - 네트워크 없이 개인 기록 저장, 닉네임 변경 및 낮은 점수 제출 후 최고 기록 유지.
+- 세 언어 전환 후 열린 시스템창·튜토리얼·대사·강화·결과 표시, 재실행 후 언어 유지.
 
 ## 이펙트 세부 설정
 

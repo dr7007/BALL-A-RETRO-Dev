@@ -235,6 +235,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000031}
   - component: {fileID: 8525831323628727830}
   - component: {fileID: 526606683099000036}
   - component: {fileID: 210568872243880019}
@@ -728,6 +729,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000032}
   - component: {fileID: 5805938275811357387}
   - component: {fileID: 376398584277404552}
   - component: {fileID: 7184546755836417954}
@@ -1563,3 +1565,31 @@ MonoBehaviour:
   hoverScale: 1.1
   scaleDuration: 0.2
   textHoverColor: {r: 0, g: 1, b: 1, a: 1}
+--- !u!114 &8200000000000000031
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5449896815287898153}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: Button_Reroll
+  fitText: 1
+--- !u!114 &8200000000000000032
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 8986804717879248581}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: Button_Skip
+  fitText: 1

@@ -1,6 +1,8 @@
 using System;
 using System.Text;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 
@@ -12,33 +14,35 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     public TMP_Text textResult;
 
     [Header("Leaderboard (choose one)")]
-    public TMP_Text textLeaderboard;                    // ÅØ½ºÆ® ¹æ½Ä
-    public CJS_Script_LeaderboardList leaderboardList;  // ¸®½ºÆ® ÇÁ¸®ÆÕ ¹æ½Ä
+    public TMP_Text textLeaderboard;                    // í…ìŠ¤íŠ¸ ë°©ì‹
+    public CJS_Script_LeaderboardList leaderboardList;  // ë¦¬ìŠ¤íŠ¸ í”„ë¦¬íŒ¹ ë°©ì‹
 
     [Header("Panels")]
-    public GameObject panelGameEnd;   // ÀÌ ½ºÅ©¸³Æ®°¡ ºÙÀº ÆĞ³ÎÀÌ¸é ÀÚ±â ÀÚ½Å ÇÒ´ç
-    public GameObject panelRank;      // Top10 ÆĞ³Î(ºñÈ°¼º ½ÃÀÛ ±ÇÀå)
+    public GameObject panelGameEnd;   // ì´ ìŠ¤í¬ë¦½íŠ¸ê°€ ë¶™ì€ íŒ¨ë„ì´ë©´ ìê¸° ìì‹  í• ë‹¹
+    public GameObject panelRank;      // Top10 íŒ¨ë„(ë¹„í™œì„± ì‹œì‘ ê¶Œì¥)
 
     [Header("Options")]
     public string gameMode = "Classic";
     public int level = 1;
     public bool autoSubmitOnShow = true;
 
-    [Tooltip("·©Å© ÆĞ³ÎÀ» ¿­ ¶§ ¼­¹ö¿¡¼­ Ç×»ó ÃÖ½Å Top10À» ¹Ş¾Æ¿É´Ï´Ù.")]
+    [Tooltip("ë­í¬ íŒ¨ë„ì„ ì—´ ë•Œ ì„œë²„ì—ì„œ í•­ìƒ ìµœì‹  Top10ì„ ë°›ì•„ì˜µë‹ˆë‹¤.")]
     public bool preferFreshRankOnOpen = true;
 
-    [Tooltip("·©Å© ÆĞ³ÎÀÌ ¿­¸° µ¿¾È ÁÖ±âÀûÀ¸·Î »õ·Î°íÄ§(ÃÊ). 0ÀÌ¸é ²û.")]
+    [Tooltip("ë­í¬ íŒ¨ë„ì´ ì—´ë¦° ë™ì•ˆ ì£¼ê¸°ì ìœ¼ë¡œ ìƒˆë¡œê³ ì¹¨(ì´ˆ). 0ì´ë©´ ë”.")]
     public float autoRefreshIntervalOnRankOpen = 0f;
 
-    [Tooltip("¼­ºñ½º°¡ ¾øÀ¸¸é ·±Å¸ÀÓ¿¡ ÀÚµ¿ »ı¼ºÇÕ´Ï´Ù(°³¹ß ÆíÀÇ¿ë).")]
+    [Tooltip("ì„œë¹„ìŠ¤ê°€ ì—†ìœ¼ë©´ ëŸ°íƒ€ì„ì— ìë™ ìƒì„±í•©ë‹ˆë‹¤(ê°œë°œ í¸ì˜ìš©).")]
     public bool autoCreateServiceIfMissing = false;
 
+    private string statusKey = "Rank_Ready";
+    private object[] statusArguments = Array.Empty<object>();
     private int _finalScore;
     private SubmitResp _lastSubmit;
     private bool _rankPanelOpen;
     private float _refreshElapsed;
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
     #region Lifecycle & Wiring
 
     void Awake()
@@ -53,7 +57,9 @@ public class CJS_Script_GameOverUI : MonoBehaviour
 
     void OnEnable()
     {
-        // ¾ÀÀÌ ¹Ù²ğ ¶§¸¶´Ù ¼­ºñ½º ÀçÈ®º¸ (Áßº¹ ÆÄ±« Å¸ÀÌ¹Ö ´ëºñ)
+        LocalizationSettings.SelectedLocaleChanged += RefreshLanguage;
+        RefreshLanguage(null);
+        // ì”¬ì´ ë°”ë€” ë•Œë§ˆë‹¤ ì„œë¹„ìŠ¤ ì¬í™•ë³´ (ì¤‘ë³µ íŒŒê´´ íƒ€ì´ë° ëŒ€ë¹„)
         SceneManager.activeSceneChanged += OnActiveSceneChanged;
         TryWireService();
     }
@@ -65,7 +71,19 @@ public class CJS_Script_GameOverUI : MonoBehaviour
 
     void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= RefreshLanguage;
         SceneManager.activeSceneChanged -= OnActiveSceneChanged;
+    }
+
+    private void SetStatus(string key, params object[] arguments)
+    {
+        statusKey = key;
+        statusArguments = arguments;
+        RefreshLanguage(null);
+    }
+    private void RefreshLanguage(Locale _)
+    {
+        if (textResult) textResult.text = PSH_Script_Localization.Text(statusKey, statusArguments);
     }
 
     private void OnActiveSceneChanged(Scene oldScene, Scene newScene)
@@ -75,10 +93,10 @@ public class CJS_Script_GameOverUI : MonoBehaviour
 
     private void TryWireService()
     {
-        // ÆÄ±«µÈ ÂüÁ¶(or ¹ÌÇÒ´ç)ÀÌ¸é ÀçÈ®º¸
+        // íŒŒê´´ëœ ì°¸ì¡°(or ë¯¸í• ë‹¹)ì´ë©´ ì¬í™•ë³´
         if (!service)
         {
-            // ½Ì±ÛÅæ ¿ì¼±
+            // ì‹±ê¸€í†¤ ìš°ì„ 
             var instProp = GetInstanceOrNull();
             if (instProp != null)
             {
@@ -86,12 +104,12 @@ public class CJS_Script_GameOverUI : MonoBehaviour
             }
             else
             {
-                // ¾À °Ë»ö(ºñÈ°¼º Æ÷ÇÔ)
+                // ì”¬ ê²€ìƒ‰(ë¹„í™œì„± í¬í•¨)
                 service = FindObjectOfType<CJS_Script_PinballRankingService>(includeInactive: true);
             }
         }
 
-        // ¿©ÀüÈ÷ ¾ø°í ÀÚµ¿ »ı¼º ¿É¼ÇÀÌ ÄÑÁ® ÀÖÀ¸¸é ºÎÆ®½ºÆ®·¦
+        // ì—¬ì „íˆ ì—†ê³  ìë™ ìƒì„± ì˜µì…˜ì´ ì¼œì ¸ ìˆìœ¼ë©´ ë¶€íŠ¸ìŠ¤íŠ¸ë©
         if (!service && autoCreateServiceIfMissing)
         {
             var go = new GameObject("RankingService_Auto");
@@ -101,12 +119,12 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         }
     }
 
-    // ¸®ÇÃ·º¼Ç ¾øÀÌµµ ¾µ ¼ö ÀÖµµ·Ï Instance getter È£Ãâ ·¡ÆÛ
+    // ë¦¬í”Œë ‰ì…˜ ì—†ì´ë„ ì“¸ ìˆ˜ ìˆë„ë¡ Instance getter í˜¸ì¶œ ë˜í¼
     private CJS_Script_PinballRankingService GetInstanceOrNull()
     {
         try
         {
-            // ÇÁ·ÎÁ§Æ®¿¡ public static CJS_Script_PinballRankingService Instance {get;} °¡ ÀÖ¾î¾ß ÇÔ
+            // í”„ë¡œì íŠ¸ì— public static CJS_Script_PinballRankingService Instance {get;} ê°€ ìˆì–´ì•¼ í•¨
             return CJS_Script_PinballRankingService.Instance;
         }
         catch
@@ -116,11 +134,11 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     }
 
     #endregion
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
     void Update()
     {
-        // ·©Å© ÆĞ³Î ÀÚµ¿ »õ·Î°íÄ§(¼±ÅÃ)
+        // ë­í¬ íŒ¨ë„ ìë™ ìƒˆë¡œê³ ì¹¨(ì„ íƒ)
         if (_rankPanelOpen && autoRefreshIntervalOnRankOpen > 0f && service != null)
         {
             _refreshElapsed += Time.unscaledDeltaTime;
@@ -132,20 +150,20 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         }
     }
 
-    /// ¿ÜºÎ¿¡¼­ Á¡¼ö¸¸ ¸ÕÀú ¹İ¿µÇÏ°í ½ÍÀ» ¶§ »ç¿ë
+    /// ì™¸ë¶€ì—ì„œ ì ìˆ˜ë§Œ ë¨¼ì € ë°˜ì˜í•˜ê³  ì‹¶ì„ ë•Œ ì‚¬ìš©
     public void SetFinalScore(int score)
     {
         _finalScore = score;
         if (textFinalScore) textFinalScore.text = score.ToString("N0");
     }
 
-    /// °ÔÀÓ Á¾·á ½Ã È£Ãâ
+    /// ê²Œì„ ì¢…ë£Œ ì‹œ í˜¸ì¶œ
     public void Show(int finalScore)
     {
         _finalScore = finalScore;
 
         if (textFinalScore) textFinalScore.text = _finalScore.ToString("N0");
-        if (textResult) textResult.text = "Á¦Ãâ ´ë±âÁß¡¦";
+        SetStatus("Rank_Ready");
 
         Debug.Log($"[GameOverUI.Show] finalScore={_finalScore} autoSubmit={autoSubmitOnShow}");
         if (autoSubmitOnShow) OnClickSubmit();
@@ -156,25 +174,24 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         TryWireService();
         if (service == null) { Debug.LogError("[GameOverUI] service is null"); return; }
 
-        if (textResult) textResult.text = "¼­¹ö¿¡ Àü¼ÛÁß¡¦";
+        SetStatus("Rank_Saving");
 
         service.SubmitScore(_finalScore, gameMode, level,
             onDone: resp =>
             {
                 _lastSubmit = resp;
 
-                if (textResult)
-                    textResult.text = $"³» Á¡¼ö: {resp.your_score:N0}\n³» ·©Å·: #{resp.rank}";
+                SetStatus("Rank_Saved", resp.your_score, resp.rank);
 
-                // 1) ³«°üÀû ¾÷µ¥ÀÌÆ®: ¼­¹ö°¡ µ¹·ÁÁØ ½º³À¼¦ ¸ÕÀú Ç¥½Ã
+                // 1) ë‚™ê´€ì  ì—…ë°ì´íŠ¸: ì„œë²„ê°€ ëŒë ¤ì¤€ ìŠ¤ëƒ…ìƒ· ë¨¼ì € í‘œì‹œ
                 RefreshLeaderboardUI(resp.top10);
 
-                // 2) È®Á¤ µ¿±âÈ­: ¹æ±İ ÀúÀåµÈ ³»¿ëÀÌ Top10¿¡ ¹İ¿µµÆ´ÂÁö ¼­¹ö¿¡¼­ "´Ù½Ã" ¹Ş¾Æ¼­ °»½Å
+                // 2) í™•ì • ë™ê¸°í™”: ë°©ê¸ˆ ì €ì¥ëœ ë‚´ìš©ì´ Top10ì— ë°˜ì˜ëëŠ”ì§€ ì„œë²„ì—ì„œ "ë‹¤ì‹œ" ë°›ì•„ì„œ ê°±ì‹ 
                 FetchFreshLeaderboardAndDraw();
             },
             onFail: err =>
             {
-                if (textResult) textResult.text = $"Á¦Ãâ ½ÇÆĞ: {err}";
+                SetStatus("Rank_Failed");
                 Debug.LogError("[GameOverUI] Submit fail: " + err);
             }
         );
@@ -210,8 +227,8 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         FetchFreshLeaderboardAndDraw();
     }
 
-    // ¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡¦¡
-    // ³»ºÎ À¯Æ¿
+    // â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+    // ë‚´ë¶€ ìœ í‹¸
 
     private void FetchFreshLeaderboardAndDraw()
     {
@@ -249,6 +266,6 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     {
         if (string.IsNullOrEmpty(s)) return "Player";
         s = s.Trim();
-        return s.Length > maxLen ? s.Substring(0, maxLen) + "¡¦" : s;
+        return s.Length > maxLen ? s.Substring(0, maxLen) + "â€¦" : s;
     }
 }

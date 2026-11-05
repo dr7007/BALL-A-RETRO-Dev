@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class CJS_Script_ChoiceSlot : MonoBehaviour
 {
@@ -10,14 +12,29 @@ public class CJS_Script_ChoiceSlot : MonoBehaviour
     [SerializeField] private TMP_Text txtRarity;
 
     [Header("Tooltip (optional)")]
-    [SerializeField] private CJS_Script_TooltipTarget tooltipTarget; // ¾øÀ¸¸é ÀÚµ¿ Å½»ö/Ãß°¡
+    [SerializeField] private CJS_Script_TooltipTarget tooltipTarget; // ì—†ìœ¼ë©´ ìë™ íƒìƒ‰/ì¶”ê°€
+
+    private CJS_ChoiceSnapshot snapshot;
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += RefreshText;
+        RefreshText(null);
+    }
+    private void OnDisable() => LocalizationSettings.SelectedLocaleChanged -= RefreshText;
+    private void RefreshText(Locale _)
+    {
+        if (snapshot == null) return;
+        if (txtName) txtName.text = CJS_ChoiceData.Localized(snapshot.localizationKey, "Name", snapshot.name);
+        if (txtRarity) txtRarity.text = CJS_ChoiceData.LocalizedRarity(snapshot.rarity);
+        tooltipTarget?.Set("", CJS_ChoiceData.Localized(snapshot.localizationKey, "Description", snapshot.description));
+    }
 
     void Reset() { AutoWire(); Clear(); }
     void Awake() { AutoWire(); Clear(); }
 
     private void AutoWire()
     {
-        // ¾ÆÀÌÄÜ ÀÌ¹ÌÁö ÀÚµ¿ Å½»ö
+        // ì•„ì´ì½˜ ì´ë¯¸ì§€ ìë™ íƒìƒ‰
         if (!imgIcon)
         {
             var t = transform.Find("Icon");
@@ -26,7 +43,7 @@ public class CJS_Script_ChoiceSlot : MonoBehaviour
         }
         if (imgIcon) imgIcon.preserveAspect = true;
 
-        // ÅøÆÁ Å¸±ê ÀÚµ¿ Å½»ö(¾øÀ¸¸é ¾ÆÀÌÄÜ ¿ÀºêÁ§Æ®¿¡ ºÎÂø)
+        // íˆ´íŒ íƒ€ê¹ƒ ìë™ íƒìƒ‰(ì—†ìœ¼ë©´ ì•„ì´ì½˜ ì˜¤ë¸Œì íŠ¸ì— ë¶€ì°©)
         if (!tooltipTarget)
             tooltipTarget = GetComponentInChildren<CJS_Script_TooltipTarget>(true);
         if (!tooltipTarget && imgIcon)
@@ -36,6 +53,7 @@ public class CJS_Script_ChoiceSlot : MonoBehaviour
     public void Bind(CJS_ChoiceSnapshot s)
     {
         if (s == null) { Clear(); return; }
+        snapshot = s;
 
         if (imgIcon)
         {
@@ -45,11 +63,10 @@ public class CJS_Script_ChoiceSlot : MonoBehaviour
             imgIcon.material = null;    
             imgIcon.maskable = true;
         }
-        if (txtName) txtName.text = s.name ?? "";
-        if (txtRarity) txtRarity.text = s.rarity ?? "";
+        RefreshText(null);
 
    
-        tooltipTarget?.Set("", s.description);
+
 
         Debug.Log($"[ChoiceSlot] Bind icon={(s.icon ? s.icon.name : "null")}");
     }
@@ -57,6 +74,7 @@ public class CJS_Script_ChoiceSlot : MonoBehaviour
     public void Bind(CJS_ChoiceData d)
     {
         if (d == null) { Clear(); return; }
+        snapshot = CJS_ChoiceSnapshot.From(d);
 
         if (imgIcon)
         {
@@ -66,17 +84,17 @@ public class CJS_Script_ChoiceSlot : MonoBehaviour
             imgIcon.material = null;
             imgIcon.maskable = true;
         }
-        if (txtName) txtName.text = d.name ?? "";
-        if (txtRarity) txtRarity.text = d.rarity ?? "";
+        RefreshText(null);
 
 
-        tooltipTarget?.Set("", d.description);
+
 
         Debug.Log($"[ChoiceSlot] Bind(Data) icon={(d.icon ? d.icon.name : "null")}");
     }
 
     public void Clear()
     {
+        snapshot = null;
         if (imgIcon) { imgIcon.sprite = null; imgIcon.enabled = false; }
         if (txtName) txtName.text = "";
         if (txtRarity) txtRarity.text = "";

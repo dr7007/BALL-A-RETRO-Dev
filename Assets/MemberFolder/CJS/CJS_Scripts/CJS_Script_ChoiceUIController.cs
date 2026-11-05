@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using UnityEngine.EventSystems;
 
 public class CJS_Script_ChoiceUIController : MonoBehaviour
@@ -44,6 +46,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += RefreshLanguage;
+        UpdateRerollUI();
         if (btnReroll != null) btnReroll.onClick.AddListener(OnClickReroll);
         if (btnSkip != null) btnSkip.onClick.AddListener(OnClickSkip);
         KHS_Script_ScoreManager.Round_Clear += PickCountBonusFunc;
@@ -51,6 +55,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= RefreshLanguage;
         if (btnReroll != null) btnReroll.onClick.RemoveListener(OnClickReroll);
         if (btnSkip != null) btnSkip.onClick.RemoveListener(OnClickSkip);
         KHS_Script_ScoreManager.Round_Clear -= PickCountBonusFunc;
@@ -197,10 +202,12 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         Hide();
     }
 
+    private void RefreshLanguage(Locale _) => UpdateRerollUI();
+
     private void UpdateRerollUI()
     {
         if (txtRerollInfo != null)
-            txtRerollInfo.text = Mathf.Max(0, maxReroll - usedReroll) + "회";
+            txtRerollInfo.text = PSH_Script_Localization.Text("Choice_Remaining", Mathf.Max(0, maxReroll - usedReroll));
 
         if (btnReroll != null)
             btnReroll.interactable = isOpen && (usedReroll < maxReroll);

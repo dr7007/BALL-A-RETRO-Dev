@@ -1,6 +1,8 @@
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 [RequireComponent(typeof(Toggle))]
 public class PSH_Script_ToggleUIController : MonoBehaviour
@@ -44,12 +46,14 @@ public class PSH_Script_ToggleUIController : MonoBehaviour
     private void OnEnable()
     {
         PSH_Script_EffectSettings.Changed += Sync;
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
         Sync(PSH_Script_EffectSettings.IsEnabled);
     }
 
     private void OnDisable()
     {
         PSH_Script_EffectSettings.Changed -= Sync;
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
         if (detailsPanel != null) detailsPanel.gameObject.SetActive(false);
     }
     private void OnDestroy()
@@ -70,6 +74,8 @@ public class PSH_Script_ToggleUIController : MonoBehaviour
         detailsPanel.gameObject.SetActive(true);
     }
 
+    private void OnLocaleChanged(Locale _) => Sync(PSH_Script_EffectSettings.IsEnabled);
+
     private void Sync(bool value)
     {
         toggle.SetIsOnWithoutNotify(value);
@@ -79,6 +85,6 @@ public class PSH_Script_ToggleUIController : MonoBehaviour
     private void UpdateVisuals(bool value)
     {
         if (anim != null && anim.runtimeAnimatorController != null) anim.SetBool("isOn", value);
-        if (label != null) label.text = value ? (PSH_Script_EffectSettings.AllEnabled ? "ON" : "일부") : "OFF";
+        if (label != null) label.text = value ? (PSH_Script_EffectSettings.AllEnabled ? "ON" : PSH_Script_Localization.Text("Effects_Partial")) : "OFF";
     }
 }

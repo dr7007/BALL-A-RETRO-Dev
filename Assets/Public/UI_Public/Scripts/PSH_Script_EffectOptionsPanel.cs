@@ -1,6 +1,8 @@
 using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 using Effect = PSH_Script_EffectSettings.Effect;
 
 /// <summary>Shared effects dialog, opened from the settings prefab in every scene.</summary>
@@ -33,9 +35,15 @@ public class PSH_Script_EffectOptionsPanel : MonoBehaviour
     private void OnEnable()
     {
         PSH_Script_EffectSettings.Changed += Refresh;
+        LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
         Refresh(false);
     }
-    private void OnDisable() => PSH_Script_EffectSettings.Changed -= Refresh;
+    private void OnDisable()
+    {
+        PSH_Script_EffectSettings.Changed -= Refresh;
+        LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
+    }
+    private void OnLocaleChanged(Locale _) => Refresh(false);
 
     private void Build()
     {
@@ -46,16 +54,16 @@ public class PSH_Script_EffectOptionsPanel : MonoBehaviour
         var card = Rect("Panel", transform, Vector2.zero, new Vector2(920, 830));
         card.gameObject.AddComponent<Image>().color = new Color(.035f, .05f, .08f, 1);
         Border(card.gameObject);
-        Label("Title", card, "이펙트 세부 설정", new Vector2(0, 350), new Vector2(820, 58), 36);
-        Label("Hint", card, "원하는 효과만 켜거나, 관련 효과를 한 번에 끌 수 있습니다.",
+        Label("Title", card, "Effects_Title", new Vector2(0, 350), new Vector2(820, 58), 36);
+        Label("Hint", card, "Effects_Hint",
             new Vector2(0, 302), new Vector2(840, 40), 23);
-        Button("DefaultMode", card, "기본 모드 · 모두 켜기", new Vector2(-210, 240), new Vector2(390, 58),
+        Button("DefaultMode", card, "Effects_AllOn", new Vector2(-210, 240), new Vector2(390, 58),
             () => PSH_Script_EffectSettings.SetEnabled(true));
-        Button("ReduceEffects", card, "광과민성 배려 · 모두 끄기", new Vector2(210, 240), new Vector2(390, 58),
+        Button("ReduceEffects", card, "Effects_AllOff", new Vector2(210, 240), new Vector2(390, 58),
             () => PSH_Script_EffectSettings.SetEnabled(false));
         status = Label("Status", card, "", new Vector2(0, 181), new Vector2(820, 36), 24);
 
-        string[] labels = { "카메라 흔들림", "충돌·폭죽 파티클", "공 궤적", "섬광·효과 조명", "글리치·화면 움직임", "빛 번짐·후처리" };
+        string[] labels = { "Effects_CameraShake", "Effects_Particles", "Effects_Trails", "Effects_Flashes", "Effects_ScreenEffects", "Effects_PostProcessing" };
         for (int i = 0; i < switches.Length; i++)
         {
             var effect = (Effect)i;
@@ -78,15 +86,15 @@ public class PSH_Script_EffectOptionsPanel : MonoBehaviour
             toggle.onValueChanged.AddListener(value => PSH_Script_EffectSettings.Set(effect, value));
             rect.gameObject.AddComponent<PSH_Script_BaseButtonHover>();
         }
-        Button("Close", card, "설정으로 돌아가기", new Vector2(0, -335), new Vector2(380, 58),
+        Button("Close", card, "Effects_Back", new Vector2(0, -335), new Vector2(380, 58),
             () => gameObject.SetActive(false));
     }
 
     private void Refresh(bool _)
     {
         if (status == null) return;
-        status.text = PSH_Script_EffectSettings.AllEnabled ? "기본 모드 · 모든 효과 ON"
-            : PSH_Script_EffectSettings.IsEnabled ? "사용자 설정 · 선택한 효과만 ON" : "광과민성 배려 · 모든 효과 OFF";
+        status.text = PSH_Script_Localization.Text(PSH_Script_EffectSettings.AllEnabled ? "Effects_StatusOn"
+            : PSH_Script_EffectSettings.IsEnabled ? "Effects_StatusCustom" : "Effects_StatusOff");
         status.color = new Color(.745f, .949f, .69f, 1);
         for (int i = 0; i < switches.Length; i++)
         {
@@ -114,6 +122,8 @@ public class PSH_Script_EffectOptionsPanel : MonoBehaviour
         label.font = font;
         label.fontSize = fontSize;
         label.text = text;
+        if (!string.IsNullOrEmpty(text) && text != "ON")
+            rect.gameObject.AddComponent<PSH_Script_LocalizedText>().SetKey(text);
         label.color = Color.white;
         label.alignment = TextAlignmentOptions.Center;
         label.raycastTarget = false;

@@ -92,12 +92,12 @@ if ($IncludeScorePopups) {
 }
 Copy-Item -LiteralPath "$sourceRoot/Assets/TextMesh Pro" -Destination "$outputPath/Assets/TextMesh Pro" -Recurse
 Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Font" -Destination "$outputPath/Assets/Fonts" -Recurse
-$null = New-Item -ItemType Directory -Path "$outputPath/Assets/Localization"
-foreach ($name in @('UITable Shared Data.asset', 'UITable_ko.asset', 'UITable_en.asset')) {
-    Copy-Item -LiteralPath "$sourceRoot/Assets/Resources/LocalizationData/$name", "$sourceRoot/Assets/Resources/LocalizationData/$name.meta" -Destination "$outputPath/Assets/Localization"
-}
-@{ name = 'BallARetro.RunUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/RunUnderTest.asmdef" -Encoding utf8
-@{ name = 'BallARetro.RunProgressionTests'; references = @('BallARetro.RunUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RunProgressionTests.asmdef" -Encoding utf8
+$null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Resources"
+Copy-Item "$sourceRoot/Assets/Resources/LocalizationData" "$outputPath/Assets/Resources/LocalizationData" -Recurse
+Copy-Item "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_Local*.cs" "$outputPath/Assets/Runtime"
+Copy-Item "$sourceRoot/Tests/Localization/LocaleTestContext.cs" "$outputPath/Assets/Tests"
+@{ name = 'BallARetro.RunUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization', 'Unity.ResourceManager') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/RunUnderTest.asmdef" -Encoding utf8
+@{ name = 'BallARetro.RunProgressionTests'; references = @('BallARetro.RunUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization', 'Unity.ResourceManager'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RunProgressionTests.asmdef" -Encoding utf8
 if ($Baseline) { '-define:BASELINE' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
 $testClasses = @('RunProgressionTests')
 if ($IncludeBallRescue) { $testClasses += 'BallAutoRescueTests' }

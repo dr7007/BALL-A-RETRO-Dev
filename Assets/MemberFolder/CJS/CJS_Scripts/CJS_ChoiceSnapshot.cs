@@ -3,6 +3,7 @@ using UnityEngine;
 [System.Serializable]
 public class CJS_ChoiceSnapshot
 {
+    public string localizationKey;
     public string name;
     public string description;
     public string rarity;
@@ -14,6 +15,7 @@ public class CJS_ChoiceSnapshot
         if (d == null) return new CJS_ChoiceSnapshot();
         return new CJS_ChoiceSnapshot
         {
+            localizationKey = d.localizationKey,
             name = d.name,
             description = d.description,
             rarity = d.rarity,

@@ -2,6 +2,8 @@ using System;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class CJS_Script_ChoiceCard : MonoBehaviour
 {
@@ -20,11 +22,14 @@ public class CJS_Script_ChoiceCard : MonoBehaviour
 
     void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += RefreshText;
+        RefreshText(null);
         if (btn != null) btn.onClick.AddListener(InvokePick);
     }
 
     void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= RefreshText;
         if (btn != null) btn.onClick.RemoveListener(InvokePick);
     }
 
@@ -43,9 +48,7 @@ public class CJS_Script_ChoiceCard : MonoBehaviour
         data = d;
         onPick = onPickCb;
 
-        if (txtName != null) txtName.text = d != null ? d.name : "";
-        if (txtRarity != null) txtRarity.text = d != null ? d.rarity : "";
-        if (txtDesc != null) txtDesc.text = d != null ? d.description : "";
+        RefreshText(null);
         if (imgIcon != null) imgIcon.sprite = d != null ? d.icon : null;
 
         if (txtChance != null)
@@ -55,6 +58,13 @@ public class CJS_Script_ChoiceCard : MonoBehaviour
             else
                 txtChance.text = "";
         }
+    }
+
+    private void RefreshText(Locale _)
+    {
+        if (txtName) txtName.text = data != null ? CJS_ChoiceData.Localized(data.localizationKey, "Name", data.name) : "";
+        if (txtDesc) txtDesc.text = data != null ? CJS_ChoiceData.Localized(data.localizationKey, "Description", data.description) : "";
+        if (txtRarity) txtRarity.text = data != null ? CJS_ChoiceData.LocalizedRarity(data.rarity) : "";
     }
 
     private void InvokePick()

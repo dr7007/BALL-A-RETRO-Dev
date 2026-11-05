@@ -83,6 +83,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000040}
   - component: {fileID: 8242478021284163756}
   - component: {fileID: 4898192689284391520}
   - component: {fileID: 4130434256359885159}
@@ -110,7 +111,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 16.39}
-  m_SizeDelta: {x: 600, y: 50}
+  m_SizeDelta: {x: 680, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4898192689284391520
 CanvasRenderer:
@@ -499,6 +500,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3796940333021458228}
     m_Modifications:
+    - target: {fileID: 8200000000000000055, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
+      propertyPath: key
+      value: Button_No
+      objectReference: {fileID: 0}
     - target: {fileID: 1938364947691836094, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
       propertyPath: m_text
       value: NO
@@ -685,6 +690,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 3796940333021458228}
     m_Modifications:
+    - target: {fileID: 8200000000000000055, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
+      propertyPath: key
+      value: Button_Yes
+      objectReference: {fileID: 0}
     - target: {fileID: 1938364947691836094, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
       propertyPath: m_text
       value: YES
@@ -839,3 +848,17 @@ RectTransform:
   m_CorrespondingSourceObject: {fileID: 5419743856252468876, guid: c44b940c7605dea42996cd7ff59eec80, type: 3}
   m_PrefabInstance: {fileID: 7668287403255572691}
   m_PrefabAsset: {fileID: 0}
+--- !u!114 &8200000000000000040
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6729688853369352384}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: Warning_Quit
+  fitText: 1

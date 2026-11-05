@@ -1,6 +1,8 @@
 using System.Collections.Generic;
 using UnityEngine;
 using TMPro;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class PSH_Script_ResolutionSettings : MonoBehaviour
 {
@@ -17,6 +19,30 @@ public class PSH_Script_ResolutionSettings : MonoBehaviour
         FullScreenMode.FullScreenWindow,    // 인덱스 1: 테두리 없는 창모드
         FullScreenMode.Windowed             // 인덱스 2: 창모드
     };
+
+    private void OnEnable()
+    {
+        LocalizationSettings.SelectedLocaleChanged += RefreshLanguage;
+        RefreshLanguage(null);
+    }
+    private void OnDisable() => LocalizationSettings.SelectedLocaleChanged -= RefreshLanguage;
+    private void RefreshLanguage(Locale _)
+    {
+        if (screenModeDropdown == null || screenModeDropdown.options.Count == 0) return;
+        int selected = screenModeDropdown.value;
+        screenModeDropdown.Hide();
+        SetModeOptions();
+        screenModeDropdown.SetValueWithoutNotify(selected);
+        screenModeDropdown.RefreshShownValue();
+    }
+    private void SetModeOptions()
+    {
+        screenModeDropdown.ClearOptions();
+        screenModeDropdown.AddOptions(new List<string> {
+            PSH_Script_Localization.Text("Sys_Fullscreen"),
+            PSH_Script_Localization.Text("Sys_Borderless"),
+            PSH_Script_Localization.Text("Sys_Windowed") });
+    }
 
     void Start()
     {
@@ -60,23 +86,19 @@ public class PSH_Script_ResolutionSettings : MonoBehaviour
         }
 
         resolutionDropdown.AddOptions(options);
-        resolutionDropdown.value = currentResolutionIndex;
+        resolutionDropdown.SetValueWithoutNotify(currentResolutionIndex);
         resolutionDropdown.RefreshShownValue();
     }
 
     private void InitScreenModeDropdown()
     {
-        screenModeDropdown.ClearOptions();
-        
-        // screenModes 배열의 순서와 정확히 일치하도록 텍스트 옵션을 구성합니다.
-        List<string> modeOptions = new List<string> { "전체화면", "테두리 없는 창모드", "창모드" };
-        screenModeDropdown.AddOptions(modeOptions);
+        SetModeOptions();
 
         // 현재 기기의 화면 모드가 배열의 몇 번째 인덱스인지 찾아서 UI 기본값으로 세팅합니다.
         int currentModeIndex = System.Array.IndexOf(screenModes, Screen.fullScreenMode);
         
         // 예외 처리 (만약 일치하는 모드가 없으면 0번 전체화면으로 초기화)
-        screenModeDropdown.value = currentModeIndex != -1 ? currentModeIndex : 0; 
+        screenModeDropdown.SetValueWithoutNotify(currentModeIndex != -1 ? currentModeIndex : 0);
         
         screenModeDropdown.RefreshShownValue();
     }

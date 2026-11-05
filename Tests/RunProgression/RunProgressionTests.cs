@@ -18,8 +18,10 @@ public class RunProgressionTests
     private class TestDatabase : LocalizedStringDatabase
     {
         public StringTable UI, Dialogue;
+        public bool UseTranslatedTables;
         public override StringTable GetTable(TableReference reference, Locale locale = null)
-            => reference.TableCollectionName == "UITable" ? UI : Dialogue;
+            => UseTranslatedTables ? PSH_Script_Localization.Table(reference.TableCollectionName)
+                : reference.TableCollectionName == "UITable" ? UI : Dialogue;
     }
     private readonly List<Object> objects = new List<Object>();
     private KHS_Script_ScoreManager manager;
@@ -37,10 +39,10 @@ public class RunProgressionTests
     public IEnumerator SetUp()
     {
         Time.timeScale = 1f;
-        var settings = Keep(ScriptableObject.CreateInstance<LocalizationSettings>());
-        LocalizationSettings.Instance = settings;
+        var settings = Keep(LocaleTestContext.Create());
+        yield return LocalizationSettings.InitializationOperation;
         database = new TestDatabase();
-        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Localization/UITable_ko.asset");
+        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Resources/LocalizationData/UITable_ko.asset");
         database.Dialogue = Keep(ScriptableObject.CreateInstance<StringTable>());
         database.Dialogue.SharedData = Keep(ScriptableObject.CreateInstance<SharedTableData>());
         database.Dialogue.SharedData.TableCollectionName = "DialogueTable";
@@ -125,6 +127,36 @@ public class RunProgressionTests
         objects.Clear();
         LocalizationSettings.Instance = null;
         Time.timeScale = 1f;
+    }
+
+    [UnityTest]
+    public IEnumerator SwitchingLanguageKeepsTheCurrentDialogueLineAndDoesNotCompleteIt()
+    {
+        database.UseTranslatedTables = true;
+        Set(dialogue, "introPanelRoot", endingPanel);
+        Set(dialogue, "introText", summary);
+        int completed = 0;
+        System.Action<string> onComplete = _ => completed++;
+        PSH_Script_DialogueUI.OnDialogueComplete += onComplete;
+        try
+        {
+            foreach(string cutscene in new[]{"Tutorial", "Intro", "Ending1", "Ending2"})
+            {
+                dialogue.Play(cutscene);
+                typeof(PSH_Script_DialogueUI).GetMethod("AdvanceDialogue",BindingFlags.Instance|BindingFlags.NonPublic).Invoke(dialogue,null);
+                int line = (int)Get(dialogue,"idx");
+                int before = completed;
+                foreach(string code in new[]{"en", "ja", "ko"})
+                {
+                    LocaleTestContext.Select(code);yield return LocalizationSettings.InitializationOperation;yield return null;
+                    Assert.That(summary.text,Is.EqualTo(PSH_Script_Localization.Table("DialogueTable").GetEntry(cutscene+"_01").LocalizedValue));
+                    Assert.That(Get(dialogue,"idx"),Is.EqualTo(line));
+                    Assert.That(completed,Is.EqualTo(before));
+                }
+                dialogue.SkipDialogue();
+            }
+        }
+        finally { PSH_Script_DialogueUI.OnDialogueComplete -= onComplete; }
     }
 
     [UnityTest]
@@ -297,7 +329,7 @@ public class RunProgressionTests
         Assert.That(summary.isTextOverflowing, Is.False);
         Capture($"clear-{score}-ko.png");
 
-        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Localization/UITable_en.asset");
+        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Resources/LocalizationData/UITable_en.asset");
         Invoke(canvas.GetComponent<PSH_Script_RunStatusUI>(), "OnLocaleChanged", (Locale)null);
         summary.ForceMeshUpdate();
         Assert.That(summary.text, Does.Contain("Clear"));
@@ -376,7 +408,7 @@ public class RunProgressionTests
     }
 
     [UnityTest]
-    public IEnumerator KoreanAndEnglishResultFitTheExistingDialogueRectangle()
+    public IEnumerator AllThreeLanguagesFitTheExistingResultRectangle()
     {
         FinalRound(4350);
         flippers.fliper_Count = 0;
@@ -387,7 +419,7 @@ public class RunProgressionTests
         Assert.That(summary.isTextOverflowing, Is.False);
         Assert.That(summary.textInfo.lineCount, Is.LessThanOrEqualTo(2));
         Capture("result-ko.png");
-        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Localization/UITable_en.asset");
+        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Resources/LocalizationData/UITable_en.asset");
         Invoke(canvas.GetComponent<PSH_Script_RunStatusUI>(), "OnLocaleChanged", (Locale)null);
         yield return null;
         summary.ForceMeshUpdate();
@@ -395,6 +427,14 @@ public class RunProgressionTests
         Assert.That(summary.isTextOverflowing, Is.False);
         Assert.That(summary.textInfo.lineCount, Is.LessThanOrEqualTo(2));
         Capture("result-en.png");
+        database.UI = AssetDatabase.LoadAssetAtPath<StringTable>("Assets/Resources/LocalizationData/UITable_ja.asset");
+        Invoke(canvas.GetComponent<PSH_Script_RunStatusUI>(), "OnLocaleChanged", (Locale)null);
+        yield return null;
+        summary.ForceMeshUpdate();
+        Assert.That(summary.text, Does.Contain("目標未達"));
+        Assert.That(summary.isTextOverflowing, Is.False);
+        Assert.That(summary.textInfo.lineCount, Is.LessThanOrEqualTo(2));
+        Capture("result-ja.png");
         yield return null;
     }
 #endif

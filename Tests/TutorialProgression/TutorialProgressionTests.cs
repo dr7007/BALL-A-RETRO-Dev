@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
 using TMPro;
+using UnityEngine.Localization.Settings;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
@@ -12,6 +13,7 @@ using Object = UnityEngine.Object;
 public class TutorialProgressionTests
 {
     private readonly List<GameObject> objects = new List<GameObject>();
+    private LocalizationSettings localeSettings;
     private CJS_TutorialDirector tutorial;
     private KHS_Script_ScoreManager score;
 
@@ -19,6 +21,8 @@ public class TutorialProgressionTests
     public IEnumerator SetUp()
     {
         Time.timeScale = 1;
+        localeSettings = LocaleTestContext.Create();
+        yield return LocalizationSettings.InitializationOperation;
         var scoreGO = New("Score"); scoreGO.SetActive(false);
         score = scoreGO.AddComponent<KHS_Script_ScoreManager>();
         var canvas = New("TutorialCanvas", typeof(RectTransform), typeof(Canvas));
@@ -39,7 +43,7 @@ public class TutorialProgressionTests
     public void TearDown()
     {
         for (int i = objects.Count - 1; i >= 0; i--) if (objects[i]) Object.DestroyImmediate(objects[i]);
-        objects.Clear(); Time.timeScale = 1; Cursor.lockState = CursorLockMode.None;
+        objects.Clear(); Object.DestroyImmediate(localeSettings); LocalizationSettings.Instance = null; Time.timeScale = 1; Cursor.lockState = CursorLockMode.None;
     }
 
     [Test]
@@ -84,7 +88,7 @@ public class TutorialProgressionTests
         Launch(); score.curScore = 1050;
         Press(KeyCode.Z); Press(KeyCode.Z); Tick();
         Assert.That(tutorial.resultPanel.activeSelf, Is.False);
-        Assert.That(tutorial.tutorialText.text, Does.Contain("Slash: 눌러보세요"));
+        Assert.That(tutorial.tutorialText.text, Does.Contain("/: 눌러보세요"));
     }
 
     [Test]
@@ -112,8 +116,39 @@ public class TutorialProgressionTests
     {
         Launch(); score.curScore = 1100; Call(method, 1100);
         Assert.That(tutorial.resultPanel.activeSelf, Is.True);
-        Assert.That(tutorial.resultTitleText.text, Is.EqualTo("다시 해볼까?"));
+        Assert.That(tutorial.resultTitleText.text, Is.EqualTo("다시 해볼까요?"));
         Assert.That(tutorial.resultDescText.text, Does.Contain("플리퍼"));
+    }
+
+    [UnityTest]
+    public IEnumerator LanguageChangePreservesPracticeAndTranslatesTheOpenResult()
+    {
+        Launch(); Press(KeyCode.Z);
+        LocaleTestContext.Select("en"); yield return LocalizationSettings.InitializationOperation; yield return null;
+        Assert.That(tutorial.tutorialText.text, Does.Contain("Z: Done"));
+        Assert.That(tutorial.tutorialText.text, Does.Contain("/: Press it"));
+        score.curScore = 1000; Press(KeyCode.Slash);
+        yield return new WaitForSecondsRealtime(.3f); Tick();
+        Assert.That(tutorial.resultTitleText.text, Is.EqualTo("Tutorial Complete!"));
+        LocaleTestContext.Select("ja"); yield return LocalizationSettings.InitializationOperation; yield return null;
+        Assert.That(tutorial.resultTitleText.text, Is.EqualTo("チュートリアル完了！"));
+        Assert.That(tutorial.resultDescText.text, Does.Contain("1000"));
+        Assert.That(Time.timeScale, Is.Zero);
+        Assert.That(tutorial.resultPanel.activeSelf, Is.True);
+    }
+
+    [UnityTest]
+    public IEnumerator LanguageChangeDoesNotReplayTheCameraStepOrResetInputProgress()
+    {
+        Call("GoToStep", CJS_TutorialDirector.Step.Flippers);
+        typeof(CJS_TutorialDirector).GetField("_leftDone", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(tutorial, true);
+        Time.timeScale = 0;
+        LocaleTestContext.Select("en"); yield return LocalizationSettings.InitializationOperation; yield return null;
+        Assert.That(tutorial.tutorialText.text, Is.EqualTo("Press both Z and /!"));
+        Assert.That(typeof(CJS_TutorialDirector).GetField("_leftDone", BindingFlags.Instance | BindingFlags.NonPublic).GetValue(tutorial), Is.True);
+        Assert.That(Time.timeScale, Is.Zero);
+        LocaleTestContext.Select("ja"); yield return LocalizationSettings.InitializationOperation; yield return null;
+        Assert.That(tutorial.tutorialText.text, Does.Contain("それぞれ"));
     }
 
     private void Launch() { Call("GoToStep", CJS_TutorialDirector.Step.Plunger); KHS_Script_PlungerController.Launch(); }

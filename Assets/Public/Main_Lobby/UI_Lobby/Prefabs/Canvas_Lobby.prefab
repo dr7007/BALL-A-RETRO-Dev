@@ -8,6 +8,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000049}
   - component: {fileID: 4961352070844112886}
   - component: {fileID: 826044886450804726}
   - component: {fileID: 1097302247172782314}
@@ -372,6 +373,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000050}
   - component: {fileID: 7996615436469191606}
   - component: {fileID: 2597391004016123533}
   - component: {fileID: 7678008033789642292}
@@ -765,6 +767,7 @@ GameObject:
   m_PrefabAsset: {fileID: 0}
   serializedVersion: 6
   m_Component:
+  - component: {fileID: 8200000000000000051}
   - component: {fileID: 294306891277647983}
   - component: {fileID: 6555101772312474818}
   - component: {fileID: 8448374724617277564}
@@ -983,7 +986,6 @@ GameObject:
   - component: {fileID: 1749670711815635842}
   - component: {fileID: 6092786664975596656}
   - component: {fileID: 652328669646658948}
-  - component: {fileID: 7943752796703444729}
   m_Layer: 5
   m_Name: Canvas_Lobby
   m_TagString: Untagged
@@ -1122,19 +1124,6 @@ MonoBehaviour:
   panelSetting: {fileID: 1888459690775555947}
   panelWarning: {fileID: 3371566716919887408}
   goToLobbyButton: {fileID: 2411365104606688478}
---- !u!114 &7943752796703444729
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7426482737779231356}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0bf418d0c5609894e9789baffa46d198, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  languageDropdown: {fileID: 6805826656627480486}
 --- !u!1 &7865999253679325241
 GameObject:
   m_ObjectHideFlags: 0
@@ -2261,3 +2250,45 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   allowDigits: 0
   autoUppercase: 1
+--- !u!114 &8200000000000000049
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 477420998743788758}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: Nickname_Hint
+  fitText: 1
+--- !u!114 &8200000000000000050
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4510170094148378831}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: Button_Play
+  fitText: 1
+--- !u!114 &8200000000000000051
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6399019081634156824}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+  key: Button_Play
+  fitText: 1

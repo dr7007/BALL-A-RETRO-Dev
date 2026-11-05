@@ -2,6 +2,8 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
+using UnityEngine.Localization;
+using UnityEngine.Localization.Settings;
 
 public class CJS_TutorialDirector : MonoBehaviour
 {
@@ -64,6 +66,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     void OnEnable()
     {
+        LocalizationSettings.SelectedLocaleChanged += RefreshLocalizedText;
         KHS_Script_PlungerController.OnBallLaunched += OnBallLaunched;
         KHS_Script_FliperController.OnFlipperPressed += OnFlipperPressed;
         KHS_Script_ScoreManager.OnGameOverWithScore += OnGameOverWithScore;
@@ -72,6 +75,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     void OnDisable()
     {
+        LocalizationSettings.SelectedLocaleChanged -= RefreshLocalizedText;
         KHS_Script_PlungerController.OnBallLaunched -= OnBallLaunched;
         KHS_Script_FliperController.OnFlipperPressed -= OnFlipperPressed;
         KHS_Script_ScoreManager.OnGameOverWithScore -= OnGameOverWithScore;
@@ -88,6 +92,13 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (resultPanel) resultPanel.SetActive(false);
 
         BindButtons();
+        foreach (var text in new[] { tutorialText, resultTitleText, resultDescText })
+        {
+            if (text == null) continue;
+            text.fontSizeMax = text.fontSize;
+            text.fontSizeMin = text.fontSize * .65f;
+            text.enableAutoSizing = true;
+        }
 
         // Step4 전까지 플런저 잠금
         if (plunger) plunger.tutorialForceLock = true;
@@ -100,7 +111,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     void Update()
     {
-        if (_resultShown) return;
+        if (_resultShown || Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
 
         switch (_step)
         {
@@ -166,13 +177,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                     focus.Restore();
                 }
 
-                if (tutorialText)
-                {
-                    tutorialText.text =
-                        "게임 설명\n" +
-                        "핀볼(1F)에서 점수를 올리고, 조건을 달성하면 2F로 진입할 수 있어요.\n" +
-                        "아무 키나 눌러 계속…";
-                }
+
                 break;
 
             case Step.Flippers:
@@ -182,20 +187,14 @@ public class CJS_TutorialDirector : MonoBehaviour
                 if (focus && focusFlippers)
                     focus.FocusTo(focusFlippers);
 
-                if (tutorialText)
-                    tutorialText.text = $"( {leftFlipperKey} / {rightFlipperKey} 를 누르세요! )";
+
                 break;
 
             case Step.Entrance2F:
                 if (focus && focus2FEntrance)
                     focus.FocusTo(focus2FEntrance);
 
-                if (tutorialText)
-                {
-                    tutorialText.text =
-                        "( 장애물 5개를 맞추면 2층 입장 가능! )\n" +
-                        "아무 키나 눌러 계속…";
-                }
+
                 break;
 
             case Step.Plunger:
@@ -205,8 +204,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                 if (plunger)
                     plunger.tutorialForceLock = false;
 
-                if (tutorialText)
-                    tutorialText.text = "( Space 를 눌러 공을 발사하세요! )";
+
                 break;
 
             case Step.ScoreMission:
@@ -235,6 +233,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                 EndTutorialFail();
                 break;
         }
+        RefreshLocalizedText(null);
     }
 
     private void OnBallLaunched()
@@ -272,11 +271,11 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     private void RefreshMissionHint()
     {
-        string left = _playedLeft ? "완료" : "눌러보세요";
-        string right = _playedRight ? "완료" : "눌러보세요";
+        string left = PSH_Script_Localization.Text(_playedLeft ? "Tut_Practiced" : "Tut_Practice");
+        string right = PSH_Script_Localization.Text(_playedRight ? "Tut_Practiced" : "Tut_Practice");
         string score = scoreManager && scoreManager.curScore >= tutorialTargetScore
-            ? "목표 점수 달성!" : $"{tutorialTargetScore}점을 달성하세요!";
-        string hint = $"{score}\nZ: {left} / Slash: {right}";
+            ? PSH_Script_Localization.Text("Tut_TargetReached") : PSH_Script_Localization.Text("Tut_Target", tutorialTargetScore);
+        string hint = PSH_Script_Localization.Text("Tut_Mission", score, KeyLabel(leftFlipperKey), left, KeyLabel(rightFlipperKey), right);
         if (hint == _lastMissionHint) return;
         _lastMissionHint = hint;
         if (tutorialText) tutorialText.text = hint;
@@ -313,10 +312,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
         if (tutorialText) tutorialText.text = "";
 
-        ShowResultPanel(
-            "튜토리얼 완료!",
-            $"{tutorialTargetScore}점 달성 성공!\n로비로 갈지, 바로 게임하러 갈지 선택해줘."
-        );
+        ShowResultPanel();
 
         Debug.Log("[Tutorial] Success");
     }
@@ -330,17 +326,12 @@ public class CJS_TutorialDirector : MonoBehaviour
 
         if (tutorialText) tutorialText.text = "";
 
-        ShowResultPanel(
-            "다시 해볼까?",
-            HasPracticedFlippers
-                ? $"{tutorialTargetScore}점에 도달하기 전에 공이 빠졌어.\n다시 도전해봐!"
-                : "공을 발사한 뒤 Z와 / 플리퍼를 각각 한 번 사용해봐!\n목표 점수와 플리퍼 연습을 마치면 튜토리얼이 완료돼."
-        );
+        ShowResultPanel();
 
         Debug.Log("[Tutorial] Failed");
     }
 
-    private void ShowResultPanel(string title, string desc)
+    private void ShowResultPanel()
     {
         if (resultPanel)
         {
@@ -349,12 +340,37 @@ public class CJS_TutorialDirector : MonoBehaviour
             modal.SetSortingOrder(50);
             resultPanel.SetActive(true);
         }
-        if (resultTitleText) resultTitleText.text = title;
-        if (resultDescText) resultDescText.text = desc;
+        RefreshLocalizedText(null);
 
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
+    }
+
+    private static string KeyLabel(KeyCode key) => key == KeyCode.Slash ? "/" : key.ToString();
+
+    private void RefreshLocalizedText(Locale _)
+    {
+        // Only redraw text: never replay a step, camera move, launch or completion event.
+        if (_resultShown)
+        {
+            bool success = _step == Step.Done;
+            if (resultTitleText) resultTitleText.text = PSH_Script_Localization.Text(success ? "Tut_SuccessTitle" : "Tut_FailTitle");
+            if (resultDescText)
+                resultDescText.text = success ? PSH_Script_Localization.Text("Tut_SuccessBody", tutorialTargetScore)
+                    : HasPracticedFlippers ? PSH_Script_Localization.Text("Tut_FailScore", tutorialTargetScore)
+                    : PSH_Script_Localization.Text("Tut_FailPractice", KeyLabel(leftFlipperKey), KeyLabel(rightFlipperKey));
+            return;
+        }
+        if (tutorialText == null) return;
+        switch (_step)
+        {
+            case Step.Intro: tutorialText.text = PSH_Script_Localization.Text("Tut_Intro"); break;
+            case Step.Flippers: tutorialText.text = PSH_Script_Localization.Text("Tut_Flippers", KeyLabel(leftFlipperKey), KeyLabel(rightFlipperKey)); break;
+            case Step.Entrance2F: tutorialText.text = PSH_Script_Localization.Text("Tut_Entrance"); break;
+            case Step.Plunger: tutorialText.text = PSH_Script_Localization.Text("Tut_Launch"); break;
+            case Step.ScoreMission: _lastMissionHint = null; RefreshMissionHint(); break;
+        }
     }
 
     public void RetryTutorial()
