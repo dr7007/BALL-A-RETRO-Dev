@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [switch]$IncludeHover,
+    [switch]$IncludeEffects,
     [string]$PythonPath = 'python',
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
@@ -12,7 +13,7 @@ $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Runtime", 
 $lock = Get-Content -LiteralPath "$sourceRoot/Packages/packages-lock.json" -Raw | ConvertFrom-Json
 $dependencies = [ordered]@{}
 $pending = [Collections.Generic.Queue[string]]::new()
-@('com.unity.ugui', 'com.unity.render-pipelines.universal', 'com.unity.test-framework', 'com.unity.modules.audio', 'com.unity.modules.uielements', 'com.unity.modules.screencapture', 'com.unity.modules.physics', 'com.unity.modules.particlesystem') | ForEach-Object { $pending.Enqueue($_) }
+@('com.unity.ugui', 'com.unity.render-pipelines.universal', 'com.unity.test-framework', 'com.unity.modules.audio', 'com.unity.modules.animation', 'com.unity.modules.uielements', 'com.unity.modules.screencapture', 'com.unity.modules.physics', 'com.unity.modules.particlesystem') | ForEach-Object { $pending.Enqueue($_) }
 while ($pending.Count -gt 0) {
     $name = $pending.Dequeue()
     if ($dependencies.Contains($name)) { continue }
@@ -41,6 +42,17 @@ $filter = 'TutorialCanvasTests'
 if ($IncludeHover) {
     Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/ButtonHoverTests.cs" -Destination "$outputPath/Assets/Tests"
     $filter += ';ButtonHoverTests'
+}
+if ($IncludeEffects) {
+    Copy-Item -LiteralPath "$sourceRoot/Assets/JMO Assets/Cartoon FX Remaster/CFXR Assets/Scripts/CFXR_Effect.cs", "$sourceRoot/Assets/JMO Assets/Cartoon FX Remaster/CFXR Assets/Scripts/CFXR_Effect.CameraShake.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_Effect*.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_ToggleUIController.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_CameraShaker.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/EffectSettingsTests.cs" -Destination "$outputPath/Assets/Tests"
+    $null = New-Item -ItemType Directory -Path "$outputPath/Assets/EffectShaders"
+    @('ProBuilder Glow.shadergraph', 'S_glitchEffect.shadergraph', 'S_glitchEffect_Canvase.shadergraph', 'S_twisterFace.shadergraph', 'BallARetroEffectTime.hlsl') | ForEach-Object {
+        Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/PSH/PSH_Shaders/$_", "$sourceRoot/Assets/MemberFolder/PSH/PSH_Shaders/$_.meta" -Destination "$outputPath/Assets/EffectShaders"
+    }
+    $filter += ';EffectSettingsTests'
 }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

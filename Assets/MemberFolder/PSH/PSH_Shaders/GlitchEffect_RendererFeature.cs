@@ -29,7 +29,7 @@ public class GlitchEffect_RendererFeature : ScriptableRendererFeature
     {
         // [!!!!!!!!! 2. 스위치 확인 로직 추가 !!!!!!!!!]
         // 스위치가 꺼져있으면(false) 렌더 패스를 아예 추가하지 않음
-        if (!IsEnabled)
+        if (!IsEnabled || !PSH_Script_EffectSettings.IsEnabled)
         {
             return;
         }

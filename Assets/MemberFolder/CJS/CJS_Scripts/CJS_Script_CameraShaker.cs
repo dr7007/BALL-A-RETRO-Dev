@@ -70,10 +70,27 @@ public class CJS_Script_CameraShaker : MonoBehaviour
         _timeSeedY = Random.value * 1000f;
     }
 
+    void OnEnable() => PSH_Script_EffectSettings.Changed += OnEffectsChanged;
+
+    private void OnEffectsChanged(bool enabled)
+    {
+        if (!enabled) StopShake();
+    }
+
     void OnDisable()
     {
+        PSH_Script_EffectSettings.Changed -= OnEffectsChanged;
+        StopShake();
+    }
+
+    private void StopShake()
+    {
         // 비활성 시 원위치(플레이 종료 시 흔들림만 정리)
-        if (target != null) target.localPosition = _baseLocalPos;
+        if (_routine != null)
+        {
+            StopCoroutine(_routine);
+            if (target != null) target.localPosition = _baseLocalPos;
+        }
         _routine = null;
         _accumulatedAmplitude = 0f;
         _accumulatedDuration = 0f;
@@ -93,13 +110,13 @@ public class CJS_Script_CameraShaker : MonoBehaviour
     /// </summary>
     public void Shake(float amplitude, float duration)
     {
-        if (target == null) return;
+        if (target == null || !isActiveAndEnabled || !PSH_Script_EffectSettings.IsEnabled) return;
 
         amplitude = Mathf.Max(0f, amplitude) * Mathf.Max(0f, globalIntensity);
         duration = Mathf.Max(0f, duration);
 
         // 매번 현재 위치를 기준점으로 캡처 → 실행 중 카메라가 바뀌어도 정상 복원
-        _baseLocalPos = target.localPosition;
+        if (_routine == null) _baseLocalPos = target.localPosition;
 
         if (_routine == null)
         {

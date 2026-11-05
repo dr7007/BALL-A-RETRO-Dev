@@ -11,7 +11,7 @@ public class PSH_Script_UI_SoundBridge : MonoBehaviour
     private const string LOBBY_BGM_KEY = "Settings_Lobby_BGM";
     private const string GAME_BGM_KEY = "Settings_Game_BGM";
 
-    public static bool IsVfxEnabled { get; private set; } = true;
+    public static bool IsVfxEnabled => PSH_Script_EffectSettings.IsEnabled;
 
     void Awake()
     {
@@ -62,7 +62,6 @@ public class PSH_Script_UI_SoundBridge : MonoBehaviour
             SetSFXVolume(sfx); 
         }
 
-        IsVfxEnabled = PlayerPrefs.GetInt("Settings_VFX_On", 1) == 1;
     }
 
 
@@ -71,8 +70,7 @@ public class PSH_Script_UI_SoundBridge : MonoBehaviour
     #region [VFX & Resolution]
     public void ToggleVFX(bool isOn)
     {
-        IsVfxEnabled = isOn;
-        PlayerPrefs.SetInt(VFX_ON_KEY, isOn ? 1 : 0);
+        PSH_Script_EffectSettings.SetEnabled(isOn);
     }
 
     public void SetSFXVolume(float vol)

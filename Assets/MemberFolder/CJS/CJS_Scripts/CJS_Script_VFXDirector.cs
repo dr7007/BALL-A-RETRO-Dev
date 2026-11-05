@@ -33,6 +33,7 @@ public class CJS_Script_VFXDirector : MonoBehaviour
 
         if (obstacleHitVfx == null) return;
         var go = Instantiate(obstacleHitVfx, pos, Quaternion.identity);
+        PSH_Script_EffectSettings.ApplyToHierarchy(go);
         if (autoDestroySeconds > 0f) Destroy(go, autoDestroySeconds);
     }
 
@@ -44,6 +45,7 @@ public class CJS_Script_VFXDirector : MonoBehaviour
         if (deathVfx == null) return;
         Vector3 pos = ballTransform != null ? ballTransform.position : Vector3.zero;
         var go = Instantiate(deathVfx, pos, Quaternion.identity);
+        PSH_Script_EffectSettings.ApplyToHierarchy(go);
         if (autoDestroySeconds > 0f) Destroy(go, autoDestroySeconds);
     }
 }

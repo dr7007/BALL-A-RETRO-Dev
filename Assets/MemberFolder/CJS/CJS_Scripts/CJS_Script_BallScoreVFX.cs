@@ -3,15 +3,15 @@ using UnityEngine;
 public class CJS_Script_BallScoreVFX : MonoBehaviour
 {
     [Header("Refs")]
-    public ParticleSystem burst;           // °£´ÜÇÑ ÀÔÀÚ. ¾øÀ¸¸é »ı·«
-    public Renderer ballRenderer;          // ¸ÓÆ¼¸®¾ó¿¡ _EmissionColor ÀÖÀ¸¸é ÇÃ·¡½Ã
+    public ParticleSystem burst;           // ê°„ë‹¨í•œ ì…ì. ì—†ìœ¼ë©´ ìƒëµ
+    public Renderer ballRenderer;          // ë¨¸í‹°ë¦¬ì–¼ì— _EmissionColor ìˆìœ¼ë©´ í”Œë˜ì‹œ
     public Color flashColor = Color.yellow;
 
     [Header("Strength Mapping")]
-    public float scoreAtMax = 2000f;       // ÀÌ Á¡¼ö ÀÌ»óÀÌ¸é °­µµ 1.0
+    public float scoreAtMax = 2000f;       // ì´ ì ìˆ˜ ì´ìƒì´ë©´ ê°•ë„ 1.0
     public AnimationCurve strengthCurve = AnimationCurve.EaseInOut(0, 0, 1, 1);
-    public int emitAt1 = 50;               // °­µµ 1.0ÀÏ ¶§ ÀÔÀÚ ¼ö
-    public float flashAt1 = 2.0f;          // °­µµ 1.0ÀÏ ¶§ Emission ¹è¼ö
+    public int emitAt1 = 50;               // ê°•ë„ 1.0ì¼ ë•Œ ì…ì ìˆ˜
+    public float flashAt1 = 2.0f;          // ê°•ë„ 1.0ì¼ ë•Œ Emission ë°°ìˆ˜
     public float flashDuration = 0.15f;
 
     private Material _mat;
@@ -22,7 +22,7 @@ public class CJS_Script_BallScoreVFX : MonoBehaviour
     {
         if (ballRenderer != null)
         {
-            _mat = ballRenderer.material; // ÀÎ½ºÅÏ½ºÈ­
+            _mat = ballRenderer.material; // ì¸ìŠ¤í„´ìŠ¤í™”
             if (_mat.HasProperty("_EmissionColor"))
             {
                 _baseEmission = _mat.GetColor("_EmissionColor");
@@ -34,34 +34,50 @@ public class CJS_Script_BallScoreVFX : MonoBehaviour
     void OnEnable()
     {
         KHS_Script_ScoreManager.OnScoreGained += HandleScore;
+        PSH_Script_EffectSettings.Changed += OnEffectsChanged;
     }
 
     void OnDisable()
     {
         KHS_Script_ScoreManager.OnScoreGained -= HandleScore;
+        PSH_Script_EffectSettings.Changed -= OnEffectsChanged;
+        StopAllCoroutines();
         if (_hasEmission) _mat.SetColor("_EmissionColor", _baseEmission);
     }
 
     private void HandleScore(int delta)
     {
-        if (delta <= 0) return;
+        if (delta <= 0 || !PSH_Script_EffectSettings.IsEnabled) return;
 
         float nx = Mathf.Clamp01(delta / Mathf.Max(1f, scoreAtMax));
         float k = Mathf.Clamp01(strengthCurve.Evaluate(nx));
 
-        // ÆÄÆ¼Å¬ ¹ö½ºÆ®
+        // íŒŒí‹°í´ ë²„ìŠ¤íŠ¸
         if (burst != null)
         {
             int cnt = Mathf.RoundToInt(emitAt1 * k);
             if (cnt > 0) burst.Emit(cnt);
         }
 
-        // ¸ÓÆ¼¸®¾ó ÇÃ·¡½Ã
+        // ë¨¸í‹°ë¦¬ì–¼ í”Œë˜ì‹œ
         if (_hasEmission)
         {
             StopAllCoroutines();
             StartCoroutine(CoFlash(k));
         }
+    }
+
+    private void OnEffectsChanged(bool enabled)
+    {
+        if (enabled) return;
+        StopAllCoroutines();
+        if (_hasEmission) _mat.SetColor("_EmissionColor", _baseEmission);
+        if (burst != null) burst.Clear(true);
+    }
+
+    private void OnDestroy()
+    {
+        if (_mat != null) Destroy(_mat);
     }
 
     private System.Collections.IEnumerator CoFlash(float k)
