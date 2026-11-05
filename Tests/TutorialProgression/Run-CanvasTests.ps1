@@ -33,6 +33,7 @@ while ($pending.Count -gt 0) {
 Copy-Item -LiteralPath "$sourceRoot/ProjectSettings/ProjectVersion.txt", "$sourceRoot/ProjectSettings/TagManager.asset" -Destination "$outputPath/ProjectSettings"
 Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Font" -Destination "$outputPath/Assets/Fonts" -Recurse
 Copy-Item -LiteralPath "$sourceRoot/Assets/TextMesh Pro" -Destination "$outputPath/Assets/TextMesh Pro" -Recurse
+Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Textures/RectanChoice_518-911.png", "$sourceRoot/Assets/Public/Main_Game/UI_Game/Textures/RectanChoice_518-911.png.meta" -Destination "$outputPath/Assets"
 @{ name = 'BallARetro.UIRuntime'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.RenderPipelines.Universal.Runtime', 'Unity.RenderPipelines.Core.Runtime') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/UIRuntime.asmdef" -Encoding utf8
 @{ name = 'BallARetro.UITests'; references = @('BallARetro.UIRuntime', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.RenderPipelines.Universal.Runtime', 'Unity.RenderPipelines.Core.Runtime'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/UITests.asmdef" -Encoding utf8
 
