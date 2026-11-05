@@ -341,6 +341,13 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private RoundState currentState = RoundState.None;
 
+    public enum GameOverReason { None, BallsExhausted, FlippersExhausted }
+    public GameOverReason EndReason { get; private set; }
+    public bool IsRecordChallenge { get; private set; }
+    public bool HasEnded => currentState == RoundState.GameOver || currentState == RoundState.GameClear;
+    public bool IsClearResult => currentState == RoundState.GameClear;
+    public int FinalTargetScore { get; private set; }
+
     private void ChangeState(RoundState newState)
     {
         currentState = newState;
@@ -408,10 +415,15 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         }
         else
         {
-            ChangeState(RoundState.GameClear);
+            ChangeState(RoundState.Playing);
+            BeginRecordChallenge();
         }
     }
-    private void OnEnterGameOver()
+    private void OnEnterGameOver() => FinishRun(false);
+    private void OnEnterGameClear() => FinishRun(true);
+
+    // Both outcomes freeze the same score before notifying UI, effects or ranking.
+    private void FinishRun(bool cleared)
     {
         int finalScore = curScore;
 
@@ -419,9 +431,21 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             if (score > finalScore) finalScore = score;
 
         FinalUserScore = finalScore;
+        FinalTargetScore = targetScore;
+        curScore = finalScore;
+        OnScoreChanged?.Invoke(curScore);
+        UILateUpdate?.Invoke();
 
-        OnGameOver?.Invoke();
-        OnGameOverWithScore?.Invoke(finalScore);
+        if (cleared)
+        {
+            OnGameClear?.Invoke();
+            OnGameClearWithScore?.Invoke(finalScore);
+        }
+        else
+        {
+            OnGameOver?.Invoke();
+            OnGameOverWithScore?.Invoke(finalScore);
+        }
 
         if (gameOverUI != null)
         {
@@ -437,35 +461,6 @@ public class KHS_Script_ScoreManager : MonoBehaviour
             );
         }
 
-        curScore = 0;
-    }
-    private void OnEnterGameClear()
-    {
-        int finalScore = curScore;
-
-        foreach (var score in currentgameScores)
-            if (score > finalScore) finalScore = score;
-
-        FinalUserScore = finalScore;
-
-        OnGameClear?.Invoke();
-        OnGameClearWithScore?.Invoke(finalScore);
-
-        if (gameOverUI != null)
-        {
-            gameOverUI.SetFinalScore(finalScore);
-            gameOverUI.Show(finalScore);
-        }
-        // UI가 없거나 auto-submit이 꺼졌으면 직접 제출
-        if (rankingService != null && (gameOverUI == null || !gameOverUI.autoSubmitOnShow))
-        {
-            rankingService.SubmitScore(finalScore, gameMode, level,
-                onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
-                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
-            );
-        }
-
-        curScore = 0;
     }
 
     #endregion
@@ -476,6 +471,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public static event Action Round_Clear;
     public static event Action Next_Round_Init;
     public static event Action UILateUpdate;
+    public static event Action<int> OnScoreChanged;
+    public static event Action OnRecordChallengeStarted;
+    public static event Action OnBallRespawned;
 
     public static event Action<int> OnGameOverWithScore;
     public static event Action<int> OnGameClearWithScore;
@@ -497,6 +495,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     [Header("볼 관련 정보")]
     [SerializeField] private int numOfBounce = 0;
     [SerializeField] private Transform ballTransformFallback;
+    [SerializeField] private KHS_Script_FliperController flipperController;
     [SerializeField] private int maxBounce = 0;
 
     [Header("Round Infomation")]
@@ -523,6 +522,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         // 씬에서 빠뜨렸을 때 자동 연결(안전장치)
         if (gameOverUI == null) gameOverUI = FindObjectOfType<CJS_Script_GameOverUI>(true);
         if (rankingService == null) rankingService = FindObjectOfType<CJS_Script_PinballRankingService>(true);
+        if (flipperController == null) flipperController = FindAnyObjectByType<KHS_Script_FliperController>();
     }
 
     void Start()
@@ -534,6 +534,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         targetScore = targetScores[0];
 
         ChangeState(RoundState.Playing);
+        OnScoreChanged?.Invoke(curScore);
     }
 
     private void OnEnable()
@@ -563,7 +564,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void TargetScoreInit()
     {
         targetScore = targetScores[0];
-        UILateUpdate.Invoke();
+        UILateUpdate?.Invoke();
     }
 
     private void FliperBallCollision(Collision _collision)
@@ -590,6 +591,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
         int finalScore = Mathf.RoundToInt(value * multiplier);
         curScore += finalScore;
+        OnScoreChanged?.Invoke(curScore);
 
         OnScoreGained?.Invoke(finalScore);
         OnScoreGainedAt?.Invoke(finalScore, worldPos);
@@ -597,16 +599,17 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (shakeOnScore && cameraShaker != null && finalScore > 0)
             cameraShaker.OnScored(finalScore);
 
-        if (curScore >= targetScore)
-        {
-            ChangeState(RoundState.RoundClear);
-        }
+        EvaluateTarget();
     }
 
     public void MultiplyScore(int value)
     {
+        if (currentState != RoundState.Playing)
+            return;
+
         int before = curScore;
         curScore *= value;
+        OnScoreChanged?.Invoke(curScore);
         int delta = Mathf.Max(0, curScore - before);
 
         var pos = ballTransformFallback != null
@@ -618,6 +621,25 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
         if (shakeOnScore && cameraShaker != null && delta > 0)
             cameraShaker.OnScored(delta);
+
+        EvaluateTarget();
+    }
+
+    private void EvaluateTarget()
+    {
+        if (IsRecordChallenge || curScore < targetScore) return;
+
+        if (currentRound >= goalRound)
+            BeginRecordChallenge();
+        else
+            ChangeState(RoundState.RoundClear);
+    }
+
+    private void BeginRecordChallenge()
+    {
+        if (IsRecordChallenge) return;
+        IsRecordChallenge = true;
+        OnRecordChallengeStarted?.Invoke();
     }
 
     private void BallTrigger(Collider _other) { numOfBounce++; }
@@ -627,62 +649,9 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         curScore = 0;
         numOfBounce = 0;
-    }
-
-    private void RoundClearAfter()
-    {
-        if (currentRound < goalRound)
-        {
-            currentgameScores[currentRound - 1] = curScore;
-            targetScore = targetScores[currentRound++];
-            StartCoroutine(NextRoundInit());
-        }
-        else
-        {
-            int finalScore = curScore;
-
-            OnGameClear?.Invoke();
-            if (curScore >= targetScore)
-            {
-                foreach (var score in currentgameScores)
-                    if (score > finalScore) finalScore = score;
-
-                FinalUserScore = finalScore;
-                OnGameClearWithScore?.Invoke(finalScore);
-            }
-
-            if (gameOverUI != null)
-            {
-                foreach (var score in currentgameScores)
-                    if (score > finalScore) finalScore = score;
-
-                gameOverUI.SetFinalScore(finalScore);
-                gameOverUI.Show(finalScore);
-            }
-            else if (rankingService != null)
-            {
-                foreach (var score in currentgameScores)
-                    if (score > finalScore) finalScore = score;
-
-                rankingService.SubmitScore(finalScore, gameMode, level,
-                    onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
-                    onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
-                );
-            }
-
-            curScore = 0;
-            numOfBounce = 0;
-        }
-    }
-
-    private IEnumerator NextRoundInit()
-    {
-        PlungerDeathWait?.Invoke(false);
-        yield return null;
-        curScore = 0;
-        numOfBounce = 0;
-        ChangingMainCam();
-        Next_Round_Init?.Invoke();
+        IsRecordChallenge = false;
+        EndReason = GameOverReason.None;
+        OnScoreChanged?.Invoke(curScore);
     }
 
     private void ChangingSubCam(int _idx)
@@ -703,17 +672,23 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (currentState != RoundState.Playing)
             return;
 
-        int remain = ball.GetBallCount() - 1;
+        int remain = Mathf.Max(0, ball.GetBallCount() - 1);
+        ball.SetBallCount(remain);
 
         if (remain > 0)
         {
-            ball.SetBallCount(remain);
             ball.SendMessage("KHS_BallReset", SendMessageOptions.DontRequireReceiver);
+            OnBallRespawned?.Invoke();
             UILateUpdate?.Invoke();
         }
         else
         {
-            ChangeState(RoundState.GameOver);
+            EndReason = flipperController != null && flipperController.fliper_Count <= 0
+                ? GameOverReason.FlippersExhausted
+                : GameOverReason.BallsExhausted;
+            // Running out of balls ends the record attempt, not the earned clear.
+            bool cleared = IsRecordChallenge || (currentRound >= goalRound && curScore >= targetScore);
+            ChangeState(cleared ? RoundState.GameClear : RoundState.GameOver);
         }
     }
 }

@@ -31,13 +31,13 @@ public class KHS_Script_FliperController : MonoBehaviour
     {
         KHS_Script_FliperDumpManager.OnFliperCollision += OnFliper;
         KHS_Script_FliperDumpManager.OffFliperCollision += OffFliper;
-        KHS_Script_BallOutController.BallOutEvt += FliperCountReset;
+        KHS_Script_ScoreManager.OnBallRespawned += FliperCountReset;
     }
     private void OnDisable()
     {
         KHS_Script_FliperDumpManager.OnFliperCollision -= OnFliper;
         KHS_Script_FliperDumpManager.OffFliperCollision -= OffFliper;
-        KHS_Script_BallOutController.BallOutEvt -= FliperCountReset;
+        KHS_Script_ScoreManager.OnBallRespawned -= FliperCountReset;
     }
 
     private void OffFliper(Collision collision)
@@ -93,7 +93,7 @@ public class KHS_Script_FliperController : MonoBehaviour
     private void FliperCountReset()
     {
         fliper_Count = fliper_Inital;
-        FliperCountChangeEvt.Invoke();
+        FliperCountChangeEvt?.Invoke();
         lastFlipperActive = false;
     }
 
