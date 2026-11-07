@@ -35,10 +35,12 @@ public class KHS_Script_BallController : MonoBehaviour
     {
         if(isEnable)
             rigidBody.AddForce(Gravity * GravDirection);
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
         if (Input.GetKeyDown(KeyCode.Q))
         {
             rigidBody.AddForce(3f, 3f, 3f, ForceMode.Impulse);
         }
+#endif
     }
 
     private void OnEnable()

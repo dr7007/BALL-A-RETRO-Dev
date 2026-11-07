@@ -21,6 +21,7 @@ public class CJS_Script_SubmitOnKey : MonoBehaviour
                    ?? FindObjectOfType<CJS_Script_PinballRankingService>(includeInactive: true);
     }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
     void Update()
     {
         if (Input.GetKeyDown(KeyCode.F9))
@@ -41,4 +42,5 @@ public class CJS_Script_SubmitOnKey : MonoBehaviour
             );
         }
     }
+#endif
 }

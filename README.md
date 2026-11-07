@@ -13,6 +13,14 @@ Unity Version : Unity 6.0 (6000.0.60f1) [안정성 이슈로 변경]
 `Tests/AudioSettings/Run-Tests.ps1 -OutputRoot <새 외부 폴더>`로 재현할 수 있습니다.
 2026-11-08 검증: 수정 전 재현 검사 4개 실패, 수정 후 4개 모두 통과.
 
+## 출시 점검: 개발용 단축키
+
+F9 임의 점수 제출, Ctrl+R/M/L 재시작·버튼 전환·로비 이동, Q/Ctrl+Q 공 강제 이동은
+Editor 및 Development Build에서만 컴파일합니다. 일반 출시 빌드에는 포함하지 않습니다.
+일반 메뉴와 게임 조작은 유지합니다. `Tests/Release/Verify-Player.ps1`는 빌드된 DLL에서
+개발용 입력 코드와 Steam 플랫폼 선택을 검사합니다. 2026-11-08 현재 소스를 STOVE 플레이어
+define으로 컴파일하고 DLL 검사를 통과했습니다.
+
 현 Repository에서는 Unity 6의 기본 Universal 3D의 기본 Packages 폴더를 예외로 처리하고 있습니다 (기본적인 패캐지는 로컬에서 자체적으로 추가해주셔야 합니다 [용량 간소화를 위함])
 
 ## 스토브 심사 / Steam 빌드

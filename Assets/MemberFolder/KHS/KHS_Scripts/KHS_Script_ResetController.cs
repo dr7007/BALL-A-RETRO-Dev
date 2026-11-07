@@ -18,6 +18,7 @@ public class KHS_Script_ResetController : MonoBehaviour
         isClear = false;
     }
 
+#if UNITY_EDITOR || DEVELOPMENT_BUILD
     void Update()
     {
         if ((Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl))
@@ -54,6 +55,8 @@ public class KHS_Script_ResetController : MonoBehaviour
             //    }
             //}
         }
+
+#endif
 
     private void OnEnable()
     {
