@@ -16,6 +16,10 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     private Button refresh;
     private string statusKey = "Rank_Loading";
     private int requestVersion;
+    private RectTransform personalRow;
+    private float pulseTime;
+    // Match the orange dialogue text in Canvas_Dialogue.
+    private static readonly Color PersonalColor = new Color32(255, 171, 0, 255);
     public event Action Closed;
 
     public static PSH_Script_WorldRankingUI Install(Transform lobby, TMP_FontAsset font, bool showEntry = true, Sprite entryIcon = null)
@@ -36,9 +40,24 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     }
     private void RefreshLanguage(Locale _)
     {
-        if (status != null) status.text = PSH_Script_Localization.Text(statusKey);
+        if (status != null) status.text = string.IsNullOrEmpty(statusKey) ? "" : PSH_Script_Localization.Text(statusKey);
     }
     private void SetStatus(string key) { statusKey = key; RefreshLanguage(null); }
+
+    private void Update()
+    {
+        if (personalRow == null || panel == null || !panel.activeInHierarchy) return;
+        if (!PSH_Script_EffectSettings.ScreenEffectsEnabled)
+        {
+            pulseTime = 0;
+            personalRow.localScale = Vector3.one;
+            return;
+        }
+        // Results pause gameplay. Keep this gentle 3% pulse on the UI clock.
+        pulseTime = (pulseTime + Time.unscaledDeltaTime) % 2f;
+        float scale = 1f + .015f * (1f - Mathf.Cos(pulseTime * Mathf.PI));
+        personalRow.localScale = new Vector3(scale, scale, 1f);
+    }
 
     private void Build(bool showEntry, Sprite entryIcon)
     {
@@ -113,7 +132,7 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
             {
                 if (!this || request != requestVersion || !panel.activeInHierarchy) return;
                 refresh.interactable = true;
-                DrawRows(result.top10 ?? Array.Empty<ScoreRow>());
+                DrawRows(result.top10 ?? Array.Empty<ScoreRow>(), result.personal);
             },
             error =>
             {
@@ -124,25 +143,35 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     }
     private void ClearRows()
     {
+        personalRow = null;
+        pulseTime = 0;
         foreach (Transform row in rows) { row.gameObject.SetActive(false); Destroy(row.gameObject); }
     }
-    private void DrawRows(ScoreRow[] data)
+    private void DrawRows(ScoreRow[] data, ScoreRow personal)
     {
-        SetStatus(data.Length == 0 ? "Rank_Empty" : "Rank_TopTen");
-        for (int i = 0; i < Mathf.Min(10, data.Length); i++)
+        SetStatus(data.Length == 0 ? "Rank_Empty" : "");
+        bool hasIdentity = !string.IsNullOrEmpty(personal?.steam_id);
+        bool inTopTen = hasIdentity && Array.Exists(data, row => row.steam_id == personal.steam_id);
+        int count = Mathf.Min(hasIdentity && !inTopTen ? 9 : 10, data.Length);
+        for (int i = 0; i < count; i++)
         {
-            float y = 195 - i * 46;
-            var row = data[i];
-            int position = row.rank > 0 ? row.rank : i + 1;
-            var color = RankColor(position);
-            Literal("Position", rows, Ordinal(position), new Vector2(-520, y), new Vector2(180, 42), 32, color);
-            var name = Literal("Player", rows, "", new Vector2(-190, y), new Vector2(430, 42), 32, color);
-            name.text = row.nickname;
-            name.richText = false;
-            name.overflowMode = TextOverflowModes.Ellipsis;
-            Literal("Step", rows, row.step > 0 ? row.step.ToString() : "—", new Vector2(130, y), new Vector2(160, 42), 32, color);
-            Literal("Score", rows, row.score.ToString(), new Vector2(460, y), new Vector2(360, 42), 32, color);
+            DrawRow(data[i], i, hasIdentity && data[i].steam_id == personal.steam_id);
         }
+        if (hasIdentity && !inTopTen) DrawRow(personal, count, true);
+    }
+
+    private void DrawRow(ScoreRow row, int index, bool isPersonal)
+    {
+        var line = Rect(isPersonal ? "PersonalRow" : "RankingRow", rows, new Vector2(0, 195 - index * 46), new Vector2(1300, 42));
+        if (isPersonal) personalRow = line;
+        var color = isPersonal ? PersonalColor : RankColor(row.rank);
+        Literal("Position", line, row.rank > 0 ? Ordinal(row.rank) : "—", new Vector2(-520, 0), new Vector2(180, 42), 32, color);
+        var name = Literal("Player", line, "", new Vector2(-190, 0), new Vector2(430, 42), 32, color);
+        name.text = row.nickname;
+        name.richText = false;
+        name.overflowMode = TextOverflowModes.Ellipsis;
+        Literal("Step", line, row.step > 0 ? row.step.ToString() : "—", new Vector2(130, 0), new Vector2(160, 42), 32, color);
+        Literal("Score", line, row.rank > 0 ? row.score.ToString() : "—", new Vector2(460, 0), new Vector2(360, 42), 32, color);
     }
 
     private static string Ordinal(int rank) => rank + (rank % 100 >= 11 && rank % 100 <= 13 ? "TH" : rank % 10 == 1 ? "ST" : rank % 10 == 2 ? "ND" : rank % 10 == 3 ? "RD" : "TH");

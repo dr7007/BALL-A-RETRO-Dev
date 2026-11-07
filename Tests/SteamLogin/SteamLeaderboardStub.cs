@@ -7,17 +7,23 @@ namespace Steamworks
     {
         public static readonly Dictionary<ulong, object> Responses = new();
         public static readonly Queue<Action> Callbacks = new();
-        public static bool Hold, FindFails, UploadFails, DownloadFails;
+        public static bool Hold, FindFails, UploadFails, DownloadFails, PersonalDownloadFails;
         public static string Board;
         public static int Uploads, Finds, Start, End, Best, BestStep;
         public static int[] Steps;
+        public static int PersonalDownloads, PersonalStart, PersonalEnd;
+        public static int[] PersonalSteps;
+        public static Action OnPersonalRequest;
         public static ELeaderboardUploadScoreMethod Method;
         public static LeaderboardEntry_t[] Rows;
+        public static LeaderboardEntry_t[] PersonalRows;
         static ulong next;
         public static void Reset()
         {
             Responses.Clear(); Callbacks.Clear(); Hold=FindFails=UploadFails=DownloadFails=false;
             Board="";Uploads=Finds=Start=End=Best=BestStep=0;next=0;Rows=Array.Empty<LeaderboardEntry_t>();Steps=Array.Empty<int>();
+            PersonalDownloadFails=false;PersonalDownloads=PersonalStart=PersonalEnd=0;OnPersonalRequest=null;
+            PersonalRows=Array.Empty<LeaderboardEntry_t>();PersonalSteps=Array.Empty<int>();
         }
         public static SteamAPICall_t Result(object value)
         { var id=++next;Responses[id]=value;return new SteamAPICall_t {m_SteamAPICall=id}; }
@@ -33,7 +39,7 @@ namespace Steamworks
     public struct LeaderboardEntry_t { public CSteamID m_steamIDUser; public int m_nGlobalRank,m_nScore,m_cDetails; }
     public enum ELeaderboardSortMethod { k_ELeaderboardSortMethodDescending }
     public enum ELeaderboardDisplayType { k_ELeaderboardDisplayTypeNumeric }
-    public enum ELeaderboardDataRequest { k_ELeaderboardDataRequestGlobal }
+    public enum ELeaderboardDataRequest { k_ELeaderboardDataRequestGlobal, k_ELeaderboardDataRequestGlobalAroundUser }
     public enum ELeaderboardUploadScoreMethod { k_ELeaderboardUploadScoreMethodKeepBest }
     public sealed class CallResult<T> : IDisposable
     {
@@ -58,8 +64,22 @@ namespace Steamworks
             return LeaderboardFixture.Result(new LeaderboardScoreUploaded_t{m_bSuccess=(byte)(LeaderboardFixture.UploadFails?0:1),m_nScore=LeaderboardFixture.Best,m_nGlobalRankNew=3});
         }
         public static SteamAPICall_t DownloadLeaderboardEntries(SteamLeaderboard_t board,ELeaderboardDataRequest request,int first,int last)
-        { LeaderboardFixture.Start=first;LeaderboardFixture.End=last;return LeaderboardFixture.Result(LeaderboardFixture.DownloadFails?(object)new Exception():new LeaderboardScoresDownloaded_t{m_cEntryCount=LeaderboardFixture.Rows.Length,m_hSteamLeaderboardEntries=new SteamLeaderboardEntries_t{Value=1}}); }
+        {
+            if(request==ELeaderboardDataRequest.k_ELeaderboardDataRequestGlobalAroundUser)
+            {
+                LeaderboardFixture.PersonalDownloads++;LeaderboardFixture.PersonalStart=first;LeaderboardFixture.PersonalEnd=last;
+                LeaderboardFixture.OnPersonalRequest?.Invoke();
+                return LeaderboardFixture.Result(LeaderboardFixture.PersonalDownloadFails?(object)new Exception():new LeaderboardScoresDownloaded_t{m_cEntryCount=LeaderboardFixture.PersonalRows.Length,m_hSteamLeaderboardEntries=new SteamLeaderboardEntries_t{Value=2}});
+            }
+            LeaderboardFixture.Start=first;LeaderboardFixture.End=last;
+            return LeaderboardFixture.Result(LeaderboardFixture.DownloadFails?(object)new Exception():new LeaderboardScoresDownloaded_t{m_cEntryCount=LeaderboardFixture.Rows.Length,m_hSteamLeaderboardEntries=new SteamLeaderboardEntries_t{Value=1}});
+        }
         public static bool GetDownloadedLeaderboardEntry(SteamLeaderboardEntries_t entries,int i,out LeaderboardEntry_t entry,int[] details,int count)
-        {entry=LeaderboardFixture.Rows[i];if(i<LeaderboardFixture.Steps.Length&&count>0){details[0]=LeaderboardFixture.Steps[i];entry.m_cDetails=1;}return true;}
+        {
+            bool personal=entries.Value==2;
+            entry=(personal?LeaderboardFixture.PersonalRows:LeaderboardFixture.Rows)[i];
+            var steps=personal?LeaderboardFixture.PersonalSteps:LeaderboardFixture.Steps;
+            if(i<steps.Length&&count>0){details[0]=steps[i];entry.m_cDetails=1;}return true;
+        }
     }
 }

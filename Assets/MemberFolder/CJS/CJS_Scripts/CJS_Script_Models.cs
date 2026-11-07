@@ -3,6 +3,7 @@ using System;
 [Serializable]
 public class ScoreRow
 {
+    public string steam_id;
     public int rank;
     public int step;
     public string nickname;
@@ -28,6 +29,8 @@ public class LbResp
 {
     public bool ok;
     public ScoreRow[] top10;
+    // A logged-in player without a submitted record has rank 0.
+    public ScoreRow personal;
     public string msg;
 }
 

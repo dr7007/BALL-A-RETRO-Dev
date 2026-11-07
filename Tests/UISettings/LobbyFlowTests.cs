@@ -104,6 +104,9 @@ public class LobbyFlowTests
         Steamworks.LeaderboardFixture.Rows=Enumerable.Range(1,10).Select(i=>new Steamworks.LeaderboardEntry_t{
             m_steamIDUser=new Steamworks.CSteamID{Value=(ulong)i},m_nGlobalRank=i,m_nScore=(11-i)*1500}).ToArray();
         Steamworks.LeaderboardFixture.Steps=Enumerable.Range(1,10).Select(i=>i<4?3:2).ToArray();
+        Steamworks.LeaderboardFixture.PersonalRows=new[]{new Steamworks.LeaderboardEntry_t{
+            m_steamIDUser=new Steamworks.CSteamID{Value=Steamworks.Fixture.UserId},m_nGlobalRank=137,m_nScore=1250}};
+        Steamworks.LeaderboardFixture.PersonalSteps=new[]{2};
         var ui=root.GetComponentInChildren<PSH_Script_WorldRankingUI>();
         var open=ui.GetComponentsInChildren<Button>().Single(b=>b.name=="OpenWorldRanking");
         var anchor=(RectTransform)open.transform;
@@ -125,6 +128,9 @@ public class LobbyFlowTests
                 Assert.That(ui.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Position").text,Is.EqualTo("1ST"));
                 Assert.That(ui.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Player").color,Is.EqualTo(Color.red));
                 Assert.That(ui.GetComponentsInChildren<TMP_Text>().Count(t=>t.name=="Step"&&t.text=="3"),Is.EqualTo(3));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Status").text,Is.Empty);
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Last(t=>t.name=="Position").text,Is.EqualTo("137TH"));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Last(t=>t.name=="Player").color,Is.EqualTo((Color)new Color32(255,171,0,255)));
                 foreach(int width in new[]{1920,2560})
                 {
                     var target=RenderTexture.GetTemporary(width,width*9/16,24);camera.targetTexture=target;
@@ -150,6 +156,80 @@ public class LobbyFlowTests
         ui.Show();ui.Close();Steamworks.LeaderboardFixture.Hold=false;
         yield return null;yield return null;yield return null;
         Assert.That(ui.GetComponentsInChildren<TMP_Text>().Any(t=>t.name=="Title"),Is.False);
+    }
+    void SetTopTen(int personalRank)
+    {
+        Steamworks.LeaderboardFixture.Rows=Enumerable.Range(1,10).Select(i=>new Steamworks.LeaderboardEntry_t{
+            m_steamIDUser=new Steamworks.CSteamID{Value=i==personalRank?Steamworks.Fixture.UserId:(ulong)i},
+            m_nGlobalRank=i,m_nScore=(11-i)*1500}).ToArray();
+        Steamworks.LeaderboardFixture.Steps=Enumerable.Repeat(3,10).ToArray();
+        Steamworks.LeaderboardFixture.PersonalRows=personalRank>10?new[]{new Steamworks.LeaderboardEntry_t{
+            m_steamIDUser=new Steamworks.CSteamID{Value=Steamworks.Fixture.UserId},m_nGlobalRank=personalRank,m_nScore=1000}}:System.Array.Empty<Steamworks.LeaderboardEntry_t>();
+    }
+    IEnumerator Loaded(PSH_Script_WorldRankingUI ui)
+    {
+        var refresh=ui.GetComponentsInChildren<Button>().Single(b=>b.name=="Refresh");
+        float deadline=Time.realtimeSinceStartup+2;
+        while(!refresh.interactable&&Time.realtimeSinceStartup<deadline)yield return null;
+        Assert.That(refresh.interactable,Is.True);
+        yield return null;
+    }
+    [UnityTest] public IEnumerator OnlyTheSteamAccountIsHighlighted_AndTopTenPlayersKeepTenthPlaceVisible()
+    {
+        Steamworks.Fixture.Name="World Player 1"; // Same nickname as first place, different SteamID.
+        var ui=root.GetComponentInChildren<PSH_Script_WorldRankingUI>();
+        foreach(int ownRank in new[]{1,5,9,10,11,89,137})
+        {
+            SetTopTen(ownRank);ui.Show();yield return Loaded(ui);
+            var names=ui.GetComponentsInChildren<TMP_Text>().Where(t=>t.name=="Player").ToArray();
+            var positions=ui.GetComponentsInChildren<TMP_Text>().Where(t=>t.name=="Position").ToArray();
+            Assert.That(names.Length,Is.EqualTo(10));
+            var orange=(Color)new Color32(255,171,0,255);
+            Assert.That(names.Count(t=>t.color==orange),Is.EqualTo(1));
+            int ownIndex=ownRank<=10?ownRank-1:9;
+            Assert.That(names[ownIndex].text,Is.EqualTo(Steamworks.Fixture.Name));
+            Assert.That(names[ownIndex].color,Is.EqualTo(orange));
+            Assert.That(positions[ownIndex].text,Does.StartWith(ownRank.ToString()));
+            Assert.That(positions.Last().text,Is.EqualTo(ownRank<=10?"10TH":ownRank+"TH"));
+            if(ownRank>10)Assert.That(positions.Take(9).Select(t=>t.text),Is.EqualTo(new[]{"1ST","2ND","3RD","4TH","5TH","6TH","7TH","8TH","9TH"}));
+            Assert.That(ui.GetComponentsInChildren<Transform>().Count(t=>t.name=="PersonalRow"),Is.EqualTo(1));
+        }
+    }
+    [UnityTest] public IEnumerator AnUnrankedPlayerHasTheirSteamNameWithoutInventedRankOrScore()
+    {
+        SetTopTen(0);
+        var ui=root.GetComponentInChildren<PSH_Script_WorldRankingUI>();ui.Show();yield return Loaded(ui);
+        var own=ui.GetComponentsInChildren<Transform>().Single(t=>t.name=="PersonalRow");
+        Assert.That(own.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Player").text,Is.EqualTo(Steamworks.Fixture.Name));
+        foreach(var text in own.GetComponentsInChildren<TMP_Text>().Where(t=>t.name!="Player"))Assert.That(text.text,Is.EqualTo("—"));
+        Assert.That(ui.GetComponentsInChildren<TMP_Text>().Count(t=>t.name=="Player"),Is.EqualTo(10));
+    }
+    [UnityTest] public IEnumerator PersonalRowPulsesWhileGameIsPaused_AndStopsWithScreenEffectsDisabled()
+    {
+        var keys=System.Enum.GetValues(typeof(PSH_Script_EffectSettings.Effect)).Cast<PSH_Script_EffectSettings.Effect>()
+            .Select(PSH_Script_EffectSettings.KeyFor).Concat(new[]{PSH_Script_EffectSettings.PreferenceKey});
+        var preferences=keys.ToDictionary(k=>k,k=>PlayerPrefs.HasKey(k)?(int?)PlayerPrefs.GetInt(k):null);
+        try
+        {
+            PSH_Script_EffectSettings.SetEnabled(true);SetTopTen(137);Time.timeScale=0;
+            var ui=root.GetComponentInChildren<PSH_Script_WorldRankingUI>();ui.Show();yield return Loaded(ui);
+            var own=ui.GetComponentsInChildren<Transform>().Single(t=>t.name=="PersonalRow");
+            float minimum=2,maximum=0,end=Time.realtimeSinceStartup+2.1f;
+            while(Time.realtimeSinceStartup<end)
+            {minimum=Mathf.Min(minimum,own.localScale.x);maximum=Mathf.Max(maximum,own.localScale.x);yield return null;}
+            Assert.That(maximum-minimum,Is.GreaterThan(.025f));
+            Assert.That(minimum,Is.GreaterThanOrEqualTo(1));Assert.That(maximum,Is.LessThanOrEqualTo(1.031f));
+            PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.ScreenEffects,false);yield return null;yield return null;
+            Assert.That(own.localScale,Is.EqualTo(Vector3.one));
+            Assert.That(own.GetComponentsInChildren<TMP_Text>().All(t=>t.color==(Color)new Color32(255,171,0,255)),Is.True);
+        }
+        finally
+        {
+            foreach(var pair in preferences)if(pair.Value.HasValue)PlayerPrefs.SetInt(pair.Key,pair.Value.Value);else PlayerPrefs.DeleteKey(pair.Key);
+            PlayerPrefs.Save();
+            typeof(PSH_Script_EffectSettings).GetMethod("ResetStatics",BindingFlags.Static|BindingFlags.NonPublic).Invoke(null,null);
+            _=PSH_Script_EffectSettings.IsEnabled;
+        }
     }
     [UnityTest] public IEnumerator LoggedOutEmptyAndFailedStatesStayLocalizedAndReadable()
     {

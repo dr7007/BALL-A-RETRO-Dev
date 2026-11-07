@@ -89,11 +89,57 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
 
     private IEnumerator FetchRoutine(string mode, int level, Action<LbResp> done, Action<string> failed)
     {
+        if (!LoggedIn(failed)) yield break;
+        SteamManager.TryGetLoggedInPlayer(out _, out string originalUser);
         SteamLeaderboard_t board = default;
         bool found = false;
         yield return FindBoard(mode, level, value => { board = value; found = true; }, failed);
-        if (!found || !LoggedIn(failed)) yield break;
-        yield return Download(board, mode, level, done, failed);
+        if (!found || !SameAccount(originalUser, failed)) yield break;
+
+        LbResp response = null;
+        yield return Download(board, mode, level, value => response = value, failed);
+        if (response == null || !SameAccount(originalUser, failed)) yield break;
+        response.personal = Array.Find(response.top10, row => row.steam_id == originalUser);
+        if (response.personal == null)
+        {
+            // Zero neighbours requests only the signed-in player's global rank, even outside the top ten.
+            ScoreRow[] personalRows = null;
+            yield return WaitForCall<LeaderboardScoresDownloaded_t>(SteamUserStats.DownloadLeaderboardEntries(board,
+                ELeaderboardDataRequest.k_ELeaderboardDataRequestGlobalAroundUser, 0, 0),
+                result => personalRows = ReadRows(result, mode, level, failed), failed);
+            if (personalRows == null || !SameAccount(originalUser, failed)) yield break;
+            response.personal = Array.Find(personalRows, row => row.steam_id == originalUser)
+                ?? new ScoreRow { steam_id = originalUser, game_mode = mode, level = level };
+        }
+        SteamManager.TryGetLoggedInPlayer(out string nickname, out _);
+        response.personal.nickname = nickname;
+        done?.Invoke(response);
+    }
+
+    private bool SameAccount(string expectedUser, Action<string> failed)
+    {
+        if (SteamManager.TryGetLoggedInPlayer(out _, out string currentUser) && currentUser == expectedUser) return true;
+        failed?.Invoke("Steam account changed while loading rankings");
+        return false;
+    }
+
+    private ScoreRow[] ReadRows(LeaderboardScoresDownloaded_t result, string mode, int level, Action<string> failed)
+    {
+        var rows = new List<ScoreRow>();
+        for (int i = 0; i < result.m_cEntryCount; i++)
+        {
+            var details = new int[1];
+            if (!SteamUserStats.GetDownloadedLeaderboardEntry(result.m_hSteamLeaderboardEntries, i,
+                out LeaderboardEntry_t entry, details, details.Length))
+            {
+                failed?.Invoke("Could not read a Steam leaderboard entry");
+                return null;
+            }
+            rows.Add(new ScoreRow { steam_id = entry.m_steamIDUser.ToString(), rank = entry.m_nGlobalRank, score = entry.m_nScore,
+                step = entry.m_cDetails > 0 ? details[0] : 0,
+                nickname = SteamFriends.GetFriendPersonaName(entry.m_steamIDUser), game_mode = mode, level = level });
+        }
+        return rows.ToArray();
     }
 
     private IEnumerator Download(SteamLeaderboard_t board, string mode, int level, Action<LbResp> done, Action<string> failed)
@@ -101,21 +147,8 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
         yield return WaitForCall<LeaderboardScoresDownloaded_t>(SteamUserStats.DownloadLeaderboardEntries(board,
             ELeaderboardDataRequest.k_ELeaderboardDataRequestGlobal, 1, 10), result =>
             {
-                var rows = new List<ScoreRow>();
-                for (int i = 0; i < result.m_cEntryCount; i++)
-                {
-                    var details = new int[1];
-                    if (!SteamUserStats.GetDownloadedLeaderboardEntry(result.m_hSteamLeaderboardEntries, i,
-                        out LeaderboardEntry_t entry, details, details.Length))
-                    {
-                        failed?.Invoke("Could not read a Steam leaderboard entry");
-                        return;
-                    }
-                    rows.Add(new ScoreRow { rank = entry.m_nGlobalRank, score = entry.m_nScore,
-                        step = entry.m_cDetails > 0 ? details[0] : 0,
-                        nickname = SteamFriends.GetFriendPersonaName(entry.m_steamIDUser), game_mode = mode, level = level });
-                }
-                done?.Invoke(new LbResp { ok = true, top10 = rows.ToArray() });
+                var rows = ReadRows(result, mode, level, failed);
+                if (rows != null) done?.Invoke(new LbResp { ok = true, top10 = rows });
             }, failed);
     }
 

@@ -44,6 +44,51 @@ public class SteamLeaderboardTests
         Assert.That(result.your_score,Is.EqualTo(9000));Assert.That(result.rank,Is.EqualTo(3));
         Assert.That(LeaderboardFixture.Method,Is.EqualTo(ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest));
     }
+    [UnityTest] public IEnumerator PersonalRankOutsideTopTenUsesTheSignedInSteamAccount()
+    {
+        Fixture.Name="World Player 42"; // Another player can have exactly the same nickname.
+        LeaderboardFixture.Rows=new[]{new LeaderboardEntry_t{m_steamIDUser=new CSteamID{Value=42},m_nGlobalRank=1,m_nScore=12000}};
+        LeaderboardFixture.PersonalRows=new[]{new LeaderboardEntry_t{m_steamIDUser=new CSteamID{Value=Fixture.UserId},m_nGlobalRank=137,m_nScore=8250}};
+        LeaderboardFixture.PersonalSteps=new[]{3};
+        LbResp result=null;backend.Fetch("Classic",1,r=>result=r,Assert.Fail);
+        yield return Wait(()=>result!=null);
+        Assert.That(result.top10[0].steam_id,Is.EqualTo("42"));
+        Assert.That(result.personal.steam_id,Is.EqualTo(Fixture.UserId.ToString()));
+        Assert.That(result.personal.nickname,Is.EqualTo(Fixture.Name));
+        Assert.That(result.personal.rank,Is.EqualTo(137));Assert.That(result.personal.score,Is.EqualTo(8250));
+        Assert.That(result.personal.step,Is.EqualTo(3));
+        Assert.That(LeaderboardFixture.PersonalStart,Is.Zero);Assert.That(LeaderboardFixture.PersonalEnd,Is.Zero);
+    }
+    [UnityTest] public IEnumerator PersonalRankInTopTenReusesTheSameLeaderboardSnapshot()
+    {
+        LeaderboardFixture.Rows=new[]{new LeaderboardEntry_t{m_steamIDUser=new CSteamID{Value=Fixture.UserId},m_nGlobalRank=10,m_nScore=9000}};
+        LbResp result=null;backend.Fetch("Classic",1,r=>result=r,Assert.Fail);
+        yield return Wait(()=>result!=null);
+        Assert.That(result.personal,Is.SameAs(result.top10[0]));
+        Assert.That(result.personal.nickname,Is.EqualTo(Fixture.Name));
+        Assert.That(LeaderboardFixture.PersonalDownloads,Is.Zero);
+    }
+    [UnityTest] public IEnumerator PlayerWithoutARecordStillHasTheirOwnIdentityButNoRank()
+    {
+        LbResp result=null;backend.Fetch("Classic",1,r=>result=r,Assert.Fail);
+        yield return Wait(()=>result!=null);
+        Assert.That(result.personal.steam_id,Is.EqualTo(Fixture.UserId.ToString()));
+        Assert.That(result.personal.nickname,Is.EqualTo(Fixture.Name));
+        Assert.That(result.personal.rank,Is.Zero);
+    }
+    [UnityTest] public IEnumerator FailedPersonalLookupDoesNotPretendThePlayerHasNoRecord()
+    {
+        LeaderboardFixture.PersonalDownloadFails=true;string error=null;
+        backend.Fetch("Classic",1,_=>Assert.Fail("An unavailable rank is not an unranked player."),e=>error=e);
+        yield return Wait(()=>error!=null);
+    }
+    [UnityTest] public IEnumerator AccountChangeDuringPersonalLookupDiscardsThePreviousIdentity()
+    {
+        LeaderboardFixture.OnPersonalRequest=()=>Fixture.UserId++;
+        string error=null;backend.Fetch("Classic",1,_=>Assert.Fail("Previous account was returned."),e=>error=e);
+        yield return Wait(()=>error!=null);
+        Assert.That(error,Does.Contain("account changed"));
+    }
     [UnityTest] public IEnumerator BestScoreKeepsTheRoundInWhichItWasAchieved()
     {
         SubmitResp result=null;backend.Submit(8000,"Classic",1,r=>result=r,Assert.Fail,3);
