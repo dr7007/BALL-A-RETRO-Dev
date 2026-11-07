@@ -374,7 +374,9 @@ public class DialogueInputTests
 
         menu.OnClickGoToLobby();
         menu.ToggleMenu();
-        Assert.That(menu.panelWarning.activeSelf, Is.False, "Closing settings must also dismiss its confirmation.");
+        Assert.That(menu.panelWarning.activeSelf, Is.False, "Escape cancels the confirmation first.");
+        Assert.That(menu.panelSetting.activeSelf, Is.True);
+        menu.CloseMenu();
         menu.ToggleMenu();
         yield return null;
         Assert.That(RaycastScreenCenter().gameObject, Is.EqualTo(settingsButton.gameObject));
@@ -435,6 +437,7 @@ public class DialogueInputTests
     {
         var go = endingPanel.transform.parent.gameObject;
         var menu = go.AddComponent<PSH_Script_SettingController>();
+        menu.gameSceneName = go.scene.name;
         menu.panelSetting = MakePanel("System window", go.transform);
         Stretch((RectTransform)menu.panelSetting.transform);
         menu.panelSetting.SetActive(false);

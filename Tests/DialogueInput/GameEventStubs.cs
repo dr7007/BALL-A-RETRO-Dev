@@ -17,5 +17,6 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
 public class KHS_Script_ResetController : MonoBehaviour
 {
-    public void GameGoToLobbyFunc() { }
+    public int LobbyRequests { get; private set; }
+    public void GameGoToLobbyFunc() { LobbyRequests++; }
 }

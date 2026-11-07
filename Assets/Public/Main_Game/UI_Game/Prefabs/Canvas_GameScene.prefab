@@ -2335,10 +2335,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d32bc2a5ebf977144a761920b22ad066, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  gameSceneName: PSH_Scene_Game
+  gameSceneName: Main_Scene_Game
+  tutorialSceneName: Main_Scene_Tutorial
   panelSetting: {fileID: 0}
   panelWarning: {fileID: 0}
   goToLobbyButton: {fileID: 0}
+  quitGameButton: {fileID: 8300000000000000100}
+  warningMessage: {fileID: 8300000000000000101}
+  warningConfirmLabel: {fileID: 8300000000000000102}
 --- !u!1 &7165346123792614629
 GameObject:
   m_ObjectHideFlags: 0
@@ -5104,7 +5108,7 @@ PrefabInstance:
       objectReference: {fileID: 6507244277737961897}
     - target: {fileID: 5930117088481072868, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: ConfirmGoToLobby
+      value: ConfirmExit
       objectReference: {fileID: 0}
     - target: {fileID: 6114085309226906108, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
       propertyPath: panelWarning
@@ -5180,7 +5184,7 @@ PrefabInstance:
       objectReference: {fileID: 6507244277737961897}
     - target: {fileID: 7517735269046920712, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
-      value: OnClick_WarningQuitGame
+      value: OnClickQuitGame
       objectReference: {fileID: 0}
     - target: {fileID: 7582931632102728048, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
       propertyPath: m_AnchorMax.y
@@ -5530,3 +5534,30 @@ MonoBehaviour:
   m_EditorClassIdentifier:
   key: HUD_Balls
   fitText: 1
+--- !u!1 &8300000000000000100 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5107350633478157577, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
+  m_PrefabInstance: {fileID: 5468253434478679458}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &8300000000000000101 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 450813482778363444, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
+  m_PrefabInstance: {fileID: 5468253434478679458}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:
+--- !u!114 &8300000000000000102 stripped
+MonoBehaviour:
+  m_CorrespondingSourceObject: {fileID: 7794225425299844856, guid: f671aacb85d5e3b4e97cca9a6749eaed, type: 3}
+  m_PrefabInstance: {fileID: 5468253434478679458}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 46b0bcfd189142c89fe985ddb2e4e4e2, type: 3}
+  m_Name:
+  m_EditorClassIdentifier:

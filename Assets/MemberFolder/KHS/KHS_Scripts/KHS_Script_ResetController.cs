@@ -1,6 +1,7 @@
 using PSH;
 using System;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 
 public class KHS_Script_ResetController : MonoBehaviour
 {
@@ -89,7 +90,10 @@ public class KHS_Script_ResetController : MonoBehaviour
         OnReset?.Invoke();
         Debug.Log("[Reset] Go Lobby");
         PSH_Script_GameSceneDirector.ResetIntroFlag();
-        PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
+        if (PSH_Script_SceneLoader.Instance != null)
+            PSH_Script_SceneLoader.Instance.LoadSceneAsyncByName(lobbySceneName, false);
+        else
+            SceneManager.LoadScene(lobbySceneName); // Also support starting a play scene directly in the editor.
     }
     private void ButtonSwitch()
     {
