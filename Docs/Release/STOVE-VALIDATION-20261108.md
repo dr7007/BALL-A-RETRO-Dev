@@ -105,9 +105,11 @@ STOVE 상품 ID는 `106815`다. 업로드 성공, DRM 적용, 클라이언트 �
 - DRM Maker: 적용, 타임아웃 120초, `BALL-A-RETRO.exe` 1개 적용 완료.
   자동 선택되어 있던 `UnityCrashHandler64.exe`는 공식 가이드에 따라 제외하고 저장했다.
 - 무결성 검사에서도 `UnityCrashHandler64.exe`를 제외했다. 저장 후 목록에 4개가 표시된다.
-- STOVE PC 클라이언트는 `D:/Programs/NexonPlug/STOVE/STOVE.exe`에서 발견했다.
-  Smilegate 서명이 유효하다. 자동 실행 요청은 시간 초과되어 사용자에게 직접 실행·로그인을
-  요청했다. 클라이언트에서 빌드 설치·실행·종료·재실행 시험은 아직 완료하지 않았다.
+- 이전 STOVE PC 클라이언트는 `D:/Programs/NexonPlug/STOVE/STOVE.exe`에서 발견했고
+  Smilegate 서명이 유효했다. 자동 실행 요청은 시간 초과되었다. 이후 실제로 열린 창은
+  `D:/Programs/STOVE/STOVE.exe`이며 사용자가 로그인 완료를 확인했다.
+  화면 읽기 도구는 `SetIsBorderRequired`, `0x80004002` 오류로 두 번 실패했다.
+  사용자가 다음 날 진행하기로 하여 빌드 설치·실행·종료·재실행 시험 전에 중단했다.
 
 ## 심의 자료
 
