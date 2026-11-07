@@ -27,6 +27,9 @@ public class CJS_Script_LobbyBGM : MonoBehaviour
         if (I != null && I != this) { Destroy(gameObject); return; }
         I = this;
 
+        // Restore before playback even when the settings panel initializes first.
+        volume = Mathf.Clamp01(PlayerPrefs.GetFloat("Settings_Lobby_BGM", volume));
+
         if (persistBetweenScenes)
         {
             DontDestroyOnLoad(gameObject);
@@ -69,7 +72,13 @@ public class CJS_Script_LobbyBGM : MonoBehaviour
     {
         volume = Mathf.Clamp01(v);
         if (withFade) StartFade(volume, fadeSeconds, stopAfter: false);
-        else src.volume = volume;
+        else
+        {
+            // An older fade must not undo a slider change (especially mute).
+            if (fadeCo != null) StopCoroutine(fadeCo);
+            fadeCo = null;
+            src.volume = volume;
+        }
     }
 
     private void StartFade(float target, float duration, bool stopAfter)

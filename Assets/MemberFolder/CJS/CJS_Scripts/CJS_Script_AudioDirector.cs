@@ -61,6 +61,8 @@ public class CJS_Script_AudioDirector : MonoBehaviour
         bgmSource.loop = true;
         sfxLoopSource.loop = true;
         sfxLoopSource.volume = 0f;
+        SyncAllVolumes(PlayerPrefs.GetFloat("Settings_Game_BGM", bgmVolume),
+            PlayerPrefs.GetFloat("Settings_SFX_Vol", sfxVolume));
     }
 
     void Start()
@@ -76,14 +78,15 @@ public class CJS_Script_AudioDirector : MonoBehaviour
     // --- UI 브릿지에서 호출할 마스터 동기화 함수 ---
     public void SyncAllVolumes(float newBgmVol, float newSfxVol)
     {
-        bgmVolume = newBgmVol;
-        sfxVolume = newSfxVol;
+        bgmVolume = Mathf.Clamp01(newBgmVol);
+        sfxVolume = Mathf.Clamp01(newSfxVol);
 
         // 1. 배경음 즉시 반영
         if (bgmSource != null) bgmSource.volume = bgmVolume;
 
         // 2. 단발 효과음 즉시 반영
-        if (sfxSource != null) sfxSource.volume = sfxVolume;
+        // PlayOneShot already applies sfxVolume; applying it here too squares it.
+        if (sfxSource != null) sfxSource.volume = 1f;
 
         // 3. 루프 효과음 (공 소리) 즉시 반영
         if (sfxLoopSource != null && sfxLoopSource.isPlaying)
