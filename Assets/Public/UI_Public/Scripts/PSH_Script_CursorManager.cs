@@ -1,22 +1,32 @@
 using UnityEngine;
-using UnityEngine.SceneManagement; // 씬 매니저 사용을 위해 추가
+using UnityEngine.SceneManagement;
+using UnityEngine.EventSystems;
+using UnityEngine.UI;
+using System.Collections.Generic;
 
 public class PSH_Script_CursorManager : MonoBehaviour
 {
     public static PSH_Script_CursorManager Instance { get; private set; }
 
     [SerializeField] private Texture2D defaultCursor;
-    [SerializeField] private Texture2D handCursor; // ư ȣ
+    [SerializeField] private Texture2D handCursor;
     [SerializeField] private Vector2 hotspot = Vector2.zero;
     private Object handOwner;
+    private readonly List<RaycastResult> hits = new();
+    private readonly List<Component> components = new();
+    private readonly List<CanvasGroup> groups = new();
+    private EventSystem pointerEventSystem;
+    private PointerEventData pointer;
+    private bool showingHand;
+    private bool cursorApplied;
 
     private void Awake()
     {
-        //  ̹ Instance ִ Ȯ
         if (Instance == null)
         {
             Instance = this;
             DontDestroyOnLoad(gameObject);
+            SetDefaultCursor();
         }
         else if (Instance != this)
         {
@@ -33,6 +43,100 @@ public class PSH_Script_CursorManager : MonoBehaviour
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        if (Instance == this) SetDefaultCursor();
+    }
+
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    private void LateUpdate()
+    {
+        if (Instance != this) return;
+        if (!Cursor.visible || Cursor.lockState == CursorLockMode.Locked)
+        {
+            SetDefaultCursor();
+            return;
+        }
+        if (EventSystem.current != null) UpdateCursorAt(Input.mousePosition);
+    }
+
+    // Re-evaluate even without pointer movement: menus, dropdowns and interactability
+    // can change underneath a stationary pointer while the game is paused.
+    internal void UpdateCursorAt(Vector2 position)
+    {
+        var current = EventSystem.current;
+        if (current == null) { SetDefaultCursor(); return; }
+        if (pointer == null || pointerEventSystem != current)
+        {
+            pointerEventSystem = current;
+            pointer = new PointerEventData(current);
+        }
+        pointer.Reset();
+        pointer.position = position;
+        hits.Clear();
+        current.RaycastAll(pointer, hits);
+        Object owner = null;
+        // Only the frontmost hit receives input. Never show a hand for controls
+        // behind a warning panel, dropdown blocker or another overlay.
+        if (hits.Count > 0 && hits[0].module is GraphicRaycaster)
+            owner = FindInteractiveOwner(hits[0].gameObject);
+        if (owner != null) SetHandCursor(owner);
+        else SetDefaultCursor();
+    }
+
+    private Object FindInteractiveOwner(GameObject hit)
+    {
+        var selectable = hit.GetComponentInParent<Selectable>();
+        if (selectable != null)
+            return selectable.IsActive() && selectable.IsInteractable() ? selectable : null;
+
+        // Custom clickable UI (for example dialogue panels and lobby tiles).
+        for (var node = hit.transform; node != null; node = node.parent)
+        {
+            node.GetComponents(components);
+            foreach (var component in components)
+            {
+                if (!(component is IPointerClickHandler) || !(component is Behaviour behaviour)
+                    || !behaviour.isActiveAndEnabled) continue;
+                if (component is EventTrigger trigger && !HasClickEvent(trigger)) continue;
+                return AllowsInteraction(node) ? component : null;
+            }
+        }
+        return null;
+    }
+
+    private static bool HasClickEvent(EventTrigger trigger)
+    {
+        foreach (var entry in trigger.triggers)
+            if (entry.eventID == EventTriggerType.PointerClick) return true;
+        return false;
+    }
+
+    private bool AllowsInteraction(Transform node)
+    {
+        for (; node != null; node = node.parent)
+        {
+            node.GetComponents(groups);
+            bool ignoreParents = false;
+            foreach (var group in groups)
+            {
+                if (!group.isActiveAndEnabled) continue;
+                if (!group.interactable) return false;
+                ignoreParents |= group.ignoreParentGroups;
+            }
+            if (ignoreParents) break;
+        }
+        return true;
+    }
+
+    private void ApplyCursor(bool hand)
+    {
+        if (cursorApplied && showingHand == hand) return;
+        showingHand = hand;
+        cursorApplied = true;
+        Cursor.SetCursor(hand ? handCursor : defaultCursor, hand ? hotspot : Vector2.zero, CursorMode.Auto);
     }
 
     // 씬이 로드될 때마다 이 함수가 호출됩니다.
@@ -44,12 +148,12 @@ public class PSH_Script_CursorManager : MonoBehaviour
     public void SetDefaultCursor()
     {
         handOwner = null;
-        Cursor.SetCursor(defaultCursor, Vector2.zero, CursorMode.Auto);
+        ApplyCursor(false);
     }
 
     public void SetHandCursor()
     {
-        Cursor.SetCursor(handCursor, hotspot, CursorMode.Auto);
+        ApplyCursor(true);
     }
 
     public void SetHandCursor(Object owner)

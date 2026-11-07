@@ -108,10 +108,10 @@ if ($IncludeMenuInteractions) {
         Copy-Item "$sourceRoot/$_", "$sourceRoot/$_.meta" "$outputPath/Assets/Runtime"
     }
     Copy-Item "$sourceRoot/Tests/DialogueInput/GameEventStubs.cs" "$outputPath/Assets/Runtime"
-    Copy-Item "$sourceRoot/Tests/UISettings/SettingsInteractionTests.cs" "$outputPath/Assets/Tests"
+    Copy-Item "$sourceRoot/Tests/UISettings/SettingsInteractionTests.cs", "$sourceRoot/Tests/UISettings/CursorInteractionTests.cs" "$outputPath/Assets/Tests"
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions
     if ($LASTEXITCODE -ne 0) { throw 'Settings interaction extraction failed.' }
-    $filter += ';SettingsInteractionTests'
+    $filter += ';SettingsInteractionTests;CursorInteractionTests'
 }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

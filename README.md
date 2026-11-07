@@ -58,6 +58,8 @@ Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현�
 ./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/steam-new -IncludeSteamLogin -PythonPath python
 ./Tests/Localization/Run-Tests.ps1 -OutputRoot D:/ball-a-retro-validation/localization-new
 ./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/localized-ui-new -IncludeHover -IncludeEffects -IncludeLocalization -PythonPath python
+./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/menu-input-new -IncludeHover -IncludeEffects -IncludeLocalization -IncludeMenuInteractions -PythonPath python
+./Tests/DialogueInput/Run-Tests.ps1 -OutputRoot D:/ball-a-retro-validation/dialogue-input-new
 ```
 
 각 출력 폴더의 `results.xml`과 `unity.log`에서 결과를 확인합니다. Steam 검증은 실제
@@ -96,3 +98,19 @@ SteamManager와 모의 Steam API를 사용하며 실제 Steam 계정 인증 시�
 이펙트 검증에는 설정 저장·이전 버전 값 이전·독립 동작·공 본체 보존·일시정지 중 조작과
 실제 설정창 버튼 연결, FHD·QHD 표시 및 클릭을 포함합니다.
 
+
+## 시스템창 닫기와 마우스 커서
+
+시스템창 X는 닫기 전용 `CloseMenu`를 호출하며, 중복 클릭으로 다시 열리지 않습니다.
+나가기 확인창의 X와 취소는 확인창만 닫아 시스템창의 일시정지를 유지합니다.
+시스템창을 닫으면 열기 전의 시간 배율과 커서 표시 상태로 돌아갑니다.
+
+커서는 최상단 UI의 실제 클릭 가능 상태로 판정합니다. 버튼·슬라이더·드롭다운과
+생성된 선택 항목·토글·입력창·커스텀 클릭 영역에 손 모양을 표시합니다.
+비활성 버튼이나 다른 창에 가려진 UI에는 표시하지 않으며, 일시정지 중이거나
+마우스가 정지한 상태에서 창을 여닫아도 다음 프레임에 갱신합니다.
+기존 버튼의 확대·색상 호버 연출은 유지합니다.
+
+2026-11-08 검증: 실제 로비·게임 공용 프리팹의 닫기/취소 연결과 커서 판정을 포함한
+UI 검사 41개, 대사·시스템창 입력과 커서 복원 회귀 검사 29개 통과.
+검증용 UI 추출의 `--interactions` 모드는 실제 버튼 콜백을 보존합니다.
