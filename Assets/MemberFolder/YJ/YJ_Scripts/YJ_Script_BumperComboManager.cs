@@ -15,12 +15,25 @@ public class YJ_Script_BumperComboManager : MonoBehaviour
     private int currentMultiplierLevel = 0; // 0: x1, 1: x2, 2: x4, 3: x6
     private float baseMultiplier = 1.0f;    // 게임 시작 시 기본 배수 보관용
 
+    // The vendor LED caches its Renderer in Start. Scene startup order is undefined,
+    // and inactive LEDs may not have started at all. Apply the public LED state here
+    // so its later Start preserves the same state without relying on that cache.
+    private static void SetComboLight(ChangeSpriteRenderer led, bool isOn)
+    {
+        if (led == null) return;
+        led.On = isOn;
+        if (led.obj_Light != null) led.obj_Light.enabled = isOn;
+        var renderer = led.GetComponent<Renderer>();
+        if (renderer != null)
+            renderer.material.SetColor("_EmissionColor", isOn ? led.Emission_On : led.Emission_Off_);
+    }
+
     private void Start()
     {
         // 시작 시 모든 배수 조명 끄기
-        if (lightX2 != null) lightX2.F_ChangeSprite_Off();
-        if (lightX4 != null) lightX4.F_ChangeSprite_Off();
-        if (lightX6 != null) lightX6.F_ChangeSprite_Off();
+        SetComboLight(lightX2, false);
+        SetComboLight(lightX4, false);
+        SetComboLight(lightX6, false);
 
         // KHS_Script_ScoreManager의 기본 배수 저장
         if (KHS_Script_ScoreManager.Instance != null)
@@ -46,9 +59,9 @@ public class YJ_Script_BumperComboManager : MonoBehaviour
         currentMultiplierLevel = 0;
 
         // 2. 배수 조명 모두 끄기
-        if (lightX2 != null) lightX2.F_ChangeSprite_Off();
-        if (lightX4 != null) lightX4.F_ChangeSprite_Off();
-        if (lightX6 != null) lightX6.F_ChangeSprite_Off();
+        SetComboLight(lightX2, false);
+        SetComboLight(lightX4, false);
+        SetComboLight(lightX6, false);
 
         // 3. ScoreManager의 점수 배율을 초기 상태(baseMultiplier)로 되돌림
         if (KHS_Script_ScoreManager.Instance != null)
@@ -81,9 +94,9 @@ public class YJ_Script_BumperComboManager : MonoBehaviour
     private void ApplyMultiplier()
     {
         // 기존 켜져 있던 배수 조명을 모두 끕니다.
-        if (lightX2 != null) lightX2.F_ChangeSprite_Off();
-        if (lightX4 != null) lightX4.F_ChangeSprite_Off();
-        if (lightX6 != null) lightX6.F_ChangeSprite_Off();
+        SetComboLight(lightX2, false);
+        SetComboLight(lightX4, false);
+        SetComboLight(lightX6, false);
 
         float comboMultiplier = 1f;
 
@@ -91,15 +104,15 @@ public class YJ_Script_BumperComboManager : MonoBehaviour
         switch (currentMultiplierLevel)
         {
             case 1:
-                if (lightX2 != null) lightX2.F_ChangeSprite_On();
+                SetComboLight(lightX2, true);
                 comboMultiplier = 2f;
                 break;
             case 2:
-                if (lightX4 != null) lightX4.F_ChangeSprite_On();
+                SetComboLight(lightX4, true);
                 comboMultiplier = 4f;
                 break;
             case 3:
-                if (lightX6 != null) lightX6.F_ChangeSprite_On();
+                SetComboLight(lightX6, true);
                 comboMultiplier = 6f;
                 break;
         }

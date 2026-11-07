@@ -36,6 +36,7 @@ public class CJS_Script_NicknameSetter : MonoBehaviour
     private void OnSceneLoaded(Scene s, LoadSceneMode m)
     {
         // 중복 프리팹이 파괴된 다음 프레임에 확실히 살아있는 싱글톤을 잡는다
+        if (!isActiveAndEnabled) return;
         StartCoroutine(CoRewireNextFrame());
     }
 
