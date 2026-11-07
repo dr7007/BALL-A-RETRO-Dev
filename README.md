@@ -50,6 +50,12 @@ ShadowCaster·DepthOnly·DepthNormals HLSL을 명시적인 패스로 컴파일�
 
 ## 스토브 심사 / Steam 빌드
 
+2026-11-08 Windows 제출 후보와 검사 결과는
+[`Docs/Release/STOVE-VALIDATION-20261108.md`](Docs/Release/STOVE-VALIDATION-20261108.md)에 기록했습니다.
+재현 명령과 심의 자료 준비는 [`Docs/Release/STOVE-REVIEW.md`](Docs/Release/STOVE-REVIEW.md)를 확인합니다.
+PowerShell 7에서 `Tests/Release/Build-StoveReview.ps1 -OutputRoot <새 외부 폴더>`를 실행하면
+격리 복사본 생성, STOVE 빌드, 네이티브 Steam 파일 제외 및 게임 DLL 검사를 수행합니다.
+
 기본 실행 모드는 스토브 심사용입니다. Steam 클라이언트를 초기화하지 않으며,
 로비와 게임 결과에서 랭킹 화면을 열 수 있고, 온라인 조회는 Steam 버전에서만 수행합니다.
 스토브에서는 Steam 전용 기능 안내를 표시합니다. 개인 최고 기록은 현재 PC에 모드·레벨별로
