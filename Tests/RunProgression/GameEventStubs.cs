@@ -31,6 +31,7 @@ public static class KHS_Script_FliperDumpManager
 }
 public static class KHS_Script_PortalController { public static event Action<int> portalEvt; }
 public static class KHS_Script_PlincoFunction { public static event Action ReturnPortalEvt; }
+#if !TUTORIAL
 public class KHS_Script_PlungerController : MonoBehaviour
 {
     public static event Action OnBallLaunched;
@@ -38,6 +39,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
     public static event Action TestTScoreUpdateEvt;
     public bool isBallReady, tutorialForceLock;
 }
+#endif
 public static class KHS_Script_UIImgFunc
 {
     public static event Action<bool> RoundUIEvt;
@@ -59,11 +61,19 @@ public class KHS_Script_CameraManager : MonoBehaviour
 }
 public class CJS_Script_CameraShaker : MonoBehaviour { public void OnScored(int score) { } }
 public class CJS_Script_LeaderboardList : MonoBehaviour { public void Populate(ScoreRow[] rows) { } }
+// Ranking layout/clicks are tested separately with the real UI prefabs.
+public class PSH_Script_WorldRankingUI : MonoBehaviour
+{
+    public event Action Closed;
+    public static PSH_Script_WorldRankingUI Install(Transform parent, TMPro.TMP_FontAsset font, bool showEntry) => null;
+    public void Show() { }
+    public void Close() { }
+}
 public class CJS_Script_PinballRankingService : MonoBehaviour
 {
     public static CJS_Script_PinballRankingService Instance => FindAnyObjectByType<CJS_Script_PinballRankingService>();
     public int Submissions, LastScore;
-    public void SubmitScore(int score, string mode, int level, Action<SubmitResp> onDone, Action<string> onFail)
+    public void SubmitScore(int score, string mode, int level, Action<SubmitResp> onDone, Action<string> onFail, int step = 1)
     {
         Submissions++;
         LastScore = score;

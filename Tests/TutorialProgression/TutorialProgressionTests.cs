@@ -219,6 +219,14 @@ public class TutorialProgressionTests
         var lines=(List<string>)typeof(PSH_Script_DialogueUI).GetField("currentLines",fields).GetValue(dialogue);
         Assert.That(lines.Count,Is.EqualTo(7));
         Assert.That(lines[0],Does.Contain("처음인 모양"));
+        foreach (var code in new[] { "en", "ja", "ko" })
+        {
+            LocaleTestContext.Select(code); yield return LocalizationSettings.InitializationOperation; yield return null;
+            var translated=(List<string>)typeof(PSH_Script_DialogueUI).GetField("currentLines",fields).GetValue(dialogue);
+            for (int line=0;line<7;line++)
+                Assert.That(translated[line], Is.EqualTo(PSH_Script_Localization.Table("DialogueTable").GetEntry($"Tutorial_{line+1:D2}").LocalizedValue));
+            Assert.That(typeof(PSH_Script_DialogueUI).GetField("idx",fields).GetValue(dialogue),Is.EqualTo(0));
+        }
         for(int i=0;i<14;i++)typeof(PSH_Script_DialogueUI).GetMethod("AdvanceDialogue",fields).Invoke(dialogue,null);
         Assert.That(panel.activeSelf,Is.False);
         Assert.That(tutorial.tutorialText.text,Does.Contain("각각 눌러보세요"));
@@ -226,7 +234,69 @@ public class TutorialProgressionTests
         Assert.That(tutorial.resultPanel.activeSelf,Is.False);
     }
 
-    private void Launch() { Call("GoToStep", CJS_TutorialDirector.Step.Plunger); KHS_Script_PlungerController.Launch(); }
+    [Test]
+    public void TutorialStartupWithBallHudBeforeItsStartDoesNotAbortInitialization()
+    {
+        var ball = New("Ball", typeof(Rigidbody)).AddComponent<YJ_Script_BallController>();
+        ball.GetComponent<Rigidbody>().useGravity = false;
+        ball.SetBallCount(1);
+        var hud = Text("Ball HUD", tutorial.tutorialText.transform.parent);
+        hud.gameObject.AddComponent<KHS_Script_UIToBall>(); // subscribed, Start has not run
+        tutorial.resultPanel.SetActive(true);
+        tutorial.tutorialText.text = "New Text";
+        tutorial.resultTitleText.text = "asdsada";
+        Assert.DoesNotThrow(() => Call("Start"));
+        Assert.That(hud.text, Is.EqualTo("1"));
+        Assert.That(tutorial.resultPanel.activeSelf, Is.False);
+        Assert.That(tutorial.tutorialText.text, Is.Empty);
+        Assert.That(score.targetScore, Is.EqualTo(1000));
+    }
+
+    [UnityTest]
+    public IEnumerator RealPlungerAppliesImpulseAndStartsPracticeOnlyAfterUnlock()
+    {
+        var body = ReadyBall();
+        CallPlunger("Launch");
+        Assert.That(body.linearVelocity.sqrMagnitude, Is.Zero);
+        Call("GoToStep", CJS_TutorialDirector.Step.Plunger);
+        Time.timeScale = 0;
+        CallPlunger("Launch");
+        Assert.That(tutorial.tutorialText.text, Is.EqualTo(PSH_Script_Localization.Text("Tut_Launch")));
+        Time.timeScale = 1;
+        CallPlunger("Launch");
+        yield return new WaitForFixedUpdate();
+        Assert.That(body.linearVelocity.magnitude, Is.GreaterThan(0));
+        Assert.That(tutorial.tutorialText.text, Does.Contain("1000"));
+        Assert.That(tutorial.resultPanel.activeSelf, Is.False);
+    }
+
+    [UnityTest]
+    public IEnumerator EveryInstructionStepChangesImmediatelyInAllThreeLanguages()
+    {
+        foreach (var step in new[] { CJS_TutorialDirector.Step.Flippers, CJS_TutorialDirector.Step.Entrance2F, CJS_TutorialDirector.Step.Plunger, CJS_TutorialDirector.Step.ScoreMission })
+        {
+            Call("GoToStep", step);
+            foreach (var code in new[] { "ko", "en", "ja" })
+            {
+                LocaleTestContext.Select(code); yield return LocalizationSettings.InitializationOperation; yield return null;
+                string key = step == CJS_TutorialDirector.Step.Flippers ? "Tut_Flippers" : step == CJS_TutorialDirector.Step.Entrance2F ? "Tut_Entrance" : step == CJS_TutorialDirector.Step.Plunger ? "Tut_Launch" : null;
+                if (key != null) Assert.That(tutorial.tutorialText.text, Is.EqualTo(PSH_Script_Localization.Text(key, "Z", "/")));
+                else Assert.That(tutorial.tutorialText.text, Does.Contain(PSH_Script_Localization.Text("Tut_Practice")));
+                Assert.That(tutorial.tutorialText.text, Does.Not.Contain("New Text"));
+            }
+        }
+    }
+
+    private Rigidbody ReadyBall()
+    {
+        var body = New("Launch ball", typeof(Rigidbody), typeof(SphereCollider)).GetComponent<Rigidbody>();
+        body.useGravity = false; body.gameObject.tag = "Ball";
+        CallPlunger("OnTriggerEnter", body.GetComponent<Collider>());
+        return body;
+    }
+    private void CallPlunger(string method, params object[] args) => typeof(KHS_Script_PlungerController)
+        .GetMethod(method, BindingFlags.Instance | BindingFlags.NonPublic).Invoke(tutorial.plunger, args);
+    private void Launch() { ReadyBall(); Call("GoToStep", CJS_TutorialDirector.Step.Plunger); CallPlunger("Launch"); }
     private void Tick() => Call("CheckScoreMission");
     private void Press(KeyCode key) => ((Action<KeyCode>)typeof(KHS_Script_FliperController)
         .GetField("OnFlipperPressed", BindingFlags.Static | BindingFlags.NonPublic).GetValue(null))?.Invoke(key);

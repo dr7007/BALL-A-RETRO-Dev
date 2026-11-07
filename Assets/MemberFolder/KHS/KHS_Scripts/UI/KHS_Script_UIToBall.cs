@@ -12,11 +12,10 @@ public class KHS_Script_UIToBall : MonoBehaviour
 
     private void Awake()
     {
-        ballCon = FindAnyObjectByType<YJ_Script_BallController>();
+        ResolveReferences();
     }
     private void Start()
     {
-        BallCountUI = GetComponent<TextMeshProUGUI>();
         BallCountReset();
     }
     private void OnEnable()
@@ -32,7 +31,7 @@ public class KHS_Script_UIToBall : MonoBehaviour
 
     private void BallCountReset()
     {
-        if (ballCon != null)
+        if (ResolveReferences())
         {
             ballCount = ballCon.GetBallCount();
             BallCountUI.text = "" + ballCount;
@@ -41,7 +40,7 @@ public class KHS_Script_UIToBall : MonoBehaviour
 
     private void BallCountInitReset()
     {
-        if (ballCon != null)
+        if (ResolveReferences())
         {
             ballCount = ballCon.BallCountInitResponse();
             BallCountUI.text = "" + ballCount;
@@ -50,12 +49,22 @@ public class KHS_Script_UIToBall : MonoBehaviour
 
     private void BallOutUI()
     {
+        if (!ResolveReferences()) return;
         ballCount = ballCon.GetBallCount();
         BallCountUI.text = "" + ballCount;
     }
 
     public void BallInfoUpdate()
     {
+        if (!ResolveReferences()) return;
         BallCountUI.text = "" + ballCon.GetBallCount();
+    }
+
+    // UI events can arrive from another component's Start before our Start runs.
+    private bool ResolveReferences()
+    {
+        if (!BallCountUI) BallCountUI = GetComponent<TextMeshProUGUI>();
+        if (!ballCon) ballCon = FindAnyObjectByType<YJ_Script_BallController>();
+        return BallCountUI != null && ballCon != null;
     }
 }

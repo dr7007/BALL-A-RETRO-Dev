@@ -62,9 +62,10 @@ public class KHS_Script_PlungerController : MonoBehaviour
 
     private void Update()
     {
+        if (Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
         if (!isBallReady)
         {
-            StartCoroutine(WaitAndZero());
+            currentGaze = 0f;
             return;
         }
         //추가 튜토리얼용
@@ -87,21 +88,14 @@ public class KHS_Script_PlungerController : MonoBehaviour
             }
         }
     }
-    private IEnumerator WaitAndZero()
-    {
-        yield return new WaitForSeconds(0.1f);
-        currentGaze = 0f;
-    }
     private void PlungerStopFunc(bool _start)
     {
         if (!_start)
         {
-            Debug.LogError("1초낭비 진입");
             StartCoroutine(SpaceBarLock());
         }
         else
         {
-            Debug.LogWarning($"일단 플런저 너 멈춰봐{_start}");
             isLock = _start;
         }
     }
@@ -110,29 +104,23 @@ public class KHS_Script_PlungerController : MonoBehaviour
     {
         TestTScoreUpdateEvt?.Invoke();
 
-        Debug.LogWarning(
-            $"SpaceBarLock 시작 / TimeScale = {Time.timeScale}"
-        );
-
         // Time.timeScale과 관계없이 실제 시간 기준으로 0.7초 대기
         yield return new WaitForSecondsRealtime(0.7f);
 
         isLock = false;
 
-        Debug.LogWarning(
-            $"SpaceBarLock 종료 / TimeScale = {Time.timeScale}"
-        );
     }
 
     private void NoIntroExceptionFunc()
     {
         TestTScoreUpdateEvt?.Invoke();
-        Debug.LogWarning("아니 멈추지 마");
         isLock = false;
     }
 
     private void Launch()
     {
+        if (!isBallReady || ballRigidbody == null || isLock || tutorialForceLock
+            || Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
         if (ballRigidbody != null)
         {
             // 플런저가 향하는 방향 기준으로 발사
@@ -142,6 +130,13 @@ public class KHS_Script_PlungerController : MonoBehaviour
 
         // [ADD] 발사 직후 브로드캐스트(사운드 용)
         OnBallLaunched?.Invoke();
+    }
+
+    // Tutorial progression owns this gate; it must also work without a main-game intro.
+    public void BeginTutorialLaunch()
+    {
+        tutorialForceLock = false;
+        isLock = false;
     }
 
     // 공이 발사 준비 위치에 들어왔을 때 호출

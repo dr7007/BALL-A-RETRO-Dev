@@ -68,6 +68,13 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     private bool HasPracticedFlippers => _playedLeft && _playedRight;
 
+    private void Awake()
+    {
+        if (resultPanel) resultPanel.SetActive(false);
+        foreach (var text in new[] { tutorialText, resultTitleText, resultDescText })
+            if (text) text.text = string.Empty;
+    }
+
     void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += RefreshLocalizedText;
@@ -95,7 +102,6 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (!plunger) plunger = FindObjectOfType<KHS_Script_PlungerController>(true);
         if (!scoreManager) scoreManager = FindObjectOfType<KHS_Script_ScoreManager>(true);
 
-        if (scoreManager) scoreManager.ConfigureTutorial(tutorialTargetScore);
         if (resultPanel) resultPanel.SetActive(false);
 
         BindButtons();
@@ -113,6 +119,7 @@ public class CJS_TutorialDirector : MonoBehaviour
         // 튜토리얼 진행 중 2층 입구 막기
         if (railEntranceTrigger) railEntranceTrigger.enabled = false;
 
+        if (scoreManager) scoreManager.ConfigureTutorial(tutorialTargetScore);
         GoToStep(Step.Intro);
         StartCoroutine(PlayIntroduction());
     }
@@ -251,7 +258,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                     focus.FocusTo(focusPlunger);
 
                 if (plunger)
-                    plunger.tutorialForceLock = false;
+                    plunger.BeginTutorialLaunch();
 
 
                 break;

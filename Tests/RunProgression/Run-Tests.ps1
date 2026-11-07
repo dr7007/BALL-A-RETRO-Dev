@@ -69,6 +69,7 @@ if (!$Baseline) { Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/RunProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
 if ($IncludeTutorial) {
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_PlungerController.cs" -Destination "$outputPath/Assets/Runtime"
     if ($Baseline) { throw 'Tutorial checks require the current flipper event.' }
     @('CJS_TutorialDirector.cs', 'CJS_TutorialCameraFocus.cs') | ForEach-Object {
         Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
