@@ -90,6 +90,10 @@ Assets/ReleaseValidation에만 복사한다. `-batchmode -executeMethod BallARet
 
 ## 제출 전 남은 외부 절차
 
+2026-11-08 진행 상태: 빌드 `53099` 업로드 완료, 실행 설정 저장 완료,
+`BALL-A-RETRO.exe` DRM 적용 완료. 자세한 증거와 미완료 항목은
+[STOVE-VALIDATION-20261108.md](STOVE-VALIDATION-20261108.md)를 참고한다.
+
 1. 스토브 스튜디오의 그룹·프로젝트·상품, 개인/사업자 및 정산 정보를 확인한다.
 2. 로컬 Windows 플레이어를 업로드하고 DRM Maker를 적용한다. 기본 실행 파일은
    `BALL-A-RETRO.exe`다. DRM 적용 후 스토브 PC 클라이언트에서 설치·실행·종료·재실행 및

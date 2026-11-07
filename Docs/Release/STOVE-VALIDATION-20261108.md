@@ -1,25 +1,25 @@
 # STOVE 제출 후보 검증 결과 — 2026-11-08
 
 Windows 64비트 / 0.1.0 / Unity 6000.0.60f1 / 브랜치 `PSH_ALPHA`.
-출발 커밋 `6589ebe`, 게임 수정 기준 커밋 `7d4811f`.
+출발 커밋 `6589ebe`, 게임 수정 기준 커밋 `7d4811f`, 업로드 빌드 도구 기준 `96cb91f`.
 현재 사용자의 미커밋 볼 머테리얼과 두 폰트 값을 포함하여 빌드했다.
 세 원본 파일은 시작 전 SHA-256과 동일하며 커밋하지 않았다.
 
 ## 결과물
 
-- ZIP: `D:/ball-a-retro-validation/stove-release-20261108/submission/BALL-A-RETRO-STOVE-0.1.0-Win64-review.zip`
-- 실행 파일: 같은 폴더의 `player/BALL-A-RETRO.exe`
+- ZIP: `D:/ball-a-retro-validation/stove-release-20261108/submission-v3/BALL-A-RETRO-STOVE-0.1.0-Win64-review.zip`
+- 업로드 폴더의 실행 파일: 같은 폴더의 `upload/BALL-A-RETRO.exe`
 - 빌드·검사 증거: 같은 폴더의 `evidence/`
 - 심사용 문구 176개: 같은 폴더의 `materials/ALL-DIALOGUE-UI.txt`
 - 준비 안내: [STOVE-REVIEW.md](STOVE-REVIEW.md)
 
-ZIP은 136,186,368바이트이며 실행에 필요한 303개 파일을 담는다.
+ZIP은 136,184,798바이트이며 실행에 필요한 303개 파일을 담는다.
 PDB 및 `BurstDebugInformation_DoNotShip` 폴더는 압축에서 제외했다.
 압축을 다시 읽어 모든 파일의 SHA-256을 플레이어 원본과 비교했다.
 
 ```text
 SHA-256
-8E1CFC925D7CE7EEDD8E51681860F5EC7E610FD855FE291BADA4941E91B562F4
+E79ED3AA4CA224FBB357F2703EEE52634EAD5E1E98110C72B496758A7E568187
 ```
 
 ## 수정과 확인
@@ -62,10 +62,12 @@ SHA-256
 에디터 초기화에는 이전 URP 직렬화 타입에 관한 기존 경고가 남았으며, 최종 플레이어의
 30초 시작 로그에는 해당 경고나 예외가 나타나지 않았다.
 
-이 ZIP은 **DRM 적용 전 제출 후보**다. STOVE 스튜디오 업로드·DRM Maker 적용·PC 클라이언트
-설치 시험·심의 신청은 아직 수행하지 않았다. 구간별 플레이 영상과 모든 엔딩, 콘텐츠 자료를
-준비하고 룰렛·슬롯 및 대사 표현을 심의에 명시해야 한다. 등급 승인을 받았다고 표시하지 않는다.
-# 업로드 후보 재검증
+이 로컬 ZIP은 **DRM 적용 전 원본**이다. 아래 기록과 같이 STOVE 서버에 업로드한 사본에는
+DRM이 적용되어 있다. PC 클라이언트 설치 시험과 게임 이용등급 심의 신청은 완료하지 않았다.
+구간별 플레이 영상과 모든 엔딩을 준비하고 룰렛·슬롯 및 대사 표현을 심의에 명시해야 한다.
+등급 승인을 받았다고 표시하지 않는다.
+
+## 업로드 후보 재검증
 
 최신 후보는 `D:/ball-a-retro-validation/stove-release-20261108/submission-v3`다.
 업로더에는 ZIP에서 해시를 확인하며 추출한 `upload` 폴더를 지정한다. 이 폴더는 303개
@@ -89,3 +91,28 @@ ZIP SHA256: `E79ED3AA4CA224FBB357F2703EEE52634EAD5E1E98110C72B496758A7E568187`.
 STOVE 상품 ID는 `106815`다. 업로드 성공, DRM 적용, 클라이언트 시험, 이용등급 심사 접수는
 각각 Studio/클라이언트에서 확인한 결과를 별도로 기록한다. 개인·사업자 정보 신청과
 게임 이용등급 심사 신청을 혼동하지 않는다.
+
+## Studio 업로드 및 실행 설정
+
+- 상품 `106815`, 빌드 번호 `53099`.
+- 빌드 설명: `0.1.0 STOVE 심사용 Win64 96cb91f`.
+- 등록 `2026-11-08 03:57`, 서버 빌드 완료 수정 시각 `03:59`.
+- Studio 표시: 업로드 완료, 용량 `94.38 MB`, Save 파일 없음, 출시 상태 `-`.
+  서버 표시 용량은 로컬 ZIP의 바이트 크기와 별개로 기록한다.
+- 실행 설정 저장 완료: PC, 실행 파일 `BALL-A-RETRO.exe`, 설치 폴더 `BALL-A-RETRO`.
+  기존 Unity Player 아이콘인 `Icon_Logo.png`를 사용하여 Studio의 ICO 변환 및
+  썸네일 편집 기능으로 아이콘·썸네일을 등록했다. 원본 게임 에셋은 변경하지 않았다.
+- DRM Maker: 적용, 타임아웃 120초, `BALL-A-RETRO.exe` 1개 적용 완료.
+  자동 선택되어 있던 `UnityCrashHandler64.exe`는 공식 가이드에 따라 제외하고 저장했다.
+- 무결성 검사에서도 `UnityCrashHandler64.exe`를 제외했다. 저장 후 목록에 4개가 표시된다.
+- STOVE PC 클라이언트는 `D:/Programs/NexonPlug/STOVE/STOVE.exe`에서 발견했다.
+  Smilegate 서명이 유효하다. 자동 실행 요청은 시간 초과되어 사용자에게 직접 실행·로그인을
+  요청했다. 클라이언트에서 빌드 설치·실행·종료·재실행 시험은 아직 완료하지 않았다.
+
+## 심의 자료
+
+`Tests/Release/Export-ReviewManual.py`로 5쪽 한국어 설명서와 대사 이미지 목록을 생성했다.
+`materials/ALL-DIALOGUE-UI.txt`는 대사·UI 176개 항목의 세 언어 문구 528개를 담는다.
+게임·튜토리얼의 대사 스프라이트 참조 51개와 원본 이미지 1개를 `dialogue-artwork/`에 수록했다.
+본문 화면 5장은 로컬 씬 렌더링이며, 설명서에 STOVE 클라이언트 촬영 자료와 구분해 명시했다.
+초반·중반·후반 각 7분 이상 및 모든 엔딩 영상은 아직 준비되지 않았다.
