@@ -31,6 +31,14 @@ define으로 컴파일하고 DLL 검사를 통과했습니다.
 Steam 비활성 상태를 포함합니다. 검증 코드는 `Tests/Release/BallARetroSceneProbe.cs`이며
 개발 프로젝트 밖의 격리 프로젝트에서만 실행합니다.
 
+## 출시 점검: 공 셰이더
+
+`URP_MetallicMatCap`에서 전체 URP/Lit 셰이더로 연결하던 Fallback을 제거하고, URP의
+ShadowCaster·DepthOnly·DepthNormals HLSL을 명시적인 패스로 컴파일합니다. Unity 6.0에서
+실제 씬을 렌더링할 때 발생하던 `State comes from an incompatible keyword space` 오류를
+해결했습니다. 기존 ForwardLit의 색상·금속성·MatCap 계산과 사용자 머테리얼 값은 유지합니다.
+2026-11-08 수정 전 렌더링 오류 3건, 수정 후 실제 씬 5장 렌더링과 22개 통합 검사에서 오류 0건.
+
 현 Repository에서는 Unity 6의 기본 Universal 3D의 기본 Packages 폴더를 예외로 처리하고 있습니다 (기본적인 패캐지는 로컬에서 자체적으로 추가해주셔야 합니다 [용량 간소화를 위함])
 
 ## 스토브 심사 / Steam 빌드
