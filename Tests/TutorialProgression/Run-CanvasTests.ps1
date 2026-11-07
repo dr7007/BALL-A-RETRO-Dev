@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [switch]$IncludeHover,
+    [switch]$IncludeMenuInteractions,
     [switch]$IncludeLocalization,
     [switch]$IncludeEffects,
     [switch]$IncludePersonalRecords,
@@ -98,6 +99,19 @@ if ($IncludeLocalization) {
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath
     if ($LASTEXITCODE -ne 0) { throw 'Localized UI extraction failed.' }
     $filter += ';LocalizationUITests'
+}
+if ($IncludeMenuInteractions) {
+    if (!$IncludeLocalization) { throw 'Menu interaction checks use the localized UI fixture; pass -IncludeLocalization.' }
+    @('Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_SettingController.cs',
+      'Assets/Public/UI_Public/Scripts/PSH_Script_ModalCanvas.cs',
+      'Assets/Public/Main_Lobby/UI_Lobby/Scripts/PSH_Script_InputFieldHover.cs') | ForEach-Object {
+        Copy-Item "$sourceRoot/$_", "$sourceRoot/$_.meta" "$outputPath/Assets/Runtime"
+    }
+    Copy-Item "$sourceRoot/Tests/DialogueInput/GameEventStubs.cs" "$outputPath/Assets/Runtime"
+    Copy-Item "$sourceRoot/Tests/UISettings/SettingsInteractionTests.cs" "$outputPath/Assets/Tests"
+    & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions
+    if ($LASTEXITCODE -ne 0) { throw 'Settings interaction extraction failed.' }
+    $filter += ';SettingsInteractionTests'
 }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

@@ -42,7 +42,7 @@ public class PSH_Script_SettingController : MonoBehaviour
     void Start()
     {
         // 시작할 때 설정창은 꺼져 있어야 함
-        if (panelSetting != null)
+        if (panelSetting != null && !isSettingOpen)
             panelSetting.SetActive(false);
     }
 
@@ -58,11 +58,16 @@ public class PSH_Script_SettingController : MonoBehaviour
     { 
         isGameEnded = true; 
     }
-    public void ToggleMenu()
-    {
-        if (panelSetting == null) return;
+    public void ToggleMenu() => SetMenuOpen(!isSettingOpen);
 
-        if (!isSettingOpen)
+    // A close button must not toggle the menu back on if invoked more than once.
+    public void CloseMenu() => SetMenuOpen(false);
+
+    private void SetMenuOpen(bool open)
+    {
+        if (panelSetting == null || isSettingOpen == open) return;
+
+        if (open)
         {
             // 대사/선택창/로비 등 메뉴를 열기 전 화면의 입력 및 일시정지 상태를 보존한다.
             timeScaleBeforeMenu = Time.timeScale;
@@ -72,7 +77,7 @@ public class PSH_Script_SettingController : MonoBehaviour
             EnsureModalCanvas(panelWarning, MenuSortingOrder + 1);
         }
 
-        isSettingOpen = !isSettingOpen;
+        isSettingOpen = open;
         lastMenuToggleFrame = Time.frameCount;
         if (isSettingOpen) openMenu = this;
         else if (openMenu == this) openMenu = null;
