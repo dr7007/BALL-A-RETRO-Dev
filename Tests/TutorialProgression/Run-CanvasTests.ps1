@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [switch]$IncludeHover,
+    [switch]$IncludeLobby,
     [switch]$IncludeMenuInteractions,
     [switch]$IncludeLocalization,
     [switch]$IncludeEffects,
@@ -68,8 +69,8 @@ if ($IncludeEffects) {
     }
     $filter += ';EffectSettingsTests;EffectOptionsTests'
 }
-if ($IncludePersonalRecords -or $IncludeSteamLogin) {
-    Copy-Item "$sourceRoot/Assets/Public/Platform/*.cs" -Destination "$outputPath/Assets/Runtime"
+if ($IncludePersonalRecords -or $IncludeSteamLogin -or $IncludeLobby) {
+    Copy-Item "$sourceRoot/Assets/Public/Platform/*.cs*" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_PinballRankingService.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_Models.cs", "$sourceRoot/Assets/Scripts/Steamworks.NET/SteamManager.cs" -Destination "$outputPath/Assets/Runtime"
 }
 if ($IncludePersonalRecords) {
@@ -77,7 +78,7 @@ if ($IncludePersonalRecords) {
     $filter += ';PersonalRecordTests'
 }
 if ($IncludeSteamLogin) {
-    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_SteamNickLoader.cs", "$sourceRoot/Tests/SteamLogin/SteamApiStub.cs", "$sourceRoot/Assets/Public/Platform/BallARetroSteamSettings.cs.meta" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_SteamNickLoader.cs", "$sourceRoot/Tests/SteamLogin/SteamApiStub.cs", "$sourceRoot/Tests/SteamLogin/SteamLeaderboardStub.cs", "$sourceRoot/Assets/Public/Platform/BallARetroSteamSettings.cs.meta" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Tests/SteamLogin/SteamIdentityTests.cs" -Destination "$outputPath/Assets/Tests"
     $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Resources/Release", "$outputPath/Assets/Editor"
     # A synthetic ID is used exclusively with the fake Steam client, outside the game project.
@@ -100,7 +101,7 @@ if ($IncludeLocalization) {
     if ($LASTEXITCODE -ne 0) { throw 'Localized UI extraction failed.' }
     $filter += ';LocalizationUITests'
 }
-if ($IncludeMenuInteractions) {
+if ($IncludeMenuInteractions -or $IncludeLobby) {
     if (!$IncludeLocalization) { throw 'Menu interaction checks use the localized UI fixture; pass -IncludeLocalization.' }
     @('Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_SettingController.cs',
       'Assets/Public/UI_Public/Scripts/PSH_Script_ModalCanvas.cs',
@@ -112,6 +113,23 @@ if ($IncludeMenuInteractions) {
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions
     if ($LASTEXITCODE -ne 0) { throw 'Settings interaction extraction failed.' }
     $filter += ';SettingsInteractionTests;CursorInteractionTests'
+}
+if ($IncludeLobby) {
+    @('Assets/MemberFolder/PSH/PSH_Lobby/Scripts/PSH_Script_LobbyManager.cs',
+      'Assets/Public/Main_Lobby/UI_Lobby/Scripts/PSH_Script_StartButton.cs',
+      'Assets/Public/UI_Public/Scripts/PSH_Script_WorldRankingUI.cs') | ForEach-Object {
+        Copy-Item "$sourceRoot/$_", "$sourceRoot/$_.meta" "$outputPath/Assets/Runtime"
+    }
+    Copy-Item "$sourceRoot/Tests/UISettings/LobbySceneLoaderStub.cs" "$outputPath/Assets/Runtime"
+    Copy-Item "$sourceRoot/Tests/UISettings/LobbyFlowTests.cs" "$outputPath/Assets/Tests"
+    & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions --lobby
+    if ($LASTEXITCODE -ne 0) { throw 'Lobby UI extraction failed.' }
+    $filter = 'LobbyFlowTests'
+    if ($IncludeSteamLogin) {
+        Copy-Item "$sourceRoot/Tests/SteamLogin/SteamLeaderboardTests.cs" "$outputPath/Assets/Tests"
+        $filter += ';SteamIdentityTests;SteamLeaderboardTests'
+    }
+    if ($IncludePersonalRecords) { $filter += ';PersonalRecordTests' }
 }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

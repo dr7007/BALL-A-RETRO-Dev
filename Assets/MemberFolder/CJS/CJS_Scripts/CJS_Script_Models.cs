@@ -3,6 +3,7 @@ using System;
 [Serializable]
 public class ScoreRow
 {
+    public int rank;
     public string nickname;
     public int score;
     public string game_mode;

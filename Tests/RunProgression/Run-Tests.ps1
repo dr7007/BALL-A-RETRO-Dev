@@ -55,6 +55,7 @@ $unchangedSources = @(
     'Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_Flipper.cs',
     'Assets/MemberFolder/KHS/KHS_Scripts/UI/KHS_Script_UIToBall.cs',
     'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs',
+    'Assets/Public/Platform/BallARetroPlatform.cs',
     'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_Models.cs',
     'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_DialogueUI.cs',
     'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_DialogueClickForwarder.cs',

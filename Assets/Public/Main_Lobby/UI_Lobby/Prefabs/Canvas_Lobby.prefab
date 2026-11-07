@@ -235,7 +235,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 6092786664975596656}
         m_TargetAssemblyTypeName: PSH.PSH_Script_LobbyUIManager, Assembly-CSharp
-        m_MethodName: OnClick_StartGame
+        m_MethodName: OnClick_Tutorial
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -1104,7 +1104,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: dbf21f832bb66f241922900a27803316, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  sceneNameForBuild: PSH_Scene_Game
+  sceneNameForBuild: Main_Scene_Game
+  tutorialSceneName: Main_Scene_Tutorial
   cursorManagerPrefab: {fileID: 519272316604641727, guid: 1dfdab57b8a090e48808c7039d7af741, type: 3}
   inputEmailPrefab: {fileID: 476213785324123842}
   RnakingPanel: {fileID: 0}

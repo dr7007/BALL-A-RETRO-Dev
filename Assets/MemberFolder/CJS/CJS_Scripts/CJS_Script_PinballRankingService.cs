@@ -1,13 +1,8 @@
 using System.Collections;
 using UnityEngine;
-using UnityEngine.Networking;
 
 public class CJS_Script_PinballRankingService : MonoBehaviour
 {
-    [Header("Server")]
-    [SerializeField] private string baseUrl = "http://localhost/pinball";
-    [SerializeField] private string apiKey = "CHANGE_ME_STRONG_KEY";
-
     // ── Singleton ────────────────────────────────────────────────────────────
     private static CJS_Script_PinballRankingService instance;
     public static CJS_Script_PinballRankingService Instance
@@ -68,7 +63,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         DontDestroyOnLoad(gameObject);
         InstanceReady?.Invoke(this);
 
-        Debug.Log($"[RankingService.Awake] baseUrl={baseUrl} apiKey.len={apiKey?.Length ?? 0} nick='{Nickname}'");
+
     }
 
     // ── Player nickname ──────────────────────────────────────────────────────
@@ -119,122 +114,49 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         StartCoroutine(CoFetch(gameMode, level, onDone, onFail));
     }
 
-    // ── Coroutines ───────────────────────────────────────────────────────────
-    private bool HasRequiredLogin(System.Action<string> onFail)
+    private BallARetroSteamLeaderboard SteamLeaderboard
     {
-        if (!BallARetroPlatform.IsSteamBuild || SteamManager.TryGetLoggedInPlayer(out _, out _)) return true;
-        onFail?.Invoke("Steam을 실행하고 로그인해주세요.");
-        return false;
+        get
+        {
+            var backend = GetComponent<BallARetroSteamLeaderboard>();
+            return backend != null ? backend : gameObject.AddComponent<BallARetroSteamLeaderboard>();
+        }
     }
 
     private IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
-        if (!HasRequiredLogin(onFail)) yield break;
-        if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
-        if (BallARetroPlatform.UsesPersonalRecords)
-        {
-            yield return null;
-            onDone?.Invoke();
-            yield break;
-        }
-
-        WWWForm f = new WWWForm();
-        f.AddField("nickname", Nickname);
-        f.AddField("key", apiKey);
-
-        var url = $"{baseUrl}/register_nickname.php";
-        Debug.Log($"[Register] url={url} nickname='{Nickname}'");
-        using (var req = UnityWebRequest.Post(url, f))
-        {
-            yield return req.SendWebRequest();
-            Debug.Log($"[Register] HTTP={req.responseCode} text={req.downloadHandler.text}");
-            if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
-
-            RegisterResp resp = null;
-            try { resp = JsonUtility.FromJson<RegisterResp>(req.downloadHandler.text); }
-            catch { onFail?.Invoke("Invalid JSON"); yield break; }
-
-            if (resp == null) { onFail?.Invoke("Empty response"); yield break; }
-            if (!resp.ok) { onFail?.Invoke(resp.msg ?? "ok=false"); yield break; }
-
-            onDone?.Invoke();
-        }
+        // Steam identifies players itself; no nickname registration service is needed.
+        if (BallARetroPlatform.IsSteamBuild && !SteamManager.TryGetLoggedInPlayer(out _, out _))
+        { onFail?.Invoke("Steam login required"); yield break; }
+        yield return null;
+        onDone?.Invoke();
     }
 
     private IEnumerator CoSubmit(int score, string gameMode, int level,
-                                 System.Action<SubmitResp> onDone,
-                                 System.Action<string> onFail)
+        System.Action<SubmitResp> onDone, System.Action<string> onFail)
     {
-        if (!HasRequiredLogin(onFail)) yield break;
         if (score < 0) { onFail?.Invoke("Score must not be negative."); yield break; }
-        if (BallARetroPlatform.UsesPersonalRecords)
+        if (BallARetroPlatform.IsSteamBuild)
         {
-            var rows = BallARetroPersonalRecordStore.Submit(Nickname, score, gameMode, level);
-            yield return null;
-            onDone?.Invoke(new SubmitResp { ok = true, your_score = score, rank = 1, top10 = rows, msg = "Personal best saved on this device." });
+            SteamLeaderboard.Submit(score, gameMode, level, onDone, onFail);
             yield break;
         }
-        if (string.IsNullOrWhiteSpace(Nickname)) Nickname = "Guest";
-
-        WWWForm f = new WWWForm();
-        f.AddField("nickname", Nickname);
-        f.AddField("score", score);
-        if (!string.IsNullOrEmpty(gameMode)) f.AddField("game_mode", gameMode);
-        if (level > 0) f.AddField("level", level);
-        f.AddField("key", apiKey);
-
-        var url = $"{baseUrl}/submit_score.php";
-        Debug.Log($"[Submit] url={url} nick='{Nickname}' score={score} mode='{gameMode}' level={level}");
-        using (var req = UnityWebRequest.Post(url, f))
-        {
-            yield return req.SendWebRequest();
-            Debug.Log($"[Submit] HTTP={req.responseCode} text={req.downloadHandler.text}");
-            if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
-
-            SubmitResp resp = null;
-            try { resp = JsonUtility.FromJson<SubmitResp>(req.downloadHandler.text); }
-            catch { onFail?.Invoke("Invalid JSON"); yield break; }
-
-            if (resp == null) { onFail?.Invoke("Empty response"); yield break; }
-            if (!resp.ok) { onFail?.Invoke(resp.msg ?? "Server returned ok=false"); yield break; }
-
-            onDone?.Invoke(resp);
-        }
+        // Offline personal best remains available for run progress, without a ranking UI.
+        var rows = BallARetroPersonalRecordStore.Submit(Nickname, score, gameMode, level);
+        yield return null;
+        onDone?.Invoke(new SubmitResp { ok = true, your_score = score, rank = 1, top10 = rows });
     }
 
     private IEnumerator CoFetch(string gameMode, int level,
-                                System.Action<LbResp> onDone,
-                                System.Action<string> onFail)
+        System.Action<LbResp> onDone, System.Action<string> onFail)
     {
-        if (!HasRequiredLogin(onFail)) yield break;
-        if (BallARetroPlatform.UsesPersonalRecords)
+        if (BallARetroPlatform.IsSteamBuild)
         {
-            var rows = BallARetroPersonalRecordStore.Read(Nickname, gameMode, level);
-            yield return null;
-            onDone?.Invoke(new LbResp { ok = true, top10 = rows, msg = "Personal best on this device." });
+            SteamLeaderboard.Fetch(gameMode, level, onDone, onFail);
             yield break;
         }
-        WWWForm f = new WWWForm();
-        if (!string.IsNullOrEmpty(gameMode)) f.AddField("game_mode", gameMode);
-        if (level > 0) f.AddField("level", level);
-        f.AddField("key", apiKey);
-
-        var url = $"{baseUrl}/get_leaderboard.php";
-        Debug.Log($"[Leaderboard] url={url} mode='{gameMode}' level={level}");
-        using (var req = UnityWebRequest.Post(url, f))
-        {
-            yield return req.SendWebRequest();
-            Debug.Log($"[Leaderboard] HTTP={req.responseCode} text={req.downloadHandler.text}");
-            if (req.result != UnityWebRequest.Result.Success) { onFail?.Invoke(req.error); yield break; }
-
-            LbResp resp = null;
-            try { resp = JsonUtility.FromJson<LbResp>(req.downloadHandler.text); }
-            catch { onFail?.Invoke("Invalid JSON"); yield break; }
-
-            if (resp == null) { onFail?.Invoke("Empty response"); yield break; }
-            if (!resp.ok) { onFail?.Invoke(resp.msg ?? "Server returned ok=false"); yield break; }
-
-            onDone?.Invoke(resp);
-        }
+        var rows = BallARetroPersonalRecordStore.Read(Nickname, gameMode, level);
+        yield return null;
+        onDone?.Invoke(new LbResp { ok = true, top10 = rows });
     }
 }

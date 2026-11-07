@@ -10,8 +10,9 @@ Unity Version : Unity 6.0 (6000.0.60f1) [안정성 이슈로 변경]
 ## 스토브 심사 / Steam 빌드
 
 기본 실행 모드는 스토브 심사용입니다. Steam 클라이언트를 초기화하지 않으며,
-랭킹은 현재 PC에 저장된 본인의 최고 기록 한 건을 표시합니다. 기록은 모드·레벨별로
-구분하고, 닉네임을 바꾸거나 더 낮은 점수를 얻어도 최고 기록을 유지합니다.
+로비와 게임 결과에서 랭킹 버튼을 숨깁니다. 개인 최고 기록은 현재 PC에 모드·레벨별로
+저장하며, 더 낮은 점수를 얻어도 유지합니다. 로비의 게임 시작 버튼은 닉네임 입력 없이
+바로 게임 씬으로 이동하고, 튜토리얼 버튼은 튜토리얼 씬으로 이동합니다.
 
 Unity의 `BALL-A-RETRO > Build > STOVE Review (Windows)`에서 출력 파일을 선택합니다.
 플랫폼 선택은 빌드별 추가 define으로 전달하므로 프로젝트의 기본 설정을 바꾸지 않습니다.
@@ -23,9 +24,23 @@ Editor에서 Steam을 시험할 때만 `BALLARETRO_STEAM` define과 실제 ID를
 `steam_appid.txt`를 사용하고, 시험 후 define을 제거하면 스토브 기본 모드로 돌아갑니다.
 
 Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현재 계정에서 읽습니다.
-실제 Steam 클라이언트 계정으로 연결하는 검증은 남아 있습니다.
-기존 Steam 온라인 랭킹 서버의 운영·서버 인증 검증도 별도로 필요합니다.
+Steam 버전은 로비 오른쪽 아래 **세계 랭킹**에서 세계 TOP 10을 조회합니다.
+Steamworks 네이티브 리더보드를 사용하며, 기존 localhost PHP 주소와 API 키 설정은 제거했습니다.
+기본 보드 이름은 `BALLARETRO_Classic_1`이며 모드·레벨별로 구분합니다.
+첫 요청에서 보드를 찾거나 생성하고, 내림차순 정렬과 `KeepBest` 업로드로 계정별 최고 점수를 유지합니다.
+조회 실패·로그인 필요·기록 없음은 각각 화면에 표시하며, 창을 닫은 뒤 도착한 응답은 UI를 다시 열지 않습니다.
+실제 App ID 소유 계정으로 점수 업로드와 다른 계정의 조회를 검증하는 과정은 남아 있습니다.
+Steam 커뮤니티 페이지에도 보드를 노출하려면 Steamworks 관리 화면에서 표시 이름을 설정해야 합니다.
+([Steamworks 리더보드 안내](https://partner.steamgames.com/doc/features/leaderboards))
 한국어·영어·일본어는 스토브와 Steam에서 동일하게 지원하며, 번역에는 Steam 키가 필요하지 않습니다.
+
+## 튜토리얼 진행
+
+시작 시 기존 `Tutorial_01`부터 `Tutorial_07`까지의 전용 대사를 재생한 뒤
+플리퍼 → 2층 입구 → 공 발사 → 점수 연습 순서로 진행합니다. 일반 게임의 인트로와 재시도 플래그는 공유하지 않습니다.
+공 발사 이후 Z와 /를 각각 사용하고 1,000점을 달성해야 완료합니다. HUD 목표도 1,000점으로 표시합니다.
+연습 중 목표 안내는 왼쪽 위의 작은 연녹색 텍스트로 표시하여 중앙 플레이 영역을 비웁니다.
+성공 또는 공 소진 시 튜토리얼 결과창만 표시하며, 일반 게임의 라운드 선택·엔딩 대사·랭킹 제출은 실행하지 않습니다.
 
 ## 언어 설정
 
@@ -33,13 +48,13 @@ Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현�
 선택한 언어는 저장되어 다음 실행에도 유지됩니다. 최초 실행은 지원되는 시스템 언어를 사용하고,
 지원하지 않는 언어인 경우 영어로 표시합니다.
 
-- 시스템창, 화면 모드, 이펙트 세부 설정, 로비 버튼과 닉네임 안내.
+- 시스템창, 화면 모드, 이펙트 세부 설정, 로비 버튼과 세계 랭킹 안내.
 - 튜토리얼 설명·연습 진행·성공/실패 안내, 인트로·라운드·엔딩 대사.
 - 점수·남은 공·목표 표시, 강화 선택지 9종과 희귀도·보관함 툴팁·다시 뽑기 횟수.
 - 최고 기록 도전 안내, 종료 사유, 결과·기록 화면 및 나가기 확인창.
 
 언어 변경은 진행 중인 대사 순서, 튜토리얼 연습 기록, 선택한 강화, 점수와 설정값을 초기화하지 않습니다.
-닉네임은 사용자가 입력한 이름 또는 Steam 계정 이름을 그대로 표시합니다.
+랭킹의 플레이어 이름은 Steam 계정 이름을 그대로 표시합니다.
 
 번역 원본은 `Assets/Resources/ui.csv`와 `Assets/Resources/dialogues.csv`입니다.
 문구를 수정한 뒤 `python Tests/Localization/Sync-Tables.py`로 Unity StringTable을 동기화합니다.
@@ -59,6 +74,8 @@ Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현�
 ./Tests/Localization/Run-Tests.ps1 -OutputRoot D:/ball-a-retro-validation/localization-new
 ./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/localized-ui-new -IncludeHover -IncludeEffects -IncludeLocalization -PythonPath python
 ./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/menu-input-new -IncludeHover -IncludeEffects -IncludeLocalization -IncludeMenuInteractions -PythonPath python
+./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/lobby-stove-new -IncludeLobby -IncludeEffects -IncludeLocalization -IncludePersonalRecords -PythonPath python
+./Tests/TutorialProgression/Run-CanvasTests.ps1 -OutputRoot D:/ball-a-retro-validation/lobby-steam-new -IncludeLobby -IncludeEffects -IncludeLocalization -IncludeSteamLogin -PythonPath python
 ./Tests/DialogueInput/Run-Tests.ps1 -OutputRoot D:/ball-a-retro-validation/dialogue-input-new
 ```
 
@@ -76,11 +93,11 @@ SteamManager와 모의 Steam API를 사용하며 실제 Steam 계정 인증 시�
 
 심사용 빌드에서 확인할 항목:
 
-- 튜토리얼 시작 카메라, 발사 이후 Z와 / 각각 사용, 목표 점수 달성 후 완료창.
+- 튜토리얼 전용 대사, 시작 카메라, 발사 이후 Z와 / 각각 사용, 목표 점수 달성 후 완료창.
 - 완료창·선택지·닫기·랭킹 버튼의 호버와 클릭, 시스템창을 닫은 뒤 커서 복원.
 - 이펙트 OFF 즉시 적용, 다시 켜기, 로비·게임 이동과 재실행 후 설정 유지.
 - 1920×1080 및 2560×1440에서 튜토리얼 안내와 결과창 표시.
-- 네트워크 없이 개인 기록 저장, 닉네임 변경 및 낮은 점수 제출 후 최고 기록 유지.
+- 스토브에서 네트워크 없이 개인 기록 저장과 랭킹 버튼 숨김, Steam에서 세계 랭킹 조회·최고 기록 유지.
 - 세 언어 전환 후 열린 시스템창·튜토리얼·대사·강화·결과 표시, 재실행 후 언어 유지.
 
 ## 이펙트 세부 설정
@@ -114,3 +131,9 @@ SteamManager와 모의 Steam API를 사용하며 실제 Steam 계정 인증 시�
 2026-11-08 검증: 실제 로비·게임 공용 프리팹의 닫기/취소 연결과 커서 판정을 포함한
 UI 검사 41개, 대사·시스템창 입력과 커서 복원 회귀 검사 29개 통과.
 검증용 UI 추출의 `--interactions` 모드는 실제 버튼 콜백을 보존합니다.
+
+2026-11-08 로비·튜토리얼 변경 검증: 게임 진행·튜토리얼 29개, Steam 로비·로그인·랭킹
+19개, 스토브 로비·개인 기록 9개 통과. 실제 로비 프리팹의 게임/튜토리얼 클릭 경로,
+플랫폼별 랭킹 노출, 지연 응답 후 닫힌 창 유지, 로그인/빈 목록/통신 실패 표시를 확인했습니다.
+세계 랭킹은 한국어·영어·일본어의 FHD·QHD 렌더링과 글자 잘림을 검사했습니다.
+Steam API는 모의 클라이언트로 검증했으며 실제 SDK를 포함한 양쪽 플랫폼 C# 컴파일도 통과했습니다.

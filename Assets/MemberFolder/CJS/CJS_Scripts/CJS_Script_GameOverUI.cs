@@ -83,7 +83,8 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     }
     private void RefreshLanguage(Locale _)
     {
-        if (textResult) textResult.text = PSH_Script_Localization.Text(statusKey, statusArguments);
+        if (textResult) textResult.text = BallARetroPlatform.IsSteamBuild
+            ? PSH_Script_Localization.Text(statusKey, statusArguments) : string.Empty;
     }
 
     private void OnActiveSceneChanged(Scene oldScene, Scene newScene)
@@ -179,6 +180,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         service.SubmitScore(_finalScore, gameMode, level,
             onDone: resp =>
             {
+                if (!this) return;
                 _lastSubmit = resp;
 
                 SetStatus("Rank_Saved", resp.your_score, resp.rank);
@@ -191,6 +193,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
             },
             onFail: err =>
             {
+                if (!this) return;
                 SetStatus("Rank_Failed");
                 Debug.LogError("[GameOverUI] Submit fail: " + err);
             }
@@ -199,6 +202,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
 
     public void OnClickOpenRank()
     {
+        if (!BallARetroPlatform.IsSteamBuild) return;
         Debug.Log("[GameOverUI] OnClickOpenRank");
         _rankPanelOpen = true;
         _refreshElapsed = 0f;
@@ -236,8 +240,8 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         if (service == null) return;
 
         service.FetchLeaderboard(gameMode, level,
-            lb => RefreshLeaderboardUI(lb.top10),
-            err => Debug.LogError("[Rank] refresh fail: " + err));
+            lb => { if (this) RefreshLeaderboardUI(lb.top10); },
+            err => { if (this) Debug.LogError("[Rank] refresh fail: " + err); });
     }
 
     private void RefreshLeaderboardUI(ScoreRow[] rows)

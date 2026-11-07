@@ -1,4 +1,5 @@
 using UnityEngine;
+using TMPro;
 // UnityEditor 관련 using 문 제거
 
 namespace PSH
@@ -9,7 +10,7 @@ namespace PSH
 
         [Header("Build Settings")]
         [Tooltip("빌드 버전에서 로드할 게임 씬의 이름")]
-        [SerializeField] private string sceneNameForBuild = "";
+        [SerializeField] private string sceneNameForBuild = "Main_Scene_Game";
 
         [Header("Manager Prefabs")]
         [Tooltip("게임 시작 시 생성할 CursorManager 프리팹")]
@@ -22,9 +23,11 @@ namespace PSH
 
         [Header("Tutorial Settings")]
         [Tooltip("튜토리얼 씬의 이름")]
-        [SerializeField] private string tutorialSceneName = "TutorialScene";
+        [SerializeField] private string tutorialSceneName = "Main_Scene_Tutorial";
 
         private PSH_Script_SceneLoader sceneLoader;
+        private bool isLoading;
+        private PSH_Script_WorldRankingUI worldRanking;
 
         private void Awake()
         {
@@ -43,14 +46,9 @@ namespace PSH
             {
                 inputEmailPrefab.SetActive(false);
             }
-            else
-            {
-                Debug.LogError("inputEmailPrefab 프리팹이 LobbyUIManager에 할당되지 않았습니다!");
-            }
-            if (RnakingPanel != null)
-            {
-                RnakingPanel.SetActive(false);
-            }
+            if (RnakingPanel != null) RnakingPanel.SetActive(false);
+            var label = GetComponentInChildren<TMP_Text>(true);
+            worldRanking = PSH_Script_WorldRankingUI.Install(transform, label != null ? label.font : null);
         }
 
         private void Start()
@@ -66,32 +64,26 @@ namespace PSH
 
         }
 
-        public void OnClick_StartGame()
-        {
-            inputEmailPrefab.SetActive(true);
-        }
-        public void OnClick_InputEmail()
-        {
-            if (sceneLoader == null)
-            {
-                Debug.LogError("SceneLoader가 할당되지 않아 게임을 시작할 수 없습니다.");
-                return;
-            }
+        public void OnClick_StartGame() => LoadScene(sceneNameForBuild);
 
-            if (string.IsNullOrEmpty(sceneNameForBuild))
+        // Compatibility for old serialized callbacks; entering a nickname is no longer a step.
+        public void OnClick_InputEmail() => OnClick_StartGame();
+        public void OnClick_RankingPanelOpen() { if (worldRanking) worldRanking.Show(); }
+        public void OnClick_RankingPanelClose() { if (worldRanking) worldRanking.Close(); }
+
+        private void LoadScene(string sceneName)
+        {
+            if (isLoading) return;
+            if (sceneLoader == null) sceneLoader = PSH_Script_SceneLoader.Instance;
+            if (sceneLoader == null || string.IsNullOrWhiteSpace(sceneName))
             {
-                Debug.LogError("인스펙터에서 Scene Name For Build를 설정해주세요!");
+                Debug.LogError("SceneLoader 또는 이동할 씬이 설정되지 않았습니다.");
                 return;
             }
-            sceneLoader.LoadSceneAsyncByName(sceneNameForBuild);
-        }
-        public void OnClick_RankingPanelOpen()
-        {
-            RnakingPanel.SetActive(true);
-        }
-        public void OnClick_RankingPanelClose()
-        {
-            RnakingPanel.SetActive(false);
+            if (inputEmailPrefab) inputEmailPrefab.SetActive(false);
+            isLoading = true;
+            Time.timeScale = 1f;
+            sceneLoader.LoadSceneAsyncByName(sceneName);
         }
 
         public void OnClick_QuitGame()
@@ -100,23 +92,6 @@ namespace PSH
             Application.Quit();
         }
 
-        public void OnClick_Tutorial()
-        {
-            if (sceneLoader == null)
-            {
-                Debug.LogError("SceneLoader가 없습니다.");
-                return;
-            }
-            
-            if (string.IsNullOrEmpty(tutorialSceneName))
-            {
-                Debug.LogError("튜토리얼 씬 이름이 비어있습니다.");
-                return;
-            }
-
-            Debug.Log("튜토리얼 씬으로 이동합니다.");
-            sceneLoader.LoadSceneAsyncByName(tutorialSceneName);
-        }
+        public void OnClick_Tutorial() => LoadScene(tutorialSceneName);
     }
 }
-
