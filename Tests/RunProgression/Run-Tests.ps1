@@ -72,6 +72,7 @@ if ($IncludeTutorial) {
     @('CJS_TutorialDirector.cs', 'CJS_TutorialCameraFocus.cs') | ForEach-Object {
         Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
     }
+    Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_GameSceneDirector.cs", "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_EyeOpenEffect.cs" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Tests/TutorialProgression/TutorialProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
 }
 if ($IncludeBallRescue) {
@@ -99,6 +100,7 @@ Copy-Item "$sourceRoot/Tests/Localization/LocaleTestContext.cs" "$outputPath/Ass
 @{ name = 'BallARetro.RunUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization', 'Unity.ResourceManager') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/RunUnderTest.asmdef" -Encoding utf8
 @{ name = 'BallARetro.RunProgressionTests'; references = @('BallARetro.RunUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization', 'Unity.ResourceManager'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RunProgressionTests.asmdef" -Encoding utf8
 if ($Baseline) { '-define:BASELINE' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
+if ($IncludeTutorial) { '-define:TUTORIAL' | Add-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
 $testClasses = @('RunProgressionTests')
 if ($IncludeBallRescue) { $testClasses += 'BallAutoRescueTests' }
 if ($IncludeScorePopups) { $testClasses += 'ScorePopupTests' }

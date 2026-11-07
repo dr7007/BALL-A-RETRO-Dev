@@ -348,6 +348,22 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public bool IsClearResult => currentState == RoundState.GameClear;
     public bool IsPlaying => currentState == RoundState.Playing;
     public int FinalTargetScore { get; private set; }
+    public bool IsTutorialRun { get; private set; }
+    private int tutorialScoreGoal;
+
+    public void ConfigureTutorial(int goal)
+    {
+        IsTutorialRun = true;
+        tutorialScoreGoal = Mathf.Max(1, goal);
+        targetScore = tutorialScoreGoal;
+        UILateUpdate?.Invoke();
+    }
+
+    public void CompleteTutorial(bool success)
+    {
+        if (!IsTutorialRun || HasEnded) return;
+        ChangeState(success ? RoundState.GameClear : RoundState.GameOver);
+    }
 
     private void ChangeState(RoundState newState)
     {
@@ -428,7 +444,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         int finalScore = curScore;
 
-        foreach (var score in currentgameScores)
+        foreach (var score in currentgameScores ?? Array.Empty<int>())
             if (score > finalScore) finalScore = score;
 
         FinalUserScore = finalScore;
@@ -436,6 +452,15 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         curScore = finalScore;
         OnScoreChanged?.Invoke(curScore);
         UILateUpdate?.Invoke();
+
+        // Tutorial results have one owner. They never trigger normal endings,
+        // round celebrations, result panels or leaderboard submissions.
+        if (IsTutorialRun)
+        {
+            if (cleared) OnGameClearWithScore?.Invoke(finalScore);
+            else OnGameOverWithScore?.Invoke(finalScore);
+            return;
+        }
 
         if (cleared)
         {
@@ -532,7 +557,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         ChangingMainCam();
 
         currentRound = 1;
-        targetScore = targetScores[0];
+        targetScore = IsTutorialRun ? tutorialScoreGoal : targetScores[0];
 
         ChangeState(RoundState.Playing);
         OnScoreChanged?.Invoke(curScore);
@@ -564,7 +589,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void TargetScoreInit()
     {
-        targetScore = targetScores[0];
+        targetScore = IsTutorialRun ? tutorialScoreGoal : targetScores[0];
         UILateUpdate?.Invoke();
     }
 
@@ -628,7 +653,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void EvaluateTarget()
     {
-        if (IsRecordChallenge || curScore < targetScore) return;
+        if (IsTutorialRun || IsRecordChallenge || curScore < targetScore) return;
 
         if (currentRound >= goalRound)
             BeginRecordChallenge();
@@ -688,7 +713,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
                 ? GameOverReason.FlippersExhausted
                 : GameOverReason.BallsExhausted;
             // Running out of balls ends the record attempt, not the earned clear.
-            bool cleared = IsRecordChallenge || (currentRound >= goalRound && curScore >= targetScore);
+            bool cleared = !IsTutorialRun && (IsRecordChallenge || (currentRound >= goalRound && curScore >= targetScore));
             ChangeState(cleared ? RoundState.GameClear : RoundState.GameOver);
         }
     }

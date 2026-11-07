@@ -1,4 +1,6 @@
 using TMPro;
+using PSH;
+using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
 using UnityEngine.UI;
@@ -61,12 +63,15 @@ public class CJS_TutorialDirector : MonoBehaviour
     private bool _playedRight;
     private string _lastMissionHint;
     private float _lastPracticeTime;
+    private bool _waitingForIntroduction;
+    private int _resumeInputFrame;
 
     private bool HasPracticedFlippers => _playedLeft && _playedRight;
 
     void OnEnable()
     {
         LocalizationSettings.SelectedLocaleChanged += RefreshLocalizedText;
+        PSH_Script_DialogueUI.OnDialogueComplete += OnIntroductionComplete;
         KHS_Script_PlungerController.OnBallLaunched += OnBallLaunched;
         KHS_Script_FliperController.OnFlipperPressed += OnFlipperPressed;
         KHS_Script_ScoreManager.OnGameOverWithScore += OnGameOverWithScore;
@@ -76,6 +81,7 @@ public class CJS_TutorialDirector : MonoBehaviour
     void OnDisable()
     {
         LocalizationSettings.SelectedLocaleChanged -= RefreshLocalizedText;
+        PSH_Script_DialogueUI.OnDialogueComplete -= OnIntroductionComplete;
         KHS_Script_PlungerController.OnBallLaunched -= OnBallLaunched;
         KHS_Script_FliperController.OnFlipperPressed -= OnFlipperPressed;
         KHS_Script_ScoreManager.OnGameOverWithScore -= OnGameOverWithScore;
@@ -89,6 +95,7 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (!plunger) plunger = FindObjectOfType<KHS_Script_PlungerController>(true);
         if (!scoreManager) scoreManager = FindObjectOfType<KHS_Script_ScoreManager>(true);
 
+        if (scoreManager) scoreManager.ConfigureTutorial(tutorialTargetScore);
         if (resultPanel) resultPanel.SetActive(false);
 
         BindButtons();
@@ -107,11 +114,12 @@ public class CJS_TutorialDirector : MonoBehaviour
         if (railEntranceTrigger) railEntranceTrigger.enabled = false;
 
         GoToStep(Step.Intro);
+        StartCoroutine(PlayIntroduction());
     }
 
     void Update()
     {
-        if (_resultShown || Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
+        if (_resultShown || _waitingForIntroduction || Time.frameCount <= _resumeInputFrame || Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
 
         switch (_step)
         {
@@ -141,6 +149,47 @@ public class CJS_TutorialDirector : MonoBehaviour
                 CheckScoreMission();
                 break;
         }
+    }
+
+    private IEnumerator PlayIntroduction()
+    {
+        _waitingForIntroduction = true;
+        if (tutorialText) tutorialText.text = "";
+        // Allow every scene actor to finish Start before dialogue changes pause/input state.
+        yield return null;
+        yield return LocalizationSettings.InitializationOperation;
+        var dialogue = PSH_Script_DialogueUI.Instance;
+        if (dialogue != null)
+        {
+            dialogue.Play("Tutorial");
+        }
+        else
+        {
+            _waitingForIntroduction = false;
+            RefreshLocalizedText(null);
+        }
+    }
+
+    private void OnIntroductionComplete(string cutscene)
+    {
+        if (!_waitingForIntroduction || cutscene != "Tutorial") return;
+        _waitingForIntroduction = false;
+        _resumeInputFrame = Time.frameCount + 1;
+        GoToStep(Step.Flippers);
+    }
+
+    private void UseCompactMissionHint()
+    {
+        if (tutorialText == null) return;
+        var rect = tutorialText.rectTransform;
+        rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0, 1);
+        rect.anchoredPosition = new Vector2(24, -76);
+        rect.sizeDelta = new Vector2(500, 92);
+        tutorialText.alignment = TextAlignmentOptions.TopLeft;
+        tutorialText.fontSize = tutorialText.fontSizeMax = 24;
+        tutorialText.fontSizeMin = 20;
+        tutorialText.color = new Color32(190, 242, 176, 255);
+        tutorialText.raycastTarget = false;
     }
 
     private void BindButtons()
@@ -208,6 +257,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                 break;
 
             case Step.ScoreMission:
+                UseCompactMissionHint();
                 _scoreMissionActive = true;
                 _playedLeft = false;
                 _playedRight = false;
@@ -309,6 +359,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
         _resultShown = true;
         _scoreMissionActive = false;
+        if (scoreManager) scoreManager.CompleteTutorial(_step == Step.Done);
 
         if (tutorialText) tutorialText.text = "";
 
@@ -323,6 +374,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
         _resultShown = true;
         _scoreMissionActive = false;
+        if (scoreManager) scoreManager.CompleteTutorial(_step == Step.Done);
 
         if (tutorialText) tutorialText.text = "";
 
@@ -362,7 +414,7 @@ public class CJS_TutorialDirector : MonoBehaviour
                     : PSH_Script_Localization.Text("Tut_FailPractice", KeyLabel(leftFlipperKey), KeyLabel(rightFlipperKey));
             return;
         }
-        if (tutorialText == null) return;
+        if (tutorialText == null || _waitingForIntroduction) return;
         switch (_step)
         {
             case Step.Intro: tutorialText.text = PSH_Script_Localization.Text("Tut_Intro"); break;

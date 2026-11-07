@@ -52,6 +52,15 @@ namespace PSH
 
         private void Start()
         {
+            // The tutorial owns its introduction and camera steps. Do not play the
+            // main game's Intro or share its one-time retry flag with the tutorial.
+            if (cjsTutorial != null)
+            {
+                if (eyeOpenEffect) eyeOpenEffect.SetOpenImmediate();
+                if (eyeopenOBJ) eyeopenOBJ.SetActive(false);
+                return;
+            }
+
             PSH_Script_DialogueUI dialogueUI = PSH_Script_DialogueUI.Instance;
             
 

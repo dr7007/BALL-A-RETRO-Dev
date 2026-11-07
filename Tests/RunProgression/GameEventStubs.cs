@@ -44,7 +44,9 @@ public static class KHS_Script_UIImgFunc
     public static void SetOpen(bool open) => RoundUIEvt?.Invoke(open);
 }
 namespace PSH { public static class PSH_Script_SceneLoader { public static event Action OnSceneLoadStart; } }
+#if !TUTORIAL
 namespace PSH { public static class PSH_Script_GameSceneDirector { public static event Action NoIntroStartEvt; } }
+#endif
 public static class GlitchEffect_RendererFeature { public static bool IsEnabled; }
 public class KHS_Script_CameraManager : MonoBehaviour
 {

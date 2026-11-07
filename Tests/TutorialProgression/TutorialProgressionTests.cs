@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Reflection;
 using NUnit.Framework;
+using PSH;
 using TMPro;
 using UnityEngine.Localization.Settings;
 using UnityEngine;
@@ -36,6 +37,8 @@ public class TutorialProgressionTests
         tutorial.resultTitleText = Text("Title", tutorial.resultPanel.transform);
         tutorial.resultDescText = Text("Description", tutorial.resultPanel.transform);
         go.SetActive(true);
+        yield return null;
+        yield return null;
         yield return null;
     }
 
@@ -149,6 +152,78 @@ public class TutorialProgressionTests
         Assert.That(Time.timeScale, Is.Zero);
         LocaleTestContext.Select("ja"); yield return LocalizationSettings.InitializationOperation; yield return null;
         Assert.That(tutorial.tutorialText.text, Does.Contain("それぞれ"));
+    }
+
+    [Test]
+    public void MissionHintUsesASmallNonblockingCornerAndTheTutorialScoreTarget()
+    {
+        Launch();
+        Assert.That(score.targetScore, Is.EqualTo(1000));
+        Assert.That(tutorial.tutorialText.rectTransform.anchorMax, Is.EqualTo(new Vector2(0,1)));
+        Assert.That(tutorial.tutorialText.fontSizeMax, Is.EqualTo(24));
+        Assert.That(tutorial.tutorialText.raycastTarget, Is.False);
+        Assert.That(tutorial.tutorialText.color, Is.Not.EqualTo(Color.yellow));
+    }
+
+    [UnityTest]
+    public IEnumerator TutorialEndingNeverEmitsMainGameEndingOrSubmitsARanking()
+    {
+        var ranking = New("Ranking").AddComponent<CJS_Script_PinballRankingService>();
+        typeof(KHS_Script_ScoreManager).GetField("rankingService", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(score, ranking);
+        int endings=0, rounds=0;
+        Action ended=()=>endings++; Action round=()=>rounds++;
+        KHS_Script_ScoreManager.OnGameOver += ended;
+        KHS_Script_ScoreManager.OnGameClear += ended;
+        KHS_Script_ScoreManager.Round_Clear += round;
+        try
+        {
+            Launch();
+            typeof(KHS_Script_ScoreManager).GetField("currentState", BindingFlags.Instance | BindingFlags.NonPublic).SetValue(score, KHS_Script_ScoreManager.RoundState.Playing);
+            score.AddScore(2200);
+            Assert.That(rounds,Is.Zero,"Tutorial practice must not trigger round-choice/camera sequences.");
+            score.CompleteTutorial(false);
+            yield return new WaitForSecondsRealtime(.1f);
+            Assert.That(endings,Is.Zero);
+            Assert.That(ranking.Submissions,Is.Zero);
+            Assert.That(tutorial.resultPanel.activeSelf,Is.True);
+            Assert.That(tutorial.tutorialText.text,Is.Empty);
+            Assert.That(Time.timeScale,Is.Zero);
+        }
+        finally
+        {
+            KHS_Script_ScoreManager.OnGameOver -= ended;
+            KHS_Script_ScoreManager.OnGameClear -= ended;
+            KHS_Script_ScoreManager.Round_Clear -= round;
+        }
+    }
+
+    [UnityTest]
+    public IEnumerator AuthoredTutorialDialogueCompletesBeforeControlPractice()
+    {
+        var go=New("Dialogue");go.SetActive(false);
+        var dialogue=go.AddComponent<PSH_Script_DialogueUI>();
+        var panel=New("IntroPanel",typeof(RectTransform));
+        var text=Text("IntroText",panel.transform);
+        var fields=BindingFlags.Instance|BindingFlags.NonPublic;
+        typeof(PSH_Script_DialogueUI).GetField("introPanelRoot",fields).SetValue(dialogue,panel);
+        typeof(PSH_Script_DialogueUI).GetField("introText",fields).SetValue(dialogue,text);
+        go.SetActive(true);
+        var opening=New("Opening").AddComponent<PSH_Script_GameSceneDirector>();
+        // Exercise the production main-game director too; it must defer to tutorial ownership.
+        yield return null;
+        tutorial.StartCoroutine((IEnumerator)typeof(CJS_TutorialDirector).GetMethod("PlayIntroduction",fields).Invoke(tutorial,null));
+        yield return null;yield return null;
+        Assert.That(typeof(PSH_Script_DialogueUI).GetField("currentCutsceneId",fields).GetValue(dialogue),Is.EqualTo("Tutorial"));
+        Assert.That(tutorial.tutorialText.text,Is.Empty);
+        Assert.That(tutorial.resultPanel.activeSelf,Is.False);
+        var lines=(List<string>)typeof(PSH_Script_DialogueUI).GetField("currentLines",fields).GetValue(dialogue);
+        Assert.That(lines.Count,Is.EqualTo(7));
+        Assert.That(lines[0],Does.Contain("처음인 모양"));
+        for(int i=0;i<14;i++)typeof(PSH_Script_DialogueUI).GetMethod("AdvanceDialogue",fields).Invoke(dialogue,null);
+        Assert.That(panel.activeSelf,Is.False);
+        Assert.That(tutorial.tutorialText.text,Does.Contain("각각 눌러보세요"));
+        Assert.That(Time.timeScale,Is.EqualTo(1));
+        Assert.That(tutorial.resultPanel.activeSelf,Is.False);
     }
 
     private void Launch() { Call("GoToStep", CJS_TutorialDirector.Step.Plunger); KHS_Script_PlungerController.Launch(); }
