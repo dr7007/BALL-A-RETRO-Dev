@@ -20,6 +20,7 @@ namespace PSH
         [Tooltip("메일 입력창 프리팹")]
         [SerializeField] private GameObject inputEmailPrefab;
         [SerializeField] private GameObject RnakingPanel;
+        [SerializeField] private Sprite rankingIcon;
 
         [Header("Tutorial Settings")]
         [Tooltip("튜토리얼 씬의 이름")]
@@ -48,7 +49,7 @@ namespace PSH
             }
             if (RnakingPanel != null) RnakingPanel.SetActive(false);
             var label = GetComponentInChildren<TMP_Text>(true);
-            worldRanking = PSH_Script_WorldRankingUI.Install(transform, label != null ? label.font : null);
+            worldRanking = PSH_Script_WorldRankingUI.Install(transform, label != null ? label.font : null, true, rankingIcon);
         }
 
         private void Start()

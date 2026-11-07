@@ -115,6 +115,7 @@ if ($IncludeMenuInteractions -or $IncludeLobby) {
     $filter += ';SettingsInteractionTests;CursorInteractionTests'
 }
 if ($IncludeLobby) {
+    Copy-Item "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs.meta", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_LeaderboardList.cs" "$outputPath/Assets/Runtime"
     @('Assets/MemberFolder/PSH/PSH_Lobby/Scripts/PSH_Script_LobbyManager.cs',
       'Assets/Public/Main_Lobby/UI_Lobby/Scripts/PSH_Script_StartButton.cs',
       'Assets/Public/UI_Public/Scripts/PSH_Script_WorldRankingUI.cs') | ForEach-Object {

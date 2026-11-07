@@ -6,7 +6,7 @@ using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.UI;
 
-/// <summary>Steam-only lobby entry and global top-ten panel.</summary>
+/// <summary>Shared lobby/result ranking view. Only Steam builds request online scores.</summary>
 public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
 {
     private TMP_FontAsset font;
@@ -16,15 +16,15 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     private Button refresh;
     private string statusKey = "Rank_Loading";
     private int requestVersion;
+    public event Action Closed;
 
-    public static PSH_Script_WorldRankingUI Install(Transform lobby, TMP_FontAsset font)
+    public static PSH_Script_WorldRankingUI Install(Transform lobby, TMP_FontAsset font, bool showEntry = true, Sprite entryIcon = null)
     {
-        if (!BallARetroPlatform.IsSteamBuild) return null;
         var root = Rect("WorldRanking", lobby, Vector2.zero, Vector2.zero);
         Stretch(root);
         var ui = root.gameObject.AddComponent<PSH_Script_WorldRankingUI>();
         ui.font = font != null ? font : TMP_Settings.defaultFontAsset;
-        ui.Build();
+        ui.Build(showEntry, entryIcon);
         return ui;
     }
 
@@ -40,39 +40,51 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     }
     private void SetStatus(string key) { statusKey = key; RefreshLanguage(null); }
 
-    private void Build()
+    private void Build(bool showEntry, Sprite entryIcon)
     {
-        var open = Button("OpenWorldRanking", transform, "Rank_World", Vector2.zero, new Vector2(300, 64), Show);
-        var anchor = (RectTransform)open.transform;
-        anchor.anchorMin = anchor.anchorMax = anchor.pivot = new Vector2(1, 0);
-        anchor.anchoredPosition = new Vector2(-32, 32);
+        if (showEntry)
+        {
+            var open = Button("OpenWorldRanking", transform, "", Vector2.zero, new Vector2(110, 116), Show);
+            var graphic = open.GetComponent<Image>();
+            graphic.sprite = entryIcon;
+            graphic.preserveAspect = true;
+            graphic.color = Color.white;
+            open.GetComponent<Outline>().enabled = false;
+            if (entryIcon == null) open.GetComponentInChildren<TMP_Text>().text = "RANK";
+            var anchor = (RectTransform)open.transform;
+            anchor.anchorMin = anchor.anchorMax = anchor.pivot = new Vector2(1, 0);
+            anchor.anchoredPosition = new Vector2(-32, 32);
+        }
 
         var backdrop = Rect("WorldRankingPanel", transform, Vector2.zero, Vector2.zero);
         Stretch(backdrop);
         panel = backdrop.gameObject;
-        panel.AddComponent<Image>().color = new Color(.01f, .02f, .04f, .94f);
+        panel.AddComponent<Image>().color = Color.black;
         panel.AddComponent<PSH_Script_ModalCanvas>().SetSortingOrder(80);
-        var card = Rect("Card", backdrop, Vector2.zero, new Vector2(860, 760));
-        card.gameObject.AddComponent<Image>().color = new Color(.035f, .05f, .08f, 1);
-        Border(card.gameObject);
-        Label("Title", card, "Rank_World", new Vector2(0, 315), new Vector2(720, 64), 36);
-        Label("Rank", card, "Rank_Position", new Vector2(-330, 245), new Vector2(100, 38), 25);
-        Label("Name", card, "Rank_Player", new Vector2(-30, 245), new Vector2(440, 38), 25);
-        Label("Score", card, "Rank_Score", new Vector2(280, 245), new Vector2(180, 38), 25);
-        rows = Rect("Rows", card, Vector2.zero, new Vector2(760, 420));
-        status = Label("Status", card, "", new Vector2(0, -245), new Vector2(760, 60), 23);
+        var card = Rect("Card", backdrop, Vector2.zero, new Vector2(1600, 900));
+        Frame(card, new Vector2(1600, 900));
+        Frame(card, new Vector2(1580, 880));
+        Literal("Title", card, "SCORE  RANKING", new Vector2(0, 350), new Vector2(1100, 64), 44, Color.magenta);
+        Literal("Rank", card, "RANK", new Vector2(-520, 260), new Vector2(180, 48), 34, Color.white);
+        Literal("Name", card, "NAME", new Vector2(-190, 260), new Vector2(430, 48), 34, Color.white);
+        Literal("Step", card, "STEP", new Vector2(130, 260), new Vector2(160, 48), 34, Color.white);
+        Literal("Score", card, "SCORE", new Vector2(460, 260), new Vector2(360, 48), 34, Color.white);
+        rows = Rect("Rows", card, Vector2.zero, new Vector2(1300, 510));
+        Literal("Logo", card, "BALL A-RETRO", new Vector2(0, -325), new Vector2(700, 48), 28, new Color32(0, 240, 104, 255));
+        status = Label("Status", card, "", new Vector2(0, -390), new Vector2(800, 70), 23);
         status.enableAutoSizing = true;
         status.fontSizeMin = 18;
         status.fontSizeMax = 23;
         status.textWrappingMode = TextWrappingModes.Normal;
-        refresh = Button("Refresh", card, "Rank_Refresh", new Vector2(-185, -325), new Vector2(300, 60), Refresh);
-        Button("Close", card, "Button_Close", new Vector2(185, -325), new Vector2(300, 60), Close);
+        refresh = Button("Refresh", card, "", new Vector2(-615, -385), new Vector2(220, 60), Refresh);
+        refresh.GetComponentInChildren<TMP_Text>().text = "REFRESH";
+        Button("Close", card, "", new Vector2(615, -385), new Vector2(220, 60), Close).GetComponentInChildren<TMP_Text>().text = "CLOSE";
         panel.SetActive(false);
     }
 
     public void Show()
     {
-        if (!BallARetroPlatform.IsSteamBuild || panel == null) return;
+        if (panel == null) return;
         panel.SetActive(true);
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
@@ -82,11 +94,18 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     {
         requestVersion++;
         if (panel) panel.SetActive(false);
+        Closed?.Invoke();
     }
     private void Refresh()
     {
         int request = ++requestVersion;
         ClearRows();
+        if (!BallARetroPlatform.IsSteamBuild)
+        {
+            SetStatus("Rank_SteamOnly");
+            refresh.interactable = false;
+            return;
+        }
         SetStatus("Rank_Loading");
         refresh.interactable = false;
         CJS_Script_PinballRankingService.Instance.FetchLeaderboard("Classic", 1,
@@ -112,18 +131,43 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
         SetStatus(data.Length == 0 ? "Rank_Empty" : "Rank_TopTen");
         for (int i = 0; i < Mathf.Min(10, data.Length); i++)
         {
-            float y = 195 - i * 40;
+            float y = 195 - i * 46;
             var row = data[i];
-            var rank = Label("Position", rows, "", new Vector2(-330, y), new Vector2(100, 36), 24);
-            rank.text = (row.rank > 0 ? row.rank : i + 1).ToString();
-            var name = Label("Player", rows, "", new Vector2(-30, y), new Vector2(440, 36), 24);
+            int position = row.rank > 0 ? row.rank : i + 1;
+            var color = RankColor(position);
+            Literal("Position", rows, Ordinal(position), new Vector2(-520, y), new Vector2(180, 42), 32, color);
+            var name = Literal("Player", rows, "", new Vector2(-190, y), new Vector2(430, 42), 32, color);
             name.text = row.nickname;
             name.richText = false;
-            name.alignment = TextAlignmentOptions.MidlineLeft;
             name.overflowMode = TextOverflowModes.Ellipsis;
-            var score = Label("Score", rows, "", new Vector2(280, y), new Vector2(180, 36), 24);
-            score.text = row.score.ToString("N0");
-            score.alignment = TextAlignmentOptions.MidlineRight;
+            Literal("Step", rows, row.step > 0 ? row.step.ToString() : "—", new Vector2(130, y), new Vector2(160, 42), 32, color);
+            Literal("Score", rows, row.score.ToString(), new Vector2(460, y), new Vector2(360, 42), 32, color);
+        }
+    }
+
+    private static string Ordinal(int rank) => rank + (rank % 100 >= 11 && rank % 100 <= 13 ? "TH" : rank % 10 == 1 ? "ST" : rank % 10 == 2 ? "ND" : rank % 10 == 3 ? "RD" : "TH");
+    private static Color RankColor(int rank) => rank switch
+    {
+        1 => Color.red, 2 => new Color32(255, 255, 160, 255), 3 => Color.magenta,
+        4 => new Color32(0, 220, 110, 255), 5 => new Color32(255, 90, 166, 255),
+        6 => new Color32(255, 190, 0, 255), 7 => Color.green, _ => Color.gray
+    };
+
+    private TMP_Text Literal(string name, Transform parent, string text, Vector2 position, Vector2 size, float fontSize, Color color)
+    {
+        var label = Label(name, parent, "", position, size, fontSize);
+        label.text = text; label.color = color;
+        return label;
+    }
+    private static void Frame(Transform parent, Vector2 size)
+    {
+        for (int i = 0; i < 4; i++)
+        {
+            bool horizontal = i < 2;
+            var position = horizontal ? new Vector2(0, (i == 0 ? -1 : 1) * size.y / 2) : new Vector2((i == 2 ? -1 : 1) * size.x / 2, 0);
+            var edge = Rect("Border", parent, position, horizontal ? new Vector2(size.x, 3) : new Vector2(3, size.y));
+            var graphic = edge.gameObject.AddComponent<Image>();
+            graphic.color = new Color32(54, 121, 91, 255); graphic.raycastTarget = false;
         }
     }
 

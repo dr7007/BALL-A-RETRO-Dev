@@ -41,6 +41,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     private SubmitResp _lastSubmit;
     private bool _rankPanelOpen;
     private float _refreshElapsed;
+    private PSH_Script_WorldRankingUI worldRanking;
 
     // ─────────────────────────────────────────────────────────────────────────
     #region Lifecycle & Wiring
@@ -196,32 +197,31 @@ public class CJS_Script_GameOverUI : MonoBehaviour
                 if (!this) return;
                 SetStatus("Rank_Failed");
                 Debug.LogError("[GameOverUI] Submit fail: " + err);
-            }
+            },
+            step: KHS_Script_ScoreManager.Instance != null ? KHS_Script_ScoreManager.Instance.RoundRespone() : 1
         );
     }
 
     public void OnClickOpenRank()
     {
-        if (!BallARetroPlatform.IsSteamBuild) return;
+        if (!worldRanking)
+        {
+            var canvas = GetComponentInParent<Canvas>();
+            if (canvas == null) return;
+            worldRanking = PSH_Script_WorldRankingUI.Install(canvas.rootCanvas.transform,
+                textFinalScore != null ? textFinalScore.font : null, false);
+            worldRanking.Closed += () => _rankPanelOpen = false;
+        }
+        worldRanking.Show();
         Debug.Log("[GameOverUI] OnClickOpenRank");
         _rankPanelOpen = true;
         _refreshElapsed = 0f;
-
-        if (panelGameEnd) panelGameEnd.SetActive(false);
-        if (panelRank) panelRank.SetActive(true);
-
-        if (preferFreshRankOnOpen)
-            FetchFreshLeaderboardAndDraw();
-        else
-        {
-            if (HasTop10(_lastSubmit)) RefreshLeaderboardUI(_lastSubmit.top10);
-            else FetchFreshLeaderboardAndDraw();
-        }
     }
 
     public void OnClickCloseRank()
     {
         _rankPanelOpen = false;
+        if (worldRanking) worldRanking.Close();
         if (panelRank) panelRank.SetActive(false);
         if (panelGameEnd) panelGameEnd.SetActive(true);
     }

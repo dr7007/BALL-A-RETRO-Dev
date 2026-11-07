@@ -10,7 +10,7 @@ for folder in ['Assets/Public','Assets/MemberFolder/PSH','Assets/MemberFolder/CJ
   if m:meta[m[1]]=p.with_suffix('')
 keep_names={'PSH_Script_LocalizedText.cs','PSH_Script_LanguageManager.cs','PSH_Script_ResolutionSettings.cs','PSH_Script_ToggleUIController.cs','PSH_Script_BaseButtonHover.cs','CJS_Script_ChoiceCard.cs'}
 if interactions:keep_names.update({'PSH_Script_SettingController.cs','PSH_Script_ModalCanvas.cs','PSH_Script_InputFieldHover.cs'})
-if lobby:keep_names.update({'PSH_Script_LobbyManager.cs','PSH_Script_StartButton.cs','BallARetroSteamOnly.cs','PSH_Script_CursorManager.cs'})
+if lobby:keep_names.update({'PSH_Script_LobbyManager.cs','PSH_Script_StartButton.cs','PSH_Script_CursorManager.cs','CJS_Script_GameOverUI.cs'})
 keep={g for g,p in meta.items() if p.name in keep_names}
 keep.add('56eb0353ae6e5124bb35b17aff880f16')
 for p in (source/'Library/PackageCache').glob('com.unity.ugui@*/**/*.cs.meta'):

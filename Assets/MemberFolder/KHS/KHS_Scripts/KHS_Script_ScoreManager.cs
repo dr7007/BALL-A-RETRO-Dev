@@ -483,7 +483,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         {
             rankingService.SubmitScore(finalScore, gameMode, level,
                 onDone: resp => Debug.Log($"[ScoreManager] Submit OK rank=#{resp.rank}"),
-                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}")
+                onFail: err => Debug.LogError($"[ScoreManager] Submit FAIL: {err}"),
+                step: currentRound
             );
         }
 
@@ -718,4 +719,3 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         }
     }
 }
-

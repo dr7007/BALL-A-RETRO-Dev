@@ -48,7 +48,7 @@ public class LobbyFlowTests
         var canvas=root.GetComponent<Canvas>();
         var data=new PointerEventData(eventSystem){position=RectTransformUtility.WorldToScreenPoint(canvas.worldCamera,rect.TransformPoint(rect.rect.center)),button=PointerEventData.InputButton.Left};
         var hits=new List<RaycastResult>();eventSystem.RaycastAll(data,hits);
-        Assert.That(hits,Is.Not.Empty,control.name);
+        Assert.That(hits,Is.Not.Empty,$"{control.name} at {data.position}; screen={Screen.width}x{Screen.height}; scale={rect.lossyScale}");
         Assert.That(ExecuteEvents.GetEventHandler<IPointerClickHandler>(hits[0].gameObject),Is.EqualTo(control.gameObject),control.name);
         ExecuteEvents.ExecuteHierarchy(hits[0].gameObject,data,ExecuteEvents.pointerClickHandler);
     }
@@ -63,19 +63,47 @@ public class LobbyFlowTests
     }
     [Test] public void TutorialTileUsesItsOwnDestination()
     {Click(Tile("Button_tutorial"));Assert.That(loader.Destination,Is.EqualTo("Main_Scene_Tutorial"));}
-    [UnityTest] public IEnumerator RankingEntriesAreSteamOnlyInLobbyAndGameResults()
+    [UnityTest] public IEnumerator RankingRemainsClickableAfterGameOverOnBothPlatforms()
     {
-        Assert.That(root.GetComponentInChildren<PSH_Script_WorldRankingUI>()!=null,Is.EqualTo(BallARetroPlatform.IsSteamBuild));
-        result=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Public/Main_Game/UI_Game/Prefabs/Panel_GameEnd.prefab"));
-        result.SetActive(true);yield return null;
+        Assert.That(root.GetComponentInChildren<PSH_Script_WorldRankingUI>(),Is.Not.Null);
+        var icon=root.GetComponentsInChildren<Button>().Single(b=>b.name=="OpenWorldRanking").GetComponent<Image>();
+        Assert.That(icon.sprite.name,Is.EqualTo("RankBtn_98-104"));
+        root.SetActive(false);
+        result=Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Public/Main_Game/UI_Game/Prefabs/Canvas_GameScene.prefab"));
+        result.GetComponent<Canvas>().renderMode=RenderMode.ScreenSpaceOverlay;
+        // Match Main_Scene_Game's serialized overrides of the shared canvas prefab.
+        var scaler=result.GetComponent<CanvasScaler>();
+        scaler.uiScaleMode=CanvasScaler.ScaleMode.ScaleWithScreenSize;
+        scaler.referenceResolution=new Vector2(1920,1080);scaler.matchWidthOrHeight=0;
+        var settings=result.GetComponent<PSH_Script_SettingController>();
+        settings.panelSetting=result.GetComponentsInChildren<Transform>(true).Single(t=>t.name=="Panel_Setting").gameObject;
+        settings.panelWarning=settings.panelSetting.GetComponentsInChildren<Transform>(true).Single(t=>string.Equals(t.name,"Image_Warning",System.StringComparison.OrdinalIgnoreCase)).gameObject;
+        result.SetActive(true);
+        var ending=result.GetComponentInChildren<CJS_Script_GameOverUI>(true);
+        Assert.That(ending,Is.Not.Null);
+        for(var t=ending.transform;t!=null;t=t.parent)t.gameObject.SetActive(true);
+        ending.panelGameEnd.SetActive(true);yield return null;
         var entry=result.GetComponentsInChildren<Transform>(true).Single(t=>t.name=="Image_Rank_bg");
-        Assert.That(entry.gameObject.activeSelf,Is.EqualTo(BallARetroPlatform.IsSteamBuild));
+        Assert.That(entry.gameObject.activeInHierarchy,Is.True);
+        Time.timeScale=0;
+        Click(result.GetComponentsInChildren<Button>().Single(b=>b.name=="Image_RankOpen"));
+        yield return null; // The dynamically created Canvas registers its graphics for this frame.
+        var ui=result.GetComponentInChildren<PSH_Script_WorldRankingUI>();
+        Assert.That(ui,Is.Not.Null);
+        Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,Is.EqualTo("SCORE  RANKING"));
+        if(!BallARetroPlatform.IsSteamBuild)
+            Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Status").text,Is.EqualTo(PSH_Script_Localization.Text("Rank_SteamOnly")));
+        Click(ui.GetComponentsInChildren<Button>().Single(b=>b.name=="Close"));
+        Assert.That(ui.GetComponentsInChildren<TMP_Text>().Any(t=>t.name=="Title"),Is.False);
+        Assert.That(ending.panelGameEnd.activeInHierarchy,Is.True);
+        Assert.That(Time.timeScale,Is.Zero);
     }
 #if BALLARETRO_STEAM
     [UnityTest] public IEnumerator WorldRankingRendersInThreeLanguages_AndClosesWithTheMouse()
     {
         Steamworks.LeaderboardFixture.Rows=Enumerable.Range(1,10).Select(i=>new Steamworks.LeaderboardEntry_t{
             m_steamIDUser=new Steamworks.CSteamID{Value=(ulong)i},m_nGlobalRank=i,m_nScore=(11-i)*1500}).ToArray();
+        Steamworks.LeaderboardFixture.Steps=Enumerable.Range(1,10).Select(i=>i<4?3:2).ToArray();
         var ui=root.GetComponentInChildren<PSH_Script_WorldRankingUI>();
         var open=ui.GetComponentsInChildren<Button>().Single(b=>b.name=="OpenWorldRanking");
         var anchor=(RectTransform)open.transform;
@@ -93,13 +121,16 @@ public class LobbyFlowTests
             foreach(var code in new[]{"ko","en","ja"})
             {
                 LocaleTestContext.Select(code);yield return LocalizationSettings.InitializationOperation;yield return null;
-                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,Is.EqualTo(PSH_Script_Localization.Text("Rank_World")));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,Is.EqualTo("SCORE  RANKING"));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Position").text,Is.EqualTo("1ST"));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Player").color,Is.EqualTo(Color.red));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Count(t=>t.name=="Step"&&t.text=="3"),Is.EqualTo(3));
                 foreach(int width in new[]{1920,2560})
                 {
                     var target=RenderTexture.GetTemporary(width,width*9/16,24);camera.targetTexture=target;
                     yield return null;Canvas.ForceUpdateCanvases();
-                    foreach(var label in ui.GetComponentsInChildren<PSH_Script_LocalizedText>())
-                    {var text=label.GetComponent<TMP_Text>();text.ForceMeshUpdate();Assert.That(text.isTextOverflowing,Is.False,code+"/"+label.name);}
+                    foreach(var text in ui.GetComponentsInChildren<TMP_Text>())
+                    {text.ForceMeshUpdate();Assert.That(text.isTextOverflowing,Is.False,code+"/"+text.name);}
                     camera.Render();var old=RenderTexture.active;RenderTexture.active=target;
                     var pixels=new Texture2D(target.width,target.height,TextureFormat.RGB24,false);
                     pixels.ReadPixels(new Rect(0,0,target.width,target.height),0,0);pixels.Apply();

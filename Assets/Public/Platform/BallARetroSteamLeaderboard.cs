@@ -38,12 +38,12 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
 #endif
     }
 
-    public void Submit(int score, string mode, int level, Action<SubmitResp> done, Action<string> failed)
+    public void Submit(int score, string mode, int level, Action<SubmitResp> done, Action<string> failed, int step = 1)
     {
 #if BALLARETRO_STEAM && !BALLARETRO_STOVE
         if (uploading) { failed?.Invoke("Score upload already in progress"); return; }
         if (score < 0) { failed?.Invoke("Score must not be negative"); return; }
-        StartCoroutine(SubmitRoutine(score, mode, level, done, failed));
+        StartCoroutine(SubmitRoutine(score, mode, level, done, failed, Mathf.Max(1, step)));
 #else
         failed?.Invoke("Steam only");
 #endif
@@ -104,20 +104,22 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
                 var rows = new List<ScoreRow>();
                 for (int i = 0; i < result.m_cEntryCount; i++)
                 {
+                    var details = new int[1];
                     if (!SteamUserStats.GetDownloadedLeaderboardEntry(result.m_hSteamLeaderboardEntries, i,
-                        out LeaderboardEntry_t entry, Array.Empty<int>(), 0))
+                        out LeaderboardEntry_t entry, details, details.Length))
                     {
                         failed?.Invoke("Could not read a Steam leaderboard entry");
                         return;
                     }
                     rows.Add(new ScoreRow { rank = entry.m_nGlobalRank, score = entry.m_nScore,
+                        step = entry.m_cDetails > 0 ? details[0] : 0,
                         nickname = SteamFriends.GetFriendPersonaName(entry.m_steamIDUser), game_mode = mode, level = level });
                 }
                 done?.Invoke(new LbResp { ok = true, top10 = rows.ToArray() });
             }, failed);
     }
 
-    private IEnumerator SubmitRoutine(int score, string mode, int level, Action<SubmitResp> done, Action<string> failed)
+    private IEnumerator SubmitRoutine(int score, string mode, int level, Action<SubmitResp> done, Action<string> failed, int step)
     {
         uploading = true;
         try
@@ -132,7 +134,7 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
             { failed?.Invoke("Steam account changed before upload"); yield break; }
             SubmitResp submitted = null;
             yield return WaitForCall<LeaderboardScoreUploaded_t>(SteamUserStats.UploadLeaderboardScore(board,
-                ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest, score, Array.Empty<int>(), 0), result =>
+                ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest, score, new[] { step }, 1), result =>
                 {
                     if (result.m_bSuccess == 0) { failed?.Invoke("Steam score upload failed"); return; }
                     submitted = new SubmitResp { ok = true, your_score = result.m_nScore,

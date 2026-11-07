@@ -101,10 +101,10 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
 
     public void SubmitScore(int score, string gameMode, int level,
                             System.Action<SubmitResp> onDone,
-                            System.Action<string> onFail)
+                            System.Action<string> onFail, int step = 1)
     {
         Debug.Log($"[SubmitScore()] called score={score} mode='{gameMode}' level={level}");
-        StartCoroutine(CoSubmit(score, gameMode, level, onDone, onFail));
+        StartCoroutine(CoSubmit(score, gameMode, level, onDone, onFail, step));
     }
 
     public void FetchLeaderboard(string gameMode, int level,
@@ -133,12 +133,12 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     }
 
     private IEnumerator CoSubmit(int score, string gameMode, int level,
-        System.Action<SubmitResp> onDone, System.Action<string> onFail)
+        System.Action<SubmitResp> onDone, System.Action<string> onFail, int step)
     {
         if (score < 0) { onFail?.Invoke("Score must not be negative."); yield break; }
         if (BallARetroPlatform.IsSteamBuild)
         {
-            SteamLeaderboard.Submit(score, gameMode, level, onDone, onFail);
+            SteamLeaderboard.Submit(score, gameMode, level, onDone, onFail, step);
             yield break;
         }
         // Offline personal best remains available for run progress, without a ranking UI.

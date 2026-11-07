@@ -27,12 +27,14 @@ public class SteamLeaderboardTests
     {
         Time.timeScale=0;
         LeaderboardFixture.Rows=new[]{new LeaderboardEntry_t{m_steamIDUser=new CSteamID{Value=42},m_nGlobalRank=1,m_nScore=12000}};
+        LeaderboardFixture.Steps=new[]{3};
         LbResp result=null;backend.Fetch("Classic",1,r=>result=r,Assert.Fail);
         yield return Wait(()=>result!=null);
         Assert.That(LeaderboardFixture.Board,Is.EqualTo("BALLARETRO_Classic_1"));
         Assert.That(LeaderboardFixture.Start,Is.EqualTo(1));Assert.That(LeaderboardFixture.End,Is.EqualTo(10));
         Assert.That(result.top10[0].nickname,Is.EqualTo("World Player 42"));
         Assert.That(result.top10[0].rank,Is.EqualTo(1));Assert.That(result.top10[0].score,Is.EqualTo(12000));
+        Assert.That(result.top10[0].step,Is.EqualTo(3));
     }
     [UnityTest] public IEnumerator SubmittingALowerScoreKeepsTheExistingBest()
     {
@@ -41,6 +43,15 @@ public class SteamLeaderboardTests
         yield return Wait(()=>result!=null);
         Assert.That(result.your_score,Is.EqualTo(9000));Assert.That(result.rank,Is.EqualTo(3));
         Assert.That(LeaderboardFixture.Method,Is.EqualTo(ELeaderboardUploadScoreMethod.k_ELeaderboardUploadScoreMethodKeepBest));
+    }
+    [UnityTest] public IEnumerator BestScoreKeepsTheRoundInWhichItWasAchieved()
+    {
+        SubmitResp result=null;backend.Submit(8000,"Classic",1,r=>result=r,Assert.Fail,3);
+        yield return Wait(()=>result!=null);
+        Assert.That(LeaderboardFixture.BestStep,Is.EqualTo(3));
+        result=null;backend.Submit(1000,"Classic",1,r=>result=r,Assert.Fail,1);
+        yield return Wait(()=>result!=null);
+        Assert.That(LeaderboardFixture.BestStep,Is.EqualTo(3));
     }
     [Test] public void LoggedOutRequestsDoNotReachSteamLeaderboards()
     {

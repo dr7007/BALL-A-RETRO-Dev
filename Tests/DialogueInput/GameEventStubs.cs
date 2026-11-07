@@ -3,8 +3,10 @@
 using System;
 using UnityEngine;
 
-public static class KHS_Script_ScoreManager
+public class KHS_Script_ScoreManager : MonoBehaviour
 {
+    public static KHS_Script_ScoreManager Instance => FindAnyObjectByType<KHS_Script_ScoreManager>();
+    public int RoundRespone() => 1;
     public static event Action OnGameClear, OnGameOver;
     public static void EndGame(string ending)
     {
