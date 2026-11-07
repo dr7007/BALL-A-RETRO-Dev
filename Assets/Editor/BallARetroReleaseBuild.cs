@@ -8,6 +8,13 @@ using UnityEngine;
 
 public static class BallARetroReleaseBuild
 {
+    internal static string ActiveEvidenceDirectory { get; private set; }
+    private static readonly string[] ReleaseScenes = {
+        "Assets/MainScenes/Main_Scene_Lobby.unity",
+        "Assets/MainScenes/Main_Scene_Tutorial.unity",
+        "Assets/MainScenes/Main_Scene_Game.unity"
+    };
+
     [MenuItem("BALL-A-RETRO/Build/STOVE Review (Windows)")]
     public static void BuildStove() => BuildInteractive(false);
 
@@ -49,8 +56,8 @@ public static class BallARetroReleaseBuild
         if (Directory.Exists(output) && Directory.EnumerateFileSystemEntries(output).Any())
             throw new BuildFailedException("Choose a new, empty output folder for each release build.");
         var scenes = EditorBuildSettings.scenes.Where(s => s.enabled).Select(s => s.path).ToArray();
-        if (scenes.Length == 0 || scenes[0] != "Assets/MainScenes/Main_Scene_Lobby.unity" || scenes.Any(s => !File.Exists(s)))
-            throw new BuildFailedException("Enable the release scenes with Main_Scene_Lobby first, and verify all scene paths.");
+        if (!scenes.SequenceEqual(ReleaseScenes) || scenes.Any(s => !File.Exists(s)))
+            throw new BuildFailedException("Enable only Lobby, Tutorial and Game, in that order, for a release build.");
         var defines = PlayerSettings.GetScriptingDefineSymbols(UnityEditor.Build.NamedBuildTarget.Standalone)
             .Split(';');
         if (steam && defines.Contains("BALLARETRO_STOVE"))
@@ -63,25 +70,80 @@ public static class BallARetroReleaseBuild
         BuildReport report;
         try
         {
+            ActiveEvidenceDirectory = Path.Combine(Path.GetDirectoryName(output), "evidence");
             report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = scenes,
                 locationPathName = file, target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.None,
+                options = BuildOptions.DetailedBuildReport,
                 extraScriptingDefines = new[] { steam ? "BALLARETRO_STEAM" : "BALLARETRO_STOVE" }
             });
         }
         finally
         {
+            ActiveEvidenceDirectory = null;
             foreach (var plugin in steamPlugins)
                 if (plugin != null) plugin.SetIncludeInBuildDelegate(null);
         }
         if (report.summary.result != BuildResult.Succeeded)
             throw new BuildFailedException("Build failed. See the Unity Console and build report.");
+        WriteAssetReport(report, file, scenes);
         if (!steam && Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories).Any(p =>
             Path.GetFileName(p).StartsWith("steam_api", StringComparison.OrdinalIgnoreCase)
             || Path.GetFileName(p).StartsWith("libsteam_api", StringComparison.OrdinalIgnoreCase)))
             throw new BuildFailedException("STOVE output contains Steam runtime files. Do not submit this build.");
         Debug.Log($"[Release] {(steam ? "Steam" : "STOVE")} Windows build succeeded: {file}; {report.summary.totalSize} bytes.");
+    }
+
+    [Serializable] private class AssetEntry { public string path; public long packedBytes; }
+    [Serializable] private class AssetReport
+    {
+        public string[] scenes;
+        public AssetEntry[] assets;
+        public string[] resources;
+    }
+
+    private static void WriteAssetReport(BuildReport report, string file, string[] scenes)
+    {
+        var entries = report.packedAssets.SelectMany(p => p.contents)
+            .GroupBy(p => p.sourceAssetPath ?? "")
+            .Select(g => new AssetEntry { path = g.Key, packedBytes = g.Sum(p => (long)p.packedSize) })
+            .OrderByDescending(p => p.packedBytes).ToArray();
+        if (entries.Any(e => e.path.EndsWith("/PerformanceTestRunInfo.json") ||
+            e.path.EndsWith("/PerformanceTestRunSettings.json")))
+            throw new BuildFailedException("Performance test metadata must not be included in a release.");
+        // Keep provenance alongside, never inside, the distributable player folder.
+        string evidence = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(file)), "evidence");
+        Directory.CreateDirectory(evidence);
+        File.WriteAllText(Path.Combine(evidence, "packed-assets.json"), JsonUtility.ToJson(new AssetReport {
+            scenes = scenes, assets = entries,
+            resources = entries.Where(e => e.path.Contains("/Resources/")).Select(e => e.path).ToArray()
+        }, true));
+    }
+}
+
+// Performance Testing 3.0.3 (a transitive Collections dependency) writes these
+// Resources in its order-0 callback even for ordinary non-test player builds.
+// Move only that generated metadata out after preprocessors have run. Keep the
+// originals in local evidence and leave unrelated resources and test builds alone.
+public sealed class BallARetroReleaseTestMetadataFilter : IPreprocessBuildWithReport
+{
+    public int callbackOrder => int.MaxValue;
+    public void OnPreprocessBuild(BuildReport report)
+    {
+        if (BallARetroReleaseBuild.ActiveEvidenceDirectory == null ||
+            (report.summary.options & BuildOptions.IncludeTestAssemblies) != 0) return;
+        string excluded = Path.Combine(BallARetroReleaseBuild.ActiveEvidenceDirectory, "excluded-generated");
+        Directory.CreateDirectory(excluded);
+        bool moved = false;
+        foreach (string name in new[] { "PerformanceTestRunInfo.json", "PerformanceTestRunSettings.json" })
+        foreach (string suffix in new[] { "", ".meta" })
+        {
+            string source = Path.Combine(Application.dataPath, "Resources", name + suffix);
+            if (!File.Exists(source)) continue;
+            File.Move(source, Path.Combine(excluded, name + suffix));
+            moved = true;
+        }
+        if (moved) AssetDatabase.Refresh();
     }
 }

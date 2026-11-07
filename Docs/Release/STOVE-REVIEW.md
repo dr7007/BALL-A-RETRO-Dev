@@ -56,12 +56,20 @@ PowerShell 7 이상과 Unity 6000.0.60f1 Windows Build Support를 사용한다. 
 ./Tests/Release/Verify-Player.ps1 -PlayerRoot D:/ball-a-retro-validation/stove-new/player -EvidencePath D:/ball-a-retro-validation/stove-new/evidence/player-audit.json
 ./Tests/Release/Run-PlayerSmoke.ps1 -PlayerRoot D:/ball-a-retro-validation/stove-new/player -EvidenceRoot D:/ball-a-retro-validation/stove-new/evidence/startup
 ./Tests/Release/Package-StoveReview.ps1 -PlayerRoot D:/ball-a-retro-validation/stove-new/player -OutputZip D:/ball-a-retro-validation/stove-new/BALL-A-RETRO-STOVE.zip
+./Tests/Release/Verify-PackedAssets.ps1 -ReportPath D:/ball-a-retro-validation/stove-new/evidence/packed-assets.json
+./Tests/Release/Prepare-Upload.ps1 -ArchivePath D:/ball-a-retro-validation/stove-new/BALL-A-RETRO-STOVE.zip -OutputDirectory D:/ball-a-retro-validation/stove-new/upload
 python Tests/Release/Export-ReviewText.py --output D:/ball-a-retro-validation/stove-new/ALL-DIALOGUE-UI.txt
 ```
 
 빌드는 로비를 첫 씬으로 요구하며, 출력 폴더가 비어 있는지 검사한다. STOVE define과
 빌드별 플러그인 제외 규칙을 사용하여 Steam 네이티브 DLL이 섞이지 않게 한다.
 Steam 프로젝트 설정, 플러그인 meta, 사용자의 볼 머테리얼·폰트를 변경하지 않는다.
+
+출시 씬은 Lobby, Tutorial, Game의 정확한 목록과 순서를 검사한다. 격리 복사본에서만
+SteamSettings 및 샘플 BillingMode 리소스를 Assets 밖으로 옮기고, 빌드 중 자동 생성되는
+성능 시험 메타데이터를 제외한다. `packed-assets.json`으로 실제 포함 목록과 용량을 남긴다.
+STOVE GUI 업로더에는 디버그 파일을 제외한 ZIP을 검증·추출한 `upload` 폴더를 지정한다.
+원본 플레이어 출력 폴더나 프로젝트 폴더를 직접 업로드하지 않는다.
 
 `Verify-Player.ps1`는 실제 완성된 Assembly-CSharp.dll을 읽어 플랫폼 상수와 개발용 입력의
 제거를 확인한다. 이 검사는 게임 플레이 및 STOVE 클라이언트 시험을 대신하지 않는다.

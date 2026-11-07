@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
-    [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
+    [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe',
+    [string]$CacheProjectRoot
 )
 $ErrorActionPreference = 'Stop'
 $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -20,9 +21,18 @@ $initialStatus | Set-Content -LiteralPath "$releaseRoot/evidence/source-status.t
 
 # Copy, never junction/hardlink, so imports and generated font atlases stay isolated.
 foreach ($folder in @('Assets', 'Packages', 'ProjectSettings', 'Library')) {
-    & robocopy (Join-Path $sourceRoot $folder) "$releaseRoot/project/$folder" /E /XJ /MT:16 /R:1 /W:1 /NFL /NDL /NJH /NJS /NP
+    $copyRoot = $sourceRoot
+    if ($folder -eq 'Library' -and $CacheProjectRoot) {
+        $copyRoot = (Resolve-Path -LiteralPath $CacheProjectRoot).Path
+        if ((Get-Content "$copyRoot/ProjectSettings/ProjectVersion.txt" -Raw) -ne
+            (Get-Content "$sourceRoot/ProjectSettings/ProjectVersion.txt" -Raw)) { throw 'Cache Unity version mismatch.' }
+    }
+    $excludeDirectories = @()
+    if ($folder -eq 'Assets') { $excludeDirectories = @('/XD', 'Library', 'Temp', 'Logs', '.git', 'obj', 'UserSettings') }
+    & robocopy (Join-Path $copyRoot $folder) "$releaseRoot/project/$folder" /E /XJ /MT:16 /R:1 /W:1 /NFL /NDL /NJH /NJS /NP @excludeDirectories
     if ($LASTEXITCODE -ge 8) { throw "Snapshot copy failed: $folder ($LASTEXITCODE)" }
 }
+& "$PSScriptRoot/Prepare-StoveSnapshot.ps1" -ProjectRoot "$releaseRoot/project"
 Write-Output "Snapshot ready: $releaseRoot/project"
 $arguments = @('-batchmode', '-quit', '-projectPath', "`"$releaseRoot/project`"",
     '-buildTarget', 'Win64', '-executeMethod', 'BallARetroReleaseBuild.BuildStoveBatch',
@@ -38,6 +48,7 @@ $forbidden = Get-ChildItem -LiteralPath "$releaseRoot/player" -Recurse -File |
     Where-Object { $_.Name -match '^(steam_appid\.txt|(?:lib)?steam_api.*)$' }
 if ($forbidden) { throw 'Steam runtime or development App ID found in STOVE output.' }
 & "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot "$releaseRoot/player" -EvidencePath "$releaseRoot/evidence/player-audit.json"
+& "$PSScriptRoot/Verify-PackedAssets.ps1" -ReportPath "$releaseRoot/evidence/packed-assets.json"
 Get-ChildItem -LiteralPath "$releaseRoot/player" -Recurse -File | ForEach-Object {
     [pscustomobject]@{ path = [IO.Path]::GetRelativePath("$releaseRoot/player", $_.FullName); bytes = $_.Length;
         sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash }
