@@ -9,6 +9,8 @@ using UnityEngine.Localization.Settings;
 using UnityEngine;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 public class TutorialProgressionTests
@@ -26,7 +28,8 @@ public class TutorialProgressionTests
         yield return LocalizationSettings.InitializationOperation;
         var scoreGO = New("Score"); scoreGO.SetActive(false);
         score = scoreGO.AddComponent<KHS_Script_ScoreManager>();
-        var canvas = New("TutorialCanvas", typeof(RectTransform), typeof(Canvas));
+        var canvas = New("TutorialCanvas", typeof(RectTransform), typeof(Canvas), typeof(GraphicRaycaster));
+        canvas.GetComponent<Canvas>().renderMode = RenderMode.ScreenSpaceOverlay;
         var go = New("Tutorial"); go.SetActive(false);
         tutorial = go.AddComponent<CJS_TutorialDirector>();
         tutorial.scoreManager = score;
@@ -36,6 +39,9 @@ public class TutorialProgressionTests
         tutorial.tutorialText = Text("Hint", canvas.transform);
         tutorial.resultTitleText = Text("Title", tutorial.resultPanel.transform);
         tutorial.resultDescText = Text("Description", tutorial.resultPanel.transform);
+        tutorial.retryButton = ResultButton("Retry", -250);
+        tutorial.goLobbyButton = ResultButton("Lobby", 0);
+        tutorial.goGameButton = ResultButton("Game", 250);
         go.SetActive(true);
         yield return null;
         yield return null;
@@ -285,6 +291,42 @@ public class TutorialProgressionTests
                 Assert.That(tutorial.tutorialText.text, Does.Not.Contain("New Text"));
             }
         }
+    }
+
+    [UnityTest] public IEnumerator FailedTutorialRetryClickReloadsTheTutorial() { yield return Navigate("Retry"); }
+    [UnityTest] public IEnumerator FailedTutorialLobbyClickLoadsTheLobby() { yield return Navigate("Lobby"); }
+    [UnityTest] public IEnumerator FailedTutorialGameClickLoadsTheMainGame() { yield return Navigate("Game"); }
+
+    private IEnumerator Navigate(string action)
+    {
+        string destination = "Navigation" + action;
+        Assert.That(Application.CanStreamedLevelBeLoaded(destination), Is.True, "The isolated runner must register navigation scenes before Play Mode.");
+        tutorial.tutorialSceneName = "NavigationRetry";
+        tutorial.lobbySceneName = "NavigationLobby";
+        tutorial.gameSceneName = "NavigationGame";
+        Launch(); score.curScore = 700; Call("OnGameOverWithScore", 700);
+        Assert.That(tutorial.resultPanel.activeInHierarchy, Is.True); Assert.That(Time.timeScale, Is.Zero);
+        var events = New("Result events", typeof(EventSystem)).GetComponent<EventSystem>();
+        yield return null; Canvas.ForceUpdateCanvases();
+        var button = action == "Retry" ? tutorial.retryButton : action == "Lobby" ? tutorial.goLobbyButton : tutorial.goGameButton;
+        var rect = (RectTransform)button.transform;
+        var pointer = new PointerEventData(events) { position = RectTransformUtility.WorldToScreenPoint(null, rect.TransformPoint(rect.rect.center)), button = PointerEventData.InputButton.Left };
+        var hits = new List<RaycastResult>(); events.RaycastAll(pointer, hits);
+        Assert.That(hits, Is.Not.Empty);
+        Assert.That(ExecuteEvents.GetEventHandler<IPointerClickHandler>(hits[0].gameObject), Is.EqualTo(button.gameObject));
+        ExecuteEvents.ExecuteHierarchy(hits[0].gameObject, pointer, ExecuteEvents.pointerClickHandler);
+        Assert.That(Time.timeScale, Is.EqualTo(1));
+        yield return null;
+        Assert.That(SceneManager.GetActiveScene().name, Is.EqualTo(destination));
+    }
+
+    private Button ResultButton(string name, float x)
+    {
+        var go = New(name, typeof(RectTransform), typeof(Image), typeof(Button));
+        go.transform.SetParent(tutorial.resultPanel.transform, false);
+        var rect = (RectTransform)go.transform;
+        rect.anchoredPosition = new Vector2(x, -100); rect.sizeDelta = new Vector2(220, 70);
+        return go.GetComponent<Button>();
     }
 
     private Rigidbody ReadyBall()

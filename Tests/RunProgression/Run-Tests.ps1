@@ -76,6 +76,20 @@ if ($IncludeTutorial) {
     }
     Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_GameSceneDirector.cs", "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_EyeOpenEffect.cs" -Destination "$outputPath/Assets/Runtime"
     Copy-Item -LiteralPath "$sourceRoot/Tests/TutorialProgression/TutorialProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
+    # Real scene changes are exercised only in this disposable project.
+    $sceneSettings = @('%YAML 1.1', '%TAG !u! tag:unity3d.com,2011:', '--- !u!1045 &1', 'EditorBuildSettings:', '  m_ObjectHideFlags: 0', '  serializedVersion: 2', '  m_Scenes:')
+    $sceneNumber = 0
+    foreach ($destination in @('Retry', 'Lobby', 'Game')) {
+        $sceneNumber++
+        $sceneGuid = '2026110800000000000000000000010' + $sceneNumber
+        @('%YAML 1.1', '%TAG !u! tag:unity3d.com,2011:', '--- !u!1660057539 &9223372036854775807', 'SceneRoots:', '  m_ObjectHideFlags: 0', '  m_Roots: []') |
+            Set-Content -LiteralPath "$outputPath/Assets/Navigation$destination.unity" -Encoding utf8
+        @('fileFormatVersion: 2', "guid: $sceneGuid", 'DefaultImporter:', '  externalObjects: {}') |
+            Set-Content -LiteralPath "$outputPath/Assets/Navigation$destination.unity.meta" -Encoding utf8
+        $sceneSettings += @('  - enabled: 1', "    path: Assets/Navigation$destination.unity", "    guid: $sceneGuid")
+    }
+    $sceneSettings += '  m_configObjects: {}'
+    $sceneSettings | Set-Content -LiteralPath "$outputPath/ProjectSettings/EditorBuildSettings.asset" -Encoding utf8
 }
 if ($IncludeBallRescue) {
     if ($Baseline) { throw 'Ball rescue requires the current run state API.' }

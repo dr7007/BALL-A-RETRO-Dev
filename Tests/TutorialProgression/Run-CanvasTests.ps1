@@ -43,7 +43,7 @@ Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Textures/Rec
 & $PythonPath "$PSScriptRoot/Extract-UIFixture.py" "$sourceRoot/Assets/MainScenes/Main_Scene_Tutorial.unity" "$outputPath/Assets/TutorialUI.unity"
 if ($LASTEXITCODE -ne 0) { throw 'Fixture extraction failed.' }
 Copy-Item -LiteralPath "$PSScriptRoot/TutorialCanvasTests.cs" -Destination "$outputPath/Assets/Tests"
-@('PSH_Script_BaseButtonHover.cs', 'PSH_Script_CursorManager.cs') | ForEach-Object {
+@('PSH_Script_BaseButtonHover.cs', 'PSH_Script_CursorManager.cs', 'PSH_Script_ModalCanvas.cs') | ForEach-Object {
     Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/$_", "$sourceRoot/Assets/Public/UI_Public/Scripts/$_.meta" -Destination "$outputPath/Assets/Runtime"
 }
 $filter = 'TutorialCanvasTests'
@@ -113,6 +113,8 @@ if ($IncludeMenuInteractions -or $IncludeLobby) {
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions
     if ($LASTEXITCODE -ne 0) { throw 'Settings interaction extraction failed.' }
     $filter += ';SettingsInteractionTests;CursorInteractionTests'
+    Copy-Item "$sourceRoot/Tests/UISettings/TutorialResultInteractionTests.cs" "$outputPath/Assets/Tests"
+    $filter += ';TutorialResultInteractionTests'
 }
 if ($IncludeLobby) {
     Copy-Item "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs.meta", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_LeaderboardList.cs" "$outputPath/Assets/Runtime"

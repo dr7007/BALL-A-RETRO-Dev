@@ -9,6 +9,7 @@ using UnityEngine.Rendering.Universal;
 using UnityEngine.SceneManagement;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using TMPro;
 
 // Run against an isolated fixture containing the unmodified UI objects extracted
 // from Main_Scene_Tutorial; never open or save the developer's running scene.
@@ -59,8 +60,21 @@ public class TutorialCanvasTests
         yield return null;
         var buttons = Object.FindObjectsByType<Button>(FindObjectsSortMode.None);
         Assert.That(buttons.Length, Is.EqualTo(3));
+        // Match ShowResultPanel: the modal is added while the result is inactive.
+        var resultPanel = GameObject.Find("TutorialResultPanel");
+        var texts = resultPanel.GetComponentsInChildren<TMP_Text>();
+        texts.Single(t => t.name == "ResultTitleText").text = PSH_Script_Localization.Text("Tut_FailTitle");
+        texts.Single(t => t.name == "ResultDescText").text = PSH_Script_Localization.Text("Tut_FailPractice", "Z", "/");
+        resultPanel.SetActive(false);
+        resultPanel.AddComponent<PSH_Script_ModalCanvas>().SetSortingOrder(50);
+        resultPanel.SetActive(true);
+        Time.timeScale = 0;
+        yield return null;
+        yield return null;
         try
         {
+            Assert.That(resultPanel.GetComponent<GraphicRaycaster>().eventCamera, Is.EqualTo(overlay),
+                "The result's nested canvas must raycast through the tutorial UI camera.");
             foreach (var resolution in new[] { new Vector2Int(1920, 1080), new Vector2Int(2560, 1440) })
             {
                 var target = RenderTexture.GetTemporary(resolution.x, resolution.y, 24);
@@ -84,6 +98,13 @@ public class TutorialCanvasTests
                                 es.RaycastAll(new PointerEventData(es) { position = point }, hits);
                                 Assert.That(hits.Count, Is.GreaterThan(0), button.name);
                                 Assert.That(hits[0].gameObject.GetComponentInParent<Button>(), Is.EqualTo(button));
+                                bool clicked = false;
+                                UnityEngine.Events.UnityAction onClick = () => clicked = true;
+                                button.onClick.AddListener(onClick);
+                                ExecuteEvents.ExecuteHierarchy(hits[0].gameObject,
+                                    new PointerEventData(es) { position = point, button = PointerEventData.InputButton.Left }, ExecuteEvents.pointerClickHandler);
+                                button.onClick.RemoveListener(onClick);
+                                Assert.That(clicked, Is.True, button.name + " must receive clicks while paused.");
                                 AssertButtonVisible(pixels, overlay, rect);
                             }
                             var path = System.IO.Path.Combine(Application.dataPath, "..", $"tutorial-ui-{resolution.x}-{camera.name}.png");
@@ -101,6 +122,7 @@ public class TutorialCanvasTests
         }
         finally
         {
+            Time.timeScale = 1;
             renderGraph.enableRenderCompatibilityMode = previousCompatibility;
             GraphicsSettings.defaultRenderPipeline = previous;
             Object.Destroy(pipeline);
