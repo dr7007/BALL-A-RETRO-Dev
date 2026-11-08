@@ -368,6 +368,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     private void ChangeState(RoundState newState)
     {
         currentState = newState;
+        BallARetroDemoRun.Current?.NotifyStateChanged();
 
         switch (currentState)
         {
@@ -550,6 +551,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (gameOverUI == null) gameOverUI = FindObjectOfType<CJS_Script_GameOverUI>(true);
         if (rankingService == null) rankingService = FindObjectOfType<CJS_Script_PinballRankingService>(true);
         if (flipperController == null) flipperController = FindAnyObjectByType<KHS_Script_FliperController>();
+        if (BallARetroPlatform.IsDemoBuild && GetComponent<BallARetroDemoRun>() == null)
+            gameObject.AddComponent<BallARetroDemoRun>();
     }
 
     void Start()
@@ -616,8 +619,28 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (currentState != RoundState.Playing)
             return;
 
-        int finalScore = Mathf.RoundToInt(value * multiplier);
+        ApplyDirectScore(value, worldPos, 0);
+    }
+
+    public void AddBlackholeScoreAt(int value, Vector3 worldPos)
+    {
+        if (currentState != RoundState.Playing) return;
+        var demo = BallARetroDemoRun.Current;
+        bool demoRun = demo != null && demo.IsEnabled;
+        int charge = demoRun ? demo.ConsumeCharge() : 0;
+        // The charge is a flat payout, separate from both table and last-ball
+        // multipliers. One transaction prevents a round boundary losing it.
+        ApplyDirectScore(demoRun ? 500 : value, worldPos, charge);
+    }
+
+    private void ApplyDirectScore(int value, Vector3 worldPos, int charge)
+    {
+        int awardedBase = Mathf.RoundToInt(value * multiplier);
+        var demo = BallARetroDemoRun.Current;
+        int lastBallBonus = demo != null && demo.IsEnabled ? demo.CalculateLastBallBonus(awardedBase) : 0;
+        int finalScore = awardedBase + charge + lastBallBonus;
         curScore += finalScore;
+        if (demo != null && demo.IsEnabled) demo.RecordAwarded(charge, lastBallBonus);
         OnScoreChanged?.Invoke(curScore);
 
         OnScoreGained?.Invoke(finalScore);

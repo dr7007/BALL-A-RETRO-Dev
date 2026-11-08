@@ -22,6 +22,8 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     [Header("Random")]
     [SerializeField] private int seed = 0;
     private System.Random rnd;
+    private Sprite demoCapacitorIcon;
+    private Sprite demoLastBallIcon;
 
     void Awake()
     {
@@ -55,6 +57,8 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 
     public List<CJS_ChoiceData> Roll3(out Dictionary<CJS_ChoiceData, float> rollChances)
     {
+        var demo = BallARetroDemoRun.Current;
+        if (demo != null && demo.IsEnabled) return RollDemoChoices(demo, out rollChances);
         // 1) 실제 추첨 풀 구성(활성 + weight>0). 하나도 없으면 활성만 허용
         var pool = BuildPoolFromAllChoices();
 
@@ -120,6 +124,13 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     public void PushPicked(CJS_ChoiceData picked)
     {
         if (picked == null) return;
+        var demo = BallARetroDemoRun.Current;
+        if (demo != null && demo.IsEnabled
+            && (picked.funcIdx == BallARetroDemoRun.CapacitorChoiceId || picked.funcIdx == BallARetroDemoRun.LastBallChoiceId))
+        {
+            demo.ApplyUpgrade(picked.funcIdx);
+            return;
+        }
         picked.roguelike?.MatchingFunc(picked.funcIdx);
         Debug.Log("[ChoiceRoller] Picked: " + picked.name);
     }
@@ -146,6 +157,47 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
         }
         return pool;
     }
+
+    private List<CJS_ChoiceData> RollDemoChoices(BallARetroDemoRun demo, out Dictionary<CJS_ChoiceData, float> chances)
+    {
+        // A short demo must offer both core strategies. These are deliberate
+        // choices, not a weighted lottery, so its UI hides odds and reroll.
+        chances = new Dictionary<CJS_ChoiceData, float>();
+        var result = new List<CJS_ChoiceData>(3);
+        if (demo.CapacitorLevel < 2)
+        {
+            if (!demoCapacitorIcon) demoCapacitorIcon = Resources.Load<Sprite>("Demo/Choice_Capacitor");
+            result.Add(DemoChoice(BallARetroDemoRun.CapacitorChoiceId,
+                demo.CapacitorLevel == 0 ? "Demo_Capacitor" : "Demo_CapacitorUpgrade",
+                demoCapacitorIcon ? demoCapacitorIcon : FindChoice(5)?.icon));
+        }
+        if (demo.LastBallLevel < 2)
+        {
+            if (!demoLastBallIcon) demoLastBallIcon = Resources.Load<Sprite>("Demo/Choice_LastBall");
+            result.Add(DemoChoice(BallARetroDemoRun.LastBallChoiceId,
+                demo.LastBallLevel == 0 ? "Demo_LastBall" : "Demo_LastBallUpgrade",
+                demoLastBallIcon ? demoLastBallIcon : FindChoice(8)?.icon));
+        }
+        foreach (int supportId in new[] { 6, 8 })
+        {
+            if (result.Count == 3) break;
+            var source = FindChoice(supportId);
+            if (source == null) continue;
+            result.Add(new CJS_ChoiceData {
+                funcIdx = supportId, localizationKey = supportId == 8 ? "Demo_ExtraBall" : source.localizationKey,
+                name = source.name, description = source.description, icon = source.icon,
+                rarity = source.rarity, weight = 1, roguelike = source.roguelike
+            });
+        }
+        return result;
+    }
+
+    private CJS_ChoiceData FindChoice(int id) => allChoices.Find(choice => choice != null && choice.funcIdx == id);
+
+    private CJS_ChoiceData DemoChoice(int id, string key, Sprite icon) => new CJS_ChoiceData {
+        funcIdx = id, localizationKey = key, name = key, description = key,
+        rarity = "Rare", icon = icon, weight = 1, roguelike = GetComponent<KHS_Script_RogueLikeManager>()
+    };
 
     private static float SumWeights(List<CJS_ChoiceData> list)
     {

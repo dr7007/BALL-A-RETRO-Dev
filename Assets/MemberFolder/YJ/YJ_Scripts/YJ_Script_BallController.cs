@@ -221,17 +221,29 @@ public class YJ_Script_BallController : MonoBehaviour
     }
 
     public int GetBallCount() => BallCount;
-    public void SetBallCount(int count) => BallCount = count;
+    public void SetBallCount(int count)
+    {
+        BallCount = count;
+        BallARetroDemoRun.Current?.NotifyStateChanged();
+    }
+
+    public void ConfigureRunBallCredits(int count)
+    {
+        initBallCount = Mathf.Max(1, count);
+        SetBallCount(initBallCount);
+    }
 
     public void AddBallFunc(int _count)
     {
         initBallCount += _count;
         BallCount += _count;
+        BallARetroDemoRun.Current?.NotifyStateChanged();
     }
 
     public int BallCountInitResponse()
     {
         BallCount = initBallCount;
+        BallARetroDemoRun.Current?.NotifyStateChanged();
         return initBallCount;
     }
 

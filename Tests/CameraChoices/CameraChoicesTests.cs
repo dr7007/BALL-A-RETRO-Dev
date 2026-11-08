@@ -127,6 +127,32 @@ public class CameraChoicesTests
     }
 
     [UnityTest]
+    public IEnumerator FullGameMultiplePicksKeepMonitorOpenAndIgnoreStaleCardDoubleClick()
+    {
+        ball.GetComponent<YJ_Script_BallController>().Credits = 3;
+        yield return OpenChoices();
+        var first = content.GetComponentInChildren<Button>();
+        first.onClick.Invoke();
+        first.onClick.Invoke(); // Destroy is deferred; this is a stale card.
+        Assert.That(roller.Picks, Is.EqualTo(1));
+        Assert.That(Time.timeScale, Is.Zero);
+        AssertOnlyCamera(2);
+        yield return null;
+        content.GetComponentInChildren<Button>().onClick.Invoke();
+        Assert.That(roller.Picks, Is.EqualTo(2));
+        Assert.That(Time.timeScale, Is.Zero);
+        AssertOnlyCamera(2);
+        yield return null;
+        var last = content.GetComponentInChildren<Button>();
+        last.onClick.Invoke();
+        last.onClick.Invoke();
+        Assert.That(roller.Picks, Is.EqualTo(3));
+        yield return FinishReturnWhileBallMoves();
+        AssertOnlyCamera(0);
+        AssertGameplayCursor();
+    }
+
+    [UnityTest]
     public IEnumerator SkippingWhileTravellingUpstairsPreservesCameraOffset()
     {
         yield return TravelToUpperRail();

@@ -50,6 +50,7 @@ public class KHS_Script_DumpManager : MonoBehaviour
             // Capture before callbacks can hide or transport the ball (e.g. slots).
             Vector3 hit = _collider.ClosestPoint(transform.position);
             triggeredBalls.Add(_collider);
+            ChargeDemoCapacitor();
             OnBallTrigger?.Invoke(_collider);
             StartCoroutine(ReleaseBall(_collider));
 
@@ -79,6 +80,7 @@ public class KHS_Script_DumpManager : MonoBehaviour
         Rigidbody ballRb = _collision.rigidbody;
         if (ballRb != null)
         {
+            ChargeDemoCapacitor();
             // 충돌 지점의 반대 방향으로 힘을 실어 튕겨냄
             if (_collision.contactCount > 0)
                 ballRb.AddForce(-_collision.GetContact(0).normal * bounceForce, ForceMode.Impulse);
@@ -99,5 +101,14 @@ public class KHS_Script_DumpManager : MonoBehaviour
     {
         yield return new WaitForSeconds(waitTime);
         triggeredBalls.Remove(col);
+    }
+
+    private void ChargeDemoCapacitor()
+    {
+        var demo = BallARetroDemoRun.Current;
+        // Ordinary switches, coins and bonus-map chips also use DumpManager.
+        // Only the table's actual illuminated bumpers charge this upgrade.
+        if (demo != null && demo.IsEnabled && GetComponent<KHS_Script_BumperEffect>() != null)
+            demo.RecordBumperHit();
     }
 }

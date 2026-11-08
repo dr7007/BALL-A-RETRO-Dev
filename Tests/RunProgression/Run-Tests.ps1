@@ -4,9 +4,11 @@ param(
     [switch]$IncludeBallRescue,
     [switch]$IncludeScorePopups,
     [switch]$IncludeTutorial,
+    [switch]$IncludeDemo,
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
 $ErrorActionPreference = 'Stop'
+if ($IncludeDemo) { $IncludeScorePopups = $true }
 $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $outputPath = [IO.Path]::GetFullPath($OutputRoot)
 if ($outputPath.StartsWith($sourceRoot, [StringComparison]::OrdinalIgnoreCase)) {
@@ -56,6 +58,7 @@ $unchangedSources = @(
     'Assets/MemberFolder/KHS/KHS_Scripts/UI/KHS_Script_UIToBall.cs',
     'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs',
     'Assets/Public/Platform/BallARetroPlatform.cs',
+    'Assets/Public/Roguelike/BallARetroDemoRun.cs',
     'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_Models.cs',
     'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_DialogueUI.cs',
     'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_DialogueClickForwarder.cs',
@@ -72,6 +75,7 @@ Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/StartupNoticeFixture.cs" -D
 Copy-Item -LiteralPath "$PSScriptRoot/RunProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
 if ($IncludeTutorial) {
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_PlungerController.cs" -Destination "$outputPath/Assets/Runtime"
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_CameraController.cs" -Destination "$outputPath/Assets/Runtime"
     if ($Baseline) { throw 'Tutorial checks require the current flipper event.' }
     @('CJS_TutorialDirector.cs', 'CJS_TutorialCameraFocus.cs') | ForEach-Object {
         Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
@@ -92,6 +96,14 @@ if ($IncludeTutorial) {
     }
     $sceneSettings += '  m_configObjects: {}'
     $sceneSettings | Set-Content -LiteralPath "$outputPath/ProjectSettings/EditorBuildSettings.asset" -Encoding utf8
+}
+if ($IncludeDemo) {
+    if ($Baseline -or $IncludeTutorial) { throw 'Demo mechanics use their own fixture; run tutorial regression separately.' }
+    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_BlackholeController.cs", "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_PlungerController.cs" -Destination "$outputPath/Assets/Runtime"
+    @('CJS_Script_ChoiceUIController.cs','CJS_Script_ChoiceRoller.cs','CJS_Script_ChoiceCard.cs','CJS_IChoiceRoller.cs','CJS_ChoiceData.cs','CJS_ChoiceSnapshot.cs','CJS_Script_ChoiceState.cs') | ForEach-Object {
+        Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
+    }
+    Copy-Item -LiteralPath "$sourceRoot/Tests/DemoGameplay/DemoGameplayTests.cs" -Destination "$outputPath/Assets/Tests"
 }
 if ($IncludeBallRescue) {
     if ($Baseline) { throw 'Ball rescue requires the current run state API.' }
@@ -119,10 +131,12 @@ Copy-Item "$sourceRoot/Tests/Localization/LocaleTestContext.cs" "$outputPath/Ass
 @{ name = 'BallARetro.RunProgressionTests'; references = @('BallARetro.RunUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization', 'Unity.ResourceManager'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RunProgressionTests.asmdef" -Encoding utf8
 if ($Baseline) { '-define:BASELINE' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
 if ($IncludeTutorial) { '-define:TUTORIAL' | Add-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
+if ($IncludeDemo) { '-define:DEMO_GAMEPLAY,BALLARETRO_STEAM,BALLARETRO_DEMO' | Add-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8 }
 $testClasses = @('RunProgressionTests')
 if ($IncludeBallRescue) { $testClasses += 'BallAutoRescueTests' }
 if ($IncludeScorePopups) { $testClasses += 'ScorePopupTests' }
 if ($IncludeTutorial) { $testClasses += 'TutorialProgressionTests' }
+if ($IncludeDemo) { $testClasses = @('DemoGameplayTests') }
 $testFilter = $testClasses -join ';'
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $testFilter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru

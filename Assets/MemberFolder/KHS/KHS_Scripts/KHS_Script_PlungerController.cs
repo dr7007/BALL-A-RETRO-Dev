@@ -62,7 +62,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
 
     private void Update()
     {
-        if (Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
+        if (Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput || BallARetroDemoRun.BlocksLaunch) return;
         if (!isBallReady)
         {
             currentGaze = 0f;
@@ -120,7 +120,7 @@ public class KHS_Script_PlungerController : MonoBehaviour
     private void Launch()
     {
         if (!isBallReady || ballRigidbody == null || isLock || tutorialForceLock
-            || Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput) return;
+            || Time.timeScale <= 0f || PSH_Script_SettingController.BlocksDialogueKeyboardInput || BallARetroDemoRun.BlocksLaunch) return;
         if (ballRigidbody != null)
         {
             // 플런저가 향하는 방향 기준으로 발사

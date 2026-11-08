@@ -6,6 +6,7 @@ using TMPro;
 using UnityEngine.Localization;
 using UnityEngine.Localization.Settings;
 using UnityEngine.EventSystems;
+using PSH;
 
 public class CJS_Script_ChoiceUIController : MonoBehaviour
 {
@@ -33,6 +34,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private bool isOpen;
     private bool busy;
     private bool gameEnded;
+    private bool starterQueued;
 
     [SerializeField]
     private YJ_Script_BallController ballCon;
@@ -54,6 +56,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         KHS_Script_ScoreManager.Round_Clear += PickCountBonusFunc;
         KHS_Script_ScoreManager.OnGameClear += OnGameEnded;
         KHS_Script_ScoreManager.OnGameOver += OnGameEnded;
+        KHS_Script_UIImgFunc.RoundUIEvt += OnRoundBanner;
+        PSH_Script_GameSceneDirector.NoIntroStartEvt += QueueDemoStarter;
     }
 
     void OnDisable()
@@ -64,6 +68,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         KHS_Script_ScoreManager.Round_Clear -= PickCountBonusFunc;
         KHS_Script_ScoreManager.OnGameClear -= OnGameEnded;
         KHS_Script_ScoreManager.OnGameOver -= OnGameEnded;
+        KHS_Script_UIImgFunc.RoundUIEvt -= OnRoundBanner;
+        PSH_Script_GameSceneDirector.NoIntroStartEvt -= QueueDemoStarter;
     }
 
     void Awake()
@@ -80,14 +86,17 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     private void SetChoiceButtonsVisible(bool visible)
     {
-        if (btnSkip) btnSkip.gameObject.SetActive(visible);
-        if (btnReroll) btnReroll.gameObject.SetActive(visible);
-        if (txtRerollInfo) txtRerollInfo.gameObject.SetActive(visible);
+        bool optionalControls = visible && !(BallARetroDemoRun.Current?.IsEnabled ?? false);
+        if (btnSkip) btnSkip.gameObject.SetActive(optionalControls);
+        if (btnReroll) btnReroll.gameObject.SetActive(optionalControls);
+        if (txtRerollInfo) txtRerollInfo.gameObject.SetActive(optionalControls);
     }
 
     public void ShowChoices()
     {
         if (isOpen || gameEnded) return;
+        var demo = BallARetroDemoRun.Current;
+        if (demo != null && demo.IsEnabled && !demo.CanChoose(CurrentRound())) return;
         if (roller == null)
         {
             Debug.LogError("CJS_IChoiceRoller가 연결되지 않았습니다.", this);
@@ -101,13 +110,15 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
         isOpen = true;
         usedReroll = 0;
+        if (demo != null && demo.IsEnabled && gameUICanvasGo) gameUICanvasGo.SetActive(false);
 
         if (panelRoot != null) panelRoot.SetActive(true);
         Time.timeScale = 0f;
         Cursor.lockState = CursorLockMode.None;
         Cursor.visible = true;
 
-        PickCountBonusFunc();
+        if (demo != null && demo.IsEnabled) pickCount = 1;
+        else PickCountBonusFunc();
         SetChoiceButtonsVisible(true);
         UpdateRerollUI();
         RefreshCards();
@@ -146,19 +157,12 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         for (int i = 0; i < picks.Count; i++)
         {
             var card = Instantiate(cardPrefab, content);
-            if (pickCount <= 1)
-            {
-                card.GetComponent<Button>().onClick.AddListener(gameUIFuncInsert);
-            }
-            else
-            {
-                card.GetComponent<Button>().onClick.AddListener(RefreshCards);
-            }
             float chance = 0f;
             if (chanceMap != null && chanceMap.TryGetValue(picks[i], out float p))
                 chance = p;
 
-            card.BindWithChance(picks[i], OnPickCard, chance);
+            card.BindWithChance(picks[i], picked => { if (liveCards.Contains(card)) OnPickCard(picked); },
+                BallARetroDemoRun.Current?.IsEnabled == true ? (float?)null : chance);
             liveCards.Add(card);
         }
     }
@@ -172,8 +176,14 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     private void OnPickCard(CJS_ChoiceData picked)
     {
-        if (busy) return;
+        if (busy || !isOpen || gameEnded || picked == null) return;
         busy = true;
+        var demo = BallARetroDemoRun.Current;
+        if (demo != null && demo.IsEnabled && !demo.TryBeginPick(CurrentRound()))
+        {
+            busy = false;
+            return;
+        }
 
         roller.PushPicked(picked);                      // 효과 적용
         CJS_Script_ChoiceState.I?.Add(picked);         // ★ 선택 스냅샷 기록(아이콘 포함)
@@ -181,9 +191,13 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (pickCount <= 1)
         {
             Hide();
+            gameUIFuncInsert();
         }
         else
+        {
             pickCount--;
+            RefreshCards();
+        }
         busy = false;
     }
 
@@ -208,6 +222,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private void OnClickSkip()
     {
         if (!isOpen || busy) return;
+        if (BallARetroDemoRun.Current?.IsEnabled == true) return;
         Hide();
     }
 
@@ -234,6 +249,32 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private void PickCountBonusFunc()
     {
         Debug.LogWarning("Round_Clear 이벤트 발생");
-        pickCount = ballCon.GetBallCount();
+        pickCount = BallARetroDemoRun.Current?.IsEnabled == true ? 1 : ballCon.GetBallCount();
+    }
+
+    private int CurrentRound() => KHS_Script_ScoreManager.Instance != null
+        ? KHS_Script_ScoreManager.Instance.RoundRespone() : 1;
+
+    private void OnRoundBanner(bool open)
+    {
+        if (!open && CurrentRound() == 1) QueueDemoStarter();
+    }
+
+    private void QueueDemoStarter()
+    {
+        if (!BallARetroPlatform.IsDemoBuild || starterQueued || gameEnded) return;
+        starterQueued = true;
+        StartCoroutine(OpenDemoStarter());
+    }
+
+    private IEnumerator OpenDemoStarter()
+    {
+        // Finish the banner's own Resume callbacks and all Start methods first.
+        yield return null;
+        yield return null;
+        var demo = BallARetroDemoRun.Current;
+        if (demo == null || !demo.IsEnabled || !demo.CanChoose(1)) yield break;
+        ShowChoices();
+        if (isOpen) camManager?.MonitorOnButton();
     }
 }

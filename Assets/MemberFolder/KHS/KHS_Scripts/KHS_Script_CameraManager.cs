@@ -311,6 +311,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
     public void MonitorOnButton()
     {
         if (gameEnded) return;
+        var demo = BallARetroDemoRun.Current;
+        if (demo != null && demo.IsEnabled && !demo.CanChoose(scoreManager != null ? scoreManager.RoundRespone() : 1)) return;
         Cursor.visible = true;
 
         Cursor.lockState = CursorLockMode.None;

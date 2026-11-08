@@ -24,6 +24,7 @@ public static class KHS_Script_DumpManager
 }
 #else
 public class YJ_Script_DropTargetController : MonoBehaviour { public void Activate_Object() { } }
+public class KHS_Script_BumperEffect : MonoBehaviour { }
 #endif
 public static class KHS_Script_FliperDumpManager
 {
@@ -31,7 +32,7 @@ public static class KHS_Script_FliperDumpManager
 }
 public static class KHS_Script_PortalController { public static event Action<int> portalEvt; }
 public static class KHS_Script_PlincoFunction { public static event Action ReturnPortalEvt; }
-#if !TUTORIAL
+#if !TUTORIAL && !DEMO_GAMEPLAY
 public class KHS_Script_PlungerController : MonoBehaviour
 {
     public static event Action OnBallLaunched;
@@ -47,7 +48,10 @@ public static class KHS_Script_UIImgFunc
 }
 namespace PSH { public static class PSH_Script_SceneLoader { public static event Action OnSceneLoadStart; } }
 #if !TUTORIAL
-namespace PSH { public static class PSH_Script_GameSceneDirector { public static event Action NoIntroStartEvt; } }
+namespace PSH { public static class PSH_Script_GameSceneDirector {
+    public static event Action NoIntroStartEvt;
+    public static void RetrySignal() => NoIntroStartEvt?.Invoke();
+} }
 #endif
 public static class GlitchEffect_RendererFeature { public static bool IsEnabled; }
 public class KHS_Script_CameraManager : MonoBehaviour
@@ -58,8 +62,22 @@ public class KHS_Script_CameraManager : MonoBehaviour
     public static void SetMonitor(bool open) => MonitorEvt?.Invoke(open);
     public static bool IsRoundCameraReady = true;
     public GameObject[] cameraGos;
+    public void MonitorOnButton() { }
+    public void MonitorOff() { }
 }
+#if DEMO_GAMEPLAY
+public class KHS_Script_RogueLikeManager : MonoBehaviour { public void MatchingFunc(int index) { } }
+#endif
 public class CJS_Script_CameraShaker : MonoBehaviour { public void OnScored(int score) { } }
+// Demo presentation has a separate production-UI fixture; this suite owns scoring.
+public class BallARetroDemoPresentation : MonoBehaviour
+{
+    public static bool CanInstall(Transform parent) => false;
+    public static BallARetroDemoPresentation InstallHud(Transform parent, TMPro.TMP_FontAsset font) => null;
+    public static BallARetroDemoPresentation InstallResult(CJS_Script_GameOverUI result) => null;
+    public void Refresh() { }
+    public void SetSubmissionState(bool localOnly) { }
+}
 public class CJS_Script_LeaderboardList : MonoBehaviour { public void Populate(ScoreRow[] rows) { } }
 // Ranking layout/clicks are tested separately with the real UI prefabs.
 public class PSH_Script_WorldRankingUI : MonoBehaviour

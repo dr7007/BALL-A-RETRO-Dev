@@ -5,7 +5,8 @@ using UnityEngine;
 
 public class YJ_Script_BallController : MonoBehaviour
 {
-    public int GetBallCount() => 1;
+    public int Credits = 1;
+    public int GetBallCount() => Credits;
 }
 public static class KHS_Script_PlungerController
 {
@@ -19,6 +20,7 @@ public static class KHS_Script_BallOutController
 }
 public class KHS_Script_ScoreManager : MonoBehaviour
 {
+    public static KHS_Script_ScoreManager Instance => null;
     public static event Action OnGameClear, OnGameOver, Round_Clear;
     public static void RaiseGameOver() => OnGameOver?.Invoke();
     public static void RaiseRoundClear() => Round_Clear?.Invoke();
@@ -53,6 +55,7 @@ namespace PSH
 {
     public static class PSH_Script_GameSceneDirector
     {
+        public static event Action NoIntroStartEvt;
         public static event Action<PSH_Script_DialogueUI> OpeningEyeEvt;
     }
     public class PSH_Script_DialogueUI : MonoBehaviour

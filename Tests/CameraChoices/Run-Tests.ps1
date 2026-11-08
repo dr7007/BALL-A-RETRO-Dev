@@ -47,6 +47,7 @@ Copy-Item -LiteralPath "$sourceRoot/ProjectSettings/ProjectVersion.txt", "$sourc
     } else { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item -LiteralPath "$PSScriptRoot/DemoRunInactiveFixture.cs", "$sourceRoot/Assets/Public/Platform/BallARetroPlatform.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_GameplayInput.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_Local*.cs" "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/CameraChoicesTests.cs" -Destination "$outputPath/Assets/Tests"

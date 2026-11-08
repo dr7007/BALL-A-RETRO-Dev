@@ -60,6 +60,16 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
     }
     public void MatchingFunc(int idx)
     {
+        var demo = BallARetroDemoRun.Current;
+        if (demo != null && demo.IsEnabled)
+        {
+            if (idx == BallARetroDemoRun.CapacitorChoiceId || idx == BallARetroDemoRun.LastBallChoiceId)
+            {
+                demo.ApplyUpgrade(idx);
+                return;
+            }
+            if (idx == 8) { BallAdditive(1); return; }
+        }
         switch (idx)
         {
             case 0:

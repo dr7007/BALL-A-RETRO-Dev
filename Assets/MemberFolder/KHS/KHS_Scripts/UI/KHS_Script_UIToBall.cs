@@ -22,11 +22,13 @@ public class KHS_Script_UIToBall : MonoBehaviour
     {
         KHS_Script_ScoreManager.UILateUpdate += BallOutUI;
         KHS_Script_ScoreManager.Next_Round_Init += BallCountInitReset;
+        BallARetroDemoRun.Changed += BallInfoUpdate;
     }
     private void OnDisable()
     {
         KHS_Script_ScoreManager.UILateUpdate -= BallOutUI;
         KHS_Script_ScoreManager.Next_Round_Init -= BallCountInitReset;
+        BallARetroDemoRun.Changed -= BallInfoUpdate;
     }
 
     private void BallCountReset()
