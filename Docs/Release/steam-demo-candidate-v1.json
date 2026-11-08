@@ -1,0 +1,153 @@
+{
+  "candidate": "SteamDemo candidate-v1",
+  "createdAt": "2026-11-09T02:26:26.9777554+09:00",
+  "sourceCommit": "aca6470fdaed384da39268b52008bde9d278fb7f",
+  "branch": "PSH_ALPHA",
+  "testHarnessCommit": "170eb7b742768623dc157f9cbd4d238686e5486b",
+  "includesUncommittedUserAssets": true,
+  "protectedAssets": [
+    {
+      "path": "Assets/Public/Font/Galmuri11 SDF_dialogue.asset",
+      "sha256": "C9A06E901745F38300287F82458BB8692E403C1B004C86AE155E9E26B97E04D4",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/Public/Font/Galmuri11-Bold SDF.asset",
+      "sha256": "16A0A6E39D8D3F159BEF07ABBBF4DA0F2F9D01A28525195847E5A656EAB657D7",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/MemberFolder/KHS/KHS_Materials/KHS_Mat_Ball.mat",
+      "sha256": "9F42CBFBBF197F5D0AA7BD07CE3BDFD2AAD13E4B6730F214C12A77AFA419F4D4",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/Public/Font/Galmuri11 SDF.asset",
+      "sha256": "B27648E60457736A9C43FE9F299A53AEF19FF75471802C3500CD0664B18DB858",
+      "preserved": true,
+      "committed": false
+    }
+  ],
+  "steam": {
+    "parentAppId": 5193980,
+    "appId": 5585210,
+    "depotId": 5585211,
+    "buildId": 26523575,
+    "manifestId": "7086458617997461246",
+    "branch": "default",
+    "branchApplied": true,
+    "releaseState": "unavailable",
+    "publiclyReleased": false,
+    "clientAuthentication": "pending",
+    "onlineLeaderboardClientTest": "pending",
+    "fiveMinutePlaytimeCheck": "pending"
+  },
+  "artifact": {
+    "zip": "D:\\ball-a-retro-validation\\steam-demo-20261109\\candidate-v1\\BALL-A-RETRO_SteamDemo_0.1.0_aca6470_Win64.zip",
+    "bytes": 137673061,
+    "sha256": "A8A9C40BB72A870BE33F836568EC2560FFC16CB3D882E31C22CAC68E7946847A",
+    "fileCount": 304,
+    "uncompressedBytes": 385363711,
+    "uploadDirectory": "D:\\ball-a-retro-validation\\steam-demo-20261109\\candidate-v1/upload",
+    "archiveEntriesMatchPlayer": true,
+    "extractedFilesVerified": true
+  },
+  "validation": {
+    "root": "D:/ball-a-retro-validation/steam-demo-20261109",
+    "automatedSuites": [
+      {
+        "report": "gameplay-tests-v1/results-release.xml",
+        "passed": 18,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "full-regression-v1/results-ranking-ui.xml",
+        "passed": 48,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "camera-regression-v1/results-final.xml",
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "platform-tests-v1/results-demo-online.xml",
+        "passed": 30,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "platform-tests-v1/results-full-steam-online-regression.xml",
+        "passed": 19,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "platform-tests-v1/results-stove-online-regression.xml",
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "ui-v1/results-online.xml",
+        "passed": 39,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "ui-v1/results-ui-final.xml",
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "ui-v1/results-retail-guard.xml",
+        "passed": 4,
+        "failed": 0,
+        "skipped": 0
+      }
+    ],
+    "playerAuditPassed": true,
+    "packedAssetCount": 3417,
+    "demoAtlas": {
+      "sprites": 2,
+      "textures": 1,
+      "width": 2048,
+      "height": 512,
+      "format": "BC7"
+    },
+    "offlineStartup": {
+      "passed": true,
+      "seconds": 30.384,
+      "report": "candidate-v1/evidence/offline-smoke/result.json"
+    },
+    "realSceneFlow": {
+      "passed": true,
+      "checks": 70,
+      "report": "candidate-v1/evidence/demo-scene-v3/demo-scene-audit.json",
+      "scope": "Real release scenes/prefabs, serialized callbacks, intro/banner/retry coroutines. Ball held stationary; real accepted bumper-trigger callbacks drive round scoring. Steam SDK disabled only in this editor audit; not a manual physics or client authentication test."
+    },
+    "resultScene": {
+      "passed": true,
+      "checks": 29,
+      "report": "candidate-v1/evidence/demo-result-v1/demo-scene-audit.json",
+      "renderState": "candidate-v1/evidence/demo-result-v1/demo-failure-result-render-state.json"
+    },
+    "snapshotRestored": true,
+    "nativeFilesMatchAuditedPlayer": true
+  },
+  "knownLimits": [
+    "Actual Steam client authentication, online score upload/readback, overlay and five-minute playtime remain pending.",
+    "Scene probe holds the ball stationary and invokes accepted gameplay callbacks; it is not a manual physics playthrough.",
+    "Offscreen result PNG temporarily converts Overlay to Camera and can show world geometry above UI. Runtime result root was verified as ScreenSpaceOverlay with no camera stack. Batch editor cannot supply an unmodified Game View screenshot.",
+    "Clean Windows installation has not been tested.",
+    "Store assets, content survey including pre-generated AI icons, and Steam review remain incomplete."
+  ],
+  "iconGenerationRecord": "Docs/Release/demo-icons-generation.json"
+}

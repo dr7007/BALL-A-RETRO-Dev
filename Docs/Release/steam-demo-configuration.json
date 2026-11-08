@@ -22,7 +22,10 @@
     "installDirectory": "BALL A RETRO Demo",
     "depotOs": "windows",
     "depotLanguages": "all",
-    "baseLanguages": ["english", "japanese", "koreana"]
+    "baseLanguages": ["english", "japanese", "koreana"],
+    "commonRedistributables": "none required",
+    "commonRedistributablesPublished": true,
+    "runtimeDependencyEvidence": "candidate-v1/evidence/native-comparison.json: all eight native binaries match the audited Unity 6000.0.60f1 Win64 Mono player"
   },
   "webUpload": {
     "url": "https://partner.steamgames.com/apps/depotuploads/5585210",
@@ -30,8 +33,17 @@
     "maximumCompressedMegabytes": 2048,
     "mode": "Standard"
   },
+  "uploadedCandidate": {
+    "sourceCommit": "aca6470fdaed384da39268b52008bde9d278fb7f",
+    "buildId": 26523575,
+    "manifestId": "7086458617997461246",
+    "branch": "default",
+    "applied": true,
+    "downloadMegabytesReportedBySteam": 126.2,
+    "diskMegabytesReportedBySteam": 385.4,
+    "receipt": "Docs/Release/steam-demo-candidate-v1.json"
+  },
   "remainingBeforePublicRelease": [
-    "Upload and select a verified SteamDemo build.",
     "Install and play through the actual Steam client under AppID 5585210.",
     "Finish store assets and the content survey, including pre-generated AI icon disclosure.",
     "Complete required Steam reviews and base-game Coming Soon requirements."
