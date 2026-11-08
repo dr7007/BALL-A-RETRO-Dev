@@ -93,13 +93,13 @@ Assets/ReleaseValidation에만 복사한다. `-batchmode -executeMethod BallARet
 
 ## 제출 전 남은 외부 절차
 
-2026-11-08 진행 상태: 빌드 `53099` 업로드 완료, 실행 설정 저장 완료,
+2026-11-08 17:20 진행 상태: 빌드 `53114` 업로드 완료, 실행 설정 저장 완료,
 `BALL-A-RETRO.exe` DRM 적용 완료. 자세한 증거와 미완료 항목은
 [STOVE-VALIDATION-20261108.md](STOVE-VALIDATION-20261108.md)를 참고한다.
 클라이언트 설치·첫 실행 후 선택 기록의 씬 전환 경고를 수정했다. 새 로컬 후보는
 `D:/ball-a-retro-validation/stove-release-20261108/submission-v4/upload`이며,
-설명 `0.1.0 STOVE 심사용 Win64 59cdfe7`로 업로드를 요청한 상태다.
-기존 `53099`와 구별하여 새 업로드의 DRM 및 클라이언트 시험을 진행한다.
+설명 `0.1.0 STOVE 심사용 Win64 59cdfe7`로 업로드 및 DRM 적용을 완료했다.
+기존 `53099`와 구별하여 새 빌드 `53114`의 클라이언트 설치·실행·설정 유지 시험을 진행한다.
 
 1. 스토브 스튜디오의 그룹·프로젝트·상품, 개인/사업자 및 정산 정보를 확인한다.
 2. 로컬 Windows 플레이어를 업로드하고 DRM Maker를 적용한다. 기본 실행 파일은
