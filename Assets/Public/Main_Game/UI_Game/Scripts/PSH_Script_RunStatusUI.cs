@@ -18,7 +18,9 @@ public class PSH_Script_RunStatusUI : MonoBehaviour
 
     private void OnEnable()
     {
-        BallARetroDemoPresentation.InstallHud(transform, resultSummaryText != null ? resultSummaryText.font : null);
+        var font = resultSummaryText != null ? resultSummaryText.font : null;
+        GetComponentInChildren<PSH_Script_QuickChoiceOnOff>(true)?.SetHintFont(font);
+        BallARetroDemoPresentation.InstallHud(transform, font);
         KHS_Script_ScoreManager.OnRecordChallengeStarted += ShowChallenge;
         KHS_Script_ScoreManager.OnGameOver += HideNotification;
         KHS_Script_ScoreManager.OnGameClear += HideNotification;
@@ -125,7 +127,7 @@ public class PSH_Script_RunStatusUI : MonoBehaviour
         rect.anchorMin = new Vector2(0.25f, 1f);
         rect.anchorMax = new Vector2(0.75f, 1f);
         rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, BallARetroDemoPresentation.CanInstall(transform) ? -144f : -65f);
+        rect.anchoredPosition = new Vector2(0f, -65f);
         rect.sizeDelta = new Vector2(0f, 110f);
         var background = notificationRoot.GetComponent<Image>();
         background.color = new Color(0.02f, 0.04f, 0.09f, 0.94f);

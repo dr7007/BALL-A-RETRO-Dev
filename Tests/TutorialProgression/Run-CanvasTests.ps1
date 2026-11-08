@@ -131,16 +131,20 @@ if ($IncludeLobby) {
     @('Assets/MemberFolder/PSH/PSH_Lobby/Scripts/PSH_Script_LobbyManager.cs',
       'Assets/Public/Main_Lobby/UI_Lobby/Scripts/PSH_Script_StartButton.cs',
       'Assets/Public/UI_Public/Scripts/BallARetroDemoPresentation.cs',
+      'Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_QuickChoiceOnOff.cs',
+      'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_ChoiceInventoryUI.cs',
+      'Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_ChoiceState.cs',
       'Assets/Public/UI_Public/Scripts/PSH_Script_WorldRankingUI.cs') | ForEach-Object {
         Copy-Item "$sourceRoot/$_", "$sourceRoot/$_.meta" "$outputPath/Assets/Runtime"
     }
     Copy-Item "$sourceRoot/Tests/UISettings/LobbySceneLoaderStub.cs" "$outputPath/Assets/Runtime"
     Copy-Item "$sourceRoot/Tests/UISettings/DemoRunPresentationFixture.cs" "$outputPath/Assets/Runtime"
     Copy-Item "$sourceRoot/Tests/UISettings/DemoPresentationTests.cs" "$outputPath/Assets/Tests"
+    Copy-Item "$sourceRoot/Tests/UISettings/QuickChoiceInteractionTests.cs" "$outputPath/Assets/Tests"
     Copy-Item "$sourceRoot/Tests/UISettings/LobbyFlowTests.cs" "$outputPath/Assets/Tests"
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions --lobby
     if ($LASTEXITCODE -ne 0) { throw 'Lobby UI extraction failed.' }
-    $filter = 'LobbyFlowTests;DemoPresentationTests'
+    $filter = 'LobbyFlowTests;DemoPresentationTests;QuickChoiceInteractionTests'
     if ($IncludeSteamLogin) {
         $filter += ';SteamIdentityTests;SteamLeaderboardTests'
     }

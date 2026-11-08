@@ -9,33 +9,53 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
     [SerializeField] private Transform grid;
     [SerializeField] private CJS_Script_ChoiceSlot slotPrefab;
 
-    private bool needsRebuild;
+    private bool needsRebuild = true;
     private bool isVisible;
+    private CJS_Script_ChoiceState subscribedState;
+    private Coroutine layoutCoroutine;
 
     void OnEnable()
     {
-        var s = CJS_Script_ChoiceState.I;
-        if (s != null)
+        BindState();
+        KHS_Script_ResetController.OnReset += HandleGlobalReset;
+    }
+
+    private void Start() { BindState(); if (isVisible && needsRebuild) RebuildAll(); }
+
+    private void BindState()
+    {
+        var state = CJS_Script_ChoiceState.I;
+        if (subscribedState == state) return;
+        UnbindState();
+        subscribedState = state;
+        if (subscribedState != null)
         {
-            s.OnPicked += HandlePicked;
-            s.OnCleared += HandleCleared;  
+            subscribedState.OnPicked += HandlePicked;
+            subscribedState.OnCleared += HandleCleared;
         }
-        KHS_Script_ResetController.OnReset += HandleGlobalReset; 
+        needsRebuild = true;
+    }
+
+    private void UnbindState()
+    {
+        if (subscribedState != null)
+        {
+            subscribedState.OnPicked -= HandlePicked;
+            subscribedState.OnCleared -= HandleCleared;
+        }
+        subscribedState = null;
     }
 
     void OnDisable()
     {
-        var s = CJS_Script_ChoiceState.I;
-        if (s != null)
-        {
-            s.OnPicked -= HandlePicked;
-            s.OnCleared -= HandleCleared;
-        }
+        UnbindState();
         KHS_Script_ResetController.OnReset -= HandleGlobalReset;
+        if (layoutCoroutine != null) { StopCoroutine(layoutCoroutine); layoutCoroutine = null; }
     }
 
     public void SetVisible(bool v)
     {
+        if (isActiveAndEnabled) BindState();
         isVisible = v;
         if (isVisible && needsRebuild) RebuildAll();
     }
@@ -44,7 +64,7 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
     {
         if (!grid || !slotPrefab) return;
 
-        foreach (Transform c in grid) Destroy(c.gameObject);
+        foreach (Transform c in grid) { c.gameObject.SetActive(false); Destroy(c.gameObject); }
 
         var list = CJS_Script_ChoiceState.I?.Picked;
         int count = (list == null) ? 0 : list.Count;
@@ -85,7 +105,8 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
 
     private void ClearUI()
     {
-        foreach (Transform c in grid) Destroy(c.gameObject);
+        if (!grid) return;
+        foreach (Transform c in grid) { c.gameObject.SetActive(false); Destroy(c.gameObject); }
         needsRebuild = false;
         RefreshLayoutNow();
     }
@@ -98,11 +119,10 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
 
     private void RefreshLayoutNow()
     {
-        Canvas.ForceUpdateCanvases();
         var rt = grid as RectTransform;
         if (rt) LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
-        Canvas.ForceUpdateCanvases();
-        StartCoroutine(RefreshNextFrame());
+        if (layoutCoroutine != null) StopCoroutine(layoutCoroutine);
+        if (isActiveAndEnabled) layoutCoroutine = StartCoroutine(RefreshNextFrame());
     }
 
     private IEnumerator RefreshNextFrame()
@@ -111,5 +131,6 @@ public class CJS_Script_ChoiceInventoryUI : MonoBehaviour
         Canvas.ForceUpdateCanvases();
         var rt = grid as RectTransform;
         if (rt) LayoutRebuilder.ForceRebuildLayoutImmediate(rt);
+        layoutCoroutine = null;
     }
 }

@@ -160,28 +160,62 @@ public sealed class DemoPresentationTests
         var scaler = root.GetComponent<CanvasScaler>(); scaler.uiScaleMode = CanvasScaler.ScaleMode.ScaleWithScreenSize;
         scaler.referenceResolution = new Vector2(1920, 1080);
         scoreObject = new GameObject("Score", typeof(KHS_Script_ScoreManager));
+        var gamePrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Public/Main_Game/UI_Game/Prefabs/Canvas_GameScene.prefab");
+        var drawer = Object.Instantiate(gamePrefab.GetComponentInChildren<PSH_Script_QuickChoiceOnOff>(true), root.transform);
+        drawer.duration = 0;
         var font = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/Fonts/Galmuri11 SDF.asset");
+        drawer.SetHintFont(font);
         var hud = BallARetroDemoPresentation.InstallHud(root.transform, font);
         Assert.That(BallARetroDemoPresentation.InstallHud(root.transform, font), Is.SameAs(hud));
         var panel = hud.GetComponentsInChildren<Transform>(true).Single(t => t.name == "BonusStatus");
         Assert.That(panel.gameObject.activeSelf, Is.False);
         var run = new BallARetroDemoRun { IsEnabled = true, CapacitorLevel = 1, Charge = 300, MaxCharge = 600, LastBallLevel = 2, LastBallBonusPercent = 75, LastBallActive = true };
         BallARetroDemoRun.Current = run; BallARetroDemoRun.Notify();
+        Assert.That(panel.gameObject.activeSelf, Is.False, "Run updates must not reveal a closed drawer.");
+        Assert.That(drawer.TryTogglePanel(), Is.True);
         Assert.That(panel.gameObject.activeSelf, Is.True);
+        Assert.That(panel.IsChildOf(drawer.transform), Is.True);
+        Assert.That(root.transform.Find("DemoHud"), Is.Null, "No permanent top-of-screen demo banner.");
         Assert.That(Text(hud.transform, "Charge").text, Is.EqualTo(PSH_Script_Localization.Text("Demo_Charge", 300, 600)));
         Assert.That(Text(hud.transform, "LastBall").text, Is.EqualTo(PSH_Script_Localization.Text("Demo_LastBall", 75)));
         Assert.That(hud.GetComponentsInChildren<Graphic>(true).All(g => !g.raycastTarget), Is.True);
         foreach (var code in new[] { "ko", "en", "ja" })
         {
             LocaleTestContext.Select(code); yield return null;
+            var hintLabel = root.transform.Find("QuickChoiceTabHint").GetComponent<TMP_Text>();
+            Assert.That(hintLabel.font.HasCharacters(hintLabel.text, out uint[] missing, true, false), Is.True,
+                code + " Tab hint missing glyphs: " + string.Join(",", missing ?? System.Array.Empty<uint>()));
             yield return Capture(canvas, "demo-hud-" + code, hud.transform);
         }
         run.LastBallActive = false; BallARetroDemoRun.Notify();
         Assert.That(Text(hud.transform, "LastBall").text, Is.EqualTo(PSH_Script_Localization.Text("Demo_LastBallReady", 75)));
+        Assert.That(drawer.TryTogglePanel(), Is.True);
+        Assert.That(panel.gameObject.activeInHierarchy, Is.False);
+        Assert.That(drawer.TryTogglePanel(), Is.True);
         scoreObject.GetComponent<KHS_Script_ScoreManager>().HasEnded = true;
         KHS_Script_ScoreManager.EndGame("Ending1");
         Assert.That(panel.gameObject.activeSelf, Is.False);
     }
+    [UnityTest] public IEnumerator InactiveDrawerInstallationDoesNotDuplicateVisibilitySubscriptions()
+    {
+        root = new GameObject("Inactive game UI", typeof(RectTransform), typeof(Canvas));
+        root.SetActive(false);
+        scoreObject = new GameObject("Score", typeof(KHS_Script_ScoreManager));
+        var prefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Public/Main_Game/UI_Game/Prefabs/Canvas_GameScene.prefab");
+        var drawer = Object.Instantiate(prefab.GetComponentInChildren<PSH_Script_QuickChoiceOnOff>(true), root.transform);
+        var hud = BallARetroDemoPresentation.InstallHud(root.transform, null);
+        var field = typeof(PSH_Script_QuickChoiceOnOff).GetField("OpenStateChanged", System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic);
+        Assert.That(field.GetValue(drawer), Is.Null);
+        for (int i = 0; i < 3; i++)
+        {
+            root.SetActive(true); yield return null;
+            Assert.That(((System.Action<bool>)field.GetValue(drawer)).GetInvocationList().Length, Is.EqualTo(1));
+            Assert.That(BallARetroDemoPresentation.InstallHud(root.transform, null), Is.SameAs(hud));
+            root.SetActive(false);
+            Assert.That(field.GetValue(drawer), Is.Null, "A disabled drawer must release the demo visibility listener.");
+        }
+    }
+
     [UnityTest] public IEnumerator ActualResultPrefabKeepsSummaryAndControlsAndShowsSeparateContributions()
     {
         RequireDemo();

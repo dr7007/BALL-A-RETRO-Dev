@@ -20,6 +20,7 @@ public sealed class BallARetroDemoPresentation : MonoBehaviour
     private int recordLevel = 1;
     private bool ready;
     private bool savedLocally;
+    private PSH_Script_QuickChoiceOnOff quickChoice;
 
     private static readonly Color Mint = new Color32(38, 255, 179, 255);
     private static readonly Color Amber = new Color32(255, 188, 85, 255);
@@ -51,19 +52,29 @@ public sealed class BallARetroDemoPresentation : MonoBehaviour
     public static BallARetroDemoPresentation InstallHud(Transform owner, TMP_FontAsset font)
     {
         if (!CanInstall(owner)) return null;
-        var existing = owner.Find("DemoHud");
+        var drawer = owner.GetComponentInChildren<PSH_Script_QuickChoiceOnOff>(true);
+        if (drawer == null || drawer.StatusHost == null) return null;
+        var host = drawer.StatusHost;
+        var existing = host.Find("DemoHud");
         if (existing != null) return existing.GetComponent<BallARetroDemoPresentation>();
-        var ui = Create(owner, font, View.Hud, "DemoHud");
-        // Place with the regular HUD, below subsequently drawn choice/settings/results.
-        ui.transform.SetSiblingIndex(Mathf.Min(1, owner.childCount - 1));
-        ui.safeArea = ui.NewRect("SafeArea", ui.transform, Vector2.zero, Vector2.zero);
-        ui.UpdateSafeArea();
-        var panel = ui.Panel("BonusStatus", ui.safeArea, new Vector2(816, 70));
-        panel.anchorMin = panel.anchorMax = panel.pivot = new Vector2(.5f, 1);
-        panel.anchoredPosition = new Vector2(0, -62);
+        var ui = Create(host, font, View.Hud, "DemoHud");
+        ui.quickChoice = drawer;
+        // Reserve a footer inside the authored left drawer; keep the scroll top
+        // fixed so cards never overlap the two read-only status lines.
+        var scroll = host.GetComponentInChildren<ScrollRect>(true);
+        if (scroll != null)
+        {
+            var scrollRect = (RectTransform)scroll.transform;
+            scrollRect.sizeDelta -= new Vector2(0, 104);
+            scrollRect.anchoredPosition += new Vector2(0, 52);
+        }
+        var panel = ui.Panel("BonusStatus", ui.transform, new Vector2(384, 92));
+        panel.anchorMin = panel.anchorMax = new Vector2(.5f, 0);
+        panel.pivot = new Vector2(.5f, 0);
+        panel.anchoredPosition = new Vector2(0, 24);
         ui.content = panel.gameObject;
-        ui.charge = ui.Label("Charge", panel, null, new Vector2(0, 17), new Vector2(784, 28), 23, Mint);
-        ui.lastBall = ui.Label("LastBall", panel, null, new Vector2(0, -17), new Vector2(784, 28), 23, Color.white);
+        ui.charge = ui.Label("Charge", panel, null, new Vector2(0, 19), new Vector2(360, 32), 22, Mint);
+        ui.lastBall = ui.Label("LastBall", panel, null, new Vector2(0, -19), new Vector2(360, 32), 22, Color.white);
         ui.Complete();
         return ui;
     }
@@ -125,9 +136,16 @@ public sealed class BallARetroDemoPresentation : MonoBehaviour
         return ui;
     }
 
-    private void Complete() { ready = true; Refresh(); }
+    private void Complete()
+    {
+        ready = true;
+        if (isActiveAndEnabled && quickChoice != null) quickChoice.OpenStateChanged += OnDrawerChanged;
+        Refresh();
+    }
+    private void OnDrawerChanged(bool _) => Refresh();
     private void OnEnable()
     {
+        if (ready && quickChoice != null) quickChoice.OpenStateChanged += OnDrawerChanged;
         BallARetroDemoRun.Changed += Refresh;
         LocalizationSettings.SelectedLocaleChanged += OnLocaleChanged;
         KHS_Script_ScoreManager.OnGameOver += Refresh;
@@ -136,6 +154,7 @@ public sealed class BallARetroDemoPresentation : MonoBehaviour
     }
     private void OnDisable()
     {
+        if (quickChoice != null) quickChoice.OpenStateChanged -= OnDrawerChanged;
         BallARetroDemoRun.Changed -= Refresh;
         LocalizationSettings.SelectedLocaleChanged -= OnLocaleChanged;
         KHS_Script_ScoreManager.OnGameOver -= Refresh;
@@ -165,7 +184,7 @@ public sealed class BallARetroDemoPresentation : MonoBehaviour
         if (view == View.Hud)
         {
             var score = KHS_Script_ScoreManager.Instance;
-            bool visible = run != null && run.IsEnabled && score != null && !score.HasEnded;
+            bool visible = quickChoice != null && quickChoice.IsOpen && run != null && run.IsEnabled && score != null && !score.HasEnded;
             content.SetActive(visible);
             if (!visible) return;
             charge.text = run.CapacitorLevel > 0 ? Text("Demo_Charge", run.Charge, run.MaxCharge) : Text("Demo_ChargeLocked");
