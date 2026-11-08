@@ -15,6 +15,7 @@ using Object = UnityEngine.Object;
 
 public class TutorialProgressionTests
 {
+    private static readonly bool[] IntroductionCompletionModes = { false, true };
     private readonly List<GameObject> objects = new List<GameObject>();
     private LocalizationSettings localeSettings;
     private CJS_TutorialDirector tutorial;
@@ -204,7 +205,8 @@ public class TutorialProgressionTests
     }
 
     [UnityTest]
-    public IEnumerator AuthoredTutorialDialogueCompletesBeforeControlPractice()
+    public IEnumerator AuthoredTutorialDialogueCompletesBeforeControlPractice(
+        [ValueSource(nameof(IntroductionCompletionModes))] bool skip)
     {
         var go=New("Dialogue");go.SetActive(false);
         var dialogue=go.AddComponent<PSH_Script_DialogueUI>();
@@ -223,21 +225,36 @@ public class TutorialProgressionTests
         Assert.That(tutorial.tutorialText.text,Is.Empty);
         Assert.That(tutorial.resultPanel.activeSelf,Is.False);
         var lines=(List<string>)typeof(PSH_Script_DialogueUI).GetField("currentLines",fields).GetValue(dialogue);
-        Assert.That(lines.Count,Is.EqualTo(7));
+        Assert.That(lines.Count,Is.EqualTo(9));
         Assert.That(lines[0],Does.Contain("처음인 모양"));
         foreach (var code in new[] { "en", "ja", "ko" })
         {
             LocaleTestContext.Select(code); yield return LocalizationSettings.InitializationOperation; yield return null;
             var translated=(List<string>)typeof(PSH_Script_DialogueUI).GetField("currentLines",fields).GetValue(dialogue);
-            for (int line=0;line<7;line++)
+            Assert.That(translated.Count,Is.EqualTo(9));
+            Assert.That(translated[5],Does.Contain("Tab"),"The dealer explains how to inspect choices before control practice.");
+            Assert.That(translated[6],Does.Contain("Tab"),"The next line explains closing the same panel.");
+            for (int line=0;line<9;line++)
                 Assert.That(translated[line], Is.EqualTo(PSH_Script_Localization.Table("DialogueTable").GetEntry($"Tutorial_{line+1:D2}").LocalizedValue));
             Assert.That(typeof(PSH_Script_DialogueUI).GetField("idx",fields).GetValue(dialogue),Is.EqualTo(0));
         }
-        for(int i=0;i<14;i++)typeof(PSH_Script_DialogueUI).GetMethod("AdvanceDialogue",fields).Invoke(dialogue,null);
+        int completions=0;
+        Action<string> completed=id=>{ if(id=="Tutorial") completions++; };
+        PSH_Script_DialogueUI.OnDialogueComplete+=completed;
+        try
+        {
+            if(skip) dialogue.SkipDialogue();
+            else for(int i=0;i<18;i++)typeof(PSH_Script_DialogueUI).GetMethod("AdvanceDialogue",fields).Invoke(dialogue,null);
+            dialogue.SkipDialogue();
+            Assert.That(completions,Is.EqualTo(1));
+        }
+        finally { PSH_Script_DialogueUI.OnDialogueComplete-=completed; }
         Assert.That(panel.activeSelf,Is.False);
         Assert.That(tutorial.tutorialText.text,Does.Contain("각각 눌러보세요"));
         Assert.That(Time.timeScale,Is.EqualTo(1));
         Assert.That(tutorial.resultPanel.activeSelf,Is.False);
+        Assert.That(typeof(CJS_TutorialDirector).GetField("_resumeInputFrame",fields).GetValue(tutorial),
+            Is.EqualTo(Time.frameCount+1),"Closing dialogue must not count the same key as tutorial practice.");
     }
 
     [Test]

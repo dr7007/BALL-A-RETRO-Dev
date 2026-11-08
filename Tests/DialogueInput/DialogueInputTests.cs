@@ -128,15 +128,16 @@ public class DialogueInputTests
         Assert.That(Time.timeScale, Is.EqualTo(0.75f));
     }
 
-    [Test]
-    public void SkipButtonConsumesClickAndCompletesOnlyOnce()
+    [TestCase("Intro")]
+    [TestCase("Tutorial")]
+    public void SkipButtonConsumesClickAndCompletesOnlyOnce(string id)
     {
         var button = MakeButton(introPanel.transform);
         button.onClick.AddListener(dialogue.SkipDialogue);
-        dialogue.Play("Intro");
+        dialogue.Play(id);
         Click(button.gameObject);
         Assert.That(completed, Is.EqualTo(1));
-        Assert.That(finishedId, Is.EqualTo("Intro"));
+        Assert.That(finishedId, Is.EqualTo(id));
         Assert.That(Time.timeScale, Is.EqualTo(0.75f));
         dialogue.SkipDialogue();
         Assert.That(completed, Is.EqualTo(1));
@@ -383,13 +384,14 @@ public class DialogueInputTests
     }
 
     [TestCase("Intro")]
+    [TestCase("Tutorial")]
     [TestCase("Ending2")]
     public void OpenSettingsBlockBackgroundDialogueAdvanceAndSkip(string id)
     {
         var menu = MakeSettingsMenu();
         dialogue.Play(id);
-        var activePanel = id == "Intro" ? introPanel : endingPanel;
-        var text = id == "Intro" ? introText : endingText;
+        var activePanel = id.StartsWith("Ending") ? endingPanel : introPanel;
+        var text = id.StartsWith("Ending") ? endingText : introText;
         menu.ToggleMenu();
         Click(activePanel);
         dialogue.SkipDialogue();
