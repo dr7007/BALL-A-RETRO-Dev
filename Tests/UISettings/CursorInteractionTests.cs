@@ -8,6 +8,7 @@ using UnityEngine;
 using UnityEngine.EventSystems;
 using UnityEngine.TestTools;
 using UnityEngine.UI;
+using UnityEngine.SceneManagement;
 using Object = UnityEngine.Object;
 
 // Uses actual GraphicRaycaster hit testing, including runtime-created dropdown items.
@@ -18,6 +19,7 @@ public class CursorInteractionTests
     float previousTime;
     bool previousVisible;
     CursorLockMode previousLock;
+    Scene cursorScene;
     static readonly BindingFlags Private = BindingFlags.Instance | BindingFlags.NonPublic;
 
     [SetUp] public void Setup()
@@ -42,6 +44,11 @@ public class CursorInteractionTests
         Time.timeScale = previousTime;
         Cursor.lockState = previousLock;
         Cursor.visible = previousVisible;
+    }
+
+    [UnityTearDown] public IEnumerator CleanupScene()
+    {
+        if(cursorScene.IsValid() && cursorScene.isLoaded) yield return SceneManager.UnloadSceneAsync(cursorScene);
     }
 
     Object Owner => (Object)typeof(PSH_Script_CursorManager).GetField("handOwner", Private).GetValue(cursor);
@@ -208,5 +215,43 @@ public class CursorInteractionTests
         Object.DestroyImmediate(button.gameObject);
         Point(position);
         Assert.That(Hand, Is.False);
+    }
+
+    [UnityTest] public IEnumerator GameplayResumeClearsTheHandAndLobbyReturnUnlocksTheCursor()
+    {
+        EmptyCanvas();
+        var button=Graphic("Choice card").AddComponent<Button>();
+        yield return null;
+        ExpectHand(button);
+        PSH_Script_GameplayInput.Resume();
+        Assert.That(Hand,Is.False);
+        Assert.That(Owner,Is.Null);
+        Assert.That(Cursor.visible,Is.False);
+        AssertGameplayCursorLockWhenSupported();
+        cursorScene=SceneManager.CreateScene("Main_Scene_Lobby");
+        typeof(PSH_Script_CursorManager).GetMethod("OnSceneLoaded",Private).Invoke(cursor,
+            new object[]{cursorScene,LoadSceneMode.Single});
+        Assert.That(Cursor.visible,Is.True);
+        Assert.That(Cursor.lockState,Is.EqualTo(CursorLockMode.None));
+        ExpectHand(button);
+    }
+
+    [UnityTest] public IEnumerator GameplayRetryStartsHiddenEvenWhenThePreviousResultUsedThePointer()
+    {
+        cursorScene=SceneManager.CreateScene("Main_Scene_Game");
+        Cursor.visible=true;Cursor.lockState=CursorLockMode.None;
+        typeof(PSH_Script_CursorManager).GetMethod("OnSceneLoaded",Private).Invoke(cursor,
+            new object[]{cursorScene,LoadSceneMode.Single});
+        Assert.That(Cursor.visible,Is.False);
+        AssertGameplayCursorLockWhenSupported();
+        yield return null;
+    }
+
+    private static void AssertGameplayCursorLockWhenSupported()
+    {
+        // Batch Editor has no focused Game View and cannot capture the OS pointer.
+        // Visibility, hand ownership and UI transitions remain asserted above.
+        if (Application.isFocused && !Application.isBatchMode)
+            Assert.That(Cursor.lockState,Is.EqualTo(CursorLockMode.Locked));
     }
 }

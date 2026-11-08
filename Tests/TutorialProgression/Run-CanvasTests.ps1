@@ -7,6 +7,8 @@ param(
     [switch]$IncludeEffects,
     [switch]$IncludePersonalRecords,
     [switch]$IncludeSteamLogin,
+    [switch]$Baseline,
+    [string]$TestFilter = '',
     [string]$PythonPath = 'python',
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
@@ -43,7 +45,7 @@ Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Textures/Rec
 & $PythonPath "$PSScriptRoot/Extract-UIFixture.py" "$sourceRoot/Assets/MainScenes/Main_Scene_Tutorial.unity" "$outputPath/Assets/TutorialUI.unity"
 if ($LASTEXITCODE -ne 0) { throw 'Fixture extraction failed.' }
 Copy-Item -LiteralPath "$PSScriptRoot/TutorialCanvasTests.cs" -Destination "$outputPath/Assets/Tests"
-@('PSH_Script_BaseButtonHover.cs', 'PSH_Script_CursorManager.cs', 'PSH_Script_ModalCanvas.cs') | ForEach-Object {
+@('PSH_Script_BaseButtonHover.cs', 'PSH_Script_CursorManager.cs', 'PSH_Script_ModalCanvas.cs', 'PSH_Script_GameplayInput.cs') | ForEach-Object {
     Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/$_", "$sourceRoot/Assets/Public/UI_Public/Scripts/$_.meta" -Destination "$outputPath/Assets/Runtime"
 }
 $filter = 'TutorialCanvasTests'
@@ -109,6 +111,7 @@ if ($IncludeMenuInteractions -or $IncludeLobby) {
         Copy-Item "$sourceRoot/$_", "$sourceRoot/$_.meta" "$outputPath/Assets/Runtime"
     }
     Copy-Item "$sourceRoot/Tests/DialogueInput/GameEventStubs.cs" "$outputPath/Assets/Runtime"
+    Copy-Item "$sourceRoot/Tests/UISettings/StartupNoticeFixture.cs" "$outputPath/Assets/Runtime"
     Copy-Item "$sourceRoot/Tests/UISettings/SettingsInteractionTests.cs", "$sourceRoot/Tests/UISettings/CursorInteractionTests.cs" "$outputPath/Assets/Tests"
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions
     if ($LASTEXITCODE -ne 0) { throw 'Settings interaction extraction failed.' }
@@ -134,6 +137,18 @@ if ($IncludeLobby) {
     }
     if ($IncludePersonalRecords) { $filter += ';PersonalRecordTests' }
 }
+if ($Baseline) {
+    # Keep the same UI assets/tests and resume stimulus; restore the pre-fix input
+    # consumers so stale settings snapshots and scene cursor state reproduce.
+    @('Assets/Public/UI_Public/Scripts/PSH_Script_CursorManager.cs',
+      'Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_SettingController.cs') | ForEach-Object {
+        $oldSource = & git -C $sourceRoot show "HEAD:$_"
+        if ($LASTEXITCODE -ne 0) { throw "Could not read baseline source: $_" }
+        $fileName = Split-Path $_ -Leaf
+        $oldSource | Set-Content -LiteralPath "$outputPath/Assets/Runtime/$fileName" -Encoding utf8
+    }
+}
+if ($TestFilter) { $filter = $TestFilter }
 $arguments = @('-batchmode', '-screen-width', '1920', '-screen-height', '1080', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', $filter, '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
 Write-Output "Test project: $outputPath; Unity process: $($process.Id)"

@@ -38,11 +38,13 @@ public class PSH_Script_CursorManager : MonoBehaviour
     private void OnEnable()
     {
         SceneManager.sceneLoaded += OnSceneLoaded;
+        PSH_Script_GameplayInput.Resumed += SetDefaultCursor;
     }
 
     private void OnDisable()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+        PSH_Script_GameplayInput.Resumed -= SetDefaultCursor;
         if (Instance == this) SetDefaultCursor();
     }
 
@@ -143,6 +145,19 @@ public class PSH_Script_CursorManager : MonoBehaviour
     void OnSceneLoaded(Scene scene, LoadSceneMode mode)
     {
         SetDefaultCursor(); // 씬이 바뀔 때마다 기본 커서로 다시 설정
+        if (Instance != this || mode != LoadSceneMode.Single) return;
+        if (scene.name == "Main_Scene_Lobby")
+        {
+            Cursor.lockState = CursorLockMode.None;
+            Cursor.visible = true;
+        }
+        else if (scene.name == "Main_Scene_Game" || scene.name == "Main_Scene_Tutorial")
+        {
+            // Intro/tutorial dialogue opens its pointer explicitly in Start.
+            // Retry paths that skip that dialogue still start with gameplay input.
+            Cursor.lockState = CursorLockMode.Locked;
+            Cursor.visible = false;
+        }
     }
 
     public void SetDefaultCursor()

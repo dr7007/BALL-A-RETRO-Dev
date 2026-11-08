@@ -163,6 +163,40 @@ public class SettingsInteractionTests
             Object.DestroyImmediate(root);root=null;
         }
     }
+    [UnityTest] public IEnumerator ClosingAChoiceBehindSettingsKeepsTheMenuUsableThenResumesGameplay()
+    {
+        var controller=Create(false);yield return null;
+        // Settings opens on top of the paused, pointer-driven choice screen.
+        Time.timeScale=0;Cursor.lockState=CursorLockMode.None;Cursor.visible=true;
+        controller.ToggleMenu();yield return null;
+        PSH_Script_GameplayInput.Resume();
+        Assert.That(PSH_Script_SettingController.IsMenuOpen,Is.True);
+        Assert.That(Time.timeScale,Is.Zero,"A remaining system menu owns the pause.");
+        Assert.That(Cursor.visible,Is.True);
+        Assert.That(Cursor.lockState,Is.EqualTo(CursorLockMode.None));
+        Click(CloseButton(controller));
+        Assert.That(Time.timeScale,Is.EqualTo(1));
+        Assert.That(Cursor.visible,Is.False,"Do not restore the now-closed choice screen's cursor snapshot.");
+        // Pointer capture requires a focused Game View, which Batch Editor lacks.
+        if (Application.isFocused && !Application.isBatchMode)
+            Assert.That(Cursor.lockState,Is.EqualTo(CursorLockMode.Locked));
+        controller.CloseMenu();
+        Assert.That(Cursor.visible,Is.False,"A repeated close must not revive the cursor.");
+    }
+    [UnityTest] public IEnumerator GameplayResumeDoesNotTakeThePointerFromAnEndingUnderSettings()
+    {
+        var controller=Create(false);yield return null;
+        Time.timeScale=1;Cursor.lockState=CursorLockMode.Locked;Cursor.visible=false;
+        controller.ToggleMenu();yield return null;
+        KHS_Script_ScoreManager.EndGame("Ending2");
+        PSH_Script_GameplayInput.Resume();
+        Assert.That(Time.timeScale,Is.Zero);
+        Assert.That(Cursor.visible,Is.True);
+        Click(CloseButton(controller));
+        Assert.That(Time.timeScale,Is.Zero);
+        Assert.That(Cursor.visible,Is.True,"Ending/result controls must remain clickable.");
+        Assert.That(Cursor.lockState,Is.EqualTo(CursorLockMode.None));
+    }
     [UnityTest] public IEnumerator LobbyOnlyOffersQuitAndNeverRoutesToLobbyReset()
     {
         var controller=Create(true);var reset=root.AddComponent<KHS_Script_ResetController>();

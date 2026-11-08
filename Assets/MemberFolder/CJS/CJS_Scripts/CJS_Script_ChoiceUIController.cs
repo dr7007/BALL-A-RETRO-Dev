@@ -32,6 +32,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private int usedReroll;
     private bool isOpen;
     private bool busy;
+    private bool gameEnded;
 
     [SerializeField]
     private YJ_Script_BallController ballCon;
@@ -51,6 +52,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (btnReroll != null) btnReroll.onClick.AddListener(OnClickReroll);
         if (btnSkip != null) btnSkip.onClick.AddListener(OnClickSkip);
         KHS_Script_ScoreManager.Round_Clear += PickCountBonusFunc;
+        KHS_Script_ScoreManager.OnGameClear += OnGameEnded;
+        KHS_Script_ScoreManager.OnGameOver += OnGameEnded;
     }
 
     void OnDisable()
@@ -59,6 +62,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (btnReroll != null) btnReroll.onClick.RemoveListener(OnClickReroll);
         if (btnSkip != null) btnSkip.onClick.RemoveListener(OnClickSkip);
         KHS_Script_ScoreManager.Round_Clear -= PickCountBonusFunc;
+        KHS_Script_ScoreManager.OnGameClear -= OnGameEnded;
+        KHS_Script_ScoreManager.OnGameOver -= OnGameEnded;
     }
 
     void Awake()
@@ -82,7 +87,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     public void ShowChoices()
     {
-        if (isOpen) return;
+        if (isOpen || gameEnded) return;
         if (roller == null)
         {
             Debug.LogError("CJS_IChoiceRoller가 연결되지 않았습니다.", this);
@@ -99,6 +104,8 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
         if (panelRoot != null) panelRoot.SetActive(true);
         Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
 
         PickCountBonusFunc();
         SetChoiceButtonsVisible(true);
@@ -117,7 +124,6 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (!isOpen) return;
 
         isOpen = false;
-        Time.timeScale = 1f;
 
         ClearCards();
 
@@ -125,7 +131,10 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         //if (panelRoot != null) panelRoot.SetActive(false);
 
         UpdateRerollUI();
+        if (!gameEnded) PSH_Script_GameplayInput.Resume();
     }
+
+    private void OnGameEnded() => gameEnded = true;
 
     private void RefreshCards()
     {

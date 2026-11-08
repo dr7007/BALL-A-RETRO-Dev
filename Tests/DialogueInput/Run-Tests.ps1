@@ -47,6 +47,8 @@ foreach ($source in $runtimeSources) {
     } else { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_GameplayInput.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/StartupNoticeFixture.cs" -Destination "$outputPath/Assets/Runtime"
 # The baseline settings script does not attach this new component.
 Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_ModalCanvas.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_Local*.cs" "$outputPath/Assets/Runtime"

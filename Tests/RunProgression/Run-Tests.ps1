@@ -63,10 +63,12 @@ $unchangedSources = @(
     'Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_GameOverUI.cs',
     'Assets/MemberFolder/PSH/UI_Sourse/Scripts/PSH_Script_SettingController.cs',
     'Assets/Public/UI_Public/Scripts/PSH_Script_ModalCanvas.cs'
+    'Assets/Public/UI_Public/Scripts/PSH_Script_GameplayInput.cs'
 )
 foreach ($source in $unchangedSources) { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 if (!$Baseline) { Copy-Item -LiteralPath "$sourceRoot/Assets/Public/Main_Game/UI_Game/Scripts/PSH_Script_RunStatusUI.cs" -Destination "$outputPath/Assets/Runtime" }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item -LiteralPath "$sourceRoot/Tests/UISettings/StartupNoticeFixture.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/RunProgressionTests.cs" -Destination "$outputPath/Assets/Tests"
 if ($IncludeTutorial) {
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_PlungerController.cs" -Destination "$outputPath/Assets/Runtime"

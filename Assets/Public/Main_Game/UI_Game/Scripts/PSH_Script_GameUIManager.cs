@@ -36,7 +36,7 @@ namespace PSH
             {
                 gameDescriptionPopup.SetActive(false);
             }
-            Time.timeScale = 1f;
+            PSH_Script_GameplayInput.Resume();
         }
     }
 }

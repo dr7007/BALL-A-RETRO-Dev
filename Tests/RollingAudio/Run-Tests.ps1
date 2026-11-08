@@ -40,6 +40,7 @@ if ($Baseline) {
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
 }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_GameplayInput.cs" -Destination "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/RollingAudioTests.cs" -Destination "$outputPath/Assets/Tests"
 @{ name = 'BallARetro.RollingAudioUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/RollingAudioUnderTest.asmdef" -Encoding utf8
 @{ name = 'BallARetro.RollingAudioTests'; references = @('BallARetro.RollingAudioUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/RollingAudioTests.asmdef" -Encoding utf8

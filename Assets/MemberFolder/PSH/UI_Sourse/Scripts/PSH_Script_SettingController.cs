@@ -40,6 +40,7 @@ public class PSH_Script_SettingController : MonoBehaviour
         if (isSettingOpen) openMenu = this;
         KHS_Script_ScoreManager.OnGameClear += SetGameEndedTrue;
         KHS_Script_ScoreManager.OnGameOver += SetGameEndedTrue;
+        PSH_Script_GameplayInput.Resumed += OnGameplayResumed;
     }
 
     private void OnDisable()
@@ -47,6 +48,7 @@ public class PSH_Script_SettingController : MonoBehaviour
         if (openMenu == this) openMenu = null;
         KHS_Script_ScoreManager.OnGameClear -= SetGameEndedTrue;
         KHS_Script_ScoreManager.OnGameOver -= SetGameEndedTrue;
+        PSH_Script_GameplayInput.Resumed -= OnGameplayResumed;
     }
     void Start()
     {
@@ -67,7 +69,29 @@ public class PSH_Script_SettingController : MonoBehaviour
     }
     private void SetGameEndedTrue() 
     { 
-        isGameEnded = true; 
+        isGameEnded = true;
+        if (isSettingOpen)
+        {
+            timeScaleBeforeMenu = 0f;
+            cursorVisibleBeforeMenu = true;
+            cursorLockBeforeMenu = CursorLockMode.None;
+        }
+    }
+
+    private void OnGameplayResumed()
+    {
+        if (!isSettingOpen) return;
+        // A choice/popup can finish under settings (for example during a camera
+        // return). Keep the modal usable and resume gameplay only after it closes.
+        if (!isGameEnded)
+        {
+            timeScaleBeforeMenu = 1f;
+            cursorVisibleBeforeMenu = false;
+            cursorLockBeforeMenu = CursorLockMode.Locked;
+        }
+        Time.timeScale = 0f;
+        Cursor.lockState = CursorLockMode.None;
+        Cursor.visible = true;
     }
     public void ToggleMenu()
     {
