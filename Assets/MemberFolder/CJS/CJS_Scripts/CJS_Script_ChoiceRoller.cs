@@ -160,37 +160,51 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 
     private List<CJS_ChoiceData> RollDemoChoices(BallARetroDemoRun demo, out Dictionary<CJS_ChoiceData, float> chances)
     {
-        // A short demo must offer both core strategies. These are deliberate
-        // choices, not a weighted lottery, so its UI hides odds and reroll.
+        // Include the real run upgrades as well as the two demo strategies.
+        // Use one demo weight scale: authored weights (5..200) would otherwise
+        // drown out the new strategy cards. Never revive disabled/zero-weight cards.
         chances = new Dictionary<CJS_ChoiceData, float>();
+        var pool = new List<CJS_ChoiceData>();
+        var ids = new HashSet<int>();
+        foreach (var source in allChoices)
+        {
+            if (source == null || !source.isEnabled || source.weight <= 0f
+                || source.funcIdx < 0 || source.funcIdx > 8 || !ids.Add(source.funcIdx)) continue;
+            pool.Add(new CJS_ChoiceData {
+                funcIdx = source.funcIdx, localizationKey = source.funcIdx == 8 ? "Demo_ExtraBall" : source.localizationKey,
+                name = source.name, description = source.description, icon = source.icon,
+                rarity = source.rarity, weight = 1, roguelike = source.roguelike
+            });
+        }
         var result = new List<CJS_ChoiceData>(3);
         if (demo.CapacitorLevel < 2)
         {
             if (!demoCapacitorIcon) demoCapacitorIcon = Resources.Load<Sprite>("Demo/Choice_Capacitor");
-            result.Add(DemoChoice(BallARetroDemoRun.CapacitorChoiceId,
+            pool.Add(DemoChoice(BallARetroDemoRun.CapacitorChoiceId,
                 demo.CapacitorLevel == 0 ? "Demo_Capacitor" : "Demo_CapacitorUpgrade",
                 demoCapacitorIcon ? demoCapacitorIcon : FindChoice(5)?.icon));
         }
         if (demo.LastBallLevel < 2)
         {
             if (!demoLastBallIcon) demoLastBallIcon = Resources.Load<Sprite>("Demo/Choice_LastBall");
-            result.Add(DemoChoice(BallARetroDemoRun.LastBallChoiceId,
+            pool.Add(DemoChoice(BallARetroDemoRun.LastBallChoiceId,
                 demo.LastBallLevel == 0 ? "Demo_LastBall" : "Demo_LastBallUpgrade",
                 demoLastBallIcon ? demoLastBallIcon : FindChoice(8)?.icon));
         }
-        foreach (int supportId in new[] { 6, 8 })
+        while (result.Count < 3 && pool.Count > 0)
         {
-            if (result.Count == 3) break;
-            var source = FindChoice(supportId);
-            if (source == null) continue;
-            result.Add(new CJS_ChoiceData {
-                funcIdx = supportId, localizationKey = supportId == 8 ? "Demo_ExtraBall" : source.localizationKey,
-                name = source.name, description = source.description, icon = source.icon,
-                rarity = source.rarity, weight = 1, roguelike = source.roguelike
-            });
+            int index = rnd.Next(pool.Count);
+            var picked = pool[index];
+            result.Add(picked);
+            pool.RemoveAt(index);
+            // Bonus-map effects are useful later, but three of them together
+            // would leave a short demo without an immediate gameplay choice.
+            if (IsBonusMapChoice(picked)) pool.RemoveAll(IsBonusMapChoice);
         }
         return result;
     }
+
+    private static bool IsBonusMapChoice(CJS_ChoiceData choice) => choice.funcIdx >= 0 && choice.funcIdx <= 3;
 
     private CJS_ChoiceData FindChoice(int id) => allChoices.Find(choice => choice != null && choice.funcIdx == id);
 
@@ -260,7 +274,9 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
 
     public void UnActiveChoices(int _idx)
     {
-        allChoices[_idx].isEnabled = false;
+        // Effect IDs are stable even if the authored list is reordered.
+        foreach (var choice in allChoices)
+            if (choice != null && choice.funcIdx == _idx) choice.isEnabled = false;
     }
 
     private static string SafeName(CJS_ChoiceData c) => c == null ? "(null)" : c.name;

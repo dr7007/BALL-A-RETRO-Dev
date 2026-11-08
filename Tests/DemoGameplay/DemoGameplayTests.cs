@@ -83,18 +83,125 @@ public class DemoGameplayTests
         Assert.That(Demo.PicksTaken, Is.EqualTo(3));
     }
 
+    [TestCase(37)]
+    [TestCase(20261109)]
+    public void SeededOffersVaryReachEveryEligibleChoiceAndContainAtMostOneBonusMapCard(int seed)
+    {
+        var roller = MakeRoller(null, Enumerable.Range(0, 9).ToArray());
+        Set(roller, "rnd", new System.Random(seed));
+        var eligible = Enumerable.Range(0, 11).ToArray();
+        var seen = new HashSet<int>();
+        var compositions = new HashSet<string>();
+
+        for (int i = 0; i < 256; i++)
+        {
+            var offer = roller.Roll3(out _);
+            AssertOffer(offer, eligible, 3);
+            seen.UnionWith(offer.Select(choice => choice.funcIdx));
+            compositions.Add(string.Join(",", offer.Select(choice => choice.funcIdx).OrderBy(id => id)));
+        }
+
+        CollectionAssert.AreEquivalent(eligible, seen, "Every eligible effect must be reachable, including ordinary cards.");
+        Assert.That(compositions.Count, Is.GreaterThan(10), "Shuffling the same fixed trio is not a varied offer.");
+        Assert.That(Demo.CapacitorLevel + Demo.LastBallLevel + Demo.PicksTaken, Is.Zero,
+            "Generating an offer must not apply a choice.");
+        CollectionAssert.AreEqual(Enumerable.Range(1, 9).Select(weight => (float)weight),
+            roller.allChoices.Select(choice => choice.weight), "Demo weighting must not overwrite authored data.");
+    }
+
     [Test]
-    public void StarterOffersBothStrategiesAndSupportThenRemovesMaxedUpgrades()
+    public void OffersExcludeDisabledNonPositiveAndDuplicateOriginalEntries()
     {
         var roller = MakeRoller();
-        CollectionAssert.AreEquivalent(new[] { 9, 10, 6 }, roller.Roll3(out _).Select(x => x.funcIdx));
-        roller.PushPicked(new CJS_ChoiceData { funcIdx = 9 });
-        Assert.That(roller.Roll3(out _).First(x => x.funcIdx == 9).localizationKey, Is.EqualTo("Demo_CapacitorUpgrade"));
-        roller.PushPicked(new CJS_ChoiceData { funcIdx = 9 });
-        CollectionAssert.AreEquivalent(new[] { 10, 6, 8 }, roller.Roll3(out _).Select(x => x.funcIdx));
-        Assert.That(roller.Roll3(out _).First(x => x.funcIdx == 8).localizationKey, Is.EqualTo("Demo_ExtraBall"));
-        Assert.That(Demo.ApplyUpgrade(9), Is.False);
+        roller.allChoices.AddRange(new[] {
+            null,
+            new CJS_ChoiceData { funcIdx = 2, isEnabled = false, weight = 1000 },
+            new CJS_ChoiceData { funcIdx = 3, weight = 0 },
+            new CJS_ChoiceData { funcIdx = 7, weight = -1 },
+            new CJS_ChoiceData { funcIdx = 0, weight = 1000 },
+            new CJS_ChoiceData { funcIdx = 6, weight = 1000 }
+        });
+        var eligible = new[] { 0, 1, 6, 8, 9, 10 };
+        var seen = new HashSet<int>();
+
+        for (int i = 0; i < 128; i++)
+        {
+            var offer = roller.Roll3(out _);
+            AssertOffer(offer, eligible, 3);
+            seen.UnionWith(offer.Select(choice => choice.funcIdx));
+        }
+
+        CollectionAssert.AreEquivalent(eligible, seen);
+    }
+
+    [Test]
+    public void NoEligibleOriginalCardsDoesNotReenableZeroWeightOrDisabledCards()
+    {
+        var roller = MakeRoller();
+        foreach (var choice in roller.allChoices) choice.weight = 0;
+        roller.allChoices.Add(new CJS_ChoiceData { funcIdx = 7, weight = 1000, isEnabled = false });
+
+        var offer = roller.Roll3(out _);
+        AssertOffer(offer, new[] { 9, 10 }, 2);
+        CollectionAssert.AreEquivalent(new[] { 9, 10 }, offer.Select(choice => choice.funcIdx));
+    }
+
+    [TestCase(5)]
+    [TestCase(7)]
+    public void DisablingAnEffectUsesItsIdAcrossReorderedDuplicateEntries(int choiceId)
+    {
+        var roller = MakeRoller(null, 8, choiceId, 6, 0, choiceId, 1);
+
+        roller.UnActiveChoices(choiceId);
+
+        Assert.That(roller.allChoices.Count(choice => choice.funcIdx == choiceId && !choice.isEnabled), Is.EqualTo(2));
+        Assert.That(roller.allChoices.Where(choice => choice.funcIdx != choiceId).All(choice => choice.isEnabled), Is.True,
+            "Disabling an effect must not use its ID as a list index or disable unrelated effects.");
+        var eligible = new[] { 0, 1, 6, 8, 9, 10 };
+        var seen = new HashSet<int>();
+        for (int i = 0; i < 64; i++)
+        {
+            var offer = roller.Roll3(out _);
+            AssertOffer(offer, eligible, 3);
+            seen.UnionWith(offer.Select(choice => choice.funcIdx));
+        }
+        CollectionAssert.AreEquivalent(eligible, seen);
+    }
+
+    [Test]
+    public void StrategyUpgradeLocalizationChangesAndMaxedStrategiesLeaveTheOfferPool()
+    {
+        var roller = MakeRoller(null, 8);
+        var initial = roller.Roll3(out _);
+        AssertOffer(initial, new[] { 8, 9, 10 }, 3);
+        Assert.That(initial.Single(choice => choice.funcIdx == 8).localizationKey, Is.EqualTo("Demo_ExtraBall"));
+        Assert.That(initial.Single(choice => choice.funcIdx == 9).localizationKey, Is.EqualTo("Demo_Capacitor"));
+        Assert.That(initial.Single(choice => choice.funcIdx == 10).localizationKey, Is.EqualTo("Demo_LastBall"));
+
+        roller.PushPicked(initial.Single(choice => choice.funcIdx == 9));
+        roller.PushPicked(initial.Single(choice => choice.funcIdx == 10));
+        var upgraded = roller.Roll3(out _);
+        Assert.That(upgraded.Single(choice => choice.funcIdx == 9).localizationKey, Is.EqualTo("Demo_CapacitorUpgrade"));
+        Assert.That(upgraded.Single(choice => choice.funcIdx == 10).localizationKey, Is.EqualTo("Demo_LastBallUpgrade"));
+        roller.PushPicked(upgraded.Single(choice => choice.funcIdx == 9));
+        var onlyLastBallUpgradeable = roller.Roll3(out _);
+        AssertOffer(onlyLastBallUpgradeable, new[] { 8, 10 }, 2);
+        Assert.That(onlyLastBallUpgradeable.Single(choice => choice.funcIdx == 10).localizationKey,
+            Is.EqualTo("Demo_LastBallUpgrade"));
+        roller.PushPicked(onlyLastBallUpgradeable.Single(choice => choice.funcIdx == 10));
+
         Assert.That(Demo.CapacitorLevel, Is.EqualTo(2));
+        Assert.That(Demo.LastBallLevel, Is.EqualTo(2));
+        Assert.That(Demo.ApplyUpgrade(9), Is.False);
+        Assert.That(Demo.ApplyUpgrade(10), Is.False);
+        for (int i = 0; i < 8; i++)
+        {
+            var remaining = roller.Roll3(out _);
+            AssertOffer(remaining, new[] { 8 }, 1);
+            Assert.That(remaining.Single().localizationKey, Is.EqualTo("Demo_ExtraBall"));
+        }
+        Assert.That(roller.allChoices.Single().localizationKey, Is.EqualTo("Choice_8"),
+            "The demo label must not replace the full-game source label.");
     }
 
     [Test]
@@ -310,7 +417,7 @@ public class DemoGameplayTests
         Assert.That(content.childCount, Is.EqualTo(3));
         Assert.That(Time.timeScale, Is.Zero);
         Assert.That(BallARetroDemoRun.BlocksLaunch, Is.True);
-        var button = content.GetChild(0).GetComponent<Button>();
+        var button = FindChoiceButton(content, 9);
         button.onClick.Invoke();
         button.onClick.Invoke();
         Assert.That(Demo.CapacitorLevel, Is.EqualTo(1));
@@ -334,7 +441,7 @@ public class DemoGameplayTests
         yield return null;
         yield return null;
         Assert.That(content.childCount, Is.EqualTo(3));
-        content.GetChild(1).GetComponent<Button>().onClick.Invoke();
+        FindChoiceButton(content, 10).onClick.Invoke();
         KHS_Script_UIImgFunc.SetOpen(false);
         yield return null;
         yield return null;
@@ -342,7 +449,7 @@ public class DemoGameplayTests
         Assert.That(content.childCount, Is.Zero);
         Set(score, "currentRound", 2);
         ui.ShowChoices();
-        content.GetChild(1).GetComponent<Button>().onClick.Invoke();
+        FindChoiceButton(content, 10).onClick.Invoke();
         Assert.That(Demo.LastBallLevel, Is.EqualTo(2));
         Assert.That(Demo.PicksTaken, Is.EqualTo(2));
     }
@@ -376,14 +483,15 @@ public class DemoGameplayTests
         finally { KHS_Script_PlungerController.OnBallLaunched -= launched; }
     }
 
-    private CJS_Script_ChoiceRoller MakeRoller(GameObject target = null)
+    private CJS_Script_ChoiceRoller MakeRoller(GameObject target = null, params int[] choiceIds)
     {
         target = target ? target : New("Roller");
         var roller = target.AddComponent<CJS_Script_ChoiceRoller>();
-        roller.allChoices = new List<CJS_ChoiceData> {
-            new CJS_ChoiceData { funcIdx = 6, localizationKey = "Choice_6" },
-            new CJS_ChoiceData { funcIdx = 8, localizationKey = "Choice_8" }
-        };
+        if (choiceIds.Length == 0) choiceIds = new[] { 0, 1, 6, 8 };
+        roller.allChoices = choiceIds.Select(id => new CJS_ChoiceData {
+            funcIdx = id, localizationKey = "Choice_" + id, weight = id + 1, isEnabled = true
+        }).ToList();
+        Set(roller, "rnd", new System.Random(271828));
         return roller;
     }
 
@@ -392,7 +500,8 @@ public class DemoGameplayTests
         New("Choice history").AddComponent<CJS_Script_ChoiceState>();
         var uiObject = New("Choice UI");
         uiObject.SetActive(false);
-        var roller = MakeRoller(uiObject);
+        // This UI fixture guarantees both strategy cards while their positions remain random.
+        var roller = MakeRoller(uiObject, 6);
         var panel = New("Panel", typeof(RectTransform));
         content = New("Content", typeof(RectTransform)).transform;
         content.SetParent(panel.transform, false);
@@ -409,6 +518,30 @@ public class DemoGameplayTests
         Set(ui, "ballCon", ball);
         uiObject.SetActive(true);
         return ui;
+    }
+
+    private static void AssertOffer(List<CJS_ChoiceData> offer, int[] eligibleIds, int expectedCount)
+    {
+        Assert.That(offer.Count, Is.EqualTo(expectedCount));
+        Assert.That(offer.Select(choice => choice.funcIdx).Distinct().Count(), Is.EqualTo(expectedCount));
+        Assert.That(offer.Count(choice => choice.funcIdx >= 0 && choice.funcIdx <= 3), Is.LessThanOrEqualTo(1),
+            "An offer must not be crowded out by bonus-map-only effects.");
+        foreach (var choice in offer)
+        {
+            Assert.That(eligibleIds, Does.Contain(choice.funcIdx));
+            Assert.That(choice.isEnabled, Is.True);
+            Assert.That(choice.weight, Is.EqualTo(1f), "Eligible demo cards use equal weight regardless of authored rarity.");
+            if (choice.funcIdx == 8) Assert.That(choice.localizationKey, Is.EqualTo("Demo_ExtraBall"));
+        }
+    }
+
+    private static Button FindChoiceButton(Transform content, int choiceId)
+    {
+        var dataField = typeof(CJS_Script_ChoiceCard).GetField("data", BindingFlags.Instance | BindingFlags.NonPublic);
+        var matches = content.GetComponentsInChildren<CJS_Script_ChoiceCard>()
+            .Where(card => (dataField.GetValue(card) as CJS_ChoiceData)?.funcIdx == choiceId).ToArray();
+        Assert.That(matches.Length, Is.EqualTo(1), "Expected one bound card for choice " + choiceId);
+        return matches[0].GetComponent<Button>();
     }
 
     private void Charge(int count) { for (int i = 0; i < count; i++) Demo.RecordBumperHit(); }

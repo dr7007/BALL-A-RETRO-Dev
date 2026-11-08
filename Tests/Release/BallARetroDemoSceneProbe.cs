@@ -91,6 +91,7 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
     bool finished;
     float started;
     int retrySignals;
+    int gameLoads;
     CJS_Script_ChoiceUIController choices;
     KHS_Script_CameraManager cameras;
     YJ_Script_BallController ball;
@@ -100,7 +101,7 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
     {
         public bool success;
         public string[] checks, errors;
-        public string instrumentation = "Real release scenes/prefabs, serialized callbacks, intro/banner/retry coroutines. Ball held stationary; real accepted bumper-trigger callbacks drive round scoring. Steam SDK disabled only in this editor audit; not a manual physics or client authentication test.";
+        public string instrumentation = "Real release scenes/prefabs, serialized callbacks, intro/banner/retry coroutines. Seeded random offers exercise specific upgrade callbacks without replacing the real choice pool. Ball held stationary; real accepted bumper-trigger callbacks drive round scoring. Steam SDK disabled only in this editor audit; not a manual physics or client authentication test.";
     }
     [Serializable] sealed class RenderState
     {
@@ -129,7 +130,19 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
         started = Time.realtimeSinceStartup;
         Application.logMessageReceived += OnLog;
         PSH_Script_GameSceneDirector.NoIntroStartEvt += OnRetrySignal;
+        SceneManager.sceneLoaded += SeedAuditOffers;
         StartCoroutine(Guarded());
+    }
+    void SeedAuditOffers(Scene scene, LoadSceneMode mode)
+    {
+        if (scene.name != "Main_Scene_Game") return;
+        var roller = Object.FindFirstObjectByType<CJS_Script_ChoiceRoller>();
+        Check(roller != null && (int)Read(roller, "seed") == 0,
+            "Authored gameplay uses a fresh random sequence rather than a fixed seed");
+        // sceneLoaded runs after Awake but before the first banner/choice. Keep
+        // production randomness intact; only this disposable audit sets its RNG.
+        typeof(CJS_Script_ChoiceRoller).GetField("rnd", BindingFlags.Instance | BindingFlags.NonPublic)
+            .SetValue(roller, new System.Random(++gameLoads == 1 ? 6 : 5));
     }
     void OnRetrySignal() => retrySignals++;
     void OnLog(string message, string trace, LogType type)
@@ -246,7 +259,25 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
                 "Accepted bumper scoring reaches round " + targetRound + " and its serialized choice button");
             yield return new WaitForSecondsRealtime(2.2f);
             CheckChoiceView("round " + targetRound);
-            yield return Pick(targetRound == 2 ? 10 : 9, targetRound);
+            int selectedId = targetRound == 2 ? 7 : 5;
+            yield return Pick(selectedId, targetRound);
+            var roller = (CJS_Script_ChoiceRoller)Read(choices, "rollerBehaviour");
+            Check(roller.allChoices.Where(c => c.funcIdx == selectedId).All(c => !c.isEnabled),
+                "Actual one-time effect " + selectedId + " removes its source card after the real selection callback");
+            if (selectedId == 7)
+                Check((bool)Read(Object.FindFirstObjectByType<KHS_Script_BatteryLedManager>(), "isForced"),
+                    "Upper-floor choice really forces the passage open");
+            else
+            {
+                var manager = roller.GetComponent<KHS_Script_RogueLikeManager>();
+                var blackhole = (YJ_Script_BlackholeController)Read(manager, "blackHole");
+                Check(((GameObject)Read(manager, "secretBumpersHolder")).activeSelf
+                    && blackhole.isForceActive && blackhole.isActivated,
+                    "Secret weapon choice really activates its bumpers and blackhole");
+                for (int i = 0; i < 32; i++)
+                    Check(roller.Roll3(out _).All(c => c.funcIdx != 5 && c.funcIdx != 7),
+                        "Consumed one-time effects are absent from subsequent random offers " + i);
+            }
         }
         Check(BallARetroDemoRun.Current.PicksTaken == 3 && CJS_Script_ChoiceState.I.Picked.Count == 3,
             "Starter plus two round upgrades create exactly three history records");
@@ -427,8 +458,10 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
             stage + ": three distinct real cards");
         Check(cameras.cameraGos.Count(c => c.activeInHierarchy) == 1 && cameras.cameraGos[2].activeInHierarchy
             && Time.timeScale == 0 && Cursor.visible, stage + ": one monitor camera, paused physics and visible cursor");
+        Check(live.Count(c => ((CJS_ChoiceData)Read(c, "data")).funcIdx <= 3) <= 1,
+            stage + ": randomized offer contains at most one bonus-map-only card");
         Check(!((Button)Read(choices, "btnSkip")).gameObject.activeInHierarchy
-            && !((Button)Read(choices, "btnReroll")).gameObject.activeInHierarchy, stage + ": fixed demo choices hide skip and reroll");
+            && !((Button)Read(choices, "btnReroll")).gameObject.activeInHierarchy, stage + ": demo keeps one mandatory pick per round without manual rerolls");
         var drawer = FindDrawer();
         Check(drawer != null && !drawer.IsOpen && !drawer.TryTogglePanel(),
             stage + ": Tab cannot open history behind an active choice screen");
@@ -519,6 +552,7 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
         if (finished) return; finished = true;
         Application.logMessageReceived -= OnLog;
         PSH_Script_GameSceneDirector.NoIntroStartEvt -= OnRetrySignal;
+        SceneManager.sceneLoaded -= SeedAuditOffers;
         try
         {
             File.WriteAllText(Path.Combine(output, "demo-scene-audit.json"), JsonUtility.ToJson(new Report {
