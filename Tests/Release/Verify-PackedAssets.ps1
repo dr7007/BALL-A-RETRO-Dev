@@ -7,7 +7,11 @@ if (!$report.assets -or $report.assets.Count -lt 100) { throw 'Missing or incomp
 $forbidden = $report.assets | Where-Object {
     $_.path -match '/(BillingMode\.json|SteamSettings\.asset|PerformanceTestRunInfo\.json|PerformanceTestRunSettings\.json)$' -or
     ($_.path -match '\.unity$' -and $_.path -notin $expectedScenes) -or
-    $_.path -match '/ReleaseValidation/'
+    $_.path -match '/ReleaseValidation/' -or
+    ($_.path -match '/(Hovl Studio|VisualX_Studio|Cool Visual Effects - Part 1)/' -and $_.path -notmatch '\.cs$')
+}
+foreach ($path in @('Assets/Public/OriginalVfx/PixelParticle.mat', 'Assets/Public/UI_Public/Shaders/BallARetroPixelParticle.shader')) {
+    if ($path -notin $report.assets.path) { throw "Required original effect asset missing: $path" }
 }
 if ($forbidden) { throw "Unwanted release assets: $($forbidden.path -join ', ')" }
 foreach ($table in @('DialogueTable','UITable')) {
@@ -17,4 +21,4 @@ foreach ($table in @('DialogueTable','UITable')) {
         }
     }
 }
-Write-Output "Verified $($report.assets.Count) packed assets: 3 release scenes, 6 language tables, no excluded resources or test scenes."
+Write-Output "Verified $($report.assets.Count) packed assets: 3 release scenes, 6 language tables, original VFX, no replaced vendor visuals, excluded resources or test scenes."

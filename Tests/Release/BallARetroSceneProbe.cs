@@ -163,6 +163,15 @@ public class BallARetroSceneProbe : MonoBehaviour
         BallARetroPersonalRecordStore.Submit("Reviewer", 5000, "ReleaseSmoke", 1);
         Check(BallARetroPersonalRecordStore.Read("Reviewer", "ReleaseSmoke", 1)[0].score == 9000, "Offline best survives lower score");
         lobby.OnClick_Tutorial();
+        yield return null;
+        var loadingVfx = Object.FindFirstObjectByType<BallARetroLoadingVfx>();
+        Check(loadingVfx != null && !loadingVfx.raycastTarget, "Original loading particles appear without intercepting input");
+        Check(loadingVfx.GetComponentInParent<Canvas>().renderMode == RenderMode.ScreenSpaceOverlay,
+            "Loading indicator does not depend on the outgoing scene camera");
+        var loadingBackdrop = loadingVfx.transform.parent.GetComponent<UnityEngine.UI.Image>();
+        Check(loadingBackdrop != null && loadingBackdrop.enabled && loadingBackdrop.raycastTarget
+            && loadingBackdrop.color.a == 1, "Loading backdrop covers the previous menu and blocks duplicate clicks");
+        CaptureFrame("loading-original");
         while (SceneManager.GetActiveScene().name != "Main_Scene_Tutorial") yield return null;
         yield return new WaitForSecondsRealtime(4);
         var tutorial = Object.FindFirstObjectByType<CJS_TutorialDirector>();
@@ -203,6 +212,29 @@ public class BallARetroSceneProbe : MonoBehaviour
         yield return null;
         Object.FindFirstObjectByType<PSH.PSH_Script_DialogueUI>().SkipDialogue();
         yield return new WaitForSecondsRealtime(3);
+        var portals = Object.FindObjectsByType<BallARetroPortalVfx>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        Check(portals.Length == 9, "All nine portal effects use the original particle implementation");
+        Check(Object.FindObjectsByType<UnityEngine.VFX.VisualEffect>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 0,
+            "No borrowed VFX Graph portal remains in the game scene");
+        Check(portals.All(p => p.GetComponent<ParticleSystemRenderer>().sharedMaterial.shader.name == "BALL-A-RETRO/Original Pixel Particle"
+            && p.GetComponent<ParticleSystemRenderer>().sharedMaterial.shader.isSupported), "Original portal shader is supported on the active graphics device");
+        var activePortal = portals.First(p => p.gameObject.activeInHierarchy);
+        var system = activePortal.GetComponent<ParticleSystem>();
+        var particleBuffer = new ParticleSystem.Particle[144];
+        Check(system.GetParticles(particleBuffer) == 144, "Original portal emits its bounded particle count");
+        var firstPosition = particleBuffer[0].position;
+        yield return new WaitForSecondsRealtime(.2f);
+        system.GetParticles(particleBuffer);
+        Check((particleBuffer[0].position - firstPosition).sqrMagnitude > .000001f, "Original portal particles animate during gameplay");
+        bool previousParticles = PSH_Script_EffectSettings.ParticlesEnabled;
+        PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.Particles, false);
+        yield return null;
+        Check(portals.All(p => p.GetComponent<ParticleSystemRenderer>().forceRenderingOff), "Particles OFF suppresses every original portal renderer");
+        PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.Particles, true);
+        yield return null;
+        Check(portals.All(p => !p.GetComponent<ParticleSystemRenderer>().forceRenderingOff), "Particles ON restores every original portal renderer");
+        CapturePortal(activePortal);
+        PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.Particles, previousParticles);
         foreach (string code in new[] { "ko", "en", "ja" })
         {
             LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale(code);
@@ -224,6 +256,28 @@ public class BallARetroSceneProbe : MonoBehaviour
         LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("ko");
         yield return null;
         CaptureFrame("game");
+        var entry = Object.FindObjectsByType<KHS_Script_PortalController>(FindObjectsSortMode.None).First(p =>
+        {
+            var data = new SerializedObject(p);
+            return p.isActivated && data.FindProperty("exitPortal").objectReferenceValue != null && data.FindProperty("portalIndex").intValue >= 0;
+        });
+        var trigger = typeof(KHS_Script_PortalController).GetMethod("OnTriggerEnter", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+        var testBall = new GameObject("Portal audit ball");
+        testBall.tag = "Ball";
+        testBall.transform.position = new Vector3(1000, 1000, 1000);
+        var testCollider = testBall.AddComponent<SphereCollider>();
+        trigger.Invoke(entry, new object[] { testCollider });
+        Check(entry.isActivated, "Portal ignores a Ball collider without a Rigidbody");
+        var testBody = testBall.AddComponent<Rigidbody>();
+        testBody.useGravity = false;
+        trigger.Invoke(entry, new object[] { testCollider });
+        Check(!testBall.activeSelf && testBody.isKinematic, "Portal transfer hides and holds the entering ball");
+        yield return new WaitForSecondsRealtime(2.15f);
+        Check(testBall.activeSelf && !testBody.isKinematic && testBody.linearVelocity.sqrMagnitude > 0,
+            "Portal transfer restores and launches the ball at the exit");
+        yield return new WaitForSecondsRealtime(.55f);
+        Check(entry.isActivated, "Portal reactivates after the transfer cooldown");
+        Object.Destroy(testBall);
         settings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
         settings.ToggleMenu();
         settings.OnClickGoToLobby();
@@ -237,14 +291,40 @@ public class BallARetroSceneProbe : MonoBehaviour
         Check(!SteamManager.Initialized, "Steam remains disabled after scene transitions");
     }
     static void EmitUI(ScriptableRenderContext context, Camera camera) => ScriptableRenderContext.EmitGeometryForCamera(camera);
-    void CaptureFrame(string name)
+    void CapturePortal(BallARetroPortalVfx portal)
     {
-        var camera = Camera.main;
+        int layer = portal.gameObject.layer;
+        var cameraObject = new GameObject("Original portal preview", typeof(Camera));
+        var camera = cameraObject.GetComponent<Camera>();
+        camera.enabled = false;
+        float radius = new SerializedObject(portal).FindProperty("radius").floatValue * Mathf.Abs(portal.transform.lossyScale.x);
+        camera.transform.position = portal.transform.position + portal.transform.forward * Mathf.Max(radius * 4, 1);
+        camera.transform.LookAt(portal.transform.position, portal.transform.up);
+        camera.orthographic = true;
+        camera.orthographicSize = radius * 1.4f;
+        camera.nearClipPlane = .01f;
+        camera.clearFlags = CameraClearFlags.SolidColor;
+        camera.backgroundColor = new Color(.015f, .025f, .04f);
+        camera.cullingMask = 1 << 30;
+        try
+        {
+            portal.gameObject.layer = 30;
+            CaptureFrame("portal-original-preview", camera);
+        }
+        finally
+        {
+            portal.gameObject.layer = layer;
+            Object.Destroy(cameraObject);
+        }
+    }
+    void CaptureFrame(string name, Camera previewCamera = null)
+    {
+        var camera = previewCamera != null ? previewCamera : Camera.main;
         if (camera == null) throw new Exception("No main camera for " + name);
         // Batch editors have no Game View. Temporarily route overlay UI through the
         // real scene camera for an offscreen render, restoring it before continuing.
         var overlays = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
-            .Where(c => c.isRootCanvas && c.renderMode == RenderMode.ScreenSpaceOverlay)
+            .Where(c => previewCamera == null && c.isRootCanvas && c.renderMode == RenderMode.ScreenSpaceOverlay)
             .Select(c => (canvas: c, camera: c.worldCamera, distance: c.planeDistance)).ToArray();
         var target = RenderTexture.GetTemporary(1920, 1080, 24);
         var previous = RenderTexture.active;
@@ -255,7 +335,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         RenderPipelineManager.beginCameraRendering += EmitUI;
         try
         {
-            camera.cullingMask |= 1 << 5;
+            if (previewCamera == null) camera.cullingMask |= 1 << 5;
             camera.targetTexture = target;
             camera.aspect = 1920f / 1080f;
             foreach (var item in overlays)
