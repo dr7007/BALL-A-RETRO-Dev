@@ -201,7 +201,20 @@ public class SteamManager : MonoBehaviour {
 		nickname = string.Empty;
 		steamId = string.Empty;
 #if !DISABLESTEAMWORKS
-		if (!Initialized || !SteamUser.BLoggedOn()) return false;
+		if (!Initialized) return false;
+		return TryGetExistingLoggedInPlayer(out nickname, out steamId);
+#else
+		return false;
+#endif
+	}
+
+	// Local demo records may use an existing Steam identity, but opening a
+	// result panel must never create a SteamManager or attempt authentication.
+	public static bool TryGetExistingLoggedInPlayer(out string nickname, out string steamId) {
+		nickname = string.Empty;
+		steamId = string.Empty;
+#if !DISABLESTEAMWORKS
+		if (s_instance == null || !s_instance.m_bInitialized || !SteamUser.BLoggedOn()) return false;
 		var id = SteamUser.GetSteamID();
 		if (!id.IsValid()) return false;
 		var name = SteamFriends.GetPersonaName();

@@ -12,5 +12,17 @@ public static class BallARetroPlatform
 #endif
         }
     }
-    public static bool UsesPersonalRecords => !IsSteamBuild;
+    public static bool IsDemoBuild
+    {
+        get
+        {
+#if BALLARETRO_STEAM && BALLARETRO_DEMO && !BALLARETRO_STOVE
+            return true;
+#else
+            return false;
+#endif
+        }
+    }
+    public static bool UsesSteamLeaderboards => IsSteamBuild;
+    public static bool UsesPersonalRecords => !IsSteamBuild || IsDemoBuild;
 }

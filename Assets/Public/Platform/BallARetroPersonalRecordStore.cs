@@ -7,7 +7,8 @@ using UnityEngine;
 public static class BallARetroPersonalRecordStore
 {
     private static string NormalizeMode(string mode) => string.IsNullOrWhiteSpace(mode) ? "Classic" : mode.Trim();
-    public static string StorageKey(string mode, int level) => "BallARetro.STOVE.Best.v1." +
+    public static string StorageKey(string mode, int level) =>
+        (BallARetroPlatform.IsDemoBuild ? "BallARetro.SteamDemo.Best.v1." : "BallARetro.STOVE.Best.v1.") +
         Math.Max(1, level).ToString(CultureInfo.InvariantCulture) + "." +
         Convert.ToBase64String(Encoding.UTF8.GetBytes(NormalizeMode(mode)));
 
