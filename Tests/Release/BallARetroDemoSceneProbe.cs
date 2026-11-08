@@ -204,6 +204,9 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
             "Authored tutorial remains outside demo mechanics");
         Check(Object.FindFirstObjectByType<YJ_Script_BallController>().GetBallCount() == 1,
             "Tutorial retains one authored ball rather than demo two");
+        Check(Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .Where(t => t.name == "QuickChoiceTabHint").All(t => !t.gameObject.activeSelf),
+            "Tutorial practice has no history hint overlapping its control instructions");
         tutorial.GoGame();
         yield return WaitFor(() => SceneManager.GetActiveScene().name == "Main_Scene_Game", "Tutorial-to-game action loads the real game");
         yield return null;
@@ -218,6 +221,7 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
         Capture("demo-starter");
         yield return Pick(9, 1);
         Check(BallARetroDemoRun.Current.CapacitorLevel == 1, "Starter capacitor applies through real card callback");
+        yield return VerifyChoiceDrawer(false);
 
         for (int targetRound = 2; targetRound <= 3; targetRound++)
         {
@@ -250,6 +254,7 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
         yield return null;
         Check(!IsChoiceOpen && cameras.cameraGos[0].activeInHierarchy, "Consumed final choice cannot reopen the monitor");
         Capture("demo-three-upgrades");
+        yield return VerifyChoiceDrawer(true);
 
         var previous = score;
         Object.FindFirstObjectByType<KHS_Script_ResetController>().GameResetFunc();
@@ -261,6 +266,7 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
         yield return new WaitForSecondsRealtime(2.2f);
         Check(BallARetroDemoRun.Current.PicksTaken == 0 && CJS_Script_ChoiceState.I.Picked.Count == 0
             && BallARetroDemoRun.Current.ChargePaidTotal == 0, "Retry has clean choices and contributions");
+        Check(!FindDrawer().IsOpen, "Retry closes previously opened upgrade history");
         var flipper = Object.FindFirstObjectByType<KHS_Script_FliperController>();
         int originalFlips = flipper.fliper_Count;
         int originalRoundFlips = (int)Read(flipper, "fliper_Inital");
@@ -333,6 +339,87 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
             "Authored next-round button has both serialized UI and camera callbacks");
     }
     bool IsChoiceOpen => choices != null && (bool)Read(choices, "isOpen");
+    PSH_Script_QuickChoiceOnOff FindDrawer()
+        => Object.FindFirstObjectByType<PSH_Script_QuickChoiceOnOff>(FindObjectsInactive.Include);
+
+    IEnumerator VerifyChoiceDrawer(bool fullLayout)
+    {
+        var drawer = FindDrawer();
+        Check(drawer != null && !drawer.IsOpen, "Upgrade history starts closed during unobstructed gameplay");
+        var bonusPanels = Object.FindObjectsByType<Transform>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .Where(t => t.name == "BonusStatus").ToArray();
+        Check(bonusPanels.Length == 1 && bonusPanels[0].GetComponentInParent<PSH_Script_QuickChoiceOnOff>() == drawer,
+            "Demo bonus status is inside the left history drawer, not an independent upper HUD");
+        Check(!bonusPanels[0].gameObject.activeInHierarchy, "Bonus explanation is hidden while history is closed");
+        if (!fullLayout) Capture("demo-tab-closed");
+        float originalTime = Time.timeScale;
+        bool originalCursor = Cursor.visible;
+        var originalLock = Cursor.lockState;
+        int originalScore = score.curScore;
+        int originalPicks = BallARetroDemoRun.Current.PicksTaken;
+        var activeCamera = cameras.cameraGos.Single(go => go.activeInHierarchy);
+        Check(drawer.TryTogglePanel() && drawer.IsOpen, "Gameplay Tab action opens the real history drawer");
+        yield return new WaitForSecondsRealtime(.65f);
+        Check(bonusPanels[0].gameObject.activeInHierarchy, "Opening history reveals current demo effects");
+        Check(drawer.GetComponentsInChildren<CJS_Script_ChoiceSlot>().Length == originalPicks,
+            "Opened history contains exactly the chosen upgrades");
+        Check(Time.timeScale == originalTime && Cursor.visible == originalCursor && Cursor.lockState == originalLock
+            && score.curScore == originalScore && BallARetroDemoRun.Current.PicksTaken == originalPicks
+            && cameras.cameraGos.Single(go => go.activeInHierarchy) == activeCamera,
+            "Viewing upgrades preserves time, pointer, camera, score and choices");
+        if (fullLayout)
+        {
+            var originalLocale = UnityEngine.Localization.Settings.LocalizationSettings.SelectedLocale;
+            foreach (string code in new[] { "ko", "en", "ja" })
+            {
+                UnityEngine.Localization.Settings.LocalizationSettings.SelectedLocale =
+                    UnityEngine.Localization.Settings.LocalizationSettings.AvailableLocales.GetLocale(code);
+                yield return null;
+                Canvas.ForceUpdateCanvases();
+                var bounds = RectTransformUtility.CalculateRelativeRectTransformBounds(drawer.transform, bonusPanels[0]);
+                var rect = ((RectTransform)drawer.transform).rect;
+                Check(bounds.min.x >= rect.xMin - 1 && bounds.max.x <= rect.xMax + 1
+                    && bounds.min.y >= rect.yMin - 1 && bounds.max.y <= rect.yMax + 1,
+                    code + ": demo status stays inside history panel bounds");
+                foreach (var text in bonusPanels[0].GetComponentsInChildren<TMPro.TMP_Text>())
+                {
+                    text.ForceMeshUpdate();
+                    Check(!string.IsNullOrWhiteSpace(text.text) && !text.text.StartsWith("Demo_") && !text.isTextOverflowing,
+                        code + ": readable localized drawer status " + text.name);
+                }
+                var hint = Object.FindObjectsByType<TMPro.TMP_Text>(FindObjectsSortMode.None)
+                    .Single(t => t.name == "QuickChoiceTabHint");
+                hint.ForceMeshUpdate();
+                Check(hint.text.Contains("Tab") && !hint.isTextOverflowing
+                    && hint.font.HasCharacters(hint.text, out uint[] missing, true, false),
+                    code + ": actual Tab hint has every glyph and fits its label");
+                Capture("demo-tab-open-" + code);
+            }
+            UnityEngine.Localization.Settings.LocalizationSettings.SelectedLocale = originalLocale;
+            yield return null;
+            // Leave this panel open intentionally: the following real scene retry
+            // must discard it without leaking input, cursor or open state.
+        }
+        else
+        {
+            yield return new WaitForSecondsRealtime(3.2f);
+            Check(drawer.IsOpen, "Tab-opened history remains available beyond the former three-second timeout");
+            Check(drawer.TryTogglePanel() && !drawer.IsOpen, "Second gameplay Tab action closes history");
+            yield return new WaitForSecondsRealtime(.65f);
+            Check(!bonusPanels[0].gameObject.activeInHierarchy, "Closed history hides the bonus status again");
+            Check(drawer.TryTogglePanel(), "History can reopen without recreating its owner");
+            var settings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
+            settings.ToggleMenu();
+            yield return null; yield return null;
+            Check(PSH_Script_SettingController.IsMenuOpen && !drawer.IsOpen && !drawer.TryTogglePanel(),
+                "Settings closes history and blocks Tab from opening behind the modal");
+            settings.CloseMenu();
+            yield return null; yield return null;
+            Check(!drawer.IsOpen && Time.timeScale == originalTime && Cursor.visible == originalCursor,
+                "Closing settings keeps history hidden and restores gameplay input");
+        }
+    }
+
     void CheckChoiceView(string stage)
     {
         var live = (List<CJS_Script_ChoiceCard>)Read(choices, "liveCards");
@@ -342,6 +429,9 @@ public sealed class BallARetroDemoSceneProbe : MonoBehaviour
             && Time.timeScale == 0 && Cursor.visible, stage + ": one monitor camera, paused physics and visible cursor");
         Check(!((Button)Read(choices, "btnSkip")).gameObject.activeInHierarchy
             && !((Button)Read(choices, "btnReroll")).gameObject.activeInHierarchy, stage + ": fixed demo choices hide skip and reroll");
+        var drawer = FindDrawer();
+        Check(drawer != null && !drawer.IsOpen && !drawer.TryTogglePanel(),
+            stage + ": Tab cannot open history behind an active choice screen");
     }
     IEnumerator Pick(int id, int expectedPicks)
     {

@@ -78,6 +78,11 @@ public class BallARetroDemoPresentation : MonoBehaviour
     public void Refresh() { }
     public void SetSubmissionState(bool localOnly) { }
 }
+// Drawer input, layout and font binding are covered by the production-UI fixture.
+public class PSH_Script_QuickChoiceOnOff : MonoBehaviour
+{
+    public void SetHintFont(TMPro.TMP_FontAsset font) { }
+}
 public class CJS_Script_LeaderboardList : MonoBehaviour { public void Populate(ScoreRow[] rows) { } }
 // Ranking layout/clicks are tested separately with the real UI prefabs.
 public class PSH_Script_WorldRankingUI : MonoBehaviour
