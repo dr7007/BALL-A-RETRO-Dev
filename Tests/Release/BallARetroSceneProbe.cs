@@ -48,6 +48,7 @@ public class BallARetroSceneProbe : MonoBehaviour
     string previousLocale;
     string previousRecord;
     string recordKey;
+    int quitRequests;
     [Serializable] class Result { public bool success; public string[] checks, errors; }
     void Awake()
     {
@@ -62,6 +63,7 @@ public class BallARetroSceneProbe : MonoBehaviour
     }
     void OnLog(string message, string trace, LogType type)
     {
+        if (message == "Game Quit") quitRequests++;
         if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert
             || (type == LogType.Warning && message.Contains("DontDestroyOnLoad only works for root")))
             errors.Add(message + "\n" + trace);
@@ -95,6 +97,22 @@ public class BallARetroSceneProbe : MonoBehaviour
         yield return LocalizationSettings.InitializationOperation;
         var lobby = Object.FindFirstObjectByType<PSH.PSH_Script_LobbyUIManager>();
         Check(lobby != null, "Full lobby scene initializes");
+        Canvas.ForceUpdateCanvases();
+        var quit = lobby.transform.Find("Panel_Bg/Panel_Close/Button_Close").GetComponent<UnityEngine.UI.Button>();
+        var quitCanvas = quit.GetComponentInParent<Canvas>();
+        var quitRect = (RectTransform)quit.transform;
+        var pointer = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+        {
+            position = RectTransformUtility.WorldToScreenPoint(quitCanvas.worldCamera, quitRect.TransformPoint(quitRect.rect.center))
+        };
+        var hits = new List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(pointer, hits);
+        Check(hits.Count > 0 && hits[0].gameObject.GetComponentInParent<UnityEngine.UI.Button>() == quit,
+            "Lobby top-right X receives the pointer instead of its transparent wrapper");
+        // Application.Quit is deliberately ignored by the editor; observe the real serialized callback.
+        UnityEngine.EventSystems.ExecuteEvents.ExecuteHierarchy(hits[0].gameObject, pointer,
+            UnityEngine.EventSystems.ExecuteEvents.pointerClickHandler);
+        Check(quitRequests == 1, "Lobby top-right X invokes the application quit callback once");
         CaptureFrame("lobby");
         // Reproduce the real scene's manager-before-LED Start order deterministically.
         var earlyLed = GameObject.CreatePrimitive(PrimitiveType.Cube);
@@ -182,6 +200,28 @@ public class BallARetroSceneProbe : MonoBehaviour
         targetHUD = Object.FindFirstObjectByType<KHS_Script_UIToTScore>();
         Check(targetHUD != null && targetHUD.GetComponent<TMPro.TMP_Text>().text.Replace(" ", "") == "/" + KHS_Script_ScoreManager.Instance.targetScore,
             "Game HUD displays the initialized round target");
+        yield return null;
+        Object.FindFirstObjectByType<PSH.PSH_Script_DialogueUI>().SkipDialogue();
+        yield return new WaitForSecondsRealtime(3);
+        foreach (string code in new[] { "ko", "en", "ja" })
+        {
+            LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale(code);
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            var checklist = Object.FindObjectsByType<PSH_Script_LocalizedText>(FindObjectsSortMode.None)
+                .Where(t => new[] { "HUD_Safety", "HUD_BlackHole", "HUD_Entrance", "HUD_Launcher" }
+                    .Contains(new SerializedObject(t).FindProperty("key").stringValue)).ToArray();
+            Check(checklist.Length == 4, "Four active gameplay checklist rows: " + code);
+            foreach (var label in checklist)
+            {
+                var text = label.GetComponent<TMPro.TMP_Text>();
+                text.ForceMeshUpdate();
+                Check(text.textInfo.lineCount == 1 && !text.isTextOverflowing,
+                    "Checklist stays on one line without clipping: " + code + "/" + text.text);
+            }
+            CaptureFrame("game-checklist-" + code);
+        }
+        LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale("ko");
         yield return null;
         CaptureFrame("game");
         settings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
