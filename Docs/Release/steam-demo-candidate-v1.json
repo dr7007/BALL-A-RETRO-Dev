@@ -41,9 +41,10 @@
     "branchApplied": true,
     "releaseState": "unavailable",
     "publiclyReleased": false,
-    "clientAuthentication": "pending",
-    "onlineLeaderboardClientTest": "pending",
-    "fiveMinutePlaytimeCheck": "pending"
+    "clientAuthentication": "user-confirmed client test; successful authenticated score write corroborated by Steamworks leaderboard",
+    "onlineLeaderboardClientTest": "passed: user confirmed installation, play and leaderboard; Steamworks showed one entry at 7150 points",
+    "fiveMinutePlaytimeCheck": "pending Steamworks checklist confirmation",
+    "clientValidationReceipt": "Docs/Release/steam-demo-client-validation.json"
   },
   "artifact": {
     "zip": "D:\\ball-a-retro-validation\\steam-demo-20261109\\candidate-v1\\BALL-A-RETRO_SteamDemo_0.1.0_aca6470_Win64.zip",
@@ -143,7 +144,7 @@
     "nativeFilesMatchAuditedPlayer": true
   },
   "knownLimits": [
-    "Actual Steam client authentication, online score upload/readback, overlay and five-minute playtime remain pending.",
+    "Steam client installation/play/leaderboard were confirmed by the user and the 7150-point entry was independently observed in Steamworks. Overlay and the Steamworks five-minute checklist remain unverified.",
     "Scene probe holds the ball stationary and invokes accepted gameplay callbacks; it is not a manual physics playthrough.",
     "Offscreen result PNG temporarily converts Overlay to Camera and can show world geometry above UI. Runtime result root was verified as ScreenSpaceOverlay with no camera stack. Batch editor cannot supply an unmodified Game View screenshot.",
     "Clean Windows installation has not been tested.",

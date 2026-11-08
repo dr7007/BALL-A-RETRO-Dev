@@ -1,0 +1,68 @@
+{
+  "candidate": "SteamDemo candidate-v1",
+  "observedAtUtc": "2026-11-08T17:31:43Z",
+  "appId": 5585210,
+  "buildId": 26523575,
+  "sourceCommit": "aca6470fdaed384da39268b52008bde9d278fb7f",
+  "depotId": 5585211,
+  "manifestId": "7086458617997461246",
+  "releaseState": "unavailable",
+  "publiclyReleased": false,
+  "automatedInstallationVerification": {
+    "report": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v1/evidence/client-install.json",
+    "expectedFiles": 304,
+    "verifiedFiles": 304,
+    "missingFiles": 0,
+    "extraFiles": 0,
+    "mismatchedFiles": 0,
+    "comparison": "Per-file size and SHA256 against the verified uploaded ZIP manifest",
+    "installedBuildMatches": true,
+    "runningExecutableMatchesInstallation": true,
+    "observedStartupOrRuntimeErrors": 0
+  },
+  "finalSessionSnapshot": {
+    "report": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v1/evidence/client-session-final.json",
+    "observedStartupOrRuntimeErrors": 0,
+    "note": "A new Steam-installed game process was running. Earlier session evidence is retained; current Player.log was reset on relaunch."
+  },
+  "manualUserConfirmation": {
+    "response": "설치·실행·랭킹 확인 완료",
+    "confirmed": [
+      "Steam installation",
+      "Game launch and play",
+      "Leaderboard verification"
+    ],
+    "verificationMethod": "User performed the native Steam client/game interaction; the agent did not directly control or observe the native UI."
+  },
+  "serverLeaderboardVerification": {
+    "source": "https://partner.steamgames.com/apps/leaderboards/5585210",
+    "verificationMethod": "Read-only Steamworks UI: opened Leaderboards and View Scores",
+    "leaderboardId": 21560538,
+    "name": "BALLARETRO_Classic_1",
+    "scope": "Demo AppID 5585210; full-game AppID 5193980 has its own leaderboard namespace",
+    "displayType": "Numeric",
+    "sortMethod": "Descending",
+    "entries": 1,
+    "observedScore": 7150,
+    "observedRank": 1,
+    "authenticatedScoreWriteCorroborated": true,
+    "playerIdentityOmitted": true,
+    "leaderboardModifiedByVerification": false
+  },
+  "fiveMinutePlaytimeChecklist": {
+    "source": "https://partner.steamgames.com/apps/landing/5585210",
+    "state": "unchecked when observed",
+    "note": "Local process duration and the user's client-test confirmation do not establish completion of the Steamworks server checklist."
+  },
+  "remainingChecks": [
+    "Steamworks five-minute playtime checklist confirmation",
+    "Steam overlay interaction",
+    "Clean Windows installation",
+    "Store assets, content survey, reviews and release prerequisites"
+  ],
+  "scopeLimits": [
+    "Runtime error count describes the inspected log snapshots only.",
+    "The server leaderboard proves the observed demo score exists, not all possible network failure scenarios.",
+    "User-owned material/font files remain uncommitted and were preserved byte-for-byte."
+  ]
+}
