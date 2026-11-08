@@ -3,8 +3,9 @@
   "recordedAtLocal": "2026-11-09",
   "fullGameAppId": 5193980,
   "demoAppId": 5585210,
-  "state": "store_preparation_in_progress",
-  "storeReviewSubmitted": false,
+  "state": "both_store_reviews_queued_demo_build_confirmation_pending",
+  "storeReviewSubmitted": true,
+  "storeReviewScope": "Both the parent Coming Soon store and demo store have been submitted for review.",
   "buildReviewSubmitted": false,
   "publiclyReleased": false,
   "currentDemoBuild": {
@@ -18,7 +19,8 @@
     "developer": "G-PIN",
     "publisher": "G-PIN",
     "confirmedByUser": true,
-    "fullGameReleaseDate": null,
+    "fullGameReleaseDate": "2027-03-09",
+    "fullGameReleaseDateScope": "User-approved internal target; public display remains Coming Soon.",
     "publicSupportContact": "ballaretro@daum.net"
   },
   "storeDraft": {
@@ -114,19 +116,94 @@
     "replacesRejectedDirectory": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v1",
     "userReferenceManifest": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2/user-reference/manifest.json",
     "direction": "Use developer-provided actual pinball cabinet views, crisp green pixel wordmark and A symbol. Preserve table identity and avoid the rejected generic pinball illustration.",
-    "storeCapsulesUploaded": false,
-    "libraryAssetsUploaded": false,
-    "uploadBlocker": "Steam graphical-assets page uses a drag/drop area without a working file chooser in the connected in-app browser. Visible legacy icon file input worked; icons were uploaded and published.",
+    "storeCapsulesUploaded": true,
+    "libraryAssetsUploaded": true,
+    "uploadBlocker": null,
+    "latestUiVerification": {
+      "observedAtLocal": "2026-11-09",
+      "apps": [5193980, 5585210],
+      "storeCapsuleImagesChecklistComplete": true,
+      "libraryAssetsChecklistComplete": true,
+      "supportInfoChecklistComplete": true,
+      "iconsChecklistComplete": true,
+      "libraryPageCounterForBothApps": "4/5",
+      "libraryCounterScope": "Both app landing checklists mark Library Assets complete despite the 4/5 counter on each Library page. This does not claim that every optional library asset is populated.",
+      "parentGameplayScreenshotsCounter": "5/5",
+      "parentGameplayScreenshotsChecklistComplete": true,
+      "parentStoreChecklistComplete": true,
+      "demoRemainingRequiredStoreItems": [],
+      "demoStoreChecklistComplete": true,
+      "demoBuildChecklistComplete": true
+    },
     "gameplayScreenshotDirectory": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v1/base-gameplay",
     "gameplayScreenshotScope": "Five unmodified frames from developer-provided full-game STOVE recordings. Older build; do not present as exact current Steam demo screenshots.",
-    "screenshotsUploaded": false
+    "screenshotsUploaded": true,
+    "gameplayScreenshotUploadBlocker": null,
+    "gameplayScreenshotUiResult": "The user uploaded five parent-store screenshots. The previously unclassified third roulette screenshot was saved as Gameplay; Screenshot assets is marked complete."
+  },
+  "releaseTargets": {
+    "fullGame": {
+      "appId": 5193980,
+      "internalTargetLocal": "2027-03-09T03:00:00+09:00",
+      "userApproved": true,
+      "savedAndReadBack": true,
+      "publicDisplay": "Coming Soon"
+    },
+    "demo": {
+      "appId": 5585210,
+      "internalTargetLocal": "2026-11-13T03:00:00+09:00",
+      "savedAndReadBack": true,
+      "publicDisplay": "Coming Soon",
+      "intent": "Release as soon as required approvals are obtained, with an internal goal before the November 15 AIGEN submission. This is not a guaranteed approval or release date."
+    }
+  },
+  "initialSupportRequirements": {
+    "basis": "Conservative initial supported configuration based on the current tested PC, existing build.log environment details and user-confirmed Steam-client testing.",
+    "minimumBenchmarkEstablished": false,
+    "lowSpecOrFpsThresholdMeasured": false,
+    "operatingSystem": "Windows 10 64-bit",
+    "processor": "AMD Ryzen 7 2700X",
+    "memoryGigabytes": 16,
+    "graphics": "NVIDIA GeForce GTX 1050 Ti 4 GB",
+    "directX": "11",
+    "storageGigabytes": 1,
+    "input": "Keyboard and mouse",
+    "network": "Internet connection required for online leaderboards",
+    "demoSavedAndSystemRequirementsChecklistComplete": true,
+    "fullGameFinalSaveAndReadBackConfirmed": true,
+    "fullGameReadBackUiResult": "All eight entered support-requirements fields persisted after saving and reloading; the parent Store Checklist is complete.",
+    "scope": "These are entered initial support requirements, not measured hardware minima or a guaranteed FPS claim. Both apps' saved requirements and completed store checklists have been confirmed."
+  },
+  "reviews": {
+    "demoStore": {
+      "submitted": true,
+      "state": "Review queue",
+      "submittedUiText": "Submitted for review on 8 Nov",
+      "observedAtLocal": "2026-11-09",
+      "ticketUrl": "https://help.steampowered.com/en/wizard/HelpRequest/HTX7B9FM4DTXR9",
+      "approved": false
+    },
+    "demoBuild": {
+      "submitted": false,
+      "checklistComplete": true,
+      "reviewNotesPrepared": true,
+      "requiredAttestation": "I have tested my demo on a different PC",
+      "differentPcTestConfirmed": false,
+      "blocker": "Final submission requires confirmation of testing on a different PC; the user has been asked and confirmation is pending."
+    },
+    "fullGameStore": {
+      "submitted": true,
+      "state": "Review queue",
+      "submittedUiText": "Submitted for review on 8 Nov",
+      "observedAtLocal": "2026-11-09",
+      "ticketUrl": "https://help.steampowered.com/en/wizard/HelpRequest/HT9RHWDX2GM72Y",
+      "uiProcessingEstimate": "3-5 business days",
+      "approved": false,
+      "scope": "Parent Coming Soon store review submitted; the UI processing estimate is not an approval guarantee."
+    }
   },
   "requiredBeforeReview": [
-    "Upload revised full/demo store capsules and library assets.",
-    "Upload at least five actual gameplay screenshots to the parent store.",
-    "Establish game-specific minimum system requirements; no untested CPU/RAM/GPU claims have been entered.",
-    "Complete Steam planned-release-date fields. Developer states the full game schedule is undecided; no invented date entered.",
-    "Submit the parent store and abbreviated demo store for Valve review, then submit the demo build when available."
+    "Confirm the required different-PC test attestation, then submit the demo build for review. Both parent and demo stores are already in the review queue."
   ],
   "requirementsSources": [
     "https://partner.steamgames.com/doc/store/application/demos?l=english",
