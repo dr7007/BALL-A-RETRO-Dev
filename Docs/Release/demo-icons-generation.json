@@ -1,0 +1,25 @@
+{
+  "method": "OpenAI built-in image_gen imagegen",
+  "usage": "Player-facing Steam demo choice sprites. Pre-generated AI artwork; disclose in Steam content survey.",
+  "prompts": [
+    {
+      "key": "capacitor",
+      "prompt": "Use case: stylized-concept. Asset type: original square transparent 2D upgrade-card sprite for BALL-A-RETRO neon arcade pinball roguelike, readable at 128 pixels. Style: polished angular neon tube illustration, bright solid white cores with electric cyan and violet contours, small lime highlights, restrained crisp glow, slightly isometric depth. A single centered standalone symbol occupies about 72% of the square, generous margins. Genuine transparent alpha background; no wall, no floor, no shadow plane, no card border. No words, numbers, logos, signatures, watermarks. No collage, just one icon. Keep all glow within the canvas. Subject: a futuristic circular pinball bumper functioning as an energy capacitor, two broad luminous cyan coil rings around a dark core, one short bright lime lightning arc going from the bumper into a small clearly defined violet black-hole ring beside it. Bold simple silhouette and clean readable connection. The meaning is store energy through bumper hits, discharge into a black hole. Avoid a generic battery or an ordinary plug."
+    },
+    {
+      "key": "last-ball",
+      "prompt": "Use case: stylized-concept. Asset type: original square transparent 2D upgrade-card sprite for BALL-A-RETRO neon arcade pinball roguelike, readable at 128 pixels. Style: polished angular neon tube illustration, bright solid white cores with electric cyan and violet contours, small lime highlights, restrained crisp glow, slightly isometric depth. A single centered standalone symbol occupies about 72% of the square, generous margins. Genuine transparent alpha background; no wall, no floor, no shadow plane, no card border. No words, numbers, logos, signatures, watermarks. No collage, just one icon. Keep all glow within the canvas. Subject: exactly ONE large glossy arcade pinball with a luminous violet-red central core and bright cyan outer rim, cradled by a short sweeping lime upward crescent, with one sharp violet flame flare behind the top. A strong heroic last-chance power-up symbol, clear large circular silhouette. No extra balls, no plus sign, no shield, no lettering."
+    }
+  ],
+  "revisionPrompt": "Edit this one transparent neon pinball upgrade sprite. Preserve the exact single ball, magenta flame, cyan rim, lime crescent, materials and colors. Scale the ENTIRE complete illustration down uniformly so it fits fully within the central 72% of a square canvas, with at least 12% fully transparent padding on all four sides. Reconstruct the small tip of the flame if cropped. Keep the complete flame and all glow entirely inside the margins. Genuinely transparent background, no other change, no border, no text.",
+  "assets": [
+    {
+      "path": "Assets/Resources/Demo/Choice_Capacitor.png",
+      "sha256": "e221447bd4d367707cecce85b0f235314f97bf9c3f268c354eb3012ce6d00d8c"
+    },
+    {
+      "path": "Assets/Resources/Demo/Choice_LastBall.png",
+      "sha256": "b81e5a4aa981da5c2f03c5577ea7868bd561da77e7536e30762e03a1a7c68294"
+    }
+  ]
+}
