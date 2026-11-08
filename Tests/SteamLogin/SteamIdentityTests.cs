@@ -10,7 +10,8 @@ public class SteamIdentityTests
     BallARetroSteamSettings settings;
     GameObject input;
     uint originalId;
-    readonly FieldInfo appId = typeof(BallARetroSteamSettings).GetField("steamAppId", BindingFlags.Instance | BindingFlags.NonPublic);
+    readonly FieldInfo appId = typeof(BallARetroSteamSettings).GetField(
+        BallARetroPlatform.IsDemoBuild ? "demoAppId" : "steamAppId", BindingFlags.Instance | BindingFlags.NonPublic);
     [SetUp] public void Setup()
     {
         Assert.That(BallARetroPlatform.IsSteamBuild, Is.True);

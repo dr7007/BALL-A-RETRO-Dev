@@ -17,6 +17,8 @@ public class ScoreRow
 public class SubmitResp
 {
     public bool ok;
+    // Demo score saved locally while online ranking is unavailable.
+    public bool local_only;
     public int insert_id;
     public int your_score;
     public int rank;
@@ -28,6 +30,7 @@ public class SubmitResp
 public class LbResp
 {
     public bool ok;
+    public bool local_only;
     public ScoreRow[] top10;
     // A logged-in player without a submitted record has rank 0.
     public ScoreRow personal;

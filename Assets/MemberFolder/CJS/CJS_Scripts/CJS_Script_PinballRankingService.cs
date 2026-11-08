@@ -71,12 +71,17 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     {
         get
         {
+            if (BallARetroPlatform.IsDemoBuild)
+                return SteamManager.TryGetExistingLoggedInPlayer(out string demoName, out _) ? demoName : "Guest";
             if (BallARetroPlatform.IsSteamBuild)
                 return SteamManager.TryGetLoggedInPlayer(out string name, out _) ? name : string.Empty;
             return PlayerPrefs.GetString("nickname", "");
         }
         set
         {
+            // Demo scores use the live Steam name (or Guest offline); they must
+            // never overwrite the full game's stored nickname in editor tests.
+            if (BallARetroPlatform.IsDemoBuild) return;
             if (BallARetroPlatform.IsSteamBuild)
             {
                 if (!SteamManager.TryGetLoggedInPlayer(out string name, out _)) return;
@@ -126,7 +131,7 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     private IEnumerator CoRegisterNickname(System.Action onDone, System.Action<string> onFail)
     {
         // Steam identifies players itself; no nickname registration service is needed.
-        if (BallARetroPlatform.IsSteamBuild && !SteamManager.TryGetLoggedInPlayer(out _, out _))
+        if (BallARetroPlatform.UsesSteamLeaderboards && !BallARetroPlatform.IsDemoBuild && !SteamManager.TryGetLoggedInPlayer(out _, out _))
         { onFail?.Invoke("Steam login required"); yield break; }
         yield return null;
         onDone?.Invoke();
@@ -136,7 +141,18 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
         System.Action<SubmitResp> onDone, System.Action<string> onFail, int step)
     {
         if (score < 0) { onFail?.Invoke("Score must not be negative."); yield break; }
-        if (BallARetroPlatform.IsSteamBuild)
+        if (BallARetroPlatform.IsDemoBuild)
+        {
+            // Keep the local best even if Steam is offline, the request fails,
+            // or the player leaves the result screen while callbacks are pending.
+            var demoRows = BallARetroPersonalRecordStore.Submit(Nickname, score, gameMode, level);
+            var local = new SubmitResp { ok = true, local_only = true, your_score = score, rank = 0, top10 = demoRows };
+            yield return null;
+            if (!SteamManager.TryGetExistingLoggedInPlayer(out _, out _)) { onDone?.Invoke(local); yield break; }
+            SteamLeaderboard.Submit(score, gameMode, level, onDone, _ => onDone?.Invoke(local), step);
+            yield break;
+        }
+        if (BallARetroPlatform.UsesSteamLeaderboards)
         {
             SteamLeaderboard.Submit(score, gameMode, level, onDone, onFail, step);
             yield break;
@@ -150,7 +166,17 @@ public class CJS_Script_PinballRankingService : MonoBehaviour
     private IEnumerator CoFetch(string gameMode, int level,
         System.Action<LbResp> onDone, System.Action<string> onFail)
     {
-        if (BallARetroPlatform.IsSteamBuild)
+        if (BallARetroPlatform.IsDemoBuild)
+        {
+            // Offline local best is displayed separately; never manufacture a
+            // global rank from a personal record or initialize Steam for this UI.
+            var local = new LbResp { ok = true, local_only = true, top10 = System.Array.Empty<ScoreRow>() };
+            yield return null;
+            if (!SteamManager.TryGetExistingLoggedInPlayer(out _, out _)) { onDone?.Invoke(local); yield break; }
+            SteamLeaderboard.Fetch(gameMode, level, onDone, _ => onDone?.Invoke(local));
+            yield break;
+        }
+        if (BallARetroPlatform.UsesSteamLeaderboards)
         {
             SteamLeaderboard.Fetch(gameMode, level, onDone, onFail);
             yield break;

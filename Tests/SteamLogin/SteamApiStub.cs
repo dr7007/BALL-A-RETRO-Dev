@@ -4,7 +4,12 @@ namespace Steamworks
 {
     public static class Fixture
     {
-        public const uint AppId = 123456; // Synthetic test ID, never a release setting.
+        // Synthetic test IDs, never release settings.
+#if BALLARETRO_DEMO
+        public const uint AppId = 654321;
+#else
+        public const uint AppId = 123456;
+#endif
         public static bool LoggedOn, InitResult;
         public static uint RuntimeAppId, RestartAppId;
         public static ulong UserId;
