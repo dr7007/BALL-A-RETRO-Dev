@@ -230,7 +230,13 @@ public class BallARetroSceneProbe : MonoBehaviour
         BallARetroPersonalRecordStore.Submit("Reviewer", 9000, "ReleaseSmoke", 1);
         BallARetroPersonalRecordStore.Submit("Reviewer", 5000, "ReleaseSmoke", 1);
         Check(BallARetroPersonalRecordStore.Read("Reviewer", "ReleaseSmoke", 1)[0].score == 9000, "Offline best survives lower score");
+        int loadStarts = 0;
+        Action countLoad = () => loadStarts++;
+        PSH.PSH_Script_SceneLoader.OnSceneLoadStart += countLoad;
         lobby.OnClick_Tutorial();
+        lobby.OnClick_Tutorial();
+        Check(loadStarts == 1, "Repeated menu activation starts only one scene load");
+        PSH.PSH_Script_SceneLoader.OnSceneLoadStart -= countLoad;
         yield return null;
         var loadingVfx = Object.FindFirstObjectByType<BallARetroLoadingVfx>();
         Check(loadingVfx != null && !loadingVfx.raycastTarget, "Original loading particles appear without intercepting input");
@@ -238,9 +244,25 @@ public class BallARetroSceneProbe : MonoBehaviour
             "Loading indicator does not depend on the outgoing scene camera");
         var loadingBackdrop = loadingVfx.transform.parent.GetComponent<UnityEngine.UI.Image>();
         Check(loadingBackdrop != null && loadingBackdrop.enabled && loadingBackdrop.raycastTarget
-            && loadingBackdrop.color.a == 1, "Loading backdrop covers the previous menu and blocks duplicate clicks");
+            && loadingBackdrop.color.a == 0, "Loading blocker keeps the lobby visible and blocks duplicate clicks");
+        var rowButtons = lobby.GetComponentsInChildren<PSH_Script_StartButton>();
+        var buttonBounds = rowButtons.Select(button => ScreenBounds((RectTransform)button.transform)).ToArray();
+        var indicatorBounds = ScreenBounds(loadingVfx.rectTransform);
+        Check(buttonBounds.Length == 2 && indicatorBounds.yMax < buttonBounds.Min(rect => rect.yMin)
+            && indicatorBounds.yMin >= 0, "Loading indicator sits fully below the middle menu buttons");
+        var rowBounds = ScreenBounds((RectTransform)rowButtons[0].transform.parent);
+        Check(Mathf.Abs(indicatorBounds.center.x - rowBounds.center.x) < 2,
+            "Loading indicator is centered beneath the menu row");
+        var loadingHits = new List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(new UnityEngine.EventSystems.PointerEventData(
+            UnityEngine.EventSystems.EventSystem.current) { position = buttonBounds[0].center }, loadingHits);
+        Check(loadingHits.Count > 0 && loadingHits[0].gameObject == loadingBackdrop.gameObject,
+            "Transparent loading panel blocks clicks reaching the menu");
         CaptureFrame("loading-original");
+        CaptureFrame("loading-1280x720", width: 1280, height: 720);
+        CaptureFrame("loading-1024x768", width: 1024, height: 768);
         while (SceneManager.GetActiveScene().name != "Main_Scene_Tutorial") yield return null;
+        Check(!loadingVfx.gameObject.activeInHierarchy, "Loading indicator is hidden on destination scene activation");
         yield return new WaitForSecondsRealtime(4);
         var tutorial = Object.FindFirstObjectByType<CJS_TutorialDirector>();
         Check(tutorial != null && tutorial.scoreManager != null && tutorial.plunger != null, "Full tutorial scene initializes with score and plunger");
@@ -288,14 +310,22 @@ public class BallARetroSceneProbe : MonoBehaviour
             "No borrowed VFX Graph portal remains in the game scene");
         Check(portals.All(p => p.GetComponent<ParticleSystemRenderer>().sharedMaterial.shader.name == "BALL-A-RETRO/Original Pixel Particle"
             && p.GetComponent<ParticleSystemRenderer>().sharedMaterial.shader.isSupported), "Original portal shader is supported on the active graphics device");
+        Check(portals.All(p => p.GetComponent<ParticleSystem>().main.scalingMode == ParticleSystemScalingMode.Hierarchy),
+            "Portal particles follow the original parent scale in the board hierarchy");
         var activePortal = portals.First(p => p.gameObject.activeInHierarchy);
         var system = activePortal.GetComponent<ParticleSystem>();
-        var particleBuffer = new ParticleSystem.Particle[144];
-        Check(system.GetParticles(particleBuffer) == 144, "Original portal emits its bounded particle count");
-        var firstPosition = particleBuffer[0].position;
+        var particleBuffer = new ParticleSystem.Particle[BallARetroPortalVfx.ParticleBudget];
+        Check(system.GetParticles(particleBuffer) > 0 && system.particleCount <= BallARetroPortalVfx.ParticleBudget,
+            "Original portal stays within its bounded particle budget");
+        var firstPositions = particleBuffer.Select(p => p.position).ToArray();
         yield return new WaitForSecondsRealtime(.2f);
         system.GetParticles(particleBuffer);
-        Check((particleBuffer[0].position - firstPosition).sqrMagnitude > .000001f, "Original portal particles animate during gameplay");
+        Check(particleBuffer.Where((p, index) => (p.position - firstPositions[index]).sqrMagnitude > .000001f).Any(),
+            "Original portal particles animate during gameplay");
+        Check(portals.Count(p => new SerializedObject(p).FindProperty("style").enumValueIndex == 1) == 4,
+            "Four fire vortices retain their distinct visual role");
+        CheckPortalVisibility("game");
+        ExerciseRailVisibility(portals);
         bool previousParticles = PSH_Script_EffectSettings.ParticlesEnabled;
         PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.Particles, false);
         yield return null;
@@ -303,7 +333,48 @@ public class BallARetroSceneProbe : MonoBehaviour
         PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.Particles, true);
         yield return null;
         Check(portals.All(p => !p.GetComponent<ParticleSystemRenderer>().forceRenderingOff), "Particles ON restores every original portal renderer");
-        CapturePortal(activePortal);
+        CapturePortal(portals.First(p => p.name == "Original Portal blue"), "portal-halo-preview");
+        CapturePortal(portals.First(p => new SerializedObject(p).FindProperty("style").enumValueIndex == 1), "portal-fire-preview");
+        // Optional visual reference capture uses development-only originals. These
+        // prefabs remain excluded from the strict packed-assets release gate.
+        if (Environment.GetCommandLineArgs().Contains("-comparePortalBaseline"))
+        {
+            foreach (var item in new[] {
+                (path: "Assets/Public/Main_Game/Effect/Hovl Studio/Magic effects pack/Prefabs/Portals/Portal blue.prefab", radius: .7f, name: "portal-baseline-halo"),
+                (path: "Assets/Cool Visual Effects - Part 1/Effects/Portals/Portal2.prefab", radius: 2f, name: "portal-baseline-fire") })
+            {
+                var original = Object.Instantiate(AssetDatabase.LoadAssetAtPath<GameObject>(item.path));
+                original.transform.position = new Vector3(1000, 1000, 1000);
+                original.transform.rotation = Quaternion.identity;
+                foreach (var child in original.GetComponentsInChildren<Transform>()) child.gameObject.layer = 30;
+                var warmCameraObject = new GameObject("Reference VFX warmup camera", typeof(Camera));
+                var warmCamera = warmCameraObject.GetComponent<Camera>();
+                warmCamera.transform.position = original.transform.position + Vector3.forward * item.radius * 4;
+                warmCamera.transform.LookAt(original.transform.position, Vector3.up);
+                warmCamera.orthographic = true;
+                warmCamera.orthographicSize = item.radius * 1.8f;
+                warmCamera.cullingMask = 1 << 30;
+                var warmTarget = RenderTexture.GetTemporary(256, 256, 24);
+                warmCamera.targetTexture = warmTarget;
+                yield return new WaitForSecondsRealtime(1.5f);
+                foreach (var effect in original.GetComponentsInChildren<UnityEngine.VFX.VisualEffect>())
+                {
+                    effect.Reinit();
+                    effect.Simulate(1f / 60, 120);
+                }
+                yield return null;
+                yield return null;
+                CaptureVisual(original, item.radius, item.name);
+                File.WriteAllLines(Path.Combine(output, item.name + "-state.txt"),
+                    original.GetComponentsInChildren<UnityEngine.VFX.VisualEffect>()
+                        .Select(effect => "culled=" + effect.culled + ", alive=" + effect.aliveParticleCount));
+                warmCamera.targetTexture = null;
+                Object.Destroy(warmCameraObject);
+                RenderTexture.ReleaseTemporary(warmTarget);
+                Object.Destroy(original);
+                yield return null;
+            }
+        }
         PSH_Script_EffectSettings.Set(PSH_Script_EffectSettings.Effect.Particles, previousParticles);
         foreach (string code in new[] { "ko", "en", "ja" })
         {
@@ -365,6 +436,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         || path.Contains("/VisualX_Studio/") || path.Contains("/Cool Visual Effects - Part 1/"));
     void CheckSceneVisualReferences(string scene)
     {
+        CheckPortalVisibility(scene);
         var materials = Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None)
             .SelectMany(renderer => renderer.sharedMaterials).Where(material => material != null).Distinct().ToArray();
         Check(!materials.Any(material => IsReplacedVendorVisual(AssetDatabase.GetAssetPath(material))
@@ -376,29 +448,97 @@ public class BallARetroSceneProbe : MonoBehaviour
         Check(trail != null && trail.shader.isSupported, "Original trail shader is assigned and supported in " + scene);
     }
     static void EmitUI(ScriptableRenderContext context, Camera camera) => ScriptableRenderContext.EmitGeometryForCamera(camera);
-    void CapturePortal(BallARetroPortalVfx portal)
+    static Rect ScreenBounds(RectTransform rect)
     {
-        int layer = portal.gameObject.layer;
+        var canvas = rect.GetComponentInParent<Canvas>();
+        var camera = canvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : canvas.worldCamera;
+        var corners = new Vector3[4];
+        rect.GetWorldCorners(corners);
+        var points = corners.Select(p => RectTransformUtility.WorldToScreenPoint(camera, p)).ToArray();
+        return Rect.MinMaxRect(points.Min(p => p.x), points.Min(p => p.y), points.Max(p => p.x), points.Max(p => p.y));
+    }
+    void CheckPortalVisibility(string scene)
+    {
+        int floor = LayerMask.NameToLayer("2F");
+        var portals = Object.FindObjectsByType<BallARetroPortalVfx>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        var floorPortals = portals.Where(p => p.name == "Original Portal red" || p.name == "Original Portal blue").ToArray();
+        Check(floorPortals.Length == 2 && floorPortals.All(p => p.gameObject.layer == floor),
+            "Red and blue portal effects retain the 2F layer: " + scene);
+        Check(portals.Except(floorPortals).All(p => p.gameObject.layer == 0),
+            "Yellow and fire portal effects retain their original layer: " + scene);
+        var cameras = Object.FindFirstObjectByType<KHS_Script_CameraManager>();
+        var mainCamera = cameras.cameraGos[0].GetComponent<Camera>();
+        Check((mainCamera.cullingMask & (1 << floor)) == 0,
+            "Main board camera hides floor portal effects before entry: " + scene);
+    }
+    void ExerciseRailVisibility(BallARetroPortalVfx[] portals)
+    {
+        const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        var entry = Object.FindObjectsByType<YJ_Script_RailEntrance>(FindObjectsSortMode.None)
+            .First(e => e.mainCam != null && e.railMover != null && e.railTimeline != null);
+        var exit = Object.FindObjectsByType<YJ_Script_RouletteEntrance>(FindObjectsSortMode.None)
+            .First(e => e.mainCam == entry.mainCam && e.railTimeline != null);
+        var ball = new GameObject("Rail visibility audit ball");
+        ball.SetActive(false);
+        ball.tag = "Ball";
+        var body = ball.AddComponent<Rigidbody>();
+        body.useGravity = false;
+        var collider = ball.AddComponent<SphereCollider>();
+        collider.isTrigger = true;
+        var controller = ball.AddComponent<YJ_Script_BallController>();
+        controller.enabled = false;
+        typeof(YJ_Script_BallController).GetField("rigidBody", flags).SetValue(controller, body);
+        ball.SetActive(true);
+        int layerBit = 1 << LayerMask.NameToLayer("2F");
+        bool triggerWasEnabled = entry.GetComponent<Collider>().enabled;
+        for (int pass = 0; pass < 2; pass++)
+        {
+            typeof(YJ_Script_RailEntrance).GetMethod("OnTriggerEnter", flags).Invoke(entry, new object[] { collider });
+            Check((entry.mainCam.cullingMask & layerBit) != 0,
+                "Actual rail entry exposes 2F portal effects: pass " + pass);
+            if (pass == 0) CaptureFrame("game-portals-floor-visible", entry.mainCam);
+            entry.railTimeline.Stop();
+            typeof(YJ_Script_RouletteEntrance).GetField("capturedBall", flags).SetValue(exit, controller);
+            typeof(YJ_Script_RouletteEntrance).GetMethod("OnRailRideEnd", flags).Invoke(exit, new object[] { exit.railTimeline });
+            Check((exit.mainCam.cullingMask & layerBit) == 0,
+                "Actual rail exit hides 2F portal effects again: pass " + pass);
+        }
+        entry.GetComponent<Collider>().enabled = triggerWasEnabled;
+        Object.Destroy(ball);
+        CaptureFrame("game-portals-hidden-after-exit", entry.mainCam);
+    }
+    void CapturePortal(BallARetroPortalVfx portal, string name)
+    {
+        var clone = Object.Instantiate(portal.gameObject);
+        clone.transform.SetParent(null);
+        clone.transform.position = new Vector3(1000, 1000, 1000);
+        clone.transform.rotation = Quaternion.identity;
+        clone.transform.localScale = Vector3.one;
+        try { CaptureVisual(clone, new SerializedObject(portal).FindProperty("radius").floatValue, name); }
+        finally { Object.DestroyImmediate(clone); }
+    }
+    void CaptureVisual(GameObject visual, float radius, string name)
+    {
+        var layers = visual.GetComponentsInChildren<Transform>(true).Select(t => (go: t.gameObject, layer: t.gameObject.layer)).ToArray();
         var cameraObject = new GameObject("Original portal preview", typeof(Camera));
         var camera = cameraObject.GetComponent<Camera>();
         camera.enabled = false;
-        float radius = new SerializedObject(portal).FindProperty("radius").floatValue * Mathf.Abs(portal.transform.lossyScale.x);
-        camera.transform.position = portal.transform.position + portal.transform.forward * Mathf.Max(radius * 4, 1);
-        camera.transform.LookAt(portal.transform.position, portal.transform.up);
+        camera.transform.position = visual.transform.position + visual.transform.forward * Mathf.Max(radius * 4, 1);
+        camera.transform.LookAt(visual.transform.position, visual.transform.up);
         camera.orthographic = true;
-        camera.orthographicSize = radius * 1.4f;
+        camera.orthographicSize = radius * 1.8f;
         camera.nearClipPlane = .01f;
         camera.clearFlags = CameraClearFlags.SolidColor;
         camera.backgroundColor = new Color(.015f, .025f, .04f);
         camera.cullingMask = 1 << 30;
         try
         {
-            portal.gameObject.layer = 30;
-            CaptureFrame("portal-original-preview", camera);
+            foreach (var item in layers) item.go.layer = 30;
+            CaptureFrame(name, camera);
         }
         finally
         {
-            portal.gameObject.layer = layer;
+            foreach (var item in layers) item.go.layer = item.layer;
             Object.Destroy(cameraObject);
         }
     }
@@ -430,6 +570,7 @@ public class BallARetroSceneProbe : MonoBehaviour
                 item.canvas.planeDistance = camera.nearClipPlane + 0.1f;
             }
             Canvas.ForceUpdateCanvases();
+            RefreshLoadingLayout();
             RenderPipeline.SubmitRenderRequest(camera, new RenderPipeline.StandardRequest { destination = target });
             RenderTexture.active = target;
             pixels = new Texture2D(target.width, target.height, TextureFormat.RGB24, false);
@@ -450,10 +591,18 @@ public class BallARetroSceneProbe : MonoBehaviour
                 item.canvas.planeDistance = item.distance;
             }
             Canvas.ForceUpdateCanvases();
+            RefreshLoadingLayout();
             RenderTexture.active = previous;
             RenderTexture.ReleaseTemporary(target);
             if (pixels != null) Object.Destroy(pixels);
         }
+    }
+    static void RefreshLoadingLayout()
+    {
+        foreach (var loading in Object.FindObjectsByType<BallARetroLoadingVfx>(FindObjectsSortMode.None))
+            typeof(BallARetroLoadingVfx).GetMethod("PositionBelowLobbyButtons",
+                System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic).Invoke(loading, null);
+        Canvas.ForceUpdateCanvases();
     }
     void Finish()
     {
