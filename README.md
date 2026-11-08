@@ -71,6 +71,34 @@ Steam App ID는 `Assets/Resources/Release/SteamSettings.asset`에 `5193980`으�
 Editor에서 Steam을 시험할 때만 `BALLARETRO_STEAM` define과 실제 ID를 담은 개발용
 `steam_appid.txt`를 사용하고, 시험 후 define을 제거하면 스토브 기본 모드로 돌아갑니다.
 
+열린 개발 프로젝트를 건드리지 않는 Steam Win64 배치 빌드는 PowerShell 7에서 실행합니다.
+아래 출력 경로는 매번 새 폴더를 사용합니다. 빌드·압축·압축 해제 모두 실제 컴파일된
+플랫폼, Steam 초기화 코드, Steamworks.NET과 일치하는 x64 DLL 하나, 개발용 App ID 제외를 검사합니다.
+
+```powershell
+./Tests/Release/Build-SteamReview.ps1 -OutputRoot D:/ball-a-retro-validation/steam-new
+./Tests/Release/Package-StoveReview.ps1 -Platform Steam -PlayerRoot D:/ball-a-retro-validation/steam-new/player -OutputZip D:/ball-a-retro-validation/steam-new/BALL-A-RETRO_Steam_Win64.zip
+./Tests/Release/Prepare-Upload.ps1 -Platform Steam -ArchivePath D:/ball-a-retro-validation/steam-new/BALL-A-RETRO_Steam_Win64.zip -OutputDirectory D:/ball-a-retro-validation/steam-new/upload
+```
+
+공통 패키징 스크립트의 기본 플랫폼은 기존대로 STOVE입니다. Steam에서는
+`Assets/Resources/Release/SteamSettings.asset`를 포함하고 샘플 IAP 설정은 제외합니다.
+이 빌드는 현재 본편 App ID와 전체 콘텐츠를 사용합니다. 별도 Demo App ID와 콘텐츠 범위를
+설정하기 전에는 Steam 데모로 취급하지 않습니다. 자동 검사는 실제 Steam 계정 인증,
+클라이언트 설치·실행, 오버레이와 서버 리더보드 검증을 대신하지 않습니다.
+
+Steam을 실행하지 않은 환경의 시작 검사는 `Tests/Release/Run-SteamOfflineSmoke.ps1`
+`-PlayerRoot <upload 폴더> -EvidenceRoot <새 외부 증거 폴더>`로 수행합니다.
+검사 도구는 원본과 해시가 일치하는 별도 복사본에만 개발용 App ID를 넣고 30초간 실행합니다.
+로비·그래픽·현지화된 광과민성 안내·Steam DLL 로드와 클라이언트 부재에 따른 초기화 실패를 확인합니다.
+배포 폴더는 변경하지 않으며, 이 결과도 실제 Steam 클라이언트 시험을 대신하지 않습니다.
+
+2026-11-09 Steam 후보 `91fd920`은 빌드, 컴파일 결과 검사 8개, 포함 에셋 3,412개,
+자동 회귀 검사 28개, 배포 파일 304개 해시 및 30초 오프라인 시작 검사를 통과했습니다.
+상세 경로와 SHA-256, 검증 범위 및 남은 항목은
+[`Docs/Release/steam-candidate-v1.json`](Docs/Release/steam-candidate-v1.json)에 기록했습니다.
+현재 본편 콘텐츠의 내부 검증 후보이며 Steam 업로드·공개와 데모 생성은 진행하지 않았습니다.
+
 Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현재 계정에서 읽습니다.
 로비 오른쪽 아래 기존 랭킹 아이콘과 게임 결과의 기존 랭킹 버튼이 같은 **SCORE RANKING** 화면을 엽니다.
 검은 배경·초록 이중 테두리·순위별 색상으로 `RANK / NAME / STEP / SCORE`를 표시하며 기존 폰트를 유지합니다.

@@ -1,0 +1,52 @@
+{
+  "preparedAt": "2026-11-09T01:20:38.9761216+09:00",
+  "status": "internal-steam-candidate",
+  "platform": "Windows x64",
+  "version": "0.1.0",
+  "appId": 5193980,
+  "sourceCommit": "91fd9205d646bd3bf9406a5a7ab6601d70705cef",
+  "sourceBranch": "PSH_ALPHA",
+  "includesPreservedUserAssetChanges": true,
+  "demoBuild": false,
+  "demoAppId": null,
+  "uploadPerformed": false,
+  "published": false,
+  "releaseRoot": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1",
+  "uploadFolder": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/upload",
+  "archive": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/BALL-A-RETRO_Steam_0.1.0_91fd920_Win64.zip",
+  "archiveBytes": 137414804,
+  "archiveSha256": "111B6BDE3499F32EF8A691E2EFF44C5349E5951F0F8AC6EAEEC09271CDD17FE5",
+  "distributionFiles": 304,
+  "distributionBytes": 383758742,
+  "validation": {
+    "unityBuild": "succeeded",
+    "compiledPlayerChecks": 8,
+    "packedAssets": 3412,
+    "automatedSteamTestsPassed": 28,
+    "automatedSteamTestsFailed": 0,
+    "automatedSteamTestsUseMockApi": true,
+    "archiveAndExtractedFileHashes": "passed",
+    "offlineStartupSeconds": 30.094,
+    "offlineStartup": "passed",
+    "steamClientIntentionallyAbsent": true,
+    "nativeDll": "steam_api64.dll",
+    "nativeDllSha256": "E3FE06E2D802C2F753AEB46869E2AF898F34715CE85F08001456FD8A80ECD21E",
+    "protectedSourceAssetsUnchanged": 4,
+    "developmentAppIdInUpload": false
+  },
+  "evidence": {
+    "build": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/evidence/build.log",
+    "packedAssets": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/evidence/packed-assets.json",
+    "compiledPlayer": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/evidence/player-audit.json",
+    "userAssets": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/evidence/user-assets.json",
+    "offlineStartup": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/offline-smoke/result.json",
+    "tests": "D:/ball-a-retro-validation/steam-release-20261109/tests-steam/results.xml",
+    "steamworksReadOnlyStatus": "D:\\ball-a-retro-validation\\steam-release-20261109\\candidate-v1/evidence/steamworks-status.json"
+  },
+  "pending": [
+    "Choose and implement demo scope with a separate Demo App ID before producing a demo build.",
+    "Upload and configure the chosen app/depot/launch options.",
+    "Install and launch through the Steam PC client; validate authentication, overlay, leaderboard and required playtime.",
+    "Finish store assets, content survey and release review."
+  ]
+}
