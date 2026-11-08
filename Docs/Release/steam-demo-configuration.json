@@ -12,7 +12,7 @@
   "releaseState": "unavailable",
   "publiclyReleased": false,
   "storeReviewSubmitted": true,
-  "buildReviewSubmitted": false,
+  "buildReviewSubmitted": true,
   "standaloneDemoStorePageRequested": false,
   "technicalConfiguration": {
     "published": true,
@@ -43,14 +43,14 @@
     "mode": "Standard"
   },
   "uploadedCandidate": {
-    "sourceCommit": "d84a4d41757624ceb65db38bb48ebe87a10766b5",
-    "buildId": 26524160,
-    "manifestId": "7888680335241741121",
+    "sourceCommit": "7b3ca8ac0ac506c67fad5bbb016e54b6c7e3316d",
+    "buildId": 26525930,
+    "manifestId": "6918654985808185524",
     "branch": "default",
     "applied": true,
     "downloadMegabytesReportedBySteam": 126.2,
     "diskMegabytesReportedBySteam": 385.4,
-    "receipt": "Docs/Release/steam-demo-candidate-v2.json"
+    "receipt": "Docs/Release/steam-demo-candidate-v3.json"
   },
   "clientChecklist": {
     "observedAt": "2026-11-09",
@@ -67,7 +67,7 @@
     "plannedReleaseDateChecklistComplete": true,
     "systemRequirementsChecklistComplete": true,
     "remainingRequiredStoreItems": [],
-    "scope": "Steamworks demo store and build checklists are complete. The store was submitted for review. Build submission still requires the separate final attestation of testing on a different PC. This UI check is not a new manual gameplay test; candidate-v2 validation is recorded separately."
+    "scope": "Steamworks demo store and build checklists are complete; both are in the review queue. The user confirmed playing the preceding demo through Steam on a different PC, where the fixed-choice issue was discovered. Candidate-v3 corrects that issue and passed 44 automated tests plus 149 instrumented real-scene checks locally; it has not been manually retested on the separate PC. This scope was disclosed in the build review notes."
   },
   "plannedRelease": {
     "internalTargetLocal": "2026-11-13T03:00:00+09:00",
@@ -100,15 +100,21 @@
       "approved": false
     },
     "build": {
-      "submitted": false,
+      "submitted": true,
+      "state": "Review queue",
+      "submittedUiText": "Submitted for review on 8 Nov",
+      "observedAtLocal": "2026-11-09T05:22:40+09:00",
+      "ticketUrl": "https://help.steampowered.com/en/wizard/HelpRequest/HTXGT6D6XFYB57",
+      "reviewTargetBuildId": 26525930,
+      "approved": false,
       "reviewNotesPrepared": true,
       "requiredAttestation": "I have tested my demo on a different PC",
-      "differentPcTestConfirmed": false,
-      "blocker": "User confirmation of testing on a different PC is pending."
+      "differentPcTestConfirmed": true,
+      "differentPcTestScope": "User-confirmed Steam installation and play on another PC with the preceding demo; exact installed Build ID not independently captured. Candidate-v3 has local automated and instrumented real-scene validation, not a new second-PC manual retest.",
+      "blocker": null
     }
   },
   "remainingBeforePublicRelease": [
-    "Confirm the required different-PC test attestation and submit the demo build for review; the store is already in the review queue.",
-    "Receive the required Steam approvals and complete base-game Coming Soon/public-demo release steps. Both parent and demo stores are submitted for review; no public release has occurred. See steam-store-release-status.json for the parent ticket and current release record."
+    "Receive the required Steam approvals and complete base-game Coming Soon/public-demo release steps. Both parent and demo stores and the demo build are in their review queues; no public release has occurred. See steam-store-release-status.json for review tickets and the current release record."
   ]
 }

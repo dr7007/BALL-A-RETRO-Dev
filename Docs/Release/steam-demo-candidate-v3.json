@@ -1,0 +1,177 @@
+{
+  "candidate": "SteamDemo candidate-v3",
+  "createdAt": "2026-11-09T05:00:37.6525624+09:00",
+  "sourceCommit": "7b3ca8ac0ac506c67fad5bbb016e54b6c7e3316d",
+  "branch": "PSH_ALPHA",
+  "includesUncommittedUserAssets": true,
+  "changes": [
+    "Demo offers draw three distinct eligible cards from all nine existing effects and two demo strategies, using a shared demo weight scale.",
+    "At most one bonus-map-only card per offer; disabled, non-positive-weight, consumed one-time, and maxed strategy cards are excluded.",
+    "Choice IDs identify consumed effects independently of list order.",
+    "The +20% run score upgrade remains through combo, ball-out and round changes; resets with a new run."
+  ],
+  "commits": [
+    {
+      "id": "7f57253",
+      "scope": "Random demo offers and regression tests"
+    },
+    {
+      "id": "cdc6edc",
+      "scope": "Persistent run score upgrade and regression tests"
+    },
+    {
+      "id": "af6b99e",
+      "scope": "Integrate remote Tab history without losing the multilingual font fix"
+    },
+    {
+      "id": "7b3ca8a",
+      "scope": "Require clean player-data rebuild and complete packed-asset evidence"
+    }
+  ],
+  "preservedScope": [
+    "Three rounds and three total picks",
+    "Demo-specific online leaderboard and local personal best",
+    "Tab upgrade history",
+    "Korean, English and Japanese interfaces"
+  ],
+  "protectedAssets": [
+    {
+      "path": "Assets/Public/Font/Galmuri11 SDF_dialogue.asset",
+      "sha256": "C9A06E901745F38300287F82458BB8692E403C1B004C86AE155E9E26B97E04D4",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/Public/Font/Galmuri11-Bold SDF.asset",
+      "sha256": "16A0A6E39D8D3F159BEF07ABBBF4DA0F2F9D01A28525195847E5A656EAB657D7",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/MemberFolder/KHS/KHS_Materials/KHS_Mat_Ball.mat",
+      "sha256": "9F42CBFBBF197F5D0AA7BD07CE3BDFD2AAD13E4B6730F214C12A77AFA419F4D4",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/Public/Font/Galmuri11 SDF.asset",
+      "sha256": "B27648E60457736A9C43FE9F299A53AEF19FF75471802C3500CD0664B18DB858",
+      "preserved": true,
+      "committed": false
+    }
+  ],
+  "automatedTests": [
+    {
+      "suite": "random-choices-tests-v1",
+      "passed": "24",
+      "failed": "0",
+      "skipped": "0",
+      "report": "D:/ball-a-retro-validation/steam-demo-20261109/random-choices-tests-v1/results.xml"
+    },
+    {
+      "suite": "score-upgrade-full-v1",
+      "passed": "10",
+      "failed": "0",
+      "skipped": "0",
+      "report": "D:/ball-a-retro-validation/steam-demo-20261109/score-upgrade-full-v1/results.xml"
+    },
+    {
+      "suite": "score-upgrade-demo-v1",
+      "passed": "10",
+      "failed": "0",
+      "skipped": "0",
+      "report": "D:/ball-a-retro-validation/steam-demo-20261109/score-upgrade-demo-v1/results.xml"
+    }
+  ],
+  "originalScoreBugReproduction": {
+    "report": "D:/ball-a-retro-validation/steam-demo-20261109/score-upgrade-baseline-v1/results.xml",
+    "passed": 4,
+    "failed": 6,
+    "scope": "Tests against the pre-fix source demonstrate the old upgrade loss; the corrected full and demo variants pass."
+  },
+  "artifact": {
+    "zip": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v3/BALL-A-RETRO_SteamDemo_0.1.0_7b3ca8a_Win64.zip",
+    "bytes": 137675313,
+    "sha256": "814A0FAE21C0FA0F498D6B2A179E488F23F21EE85548D3426C3D324AB3931379",
+    "fileCount": 304,
+    "uncompressedBytes": 385368794.0,
+    "uploadDirectory": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v3/upload",
+    "archiveEntriesMatchPlayer": true,
+    "extractedFilesVerified": true
+  },
+  "realSceneFlow": {
+    "passed": true,
+    "checks": 149,
+    "report": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v3/evidence/random-demo-scene-v1/demo-scene-audit.json",
+    "scope": "Real release scenes/prefabs, serialized callbacks, intro/banner/retry coroutines. Seeded random offers exercise specific upgrade callbacks without replacing the real choice pool. Ball held stationary; real accepted bumper-trigger callbacks drive round scoring. Steam SDK disabled only in this editor audit; not a manual physics or client authentication test.",
+    "restoration": {
+      "steamManagerRestored": true,
+      "projectSettingsRestored": true,
+      "probeRemoved": true
+    }
+  },
+  "steam": {
+    "appId": 5585210,
+    "parentAppId": 5193980,
+    "depotId": 5585211,
+    "buildId": 26525930,
+    "manifestId": "6918654985808185524",
+    "uploadState": "complete",
+    "branch": "default",
+    "branchApplied": true,
+    "buildDetailsUrl": "https://partner.steamgames.com/apps/builddetails/5585210/26525930",
+    "downloadMegabytesReportedBySteam": 126.2,
+    "diskMegabytesReportedBySteam": 385.4,
+    "uploadAttempts": 2,
+    "uploadRetryScope": "The first HTTP upload returned Failure without creating a build. A fresh-page retry of the same verified ZIP completed, then build 26525930 was committed and applied to default.",
+    "publiclyReleased": false,
+    "buildReviewSubmitted": true,
+    "buildReviewState": "Review queue",
+    "buildReviewApproved": false,
+    "buildReviewTicketUrl": "https://help.steampowered.com/en/wizard/HelpRequest/HTXGT6D6XFYB57",
+    "buildReviewSubmittedUiText": "Submitted for review on 8 Nov",
+    "buildReviewObservedAtLocal": "2026-11-09T05:22:40+09:00",
+    "buildReviewNotesScope": "Review target 26525930; launch executable, controls, demo scope and languages; previous-build second-PC test and lack of a second-PC manual retest of this candidate; 44 automated tests and 149 instrumented scene checks; November 15 AIGEN deadline without claiming expedited approval.",
+    "differentPcTestConfirmed": true,
+    "differentPcTestEvidence": "User confirmed playing the Steam demo on another PC and discovering the fixed-choice problem there. This was before candidate-v3; the exact installed Build ID on that PC was not independently captured."
+  },
+  "limitations": [
+    "The second-PC playtest was on the preceding demo, before this choice-randomization update; this candidate receives automated and real-scene checks locally.",
+    "Random selection may legitimately repeat some cards or an offer across different runs."
+  ],
+  "integrationMerge": {
+    "commit": "af6b99e",
+    "incoming": "94dd1a1077055228e81562a6c1993cb94574c564",
+    "resolution": "Preserved explicit multilingual hint font and matching tests; incoming Tab/input/focus behavior was otherwise identical.",
+    "assetAndTestTreeMatchesBuildSource": true,
+    "conflictsRemaining": 0,
+    "backup": "D:/ball-a-retro-validation/steam-demo-20261109/merge-94dd1a1-backup"
+  },
+  "buildAuditCorrection": {
+    "initialAttemptRejected": true,
+    "reason": "Incremental script-only build produced no packed-asset inventory.",
+    "preservedAttempt": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v3/evidence-incremental-rejected",
+    "resolution": "CleanBuildCache plus DetailedBuildReport; empty inventory fails inside the builder.",
+    "unityReference": "https://docs.unity3d.com/6000.0/Documentation/ScriptReference/BuildOptions.CleanBuildCache.html"
+  },
+  "playerAudit": {
+    "passed": true,
+    "report": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v3/evidence/player-audit.json"
+  },
+  "packedAssetAudit": {
+    "passed": true,
+    "assetCount": 3417,
+    "report": "D:/ball-a-retro-validation/steam-demo-20261109/candidate-v3/evidence/packed-assets.json",
+    "scenes": [
+      "Assets/MainScenes/Main_Scene_Lobby.unity",
+      "Assets/MainScenes/Main_Scene_Tutorial.unity",
+      "Assets/MainScenes/Main_Scene_Game.unity"
+    ]
+  },
+  "snapshotProvenance": {
+    "runtimeSourcesMatch": true,
+    "comparison": "ChoiceRoller, ScoreManager, RogueLikeManager, QuickChoiceOnOff and RunStatusUI match repository after line-ending normalization; the builder matches byte-for-byte.",
+    "sourceProtectedAssetsUnchanged": true,
+    "snapshotFontCacheNote": "The isolated Galmuri11 SDF snapshot contains generated glyph/atlas changes after build and scene audit; the original user font SHA256 remains unchanged."
+  }
+}

@@ -3,17 +3,18 @@
   "recordedAtLocal": "2026-11-09",
   "fullGameAppId": 5193980,
   "demoAppId": 5585210,
-  "state": "both_store_reviews_queued_demo_build_confirmation_pending",
+  "state": "both_store_reviews_and_demo_build_review_queued",
   "storeReviewSubmitted": true,
   "storeReviewScope": "Both the parent Coming Soon store and demo store have been submitted for review.",
-  "buildReviewSubmitted": false,
+  "buildReviewSubmitted": true,
   "publiclyReleased": false,
   "currentDemoBuild": {
-    "buildId": 26524160,
-    "sourceCommit": "d84a4d41757624ceb65db38bb48ebe87a10766b5",
+    "buildId": 26525930,
+    "sourceCommit": "7b3ca8ac0ac506c67fad5bbb016e54b6c7e3316d",
+    "manifestId": "6918654985808185524",
     "branch": "default",
-    "receipt": "Docs/Release/steam-demo-candidate-v2.json",
-    "binaryChangedInThisWork": false
+    "receipt": "Docs/Release/steam-demo-candidate-v3.json",
+    "binaryChangedInThisWork": true
   },
   "identity": {
     "developer": "G-PIN",
@@ -184,12 +185,19 @@
       "approved": false
     },
     "demoBuild": {
-      "submitted": false,
+      "submitted": true,
+      "state": "Review queue",
+      "submittedUiText": "Submitted for review on 8 Nov",
+      "observedAtLocal": "2026-11-09T05:22:40+09:00",
+      "ticketUrl": "https://help.steampowered.com/en/wizard/HelpRequest/HTXGT6D6XFYB57",
+      "reviewTargetBuildId": 26525930,
+      "approved": false,
       "checklistComplete": true,
       "reviewNotesPrepared": true,
       "requiredAttestation": "I have tested my demo on a different PC",
-      "differentPcTestConfirmed": false,
-      "blocker": "Final submission requires confirmation of testing on a different PC; the user has been asked and confirmation is pending."
+      "differentPcTestConfirmed": true,
+      "differentPcTestScope": "The user installed and played the preceding Steam demo on another PC and discovered the fixed-choice issue there. The updated candidate has not been manually retested on that PC; local automated and instrumented scene checks passed. Both facts were disclosed in the review notes.",
+      "blocker": null
     },
     "fullGameStore": {
       "submitted": true,
@@ -202,8 +210,9 @@
       "scope": "Parent Coming Soon store review submitted; the UI processing estimate is not an approval guarantee."
     }
   },
-  "requiredBeforeReview": [
-    "Confirm the required different-PC test attestation, then submit the demo build for review. Both parent and demo stores are already in the review queue."
+  "requiredBeforeReview": [],
+  "remainingBeforePublicRelease": [
+    "Receive the required Steam approvals and complete the parent Coming Soon and public-demo release steps. App release state remains Unavailable."
   ],
   "requirementsSources": [
     "https://partner.steamgames.com/doc/store/application/demos?l=english",
