@@ -1,0 +1,141 @@
+{
+  "schemaVersion": 1,
+  "recordedAtLocal": "2026-11-09",
+  "fullGameAppId": 5193980,
+  "demoAppId": 5585210,
+  "state": "store_preparation_in_progress",
+  "storeReviewSubmitted": false,
+  "buildReviewSubmitted": false,
+  "publiclyReleased": false,
+  "currentDemoBuild": {
+    "buildId": 26524160,
+    "sourceCommit": "d84a4d41757624ceb65db38bb48ebe87a10766b5",
+    "branch": "default",
+    "receipt": "Docs/Release/steam-demo-candidate-v2.json",
+    "binaryChangedInThisWork": false
+  },
+  "identity": {
+    "developer": "G-PIN",
+    "publisher": "G-PIN",
+    "confirmedByUser": true,
+    "fullGameReleaseDate": null,
+    "publicSupportContact": null
+  },
+  "storeDraft": {
+    "apps": [
+      5193980,
+      5585210
+    ],
+    "languages": [
+      "english",
+      "koreana",
+      "japanese"
+    ],
+    "textInterfaceOnly": true,
+    "shortDescriptionsSavedAndReadBack": true,
+    "aboutDescriptionsSaved": true,
+    "input": "Keyboard and mouse; controller support wizard completed as no controller support.",
+    "playerModes": [
+      "Single-player"
+    ],
+    "steamFeatures": [
+      "Steam Leaderboards"
+    ],
+    "standaloneDemoStorePageRequested": false,
+    "copySource": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v1/store-copy-draft.json"
+  },
+  "tags": {
+    "appId": 5193980,
+    "published": true,
+    "ordered": [
+      "Pinball",
+      "Roguelite",
+      "Arcade",
+      "3D",
+      "Action",
+      "Colorful",
+      "Sci-fi",
+      "Score Attack",
+      "Robots",
+      "Physics",
+      "Retro",
+      "Singleplayer"
+    ],
+    "uiResult": "Your changes have been successfully published to Steam."
+  },
+  "contentSurvey": {
+    "parentAppId": 5193980,
+    "published": true,
+    "demoInheritsParent": true,
+    "disclosures": [
+      "Mild language",
+      "Simulated chance-based gambling mechanics",
+      "Online interactions",
+      "Brief non-gory skull effect",
+      "Pre-generated AI artwork and AI-assisted dialogue/localization"
+    ],
+    "noAdultOnlyContent": true,
+    "noLiveGenerativeAI": true,
+    "noDrugOrSexualContent": true,
+    "steamGeneratedRatings": {
+      "Brazil": "12",
+      "Germany": "12+"
+    },
+    "externalRatingCertificatesClaimed": [],
+    "evidence": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v1/survey-evidence.json",
+    "demoUiResult": "이 체험판 콘텐츠는 BALL A RETRO 게임의 콘텐츠 설문 조사를 사용합니다. 더 이상 필요한 작업이 없습니다."
+  },
+  "steamMetadata": {
+    "apps": [
+      5193980,
+      5585210
+    ],
+    "nativeOperatingSystems": [
+      "windows"
+    ],
+    "architecture": "64",
+    "platformMetadataPublished": true,
+    "appAndShortcutIconsUploadedAndPublished": true,
+    "iconSource": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2/user-reference/08-brandmark-split-a.png",
+    "iconContentId": "b755101a73b05e71e9c1c5ce9e55a1a4336c6043",
+    "publishUiResult": "Your changes have been published. Since your app isn't released, these changes are only accessible for app owners with a release state override package."
+  },
+  "artwork": {
+    "activeDirectory": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2",
+    "assetCount": 20,
+    "exportValidationPassed": true,
+    "validationReport": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2/asset-validation.json",
+    "assetManifest": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2/asset-manifest.json",
+    "generationPrompts": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2/prompts-all.json",
+    "generationMethod": "Built-in image generation for reference-based compositing; mechanical export resizing. Library logos and app icons preserve the developer-provided original artwork.",
+    "replacesRejectedDirectory": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v1",
+    "userReferenceManifest": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v2/user-reference/manifest.json",
+    "direction": "Use developer-provided actual pinball cabinet views, crisp green pixel wordmark and A symbol. Preserve table identity and avoid the rejected generic pinball illustration.",
+    "storeCapsulesUploaded": false,
+    "libraryAssetsUploaded": false,
+    "uploadBlocker": "Steam graphical-assets page uses a drag/drop area without a working file chooser in the connected in-app browser. Visible legacy icon file input worked; icons were uploaded and published.",
+    "gameplayScreenshotDirectory": "D:/ball-a-retro-validation/steam-demo-20261109/store-assets-v1/base-gameplay",
+    "gameplayScreenshotScope": "Five unmodified frames from developer-provided full-game STOVE recordings. Older build; do not present as exact current Steam demo screenshots.",
+    "screenshotsUploaded": false
+  },
+  "requiredBeforeReview": [
+    "Upload revised full/demo store capsules and library assets.",
+    "Upload at least five actual gameplay screenshots to the parent store.",
+    "Obtain the public support email or support website from the developer.",
+    "Establish game-specific minimum system requirements; no untested CPU/RAM/GPU claims have been entered.",
+    "Complete Steam planned-release-date fields. Developer states the full game schedule is undecided; no invented date entered.",
+    "Submit the parent store and abbreviated demo store for Valve review, then submit the demo build when available."
+  ],
+  "requirementsSources": [
+    "https://partner.steamgames.com/doc/store/application/demos?l=english",
+    "https://partner.steamgames.com/doc/store/review_process?l=english",
+    "https://partner.steamgames.com/doc/store/assets?l=english",
+    "https://partner.steamgames.com/doc/store/assets/libraryassets?l=english"
+  ],
+  "protectedUserFilesUnchanged": [
+    "Assets/MemberFolder/KHS/KHS_Materials/KHS_Mat_Ball.mat",
+    "Assets/Public/Font/Galmuri11 SDF.asset",
+    "Assets/Public/Font/Galmuri11 SDF_dialogue.asset",
+    "Assets/Public/Font/Galmuri11-Bold SDF.asset"
+  ]
+}
