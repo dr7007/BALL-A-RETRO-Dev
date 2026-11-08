@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$ArchivePath,
-    [Parameter(Mandatory=$true)][string]$OutputDirectory
+    [Parameter(Mandatory=$true)][string]$OutputDirectory,
+    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $archivePath = (Resolve-Path -LiteralPath $ArchivePath).Path
@@ -15,7 +16,8 @@ try {
     foreach($entry in $zip.Entries) {
         $destination = [IO.Path]::GetFullPath((Join-Path $target $entry.FullName))
         if (!$destination.StartsWith($target + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe ZIP entry.' }
-        if ($entry.FullName -match '(?i)(\.pdb$|BurstDebugInformation|BackUpThisFolderButDontShipIt|steam_appid|steam_api|(^|/)evidence/)') {
+        if ($entry.FullName -match '(?i)(\.pdb$|BurstDebugInformation|BackUpThisFolderButDontShipIt|steam_appid|(^|/)evidence/)' -or
+            ($Platform -eq 'STOVE' -and $entry.FullName -match '(?i)steam_api')) {
             throw "Non-distributable file in archive: $($entry.FullName)"
         }
     }
@@ -26,5 +28,5 @@ foreach($entry in $manifest) {
     if ((Get-Item -LiteralPath $file).Length -ne $entry.bytes -or
         (Get-FileHash -LiteralPath $file).Hash -ne $entry.sha256) { throw "Upload file mismatch: $($entry.path)" }
 }
-& "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot $target -EvidencePath "$target.audit.json"
+& "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot $target -EvidencePath "$target.audit.json" -Platform $Platform
 Write-Output "Upload this folder: $target ($($manifest.Count) verified files)"

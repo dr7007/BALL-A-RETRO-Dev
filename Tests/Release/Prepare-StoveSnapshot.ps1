@@ -1,4 +1,7 @@
-param([Parameter(Mandatory = $true)][string]$ProjectRoot)
+param(
+    [Parameter(Mandatory = $true)][string]$ProjectRoot,
+    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
+)
 $ErrorActionPreference = 'Stop'
 $source = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path.TrimEnd('\', '/')
 $snapshot = (Resolve-Path -LiteralPath $ProjectRoot).Path.TrimEnd('\', '/')
@@ -10,16 +13,16 @@ if (!(Test-Path -LiteralPath "$snapshot/ProjectSettings/ProjectVersion.txt")) { 
 # BillingMode belongs to a nested sample project's Android IAP setup. This game has no IAP package.
 # The Steam settings asset is read only by the Steam path, which is compiled out in STOVE.
 $exclusions = @(
-    'Assets/Resources/Release/SteamSettings.asset',
     'Assets/IgnorePackages/Pinball Creator v2.0.1/Assets/Resources/BillingMode.json'
 )
+if ($Platform -eq 'STOVE') { $exclusions += 'Assets/Resources/Release/SteamSettings.asset' }
 $evidence = Join-Path (Split-Path $snapshot -Parent) 'evidence'
 $null = New-Item -ItemType Directory -Path $evidence -Force
 $records = @()
 foreach ($relative in $exclusions) {
     foreach ($suffix in @('', '.meta')) {
         $from = [IO.Path]::GetFullPath((Join-Path $snapshot ($relative + $suffix)))
-        $to = [IO.Path]::GetFullPath((Join-Path $snapshot ('ExcludedFromStove/' + $relative + $suffix)))
+        $to = [IO.Path]::GetFullPath((Join-Path $snapshot ("ExcludedFrom$Platform/" + $relative + $suffix)))
         if (!$from.StartsWith($snapshot + '\', [StringComparison]::OrdinalIgnoreCase) -or
             !$to.StartsWith($snapshot + '\', [StringComparison]::OrdinalIgnoreCase)) { throw 'Unsafe exclusion path.' }
         if (!(Test-Path -LiteralPath $from)) { continue }

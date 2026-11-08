@@ -1,6 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$PlayerRoot,
-    [Parameter(Mandatory = $true)][string]$OutputZip
+    [Parameter(Mandatory = $true)][string]$OutputZip,
+    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $PlayerRoot).Path.TrimEnd('\', '/')
@@ -10,7 +11,7 @@ if ($zipPath.StartsWith($root + [IO.Path]::DirectorySeparatorChar, [StringCompar
     throw 'Save the ZIP outside the player folder.'
 }
 if (!(Test-Path -LiteralPath "$root/BALL-A-RETRO.exe")) { throw 'Missing player executable.' }
-& "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot $root -EvidencePath "$zipPath.player-audit.json"
+& "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot $root -EvidencePath "$zipPath.player-audit.json" -Platform $Platform
 $files = @(Get-ChildItem -LiteralPath $root -File -Recurse | Where-Object {
     $relative = [IO.Path]::GetRelativePath($root, $_.FullName)
     $relative -notmatch '(^|[/\\])[^/\\]*_(BurstDebugInformation|BackUpThisFolderButDontShipIt)' -and

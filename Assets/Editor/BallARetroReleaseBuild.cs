@@ -23,6 +23,7 @@ public static class BallARetroReleaseBuild
 
     // Run only on an isolated project copy when the development editor is open.
     public static void BuildStoveBatch() => Build(false, ReadBatchOutput());
+    public static void BuildSteamBatch() => Build(true, ReadBatchOutput());
 
     private static string ReadBatchOutput()
     {
@@ -68,7 +69,17 @@ public static class BallARetroReleaseBuild
         var steamPlugins = PluginImporter.GetAllImporters().Where(p =>
             p.isNativePlugin && (Path.GetFileName(p.assetPath).StartsWith("steam_api", StringComparison.OrdinalIgnoreCase)
                 || Path.GetFileName(p.assetPath).StartsWith("libsteam_api", StringComparison.OrdinalIgnoreCase))).ToArray();
-        foreach (var plugin in steamPlugins) plugin.SetIncludeInBuildDelegate(_ => steam);
+        // Match the Windows native library to the vendored Steamworks.NET wrapper.
+        // A second, different DLL exists under Assets/Plugins; never ship both or
+        // depend on Unity's overridable-plugin priority to choose the API version.
+        const string windowsSteamPlugin = "Assets/com.rlabrecque.steamworks.net/Plugins/steam_api64.dll";
+        if (steam && !steamPlugins.Any(p => p.assetPath == windowsSteamPlugin))
+            throw new BuildFailedException("The Steamworks.NET Windows x64 native library is missing.");
+        foreach (var plugin in steamPlugins)
+        {
+            bool includeNative = steam && plugin.assetPath == windowsSteamPlugin;
+            plugin.SetIncludeInBuildDelegate(_ => includeNative);
+        }
         BuildReport report;
         try
         {

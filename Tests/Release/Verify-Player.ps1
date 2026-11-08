@@ -1,13 +1,24 @@
 param(
     [Parameter(Mandatory = $true)][string]$PlayerRoot,
     [Parameter(Mandatory = $true)][string]$EvidencePath,
-    [string]$CecilPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Data\Managed\Unity.Cecil.dll'
+    [string]$CecilPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Data\Managed\Unity.Cecil.dll',
+    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $PlayerRoot).Path
 $forbidden = @(Get-ChildItem -LiteralPath $root -Recurse -File |
     Where-Object { $_.Name -match '^(steam_appid\.txt|(?:lib)?steam_api.*)$' })
-if ($forbidden) { throw 'Steam native runtime/development appid found in STOVE player.' }
+if ($Platform -eq 'STOVE' -and $forbidden) { throw 'Steam native runtime/development appid found in STOVE player.' }
+if ($forbidden | Where-Object Name -eq 'steam_appid.txt') { throw 'Development App ID file must not be shipped.' }
+$steamNative = @()
+if ($Platform -eq 'Steam') {
+    $steamNative = @($forbidden | Where-Object Name -eq 'steam_api64.dll')
+    if ($steamNative.Count -ne 1 -or $forbidden.Count -ne 1) { throw 'Steam Win64 player must contain exactly one steam_api64.dll and no other Steam native variants.' }
+    $nativeSource = Join-Path $PSScriptRoot '../../Assets/com.rlabrecque.steamworks.net/Plugins/steam_api64.dll'
+    if ((Get-FileHash -LiteralPath $steamNative[0].FullName).Hash -ne (Get-FileHash -LiteralPath $nativeSource).Hash) {
+        throw 'Steam native library does not match the vendored Steamworks.NET library.'
+    }
+}
 Add-Type -Path $CecilPath
 $assemblyPath = Join-Path $root 'BALL-A-RETRO_Data/Managed/Assembly-CSharp.dll'
 $assembly = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($assemblyPath)
@@ -29,20 +40,43 @@ try {
         }
         $checks.Add("No debug impulse input: $name")
     }
-    $platform = ($types | Where-Object Name -eq 'BallARetroPlatform').Methods | Where-Object Name -eq 'get_IsSteamBuild'
-    if (!$platform -or !@($platform.Body.Instructions | Where-Object { $_.OpCode.Name -eq 'ldc.i4.0' }).Count -or
-        @($platform.Body.Instructions | Where-Object { $_.OpCode.Name -eq 'ldc.i4.1' }).Count) {
-        throw 'Player was not compiled with Steam disabled.'
+    $platformGetter = ($types | Where-Object Name -eq 'BallARetroPlatform').Methods | Where-Object Name -eq 'get_IsSteamBuild'
+    $expectedConstant = if ($Platform -eq 'Steam') { 'ldc.i4.1' } else { 'ldc.i4.0' }
+    $unexpectedConstant = if ($Platform -eq 'Steam') { 'ldc.i4.0' } else { 'ldc.i4.1' }
+    if (!$platformGetter -or !$platformGetter.HasBody -or !@($platformGetter.Body.Instructions | Where-Object { $_.OpCode.Name -eq $expectedConstant }).Count -or
+        @($platformGetter.Body.Instructions | Where-Object { $_.OpCode.Name -eq $unexpectedConstant }).Count) {
+        throw "Player was not compiled for $Platform."
     }
-    $checks.Add('Compiled platform flag is STOVE (Steam disabled)')
+    $checks.Add("Compiled platform flag is $Platform")
     $pinvoke = @($types | ForEach-Object Methods | Where-Object { $_.IsPInvokeImpl -and $_.PInvokeInfo.Module.Name -match 'steam_api' })
-    if ($pinvoke.Count) { throw 'Steam native API imports found in game assembly.' }
-    $checks.Add('No Steam native runtime files or API imports')
+    if ($Platform -eq 'STOVE') {
+        if ($pinvoke.Count) { throw 'Steam native API imports found in game assembly.' }
+        $checks.Add('No Steam native runtime files or API imports')
+    } else {
+        $manager = $types | Where-Object Name -eq 'SteamManager'
+        $awake = $manager.Methods | Where-Object Name -eq 'Awake'
+        if (!$awake -or !$awake.HasBody) { throw 'Steam initialization was stripped from the player.' }
+        $operands = @($awake.Body.Instructions | Where-Object Operand | ForEach-Object { $_.Operand.ToString() }) -join "`n"
+        foreach ($required in @('Steamworks.SteamAPI::RestartAppIfNecessary', 'Steamworks.SteamAPI::Init', 'Steamworks.SteamUtils::GetAppID', 'BallARetroSteamSettings::TryGetAppId')) {
+            if (!$operands.Contains($required)) { throw "Missing compiled Steam startup call: $required" }
+        }
+        $wrapperPath = Join-Path $root 'BALL-A-RETRO_Data/Managed/com.rlabrecque.steamworks.net.dll'
+        if (!(Test-Path -LiteralPath $wrapperPath)) { throw 'Steamworks.NET runtime assembly is missing.' }
+        $wrapper = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($wrapperPath)
+        try {
+            if (!@($wrapper.MainModule.ModuleReferences | Where-Object Name -Match '^steam_api64').Count) {
+                throw 'Steamworks.NET has no Windows x64 native API reference.'
+            }
+            if (@($wrapper.MainModule.Types | Where-Object FullName -eq 'Steamworks.Fixture').Count) { throw 'Fake Steam client leaked into release.' }
+        } finally { $wrapper.Dispose() }
+        $checks.Add('Steam initialization, App ID validation and native wrapper are compiled')
+        $checks.Add('Exactly one native library, matching the Steamworks.NET package')
+    }
     if (@($types | Where-Object { $_.Name -match '^BallARetro(Scene(Audit(Runner)?|Probe)|RenderProbe|ChoiceIcon(Preparation|Probe|Audit(Runner)?))$' }).Count) {
         throw 'Editor scene audit leaked into player.'
     }
     $checks.Add('No editor scene audit code in player')
-    @{ success = $true; assembly = $assemblyPath; sha256 = (Get-FileHash -LiteralPath $assemblyPath -Algorithm SHA256).Hash;
+    @{ success = $true; platform = $Platform; assembly = $assemblyPath; sha256 = (Get-FileHash -LiteralPath $assemblyPath -Algorithm SHA256).Hash;
         checks = $checks.ToArray() } | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath $EvidencePath -Encoding utf8
     $checks
 }
