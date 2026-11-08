@@ -191,7 +191,7 @@ public class KHS_Script_RogueLikeManager : MonoBehaviour
 
     private void AddScoreMultiplier(float _multi)
     {
-        scoreManager.multiplier += _multi;
+        scoreManager.AddRunScoreMultiplier(_multi);
     }
 
     private void SecretWeaponActivate(int _idx)

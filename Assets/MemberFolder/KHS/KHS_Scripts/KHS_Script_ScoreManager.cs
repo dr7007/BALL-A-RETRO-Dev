@@ -519,6 +519,15 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public int[] targetScores = new int[3];
     public float multiplier = 1.0f;
     public int FinalUserScore = 0;
+    // Permanent choices belong to the run, while the bumper combo owns multiplier.
+    // Keep them separate so a combo change or a lost ball cannot erase a choice.
+    private float runScoreMultiplierBonus;
+
+    public void AddRunScoreMultiplier(float amount)
+    {
+        if (IsTutorialRun || HasEnded || amount <= 0f) return;
+        runScoreMultiplierBonus += amount;
+    }
 
     [Header("볼 관련 정보")]
     [SerializeField] private int numOfBounce = 0;
@@ -635,7 +644,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void ApplyDirectScore(int value, Vector3 worldPos, int charge)
     {
-        int awardedBase = Mathf.RoundToInt(value * multiplier);
+        int awardedBase = Mathf.RoundToInt(value * multiplier * (1f + runScoreMultiplierBonus));
         var demo = BallARetroDemoRun.Current;
         int lastBallBonus = demo != null && demo.IsEnabled ? demo.CalculateLastBallBonus(awardedBase) : 0;
         int finalScore = awardedBase + charge + lastBallBonus;
@@ -699,6 +708,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         curScore = 0;
         numOfBounce = 0;
+        runScoreMultiplierBonus = 0f;
         IsRecordChallenge = false;
         EndReason = GameOverReason.None;
         OnScoreChanged?.Invoke(curScore);
