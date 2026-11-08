@@ -27,7 +27,7 @@ public class KHS_Script_RogueLikeGenerate : MonoBehaviour
 
     private void RogueLikeGenerateTime()
     {
-        Debug.LogError(
+        Debug.Log(
         $"[ROGUELIKE 1] RogueLikeGenerateTime 호출 / " +
         $"TimeScale = {Time.timeScale}");
 
@@ -41,14 +41,14 @@ public class KHS_Script_RogueLikeGenerate : MonoBehaviour
 
     private IEnumerator WaitDeathEffect()
     {
-        Debug.LogError(
+        Debug.Log(
         $"[ROGUELIKE 2] Coroutine 시작 / " +
         $"TimeScale = {Time.timeScale}"
         );
 
         yield return null;
 
-        Debug.LogError(
+        Debug.Log(
         $"[ROGUELIKE 3] yield return null 이후 / " +
         $"TimeScale = {Time.timeScale}"
         );

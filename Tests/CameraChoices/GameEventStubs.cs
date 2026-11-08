@@ -10,6 +10,7 @@ public class YJ_Script_BallController : MonoBehaviour
 public static class KHS_Script_PlungerController
 {
     public static event Action OnBallLaunched;
+    public static void RaiseLaunched() => OnBallLaunched?.Invoke();
 }
 public static class KHS_Script_BallOutController
 {
@@ -19,11 +20,14 @@ public static class KHS_Script_BallOutController
 public class KHS_Script_ScoreManager : MonoBehaviour
 {
     public static event Action OnGameClear, OnGameOver, Round_Clear;
+    public static void RaiseGameOver() => OnGameOver?.Invoke();
+    public static void RaiseRoundClear() => Round_Clear?.Invoke();
     public int RoundRespone() => 1;
 }
 public class KHS_Script_UIImgFunc : MonoBehaviour
 {
     public static event Action<bool> RoundUIEvt;
+    public static void RaiseRoundUI(bool active) => RoundUIEvt?.Invoke(active);
     public void StartRoundFunc(int round) { }
 }
 public static class KHS_Script_PortalController
@@ -35,6 +39,11 @@ public static class KHS_Script_PlincoFunction
     public static event Action ReturnPortalEvt;
 }
 public class KHS_Script_RogueLikeManager : MonoBehaviour { }
+public static class PSH_Script_EffectSettings
+{
+    public static event Action<bool> Changed;
+    public static bool CameraShakeEnabled => true;
+}
 public class CJS_Script_ChoiceState
 {
     public static CJS_Script_ChoiceState I => null;

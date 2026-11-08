@@ -83,6 +83,8 @@ public class CJS_Script_CameraShaker : MonoBehaviour
         StopShake();
     }
 
+    public void CancelShake() => StopShake();
+
     private void StopShake()
     {
         // 비활성 시 원위치(플레이 종료 시 흔들림만 정리)
@@ -112,7 +114,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
     {
         if (target == null || !isActiveAndEnabled || !PSH_Script_EffectSettings.CameraShakeEnabled) return;
 
-        amplitude = Mathf.Max(0f, amplitude) * Mathf.Max(0f, globalIntensity);
+        amplitude = Mathf.Clamp(amplitude, 0f, Mathf.Max(0f, maxAmplitude)) * Mathf.Max(0f, globalIntensity);
         duration = Mathf.Max(0f, duration);
 
         // 매번 현재 위치를 기준점으로 캡처 → 실행 중 카메라가 바뀌어도 정상 복원
@@ -125,7 +127,7 @@ public class CJS_Script_CameraShaker : MonoBehaviour
         else if (accumulate)
         {
             // 진행 중이면 강도/시간을 보강
-            _accumulatedAmplitude += amplitude;
+            _accumulatedAmplitude = Mathf.Min(_accumulatedAmplitude + amplitude, Mathf.Max(0f, maxAmplitude * globalIntensity));
             _accumulatedDuration = Mathf.Max(_accumulatedDuration, duration);
         }
         else
@@ -151,14 +153,14 @@ public class CJS_Script_CameraShaker : MonoBehaviour
             // 누적 반영(있다면)
             if (_accumulatedAmplitude > 0f)
             {
-                currentAmp += _accumulatedAmplitude;
+                currentAmp = Mathf.Min(currentAmp + _accumulatedAmplitude, Mathf.Max(0f, maxAmplitude * globalIntensity));
                 useDuration = Mathf.Max(useDuration, _accumulatedDuration);
                 _accumulatedAmplitude = 0f;
                 _accumulatedDuration = 0f;
             }
 
             float normalized = useDuration > 0f ? Mathf.Clamp01(t / useDuration) : 1f;
-            float mul = falloff.Evaluate(normalized);
+            float mul = Mathf.Clamp01(falloff.Evaluate(normalized));
 
             // Perlin 노이즈 기반 오프셋
             float timeFactor = (useUnscaledTime ? Time.unscaledTime : Time.time) * frequency;

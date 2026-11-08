@@ -1,877 +1,313 @@
-using PSH;
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 [DefaultExecutionOrder(-5)]
 public class KHS_Script_CameraController : MonoBehaviour
 {
-    public enum FollowSpace
-    {
-        CameraAxesOffset,
-        WorldSpaceOffset
-    }
-
-    public enum ZAxisMode
-    {
-        WorldZ,
-        LocalZ
-    }
-
-    // =========================================================
-    // Target
-    // =========================================================
+    public enum FollowSpace { CameraAxesOffset, WorldSpaceOffset }
+    public enum ZAxisMode { WorldZ, LocalZ }
 
     [Header("Targets")]
     public Transform ball;
     public string ballTag = "Ball";
     public Camera cam;
-
-    // =========================================================
-    // Follow
-    // =========================================================
-
     [Header("Follow")]
     public bool followOnLaunch = true;
     public bool returnOnBallOutOrGameEnd = true;
-
     public FollowSpace followSpace = FollowSpace.CameraAxesOffset;
-
-    [Tooltip("카메라축 기준 오프셋 (Right, Up, Forward)")]
-    public Vector3 camAxesOffset = new Vector3(0f, 0.9f, -1.8f);
-
-    [Tooltip("월드 좌표 오프셋")]
+    public Vector3 camAxesOffset = new Vector3(0f, .9f, -1.8f);
     public Vector3 worldOffset = new Vector3(0f, 1.2f, -1.6f);
-
-    // =========================================================
-    // Axis
-    // =========================================================
-
     [Header("Axis Locks / Mode")]
     public bool lockXY = true;
     public bool lockRotation = true;
-
     public ZAxisMode zMode = ZAxisMode.WorldZ;
-
-    // =========================================================
-    // Bounds
-    // =========================================================
-
     [Header("Bounds")]
-
     public bool useMinZClamp = true;
-
     public float minWorldZ = -2.3f;
-
     public float minLocalZ = -2.3f;
-
-    // =========================================================
-    // Smoothing
-    // =========================================================
-
+    // The gameplay board ends near world Z 7.3; its rig follows at Z - 1.8.
+    // This leaves margin beyond the upper rail without following an escaped ball.
+    public bool useMaxZClamp = true;
+    public float maxWorldZ = 6f;
+    public float maxLocalZ = 6f;
     [Header("Smoothing")]
-
-    [Min(0f)]
-    public float positionSmoothTimeZ = 0.15f;
-
-    [Min(0f)]
-    public float lookAtLerpSpeed = 6f;
-
-    public bool lookAtBall = false;
-
-
-    // =========================================================
-    // Zoom
-    // =========================================================
-
+    [Min(0f)] public float positionSmoothTimeZ = .15f;
+    [Min(0f)] public float lookAtLerpSpeed = 6f;
+    public bool lookAtBall;
     [Header("Zoom (FOV)")]
-
     public float zoomFOV = 45f;
-
-    [Min(0f)]
-    public float zoomInTime = 0.25f;
-
-    [Min(0f)]
-    public float zoomOutTime = 0.35f;
-
-
-    // =========================================================
-    // Misc
-    // =========================================================
-
+    [Min(0f)] public float zoomInTime = .25f;
+    [Min(0f)] public float zoomOutTime = .35f;
     [Header("Misc")]
+    [Range(0f, 1f)] public float firstSnapFactor = .35f;
 
-    [Range(0f, 1f)]
-    public float firstSnapFactor = 0.35f;
+    Vector3 _defaultPos, _defaultLocalPos, _monitorSavedPos;
+    Quaternion _defaultRot, _monitorSavedRot;
+    float _defaultFOV, _velZ;
+    bool _defaultSaved, _following, _temporarilyDisabled, _resumeAfterCameraChange, _returningToDefault;
+    bool _monitorPaused, _monitorPoseSaved, _monitorWasFollowing, _returnAfterMonitor;
+    bool _focusPaused, _focusWasFollowing, _focusLaunchRequested, _returnAfterFocus;
+    readonly Dictionary<Camera, float> _cameraFovs = new Dictionary<Camera, float>();
 
-    // =========================================================
-    // Internal
-    // =========================================================
-
-    private Vector3 _defaultPos;
-    private Quaternion _defaultRot;
-
-    private float _defaultFOV;
-
-    private bool _defaultSaved;
-
-    private bool _following;
-
-    private bool _temporarilyDisabled;
-
-    private bool _monitorPaused;
-
-    private float _velZ;
-
-
-    // =========================================================
-    // Monitor 이전 상태
-    // =========================================================
-
-    private Vector3 _monitorSavedPos;
-    private Quaternion _monitorSavedRot;
-
-    private bool _monitorPoseSaved;
-    private bool _monitorWasFollowing;
-
-    // =========================================================
-    // Unity
-    // =========================================================
-
-    private void Awake()
+    void Awake()
     {
-        if (cam == null)
-            cam = GetComponent<Camera>();
-
-        if (cam == null)
-            cam = Camera.main;
-
-        if (ball == null)
-            TryFindBall();
-
+        if (!cam) cam = GetComponent<Camera>();
+        if (!cam) cam = Camera.main;
+        if (!ball) TryFindBall();
         SaveDefaultPose();
     }
-    private void OnEnable()
+    void OnEnable()
     {
         KHS_Script_PlungerController.OnBallLaunched += HandleLaunched;
-
         KHS_Script_CameraManager.CameraChangeEvt += ChangeCameraFunc;
-
-        if (returnOnBallOutOrGameEnd)
-        {
-            KHS_Script_BallOutController.BallOutEvt += ReturnToDefault;
-
-            KHS_Script_ScoreManager.OnGameOver += ReturnToDefault;
-
-            KHS_Script_ScoreManager.OnGameClear += ReturnToDefault;
-        }
+        if (!returnOnBallOutOrGameEnd) return;
+        KHS_Script_BallOutController.BallOutEvt += ReturnToDefault;
+        KHS_Script_ScoreManager.OnGameOver += ReturnToDefault;
+        KHS_Script_ScoreManager.OnGameClear += ReturnToDefault;
     }
-
-
-    private void OnDisable()
+    void OnDisable()
     {
         KHS_Script_PlungerController.OnBallLaunched -= HandleLaunched;
-
         KHS_Script_CameraManager.CameraChangeEvt -= ChangeCameraFunc;
-
-        if (returnOnBallOutOrGameEnd)
-        {
-            KHS_Script_BallOutController.BallOutEvt -= ReturnToDefault;
-
-            KHS_Script_ScoreManager.OnGameOver -= ReturnToDefault;
-
-            KHS_Script_ScoreManager.OnGameClear -= ReturnToDefault;
-        }
+        KHS_Script_BallOutController.BallOutEvt -= ReturnToDefault;
+        KHS_Script_ScoreManager.OnGameOver -= ReturnToDefault;
+        KHS_Script_ScoreManager.OnGameClear -= ReturnToDefault;
+        StopAllCoroutines();
     }
-    private void LateUpdate()
+    void LateUpdate()
     {
-        // Monitor
-        // 다른 카메라 연출 중에는
-        // Controller가 절대로 Transform을 건드리지 않는다.
-        if (_monitorPaused)
-            return;
-
-        if (!_following)
-            return;
-
-        if (ball == null)
-            return;
-
-        Vector3 desiredWorld = ComputeDesiredWorldPosition();
-
-
-        // -----------------------------------------------------
-        // World Z
-        // -----------------------------------------------------
-
-        if (zMode == ZAxisMode.WorldZ)
-        {
-            float targetZ = desiredWorld.z;
-
-            if (useMinZClamp)
-            {
-                targetZ = Mathf.Max(targetZ, minWorldZ);
-            }
-
-            float newZ = Mathf.SmoothDamp(
-                    transform.position.z,
-                    targetZ,
-                    ref _velZ,
-                    positionSmoothTimeZ
-                );
-
-            if (useMinZClamp)
-            {
-                newZ = Mathf.Max(newZ, minWorldZ);
-            }
-
-            transform.position =
-                new Vector3(
-                    lockXY
-                        ? _defaultPos.x
-                        : transform.position.x,
-
-                    lockXY
-                        ? _defaultPos.y
-                        : transform.position.y,
-
-                    newZ
-                );
-        }
-
-
-        // -----------------------------------------------------
-        // Local Z
-        // -----------------------------------------------------
-
-        else
-        {
-            Vector3 desiredLocal = 
-                transform.parent != null ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
-
-            float targetLZ = desiredLocal.z;
-
-            if (useMinZClamp)
-            {
-                targetLZ = Mathf.Max(targetLZ, minLocalZ);
-            }
-
-            float newLZ = 
-                Mathf.SmoothDamp(
-                    transform.localPosition.z,
-                    targetLZ,
-                    ref _velZ,
-                    positionSmoothTimeZ
-                );
-
-            if (useMinZClamp)
-            {
-                newLZ = Mathf.Max(newLZ, minLocalZ);
-            }
-
-            transform.localPosition =
-                new Vector3(
-                    transform.localPosition.x,
-                    transform.localPosition.y,
-                    newLZ
-                );
-        }
-
-
-        // -----------------------------------------------------
-        // Rotation
-        // -----------------------------------------------------
-
+        if (_monitorPaused || _focusPaused || _temporarilyDisabled || !_following || !ball) return;
+        if (lockRotation) transform.rotation = _defaultRot;
+        Vector3 desired = ComputeDesiredWorldPosition();
+        bool local = zMode == ZAxisMode.LocalZ;
+        float target = local && transform.parent ? transform.parent.InverseTransformPoint(desired).z : desired.z;
+        float current = local ? transform.localPosition.z : transform.position.z;
+        float next = Mathf.SmoothDamp(ClampZ(current, local), ClampZ(target, local), ref _velZ, positionSmoothTimeZ);
+        SetZ(ClampZ(next, local), local);
         if (!lockRotation && lookAtBall)
         {
-            Vector3 dir = ball.position - transform.position;
-
-            if (dir.sqrMagnitude > 0.0001f)
-            {
-                Quaternion targetRot =
-                    Quaternion.LookRotation(
-                        dir.normalized,
-                        Vector3.up
-                    );
-
-                transform.rotation =
-                    Quaternion.Slerp(
-                        transform.rotation,
-                        targetRot,
-                        lookAtLerpSpeed *
-                        Time.deltaTime
-                    );
-            }
+            Vector3 direction = ball.position - transform.position;
+            if (direction.sqrMagnitude > .0001f)
+                transform.rotation = Quaternion.Slerp(transform.rotation, Quaternion.LookRotation(direction, Vector3.up), lookAtLerpSpeed * Time.deltaTime);
         }
     }
-    // =========================================================
-    // Ball Launch
-    // =========================================================
-
-    private void HandleLaunched()
+    void HandleLaunched()
     {
-        if (!followOnLaunch)
-            return;
-
-        if (_monitorPaused)
-            return;
-
-        if (ball == null)
-            TryFindBall();
-
+        if (!followOnLaunch) return;
+        if (_focusPaused) { _focusLaunchRequested = true; return; }
+        if (_monitorPaused || _temporarilyDisabled) return;
+        if (!ball) TryFindBall();
         StartFollow();
     }
-
-
-    // =========================================================
-    // Start Follow
-    // =========================================================
-
     public void StartFollow()
     {
-        if (ball == null)
-            return;
-
-        if (_monitorPaused)
-            return;
-
+        if (_focusPaused) { _focusLaunchRequested = true; return; }
+        if (!ball || _monitorPaused || _temporarilyDisabled) return;
         SaveDefaultPose();
-
-        Vector3 desiredWorld = ComputeDesiredWorldPosition();
-
-
-        if (zMode == ZAxisMode.WorldZ)
-        {
-            float snapZ =
-                Mathf.Lerp(
-                    transform.position.z,
-                    desiredWorld.z,
-                    firstSnapFactor
-                );
-
-            if (useMinZClamp)
-            {
-                snapZ =
-                    Mathf.Max(
-                        snapZ,
-                        minWorldZ
-                    );
-            }
-
-            transform.position =
-                new Vector3(
-                    _defaultPos.x,
-                    _defaultPos.y,
-                    snapZ
-                );
-        }
-        else
-        {
-            Vector3 desiredLocal =
-                transform.parent != null ? transform.parent.InverseTransformPoint(desiredWorld) : desiredWorld;
-
-            float snapLZ =
-                Mathf.Lerp(
-                    transform.localPosition.z,
-                    desiredLocal.z,
-                    firstSnapFactor
-                );
-
-            if (useMinZClamp)
-            {
-                snapLZ =
-                    Mathf.Max(
-                        snapLZ,
-                        minLocalZ
-                    );
-            }
-
-            transform.localPosition =
-                new Vector3(
-                    transform.localPosition.x,
-                    transform.localPosition.y,
-                    snapLZ
-                );
-        }
-
-
-        _velZ = 0f;
-
+        StopAllCoroutines();
+        bool local = zMode == ZAxisMode.LocalZ;
+        Vector3 desired = ComputeDesiredWorldPosition();
+        float target = local && transform.parent ? transform.parent.InverseTransformPoint(desired).z : desired.z;
+        float current = local ? transform.localPosition.z : transform.position.z;
+        SetZ(ClampZ(Mathf.Lerp(current, ClampZ(target, local), firstSnapFactor), local), local);
+        _velZ = 0;
         _following = true;
-
-        if (cam != null)
-        {
-            StopCoroutineSafe();
-
-            StartCoroutine(
-                CoZoom(
-                    cam.fieldOfView,
-                    zoomFOV,
-                    zoomInTime
-                )
-            );
-        }
+        _returningToDefault = false;
+        StartZoom(zoomFOV, zoomInTime);
     }
-
-
-    // =========================================================
-    // Monitor 진입
-    // =========================================================
 
     public void BeginMonitor()
     {
-        if (_monitorPaused)
-            return;
-
-        Debug.Log(
-            "[CameraFollow] BeginMonitor"
-        );
-
-        // 현재 카메라의 실제 상태를 저장
+        if (_monitorPaused) return;
+        _returnAfterMonitor |= _returningToDefault;
         _monitorSavedPos = transform.position;
-
         _monitorSavedRot = transform.rotation;
-
         _monitorPoseSaved = true;
-        _monitorWasFollowing = _following;
-
-
-        // Follow 완전 정지
+        _monitorWasFollowing = _following || _resumeAfterCameraChange;
         _following = false;
-
         _monitorPaused = true;
-
-        _velZ = 0f;
-
+        _velZ = 0;
         StopAllCoroutines();
     }
-
-
-    // =========================================================
-    // Monitor 종료 준비
-    // =========================================================
-
-    public bool HasMonitorSavedPose()
-    {
-        return _monitorPoseSaved;
-    }
-
-
-    public Vector3 GetMonitorSavedPosition()
-    {
-        return _monitorSavedPos;
-    }
-
-
-    public Quaternion GetMonitorSavedRotation()
-    {
-        return _monitorSavedRot;
-    }
-
-
-    // =========================================================
-    // Monitor 종료
-    // =========================================================
-
+    public bool HasMonitorSavedPose() => _monitorPoseSaved;
+    public Vector3 GetMonitorSavedPosition() => _monitorSavedPos;
+    public Quaternion GetMonitorSavedRotation() => _monitorSavedRot;
     public void EndMonitor()
     {
-        if (!_monitorPoseSaved)
+        if (_monitorPoseSaved)
         {
-            Debug.LogWarning("[CameraFollow] 저장된 Monitor Pose가 없습니다.");
-
-            _monitorPaused = false;
-
-            return;
+            transform.SetPositionAndRotation(_monitorSavedPos, _monitorSavedRot);
+            SetZ(ClampZ(zMode == ZAxisMode.LocalZ ? transform.localPosition.z : transform.position.z, zMode == ZAxisMode.LocalZ), zMode == ZAxisMode.LocalZ);
         }
-
-
-        // Monitor 연출이 끝난 후
-        // 저장해둔 실제 플레이 카메라 자세를 적용
-        transform.position = _monitorSavedPos;
-
-        transform.rotation = _monitorSavedRot;
-
-
-        // 이전 SmoothDamp 속도 제거
-        _velZ = 0f;
-
-
-        // Monitor 상태 종료
         _monitorPoseSaved = false;
-
         _monitorPaused = false;
-
-
-        // 기본 자세를 덮어쓰거나 공 위치로 순간 이동하지 않는다.
-        // 진입 전에 추적 중이었다면 LateUpdate의 보간으로 자연스럽게 이어간다.
         _following = _monitorWasFollowing;
+        _velZ = 0;
+        if (_returnAfterMonitor) { _returnAfterMonitor = false; ReturnToDefault(); }
     }
 
-
-    // =========================================================
-    // Default Pose 갱신
-    // =========================================================
-
-    public void RefreshDefaultPose()
+    // Tutorial focus owns the child camera while this rig remains still. Keep
+    // launch events subscribed so the first tutorial shot is followed on release.
+    public void BeginFocus()
     {
-        _defaultPos = transform.position;
-
-        _defaultRot = transform.rotation;
-
-        if (cam == null)
-            cam = GetComponent<Camera>();
-
-        if (cam != null)
-        {
-            _defaultFOV = cam.fieldOfView;
-        }
-
-        _defaultSaved = true;
-
-        _velZ = 0f;
-    }
-
-
-    // =========================================================
-    // Game End / Ball Out
-    // =========================================================
-
-    private void ReturnToDefault()
-    {
-        if (!_defaultSaved)
-            return;
-
+        if (_focusPaused) return;
+        _returnAfterFocus |= _returningToDefault;
+        _focusPaused = true;
+        _focusWasFollowing = _following;
+        _focusLaunchRequested = false;
         _following = false;
-
-        _monitorPaused = false;
-
+        _velZ = 0;
         StopAllCoroutines();
-
-        if (zMode == ZAxisMode.WorldZ)
-        {
-            float targetZ = _defaultPos.z;
-
-            if (useMinZClamp)
-            {
-                targetZ =
-                    Mathf.Max(
-                        targetZ,
-                        minWorldZ
-                    );
-            }
-
-            StartCoroutine(
-                CoReturnZ_World(
-                    targetZ,
-                    zoomOutTime
-                )
-            );
-
-            if (lockXY)
-            {
-                transform.position =
-                    new Vector3(
-                        _defaultPos.x,
-                        _defaultPos.y,
-                        transform.position.z
-                    );
-            }
-        }
-        else
-        {
-            StartCoroutine(
-                CoReturnZ_Local(
-                    transform.localPosition.x,
-                    transform.localPosition.y,
-                    _defaultPos,
-                    zoomOutTime
-                )
-            );
-        }
-
-
-        if (!lockRotation)
-        {
-            StartCoroutine(
-                CoReturnRot(
-                    _defaultRot,
-                    zoomOutTime
-                )
-            );
-        }
-
-
-        if (cam != null)
-        {
-            StartCoroutine(
-                CoZoom(
-                    cam.fieldOfView,
-                    _defaultFOV,
-                    zoomOutTime
-                )
-            );
-        }
     }
-
-
-    // =========================================================
-    // Camera Change
-    // =========================================================
-
-    private void ChangeCameraFunc(Camera newCamera)
+    public void EndFocus()
     {
-        if (newCamera == null)
-            return;
-
-        Debug.Log($"[CameraFollow] Camera Change → {newCamera.name}");
-
-        cam = newCamera;
-
-
-        // Roulette Camera
-        if (newCamera.gameObject.name == "RouletteCamera")
+        if (!_focusPaused) return;
+        _focusPaused = false;
+        _following = _focusWasFollowing || _focusLaunchRequested;
+        _focusLaunchRequested = false;
+        _velZ = 0;
+        if (_returnAfterFocus) { _returnAfterFocus = false; ReturnToDefault(); }
+        else if (_following && !_monitorPaused && !_temporarilyDisabled) StartZoom(zoomFOV, zoomInTime);
+    }
+    public void ResetToDefaultView() => ReturnToDefault();
+    void ReturnToDefault()
+    {
+        if (!_defaultSaved) return;
+        _following = _resumeAfterCameraChange = _monitorWasFollowing = _focusWasFollowing = _focusLaunchRequested = false;
+        _returningToDefault = true;
+        _velZ = 0;
+        StopAllCoroutines();
+        if (_focusPaused) { _returnAfterFocus = true; return; }
+        if (_monitorPaused) { _returnAfterMonitor = true; return; }
+        if (!isActiveAndEnabled)
         {
-            _following = false;
-
-            _temporarilyDisabled = true;
-
-            StopAllCoroutines();
-
+            transform.SetPositionAndRotation(_defaultPos, _defaultRot);
+            if (cam) cam.fieldOfView = DefaultFov(cam);
             return;
         }
-
-
+        StartCoroutine(ReturnPose());
+        StartZoom(DefaultFov(cam), zoomOutTime);
+    }
+    IEnumerator ReturnPose()
+    {
+        Vector3 start = transform.position;
+        Quaternion rotation = transform.rotation;
+        float elapsed = 0;
+        while (elapsed < zoomOutTime)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.SmoothStep(0, 1, Mathf.Clamp01(elapsed / zoomOutTime));
+            transform.SetPositionAndRotation(Vector3.Lerp(start, _defaultPos, t), Quaternion.Slerp(rotation, _defaultRot, t));
+            SetZ(ClampZ(zMode == ZAxisMode.LocalZ ? transform.localPosition.z : transform.position.z, zMode == ZAxisMode.LocalZ), zMode == ZAxisMode.LocalZ);
+            yield return null;
+        }
+        transform.SetPositionAndRotation(_defaultPos, _defaultRot);
+        SetZ(ClampZ(zMode == ZAxisMode.LocalZ ? _defaultLocalPos.z : _defaultPos.z, zMode == ZAxisMode.LocalZ), zMode == ZAxisMode.LocalZ);
+        _returningToDefault = false;
+    }
+    void ChangeCameraFunc(Camera next)
+    {
+        if (!next || _monitorPaused) return;
+        // Main activation after EndMonitor must not cancel its queued reset.
+        if (next == cam && !_temporarilyDisabled) return;
+        StopAllCoroutines();
+        _velZ = 0;
+        if (next.gameObject.name == "RouletteCamera")
+        {
+            if (!_temporarilyDisabled) _resumeAfterCameraChange = _following;
+            _following = false;
+            _temporarilyDisabled = true;
+            return;
+        }
+        cam = next;
+        DefaultFov(cam);
         if (_temporarilyDisabled)
         {
             _temporarilyDisabled = false;
-
-            RefreshDefaultPose();
+            _following = _resumeAfterCameraChange;
+            _resumeAfterCameraChange = false;
         }
-
-
-        // Monitor 중이면 자동 Follow 금지
-        if (_monitorPaused)
-            return;
-
-        StartFollow();
+        // A selection event is not a ball launch. Never capture a shifted rig as
+        // a new default, and never snap the rig toward a ball on another table.
+        if (_returningToDefault) ReturnToDefault();
+        else if (_following && !_focusPaused) StartZoom(zoomFOV, zoomInTime);
     }
-
-
-    // =========================================================
-    // Helpers
-    // =========================================================
-
-    private Vector3 ComputeDesiredWorldPosition()
+    public void RefreshDefaultPose()
     {
-        if (ball == null)
-            return transform.position;
-
-        if (followSpace == FollowSpace.WorldSpaceOffset)
-        {
-            return ball.position + worldOffset;
-        }
-
-        Transform ax = transform;
-
-        return ball.position + ax.right * camAxesOffset.x + ax.up * camAxesOffset.y + ax.forward * camAxesOffset.z;
+        if (_following || _monitorPaused || _focusPaused || _temporarilyDisabled) return;
+        _defaultSaved = false;
+        SaveDefaultPose();
     }
-
-
-    private void SaveDefaultPose()
+    void SaveDefaultPose()
     {
-        if (_defaultSaved)
-            return;
-
+        if (_defaultSaved) return;
         _defaultPos = transform.position;
-
+        _defaultLocalPos = transform.localPosition;
         _defaultRot = transform.rotation;
-
-        if (cam == null)
-            cam = Camera.main;
-
-        _defaultFOV = cam != null ? cam.fieldOfView : 60f;
-
+        _defaultFOV = cam ? cam.fieldOfView : 60;
+        if (cam) _cameraFovs[cam] = _defaultFOV;
         _defaultSaved = true;
     }
-
-
-    private void TryFindBall()
+    float DefaultFov(Camera camera)
+    {
+        if (!camera) return _defaultFOV;
+        if (!_cameraFovs.TryGetValue(camera, out float value))
+        {
+            value = camera.fieldOfView;
+            _cameraFovs.Add(camera, value);
+        }
+        return value;
+    }
+    void StartZoom(float target, float duration)
+    {
+        if (cam && isActiveAndEnabled) StartCoroutine(Zoom(cam, cam.fieldOfView, Mathf.Clamp(target, 1, 179), duration));
+    }
+    IEnumerator Zoom(Camera target, float from, float to, float duration)
+    {
+        float elapsed = 0;
+        while (elapsed < duration && target && target == cam && !_monitorPaused && !_focusPaused)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            target.fieldOfView = Mathf.Lerp(from, to, Mathf.SmoothStep(0, 1, Mathf.Clamp01(elapsed / duration)));
+            yield return null;
+        }
+        if (target && target == cam && !_monitorPaused && !_focusPaused) target.fieldOfView = to;
+    }
+    float ClampZ(float value, bool local)
+    {
+        if (float.IsNaN(value) || float.IsInfinity(value)) value = local ? _defaultLocalPos.z : _defaultPos.z;
+        float min = local ? minLocalZ : minWorldZ;
+        float max = local ? maxLocalZ : maxWorldZ;
+        if (useMinZClamp) value = Mathf.Max(value, min);
+        if (useMaxZClamp) value = Mathf.Min(value, useMinZClamp ? Mathf.Max(min, max) : max);
+        return value;
+    }
+    void SetZ(float value, bool local)
+    {
+        Vector3 position = local ? transform.localPosition : transform.position;
+        Vector3 baseline = local ? _defaultLocalPos : _defaultPos;
+        if (lockXY) { position.x = baseline.x; position.y = baseline.y; }
+        position.z = value;
+        if (local) transform.localPosition = position;
+        else transform.position = position;
+    }
+    Vector3 ComputeDesiredWorldPosition()
+    {
+        if (followSpace == FollowSpace.WorldSpaceOffset) return ball.position + worldOffset;
+        return ball.position + transform.right * camAxesOffset.x + transform.up * camAxesOffset.y + transform.forward * camAxesOffset.z;
+    }
+    void TryFindBall()
     {
         if (!string.IsNullOrEmpty(ballTag))
         {
-            GameObject go = GameObject.FindWithTag(ballTag);
-
-            if (go != null)
-                ball = go.transform;
+            var found = GameObject.FindWithTag(ballTag);
+            if (found) ball = found.transform;
         }
-
-
-        if (ball == null)
+        if (!ball)
         {
-            var bc = FindAnyObjectByType<YJ_Script_BallController>();
-
-            if (bc != null)
-                ball = bc.transform;
+            var controller = FindAnyObjectByType<YJ_Script_BallController>();
+            if (controller) ball = controller.transform;
         }
-    }
-
-
-    private void StopCoroutineSafe()
-    {
-        StopAllCoroutines();
-    }
-
-
-    // =========================================================
-    // Coroutines
-    // =========================================================
-
-    private IEnumerator CoReturnZ_World(float targetZ,float duration)
-    {
-        float startZ = transform.position.z;
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-
-            float z =
-                Mathf.Lerp(
-                    startZ,
-                    targetZ,
-                    t
-                );
-
-            if (useMinZClamp)
-                z = Mathf.Max(z, minWorldZ);
-
-            transform.position =
-                new Vector3(
-                    _defaultPos.x,
-                    _defaultPos.y,
-                    z
-                );
-
-            yield return null;
-        }
-
-        transform.position =
-            new Vector3(
-                _defaultPos.x,
-                _defaultPos.y,
-                targetZ
-            );
-    }
-
-
-    private IEnumerator CoReturnZ_Local(float keepX, float keepY, Vector3 defaultWorld, float duration)
-    {
-        float startZ = transform.localPosition.z;
-
-        float targetLZ = 
-            transform.parent != null ? transform.parent.InverseTransformPoint(defaultWorld).z : defaultWorld.z;
-
-        if (useMinZClamp)
-        {
-            targetLZ = Mathf.Max(targetLZ, minLocalZ);
-        }
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-
-            float z =
-                Mathf.Lerp(
-                    startZ,
-                    targetLZ,
-                    t
-                );
-
-            if (useMinZClamp)
-            {
-                z = Mathf.Max(z, minLocalZ);
-            }
-
-            transform.localPosition =
-                new Vector3(
-                    keepX,
-                    keepY,
-                    z
-                );
-
-            yield return null;
-        }
-
-        transform.localPosition =
-            new Vector3(
-                keepX,
-                keepY,
-                targetLZ
-            );
-    }
-
-
-    private IEnumerator CoReturnRot(Quaternion targetRot, float duration)
-    {
-        Quaternion start = transform.rotation;
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-
-            transform.rotation =
-                Quaternion.Slerp(
-                    start,
-                    targetRot,
-                    t
-                );
-
-            yield return null;
-        }
-
-        transform.rotation = targetRot;
-    }
-
-
-    private IEnumerator CoZoom(float from, float to, float duration)
-    {
-        if (cam == null)
-            yield break;
-
-        if (duration <= 0f)
-        {
-            cam.fieldOfView = to;
-            yield break;
-        }
-
-        float elapsed = 0f;
-
-        while (elapsed < duration)
-        {
-            elapsed += Time.deltaTime;
-
-            float t = Mathf.SmoothStep(0f, 1f, Mathf.Clamp01(elapsed / duration));
-
-            cam.fieldOfView =
-                Mathf.Lerp(
-                    from,
-                    to,
-                    t
-                );
-
-            yield return null;
-        }
-
-        cam.fieldOfView = to;
     }
 }

@@ -392,6 +392,7 @@ public class CJS_TutorialDirector : MonoBehaviour
 
     private void ShowResultPanel()
     {
+        if (focus) focus.RestoreGameplayView();
         if (resultPanel)
         {
             var modal = resultPanel.GetComponent<PSH_Script_ModalCanvas>();

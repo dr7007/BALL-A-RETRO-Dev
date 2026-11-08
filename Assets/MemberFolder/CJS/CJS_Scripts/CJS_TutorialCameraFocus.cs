@@ -1,75 +1,133 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class CJS_TutorialCameraFocus : MonoBehaviour
 {
     public Camera cam;
-    public MonoBehaviour[] disableWhileFocusing; // 팔로우/스위처 등 방해되는 스크립트 넣기
-
+    public MonoBehaviour[] disableWhileFocusing;
     [Header("Focus Tweaks")]
     public float focusFov = 35f;
-    public float moveDuration = 0.35f;
+    public float moveDuration = .35f;
 
-    Vector3 _origPos;
-    Quaternion _origRot;
-    float _origFov;
-    bool _captured;
+    Vector3 _originalLocalPosition, _originalWorldPosition;
+    Quaternion _originalLocalRotation, _originalWorldRotation;
+    Transform _originalParent;
+    float _originalFov;
+    bool _captured, _holding, _restoring, _releaseRequested;
+    KHS_Script_CameraController _follow;
+    readonly Dictionary<MonoBehaviour, bool> _suspended = new Dictionary<MonoBehaviour, bool>();
 
     public void CaptureOriginal()
     {
+        if (_captured) return;
         if (!cam) cam = Camera.main;
         if (!cam) return;
-
-        _origPos = cam.transform.position;
-        _origRot = cam.transform.rotation;
-        _origFov = cam.fieldOfView;
+        HoldCamera();
+        _originalParent = cam.transform.parent;
+        _originalLocalPosition = cam.transform.localPosition;
+        _originalLocalRotation = cam.transform.localRotation;
+        _originalWorldPosition = cam.transform.position;
+        _originalWorldRotation = cam.transform.rotation;
+        _originalFov = cam.fieldOfView;
         _captured = true;
     }
-
+    void HoldCamera()
+    {
+        if (_holding || !cam) return;
+        _holding = true;
+        _follow = cam.GetComponentInParent<KHS_Script_CameraController>(true);
+        if (_follow) _follow.BeginFocus();
+        if (disableWhileFocusing != null)
+            foreach (var behaviour in disableWhileFocusing) Suspend(behaviour);
+        foreach (var shaker in cam.GetComponents<CJS_Script_CameraShaker>()) Suspend(shaker);
+    }
+    void Suspend(MonoBehaviour behaviour)
+    {
+        if (!behaviour || behaviour == this || behaviour == _follow || _suspended.ContainsKey(behaviour)) return;
+        _suspended.Add(behaviour, behaviour.enabled);
+        behaviour.StopAllCoroutines();
+        behaviour.enabled = false;
+    }
     public void FocusTo(Transform target)
     {
-        if (!cam) cam = Camera.main;
-        if (!cam || !target) return;
-
-        if (!_captured) CaptureOriginal();
-
+        if (!target) return;
+        CaptureOriginal();
+        if (!cam || !_captured) return;
+        HoldCamera();
         StopAllCoroutines();
-        StartCoroutine(CoFocus(target.position, target.rotation, focusFov));
+        _releaseRequested = false;
+        _restoring = false;
+        StartCoroutine(Move(target.position, target.rotation, Mathf.Clamp(focusFov, 1, 179), false));
     }
-
     public void Restore()
     {
-        if (!cam) cam = Camera.main;
         if (!cam || !_captured) return;
-
+        HoldCamera();
         StopAllCoroutines();
-        StartCoroutine(CoFocus(_origPos, _origRot, _origFov));
+        _restoring = true;
+        StartCoroutine(Move(_originalLocalPosition, _originalLocalRotation, _originalFov, true));
     }
-
-    IEnumerator CoFocus(Vector3 pos, Quaternion rot, float fov)
-    {
-        // 방해 스크립트 잠깐 끄기
-        if (disableWhileFocusing != null)
-            foreach (var b in disableWhileFocusing) if (b) b.enabled = false;
-
-        float t = 0f;
-        Vector3 startPos = cam.transform.position;
-        Quaternion startRot = cam.transform.rotation;
-        float startFov = cam.fieldOfView;
-
-        while (t < 1f)
-        {
-            t += Time.unscaledDeltaTime / Mathf.Max(0.01f, moveDuration);
-            cam.transform.position = Vector3.Lerp(startPos, pos, t);
-            cam.transform.rotation = Quaternion.Slerp(startRot, rot, t);
-            cam.fieldOfView = Mathf.Lerp(startFov, fov, t);
-            yield return null;
-        }
-    }
-
     public void ReEnableDisabled()
     {
-        if (disableWhileFocusing != null)
-            foreach (var b in disableWhileFocusing) if (b) b.enabled = true;
+        _releaseRequested = true;
+        if (!_holding) return;
+        if (!_restoring) Restore();
+    }
+    public void RestoreGameplayView()
+    {
+        CaptureOriginal();
+        HoldCamera();
+        if (_follow) _follow.ResetToDefaultView();
+        Restore();
+        ReEnableDisabled();
+    }
+    IEnumerator Move(Vector3 position, Quaternion rotation, float fov, bool restore)
+    {
+        bool local = restore && cam.transform.parent == _originalParent;
+        if (restore && !local) { position = _originalWorldPosition; rotation = _originalWorldRotation; }
+        Vector3 startPosition = local ? cam.transform.localPosition : cam.transform.position;
+        Quaternion startRotation = local ? cam.transform.localRotation : cam.transform.rotation;
+        float startFov = cam.fieldOfView;
+        float elapsed = 0;
+        while (elapsed < moveDuration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float t = Mathf.SmoothStep(0, 1, Mathf.Clamp01(elapsed / moveDuration));
+            ApplyPose(Vector3.Lerp(startPosition, position, t), Quaternion.Slerp(startRotation, rotation, t), Mathf.Lerp(startFov, fov, t), local);
+            yield return null;
+        }
+        ApplyPose(position, rotation, fov, local);
+        if (restore)
+        {
+            _restoring = false;
+            if (_releaseRequested) ReleaseCamera();
+        }
+    }
+    void ApplyPose(Vector3 position, Quaternion rotation, float fov, bool local)
+    {
+        if (!cam) return;
+        if (local) { cam.transform.localPosition = position; cam.transform.localRotation = rotation; }
+        else cam.transform.SetPositionAndRotation(position, rotation);
+        cam.fieldOfView = fov;
+    }
+    void ReleaseCamera()
+    {
+        _holding = _restoring = _releaseRequested = false;
+        foreach (var entry in _suspended) if (entry.Key) entry.Key.enabled = entry.Value;
+        _suspended.Clear();
+        if (_follow) _follow.EndFocus();
+    }
+    void OnDisable()
+    {
+        StopAllCoroutines();
+        if (!_holding) return;
+        if (cam && _captured)
+        {
+            bool local = cam.transform.parent == _originalParent;
+            ApplyPose(local ? _originalLocalPosition : _originalWorldPosition,
+                local ? _originalLocalRotation : _originalWorldRotation, _originalFov, local);
+        }
+        ReleaseCamera();
     }
 }

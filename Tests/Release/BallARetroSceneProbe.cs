@@ -70,20 +70,24 @@ public class BallARetroSceneProbe : MonoBehaviour
     }
     void Update()
     {
-        if (!finished && Time.realtimeSinceStartup - started > 150f)
+        if (!finished && Time.realtimeSinceStartup - started > 210f)
         { errors.Add("Full scene audit timed out."); Finish(); }
     }
     IEnumerator GuardedRun()
     {
-        var run = Run();
-        while (!finished)
+        var routines = new Stack<IEnumerator>();
+        routines.Push(Run());
+        while (!finished && routines.Count > 0)
         {
+            var run = routines.Peek();
             bool next;
             try { next = run.MoveNext(); }
             catch (Exception ex) { errors.Add(ex.ToString()); Finish(); yield break; }
-            if (!next) { Finish(); yield break; }
-            yield return run.Current;
+            if (!next) { routines.Pop(); continue; }
+            if (run.Current is IEnumerator nested) routines.Push(nested);
+            else yield return run.Current;
         }
+        if (!finished) Finish();
     }
     void Check(bool ok, string label)
     {
@@ -280,6 +284,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         yield return null;
         CaptureFrame("tutorial");
         yield return BallARetroRenderProbe.Measure(output, "tutorial");
+        yield return CheckTutorialCameraRecovery(tutorial);
         settings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
         settings.ToggleMenu();
         settings.OnClickGoToLobby();
@@ -440,6 +445,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         yield return new WaitForSecondsRealtime(.55f);
         Check(entry.isActivated, "Portal reactivates after the transfer cooldown");
         Object.Destroy(testBall);
+        yield return CheckRouletteRoundTransition();
         settings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
         settings.ToggleMenu();
         settings.OnClickGoToLobby();
@@ -452,6 +458,118 @@ public class BallARetroSceneProbe : MonoBehaviour
         Check(!BallARetroStartupNotice.IsVisible, "Startup notice does not repeat when returning to the lobby");
         Check(BallARetroPersonalRecordStore.Read("Reviewer", "ReleaseSmoke", 1)[0].score == 9000, "Personal best survives all scene transitions");
         Check(!SteamManager.Initialized, "Steam remains disabled after scene transitions");
+    }
+    IEnumerator CheckRouletteRoundTransition()
+    {
+        const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        var manager = Object.FindFirstObjectByType<KHS_Script_CameraManager>();
+        var score = KHS_Script_ScoreManager.Instance;
+        var roulette = Object.FindFirstObjectByType<YJ_Script_RoulettePhysicsController>();
+        var choices = Object.FindFirstObjectByType<CJS_Script_ChoiceUIController>();
+        var panel = (GameObject)typeof(CJS_Script_ChoiceUIController).GetField("panelRoot", flags).GetValue(choices);
+        var skip = (UnityEngine.UI.Button)typeof(CJS_Script_ChoiceUIController).GetField("btnSkip", flags).GetValue(choices);
+        Check(roulette != null && panel != null && skip != null && score.IsPlaying,
+            "Roulette round regression uses the real scene score, wheel and choice UI");
+        float duration = roulette.stopDuration;
+        // Exercise the real scoring coroutine without replaying the unrelated rail ride.
+        // Null capture is supported by the production coroutine; no physical ball is moved.
+        roulette.stopDuration = .15f;
+        score.curScore = score.targetScore - 1;
+        manager.MainCamOn();
+        manager.SubCamOn(3);
+        Check(manager.cameraGos.Where(go => go.activeInHierarchy).SequenceEqual(new[] { manager.cameraGos[3] }),
+            "Only the roulette camera is active before the scoring transition");
+        roulette.StartStopSequence(null);
+        roulette.UpdateCurrentSlot(1);
+        float deadline = Time.realtimeSinceStartup + 2f;
+        while (score.IsPlaying && Time.realtimeSinceStartup < deadline) yield return null;
+        Check(!score.IsPlaying && Time.timeScale == 0f,
+            "Roulette score enters the real paused round transition within two seconds");
+        Check(manager.cameraGos.Where(go => go.activeInHierarchy).SequenceEqual(new[] { manager.cameraGos[0] }),
+            "Round banner camera immediately replaces roulette instead of remaining hidden");
+        CaptureFrame("roulette-round-banner", manager.cameraGos[0].GetComponent<Camera>());
+        deadline = Time.realtimeSinceStartup + 9f;
+        while ((!panel.activeInHierarchy || !manager.cameraGos[2].activeInHierarchy)
+            && Time.realtimeSinceStartup < deadline) yield return null;
+        Check(panel.activeInHierarchy && manager.cameraGos[2].activeInHierarchy,
+            "Round progression displays the choice panel without a hidden roulette wait");
+        yield return new WaitForSecondsRealtime(2.2f);
+        Check(manager.cameraGos.Where(go => go.activeInHierarchy).SequenceEqual(new[] { manager.cameraGos[2] }),
+            "Monitor is the sole camera throughout the paused choice screen");
+        Check(Cursor.visible && Cursor.lockState == CursorLockMode.None && Time.timeScale == 0f,
+            "Choices remain visible, clickable and paused after roulette scoring");
+        CaptureFrame("roulette-visible-choices", manager.cameraGos[2].GetComponent<Camera>());
+        skip.onClick.Invoke();
+        yield return new WaitForSecondsRealtime(2.3f);
+        Check(!(bool)typeof(CJS_Script_ChoiceUIController).GetField("isOpen", flags).GetValue(choices) && Time.timeScale == 1f,
+            "Skipping a roulette round choice resumes gameplay after camera return");
+        Check(!Cursor.visible && (Application.isBatchMode || !Application.isFocused || Cursor.lockState == CursorLockMode.Locked),
+            "Gameplay hides the cursor after skipping the choice (native lock requires focused player)");
+        Check(manager.cameraGos.Where(go => go.activeInHierarchy).SequenceEqual(new[] { manager.cameraGos[0] }),
+            "Returning from choices cannot leave a second roulette camera active");
+        yield return new WaitForSecondsRealtime(2.2f);
+        Check(!roulette.GetComponent<Renderer>().enabled && !roulette.GetComponent<Collider>().enabled,
+            "Roulette resumes its result hold and opens the drop after the choice closes");
+        roulette.ResetRoulette();
+        Check(roulette.GetComponent<Renderer>().enabled && roulette.GetComponent<Collider>().enabled,
+            "Resetting the interrupted roulette restores its plate and collider");
+        roulette.stopDuration = duration;
+        CaptureFrame("roulette-gameplay-resumed", manager.cameraGos[0].GetComponent<Camera>());
+    }
+    IEnumerator CheckTutorialCameraRecovery(CJS_TutorialDirector tutorial)
+    {
+        const System.Reflection.BindingFlags flags = System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.NonPublic;
+        var manager = Object.FindFirstObjectByType<KHS_Script_CameraManager>();
+        var follow = Object.FindFirstObjectByType<KHS_Script_CameraController>();
+        var camera = manager.cameraGos[0].GetComponent<Camera>();
+        Check(follow != null && !Object.FindObjectsByType<CJS_Script_CameraFollowBall>(FindObjectsSortMode.None).Any(component => component.enabled),
+            "Tutorial has one gameplay camera follower and no competing legacy follower");
+        var defaultPosition = (Vector3)typeof(KHS_Script_CameraController).GetField("_defaultPos", flags).GetValue(follow);
+        var localPosition = camera.transform.localPosition;
+        var localRotation = camera.transform.localRotation;
+        float defaultFov = camera.fieldOfView;
+        Object.FindFirstObjectByType<PSH.PSH_Script_DialogueUI>().SkipDialogue();
+        yield return new WaitForSecondsRealtime(.5f);
+        var step = typeof(CJS_TutorialDirector).GetMethod("GoToStep", flags);
+        var stepType = step.GetParameters()[0].ParameterType;
+        foreach (string name in new[] { "Flippers", "Entrance2F", "Plunger", "ScoreMission" })
+        {
+            step.Invoke(tutorial, new[] { Enum.Parse(stepType, name) });
+            yield return new WaitForSecondsRealtime(.45f);
+        }
+        Check(Vector3.Distance(camera.transform.localPosition, localPosition) < .02f
+            && Quaternion.Angle(camera.transform.localRotation, localRotation) < .2f,
+            "Tutorial focus sequence restores the camera child offset before gameplay tracking");
+        // Mimic an escaped tracked ball without moving the real physics object.
+        Transform realBall = follow.ball;
+        var escaped = new GameObject("Camera bounds audit target");
+        escaped.transform.position = new Vector3(0, 0, 1000);
+        follow.ball = escaped.transform;
+        follow.StartFollow();
+        yield return new WaitForSecondsRealtime(.3f);
+        Check(follow.transform.position.z <= follow.maxWorldZ + .01f,
+            "Tutorial camera does not follow an escaped ball beyond the upper board bound");
+        escaped.transform.position = new Vector3(0, 0, -1000);
+        yield return new WaitForSecondsRealtime(.3f);
+        Check(follow.transform.position.z >= follow.minWorldZ - .01f,
+            "Tutorial camera does not follow an escaped ball behind the lower board bound");
+        follow.ball = realBall;
+        Object.Destroy(escaped);
+        tutorial.scoreManager.AddScore(100);
+        // Failure can happen while a focus restoration is still in progress.
+        tutorial.focus.FocusTo(tutorial.focusPlunger);
+        step.Invoke(tutorial, new[] { Enum.Parse(stepType, "Failed") });
+        yield return new WaitForSecondsRealtime(1.2f);
+        Check(tutorial.resultPanel.activeInHierarchy && Time.timeScale == 0,
+            "Tutorial failure result remains paused and visible during camera recovery");
+        Check(Vector3.Distance(follow.transform.position, defaultPosition) < .02f
+            && Vector3.Distance(camera.transform.localPosition, localPosition) < .02f
+            && Quaternion.Angle(camera.transform.localRotation, localRotation) < .2f
+            && Mathf.Abs(camera.fieldOfView - defaultFov) < .1f,
+            "Tutorial retry screen restores the authored rig, camera offset and FOV while paused");
+        Check(Cursor.visible && Cursor.lockState == CursorLockMode.None,
+            "Tutorial failure controls retain a visible unlocked pointer");
+        CaptureFrame("tutorial-retry-camera-restored", camera);
     }
     static bool IsReplacedVendorVisual(string path) => !path.EndsWith(".cs") && (path.Contains("/Hovl Studio/")
         || path.Contains("/VisualX_Studio/") || path.Contains("/Cool Visual Effects - Part 1/"));

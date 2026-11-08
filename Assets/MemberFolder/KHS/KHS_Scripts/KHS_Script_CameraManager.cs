@@ -43,6 +43,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private Quaternion monitorReturnRot;
     private bool monitorActive;
     private bool monitorReturning;
+    private bool gameEnded;
 
 
     // =========================================================
@@ -91,6 +92,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private void OnEnable()
     {
         KHS_Script_ScoreManager.Round_Clear += OnRoundClear;
+        KHS_Script_ScoreManager.OnGameOver += OnGameEnded;
+        KHS_Script_ScoreManager.OnGameClear += OnGameEnded;
         KHS_Script_UIImgFunc.RoundUIEvt += OnRoundUIEvent;
         KHS_Script_PortalController.portalEvt += SubCamOn;
         KHS_Script_PlincoFunction.ReturnPortalEvt += MainCamOn;
@@ -104,6 +107,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
     private void OnDisable()
     {
         KHS_Script_ScoreManager.Round_Clear -= OnRoundClear;
+        KHS_Script_ScoreManager.OnGameOver -= OnGameEnded;
+        KHS_Script_ScoreManager.OnGameClear -= OnGameEnded;
         KHS_Script_UIImgFunc.RoundUIEvt -= OnRoundUIEvent;
         KHS_Script_PortalController.portalEvt -= SubCamOn;
         KHS_Script_PlincoFunction.ReturnPortalEvt -= MainCamOn;
@@ -119,40 +124,26 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MainCamOn()
     {
-        Camera mainCamera = cameraGos[0].GetComponent<Camera>();
-
-        CameraChangeEvt?.Invoke(mainCamera);
-
-        cameraGos[0].SetActive(true);
-
-        cameraGos[1].SetActive(false);
-
-        cameraGos[3].SetActive(false);
-
-
-        Debug.Log("[CameraManager] Main Camera ON");
+        if (monitorActive) return;
+        if (ActivateOnly(0)) CameraChangeEvt?.Invoke(cameraGos[0].GetComponent<Camera>());
     }
-
-
-    // =========================================================
-    // Sub Camera
-    // =========================================================
 
     public void SubCamOn(int index)
     {
-        Camera subCamera = cameraGos[index].GetComponent<Camera>();
-
-
-        CameraChangeEvt?.Invoke(subCamera);
-
-        cameraGos[0].SetActive(false);
-
-        cameraGos[index].SetActive(true);
-
-
-        Debug.Log($"[CameraManager] Sub Camera ON : {index}");
+        // A late portal callback cannot steal a round/choice presentation.
+        if (monitorActive || isRoundFlow || isRoundCameraReturning || gameEnded || index == 2) return;
+        if (ActivateOnly(index)) CameraChangeEvt?.Invoke(cameraGos[index].GetComponent<Camera>());
     }
 
+    bool ActivateOnly(int index)
+    {
+        if (cameraGos == null || index < 0 || index >= cameraGos.Length || !cameraGos[index]) return false;
+        for (int i = 0; i < cameraGos.Length; i++)
+            if (cameraGos[i]) cameraGos[i].SetActive(i == index);
+        return true;
+    }
+
+    void OnGameEnded() => gameEnded = true;
 
     // =========================================================
     // Monitor ON
@@ -160,13 +151,14 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOn(PSH_Script_DialogueUI dialogueUI = null)
     {
-        if (monitorActive)
+        if (monitorActive || gameEnded)
             return;
 
         monitorActive = true;
         Debug.Log("[CameraManager] MonitorOn");
 
         Transform mainCamera = cameraGos[0].transform;
+        mainCamera.GetComponent<CJS_Script_CameraShaker>()?.CancelShake();
         monitorReturnPos = mainCamera.position;
         monitorReturnRot = mainCamera.rotation;
 
@@ -196,7 +188,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
         // 3. Monitor Camera 활성화
         // -----------------------------------------------------
 
-        cameraGos[2].SetActive(true);
+        ActivateOnly(2);
 
 
         // 현재 메인 카메라 위치에서 시작
@@ -318,6 +310,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOnButton()
     {
+        if (gameEnded) return;
         Cursor.visible = true;
 
         Cursor.lockState = CursorLockMode.None;
@@ -328,6 +321,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
     public void MonitorOnBeforeDialogue(PSH_Script_DialogueUI dialogueUI)
     {
+        if (gameEnded) return;
         Cursor.visible = true;
 
         Cursor.lockState = CursorLockMode.None;
@@ -344,8 +338,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
     {
         Debug.Log("[CameraManager] Main Camera 복귀 완료");
 
-        cameraGos[0].SetActive(true);
-        cameraGos[2].SetActive(false);
+        ActivateOnly(0);
         monitorActive = false;
         monitorReturning = false;
 
@@ -360,7 +353,9 @@ public class KHS_Script_CameraManager : MonoBehaviour
             cameraController.EndMonitor();
         }
 
+        CameraChangeEvt?.Invoke(cameraGos[0].GetComponent<Camera>());
         MonitorEvt?.Invoke(false);
+        if (gameEnded) return;
 
 
         // -----------------------------------------------------
@@ -373,7 +368,7 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
             IsRoundCameraReady = true;
 
-            Time.timeScale = 1f;
+            PSH_Script_GameplayInput.Resume();
 
 
             Debug.Log(
@@ -495,6 +490,8 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
 
         IsRoundCameraReady = false;
+        // RoundUI must be visible even when the winning score came from roulette.
+        MainCamOn();
 
         isRoundFlow = true;
 
@@ -546,6 +543,6 @@ public class KHS_Script_CameraManager : MonoBehaviour
 
 
         // 최초 Round UI 종료
-        Time.timeScale = 1f;
+        if (!isActive && !gameEnded) PSH_Script_GameplayInput.Resume();
     }
 }

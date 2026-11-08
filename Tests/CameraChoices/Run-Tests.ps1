@@ -13,7 +13,7 @@ $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Runtime", 
 $lock = Get-Content -LiteralPath "$sourceRoot/Packages/packages-lock.json" -Raw | ConvertFrom-Json
 $dependencies = [ordered]@{}
 $pending = [Collections.Generic.Queue[string]]::new()
-@('com.unity.ugui', 'com.unity.test-framework', 'com.unity.modules.audio', 'com.unity.modules.uielements') | ForEach-Object { $pending.Enqueue($_) }
+@('com.unity.ugui', 'com.unity.localization', 'com.unity.test-framework', 'com.unity.modules.audio', 'com.unity.modules.uielements') | ForEach-Object { $pending.Enqueue($_) }
 while ($pending.Count -gt 0) {
     $name = $pending.Dequeue()
     if ($dependencies.Contains($name)) { continue }
@@ -38,13 +38,20 @@ Copy-Item -LiteralPath "$sourceRoot/ProjectSettings/ProjectVersion.txt", "$sourc
         $oldSource | Set-Content -LiteralPath "$outputPath/Assets/Runtime/$_" -Encoding utf8
     } else { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 }
-@('CJS_Script_ChoiceUIController.cs', 'CJS_Script_ChoiceCard.cs', 'CJS_IChoiceRoller.cs', 'CJS_ChoiceData.cs') | ForEach-Object {
-    Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
+@('CJS_Script_ChoiceUIController.cs', 'CJS_Script_ChoiceCard.cs', 'CJS_IChoiceRoller.cs', 'CJS_ChoiceData.cs', 'CJS_TutorialCameraFocus.cs', 'CJS_Script_CameraShaker.cs') | ForEach-Object {
+    $source = "Assets/MemberFolder/CJS/CJS_Scripts/$_"
+    if ($Baseline) {
+        $oldSource = & git -C $sourceRoot show "HEAD:$source"
+        if ($LASTEXITCODE -ne 0) { throw "Could not read baseline source from HEAD: $source" }
+        $oldSource | Set-Content -LiteralPath "$outputPath/Assets/Runtime/$_" -Encoding utf8
+    } else { Copy-Item -LiteralPath "$sourceRoot/$source" -Destination "$outputPath/Assets/Runtime" }
 }
 Copy-Item -LiteralPath "$PSScriptRoot/GameEventStubs.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item -LiteralPath "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_GameplayInput.cs" -Destination "$outputPath/Assets/Runtime"
+Copy-Item "$sourceRoot/Assets/Public/UI_Public/Scripts/PSH_Script_Local*.cs" "$outputPath/Assets/Runtime"
 Copy-Item -LiteralPath "$PSScriptRoot/CameraChoicesTests.cs" -Destination "$outputPath/Assets/Tests"
-@{ name = 'BallARetro.CameraChoicesUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/CameraChoicesUnderTest.asmdef" -Encoding utf8
-@{ name = 'BallARetro.CameraChoicesTests'; references = @('BallARetro.CameraChoicesUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/CameraChoicesTests.asmdef" -Encoding utf8
+@{ name = 'BallARetro.CameraChoicesUnderTest'; references = @('UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization') } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Runtime/CameraChoicesUnderTest.asmdef" -Encoding utf8
+@{ name = 'BallARetro.CameraChoicesTests'; references = @('BallARetro.CameraChoicesUnderTest', 'UnityEngine.UI', 'Unity.TextMeshPro', 'Unity.Localization'); optionalUnityReferences = @('TestAssemblies'); autoReferenced = $false } | ConvertTo-Json | Set-Content -LiteralPath "$outputPath/Assets/Tests/CameraChoicesTests.asmdef" -Encoding utf8
 
 $arguments = @('-batchmode', '-nographics', '-projectPath', "`"$outputPath`"", '-runTests', '-testPlatform', 'PlayMode', '-testFilter', 'CameraChoicesTests', '-testResults', "`"$outputPath/results.xml`"", '-logFile', "`"$outputPath/unity.log`"")
 $process = Start-Process -FilePath $UnityPath -ArgumentList $arguments -WindowStyle Hidden -PassThru
