@@ -61,15 +61,10 @@ public class KHS_Script_PortalController : MonoBehaviour
                 return;
             }
 
-            Rigidbody ballRigidbody = other.GetComponent<Rigidbody>();
-            if (ballRigidbody != null)
-            {
-                // 사용 횟수가 무제한이 아니면 카운터를 1씩 차감
-                if (activationCount > 0)
-                {
-                    activationCount--;
-                }
-            }
+            Rigidbody ballRigidbody = other.attachedRigidbody;
+            if (ballRigidbody == null) return;
+            // 사용 횟수가 무제한이 아니면 카운터를 1씩 차감
+            if (activationCount > 0) activationCount--;
 
             StartCoroutine(TeleportCoroutine(ballRigidbody));
         }
@@ -92,7 +87,7 @@ public class KHS_Script_PortalController : MonoBehaviour
         rb.transform.position = exitPortal.spawnPoint.position;
         rb.gameObject.SetActive(true);
 
-        Debug.LogError("일단 포탈 이벤트는 떴습니다 여러분");
+        Debug.Log("[Portal] Ball transfer completed.");
         portalEndEvt?.Invoke();
 
         // 기본 방향은 출구 포탈의 정면 방향을 기준으로 랜덤화
@@ -123,7 +118,7 @@ public class KHS_Script_PortalController : MonoBehaviour
 
     private IEnumerator TeleportSequenceCoroutine()
     {
-        portalEvt.Invoke(portalIndex);
+        portalEvt?.Invoke(portalIndex);
         yield return new WaitForSeconds(2f);
     }
 
