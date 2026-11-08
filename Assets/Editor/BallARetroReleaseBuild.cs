@@ -101,7 +101,9 @@ public static class BallARetroReleaseBuild
             {
                 scenes = scenes,
                 locationPathName = file, target = BuildTarget.StandaloneWindows64,
-                options = BuildOptions.DetailedBuildReport,
+                // Incremental script-only builds omit packedAssets even with a
+                // detailed report. Release validation requires the full asset inventory.
+                options = BuildOptions.DetailedBuildReport | BuildOptions.CleanBuildCache,
                 extraScriptingDefines = demo ? new[] { "BALLARETRO_STEAM", "BALLARETRO_DEMO" }
                     : new[] { steam ? "BALLARETRO_STEAM" : "BALLARETRO_STOVE" }
             });
@@ -179,6 +181,8 @@ public static class BallARetroReleaseBuild
             .GroupBy(p => p.sourceAssetPath ?? "")
             .Select(g => new AssetEntry { path = g.Key, packedBytes = g.Sum(p => (long)p.packedSize) })
             .OrderByDescending(p => p.packedBytes).ToArray();
+        if (entries.Length == 0)
+            throw new BuildFailedException("Release asset inventory is empty. A clean player-data build is required.");
         if (entries.Any(e => e.path.EndsWith("/PerformanceTestRunInfo.json") ||
             e.path.EndsWith("/PerformanceTestRunSettings.json")))
             throw new BuildFailedException("Performance test metadata must not be included in a release.");
