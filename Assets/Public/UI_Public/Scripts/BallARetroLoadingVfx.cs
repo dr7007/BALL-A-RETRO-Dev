@@ -6,6 +6,10 @@ using UnityEngine.UI;
 public sealed class BallARetroLoadingVfx : MaskableGraphic
 {
     float phase;
+    bool positionDirty = true;
+    bool updatingPosition;
+    Vector2 lastParentSize;
+    Vector2Int lastScreenSize;
     static readonly Color Amber = new Color32(255, 180, 58, 255);
     static readonly Color Cyan = new Color32(76, 226, 235, 255);
 
@@ -22,11 +26,27 @@ public sealed class BallARetroLoadingVfx : MaskableGraphic
         SetVerticesDirty();
     }
 
+    void LateUpdate()
+    {
+        var parentRect = rectTransform.parent as RectTransform;
+        if (parentRect != null && (positionDirty || parentRect.rect.size != lastParentSize
+            || Screen.width != lastScreenSize.x || Screen.height != lastScreenSize.y))
+            PositionBelowLobbyButtons();
+    }
+
+    protected override void OnRectTransformDimensionsChange()
+    {
+        base.OnRectTransformDimensionsChange();
+        if (!updatingPosition) positionDirty = true;
+    }
+
     protected override void OnEnable()
     {
         base.OnEnable();
         phase = 0;
+        positionDirty = true;
         PSH_Script_EffectSettings.Changed += EffectsChanged;
+        PositionBelowLobbyButtons();
     }
 
     protected override void OnDisable()
@@ -36,6 +56,74 @@ public sealed class BallARetroLoadingVfx : MaskableGraphic
     }
 
     void EffectsChanged(bool _) => SetVerticesDirty();
+
+    void PositionBelowLobbyButtons()
+    {
+        if (updatingPosition) return;
+        var lobby = FindFirstObjectByType<PSH.PSH_Script_LobbyUIManager>();
+        var parentRect = rectTransform.parent as RectTransform;
+        var overlayCanvas = canvas;
+        // A duplicate persistent loader can enable its children while its parent
+        // is being destroyed on a return to the lobby. Its canvas is then absent.
+        if (lobby == null || parentRect == null || overlayCanvas == null) return;
+
+        // The menu uses a camera canvas; the loading overlay uses screen space.
+        // Measure the actual row so the indicator stays below it at every resolution.
+        updatingPosition = true;
+        try
+        {
+            Canvas.ForceUpdateCanvases();
+            if (!this || !isActiveAndEnabled || lobby == null || parentRect == null || overlayCanvas == null) return;
+
+            float left = float.PositiveInfinity;
+            float right = float.NegativeInfinity;
+            float bottom = float.PositiveInfinity;
+            var corners = new Vector3[4];
+            RectTransform row = null;
+            Camera rowCamera = null;
+            foreach (var button in lobby.GetComponentsInChildren<PSH_Script_StartButton>())
+            {
+                if (button == null) continue;
+                var buttonRect = button.transform as RectTransform;
+                var buttonCanvas = button.GetComponentInParent<Canvas>();
+                if (buttonRect == null || buttonCanvas == null) continue;
+                var camera = buttonCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : buttonCanvas.worldCamera;
+                if (row == null)
+                {
+                    row = buttonRect.parent as RectTransform;
+                    rowCamera = camera;
+                }
+                buttonRect.GetWorldCorners(corners);
+                foreach (var corner in corners)
+                {
+                    var point = RectTransformUtility.WorldToScreenPoint(camera, corner);
+                    left = Mathf.Min(left, point.x);
+                    right = Mathf.Max(right, point.x);
+                    bottom = Mathf.Min(bottom, point.y);
+                }
+            }
+            if (float.IsInfinity(bottom)) return;
+
+            // Hover animates one button's scale; the row center remains stable.
+            float centerX = row != null
+                ? RectTransformUtility.WorldToScreenPoint(rowCamera, row.TransformPoint(row.rect.center)).x
+                : (left + right) * .5f;
+            var overlayCamera = overlayCanvas.renderMode == RenderMode.ScreenSpaceOverlay ? null : overlayCanvas.worldCamera;
+            if (RectTransformUtility.ScreenPointToLocalPointInRectangle(parentRect,
+                new Vector2(centerX, bottom), overlayCamera, out var rowBottom))
+            {
+                rectTransform.localPosition = new Vector3(rowBottom.x,
+                    rowBottom.y - 24f - rectTransform.rect.height * .5f, 0);
+            }
+            lastParentSize = parentRect.rect.size;
+            lastScreenSize = new Vector2Int(Screen.width, Screen.height);
+            positionDirty = false;
+        }
+        finally
+        {
+            updatingPosition = false;
+        }
+    }
 
     protected override void OnPopulateMesh(VertexHelper mesh)
     {
@@ -57,7 +145,7 @@ public sealed class BallARetroLoadingVfx : MaskableGraphic
                 Quad(mesh, center + point * scale, (i % 4 == 0 ? 5 : 3) * scale, tint);
             }
         }
-        // Sparse converging motes, in the same pixel geometry as the portal effect.
+        // Sparse converging motes complement the static pinball indicator.
         if (PSH_Script_EffectSettings.ParticlesEnabled)
             for (int i = 0; i < 28; i++)
             {

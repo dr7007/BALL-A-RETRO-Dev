@@ -2,7 +2,6 @@ using System;
 using System.Collections;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using static UnityEngine.EventSystems.EventTrigger;
 
 #if UNITY_EDITOR
 using UnityEditor.SceneManagement;
@@ -66,28 +65,25 @@ namespace PSH
 
         public void LoadSceneAsyncByName(string sceneName, bool showLoadingPanel = true)
         {
+            // An in-flight async load cannot be cancelled by stopping its coroutine.
+            if (currentLoadingCoroutine != null) return;
+
             // 글리치 끄는 코드 (안전장치)
             GlitchEffect_RendererFeature.IsEnabled = false;
             OnSceneLoadStart?.Invoke(); // 씬 로드 시작 알림
 
-            if (currentLoadingCoroutine != null)
-            {
-                StopCoroutine(currentLoadingCoroutine);
-            }
             currentLoadingCoroutine = StartCoroutine(LoadSceneCoroutine(sceneName, showLoadingPanel));
         }
 
         public void LoadSceneByPath_Editor(string scenePath, bool showLoadingPanel = true)
         {
 #if UNITY_EDITOR
+            if (currentLoadingCoroutine != null) return;
+
             // 글리치 끄는 코드 (안전장치)
             GlitchEffect_RendererFeature.IsEnabled = false;
             OnSceneLoadStart?.Invoke(); // 씬 로드 시작 알림
 
-            if (currentLoadingCoroutine != null)
-            {
-                StopCoroutine(currentLoadingCoroutine);
-            }
             currentLoadingCoroutine = StartCoroutine(LoadSceneCoroutine_Editor(scenePath, showLoadingPanel));
 #else
             Debug.LogError("이 기능은 유니티 에디터에서만 사용할 수 있습니다!");
@@ -96,7 +92,7 @@ namespace PSH
 
         private IEnumerator LoadSceneCoroutine(string sceneName, bool showPanel)
         {
-            float startTime = Time.time;
+            float startTime = Time.unscaledTime;
 
             if (loadingPanel != null && showPanel)
             {
@@ -111,17 +107,17 @@ namespace PSH
                 yield return null;
             }
 
-            float elapsedTime = Time.time - startTime;
+            float elapsedTime = Time.unscaledTime - startTime;
             if (elapsedTime < minLoadingTime)
             {
                 if (showPanel)
                 {
-                    yield return new WaitForSeconds(minLoadingTime - elapsedTime);
+                    yield return new WaitForSecondsRealtime(minLoadingTime - elapsedTime);
                 }
             }
 
             asyncLoad.allowSceneActivation = true;
-            yield return null;
+            yield return asyncLoad;
 
             if (loadingPanel != null && showPanel)
             {
@@ -134,18 +130,18 @@ namespace PSH
 #if UNITY_EDITOR
         private IEnumerator LoadSceneCoroutine_Editor(string scenePath, bool showPanel)
         {
-            float startTime = Time.time;
+            float startTime = Time.unscaledTime;
 
             if (loadingPanel != null && showPanel)
                 loadingPanel.SetActive(true);
 
             yield return null;
 
-            float elapsedTime = Time.time - startTime;
+            float elapsedTime = Time.unscaledTime - startTime;
             if (elapsedTime < minLoadingTime)
             {
                 if (showPanel)
-                    yield return new WaitForSeconds(minLoadingTime - elapsedTime);
+                    yield return new WaitForSecondsRealtime(minLoadingTime - elapsedTime);
             }
 
             EditorSceneManager.LoadSceneInPlayMode(scenePath, new LoadSceneParameters(LoadSceneMode.Single));
@@ -165,6 +161,10 @@ namespace PSH
         /// </summary>
         private void OnSceneLoaded(Scene scene, LoadSceneMode mode)
         {
+            // sceneLoaded runs before the new scene's first rendered frame.
+            // Keep the indicator on the lobby until activation, then remove it.
+            if (loadingPanel != null) loadingPanel.SetActive(false);
+
             Debug.Log($"'{scene.name}' 씬 로드가 완료되었습니다.");
 
             // 💡 [핵심 수정]
