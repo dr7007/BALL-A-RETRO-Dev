@@ -40,13 +40,23 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
     [SerializeField]
     private MeshRenderer numberRenderer;
     private MeshCollider plateCollider;
+    private bool plateRendererEnabled;
+    private bool numberRendererEnabled;
+    private bool plateColliderEnabled;
 
     public static event Action<int, SlotColor> OnRouletteResult;
 
-    private void Start()
+    private void Awake()
     {
         plateRenderer = GetComponent<MeshRenderer>();
         plateCollider = GetComponent<MeshCollider>();
+        plateRendererEnabled = plateRenderer != null && plateRenderer.enabled;
+        numberRendererEnabled = numberRenderer != null && numberRenderer.enabled;
+        plateColliderEnabled = plateCollider != null && plateCollider.enabled;
+    }
+
+    private void Start()
+    {
         scoreManager = FindAnyObjectByType<KHS_Script_ScoreManager>();
     }
 
@@ -57,18 +67,35 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
     private void OnDisable()
     {
         KHS_Script_BallOutController.BallOutEvt -= ResetRoulette;
+        // Deactivating the wheel stops its coroutine. Clear that partial spin
+        // now, but do not change a ball owned by gameplay/scene teardown.
+        ResetSequence(false);
     }
 
-    public void ResetRoulette()
+    public void ResetRoulette() => ResetSequence(true);
+
+    private void ResetSequence(bool releaseBall)
     {
         StopAllCoroutines();
         isSlowingDown = false;
+        lastKnownSlotNumber = -1;
+        RestorePlate();
 
-        if (capturedBall != null)
+        var ball = capturedBall;
+        capturedBall = null;
+        if (releaseBall && ball != null)
         {
-            capturedBall.ReleaseForFalling(Vector3.zero, false);
-            capturedBall = null;
+            ball.ReleaseForFalling(Vector3.zero, false);
         }
+    }
+
+    private void RestorePlate()
+    {
+        // Ball-out can interrupt the five-second hidden window before the
+        // coroutine reaches its normal restoration. Retain the prefab's state.
+        if (plateRenderer != null) plateRenderer.enabled = plateRendererEnabled;
+        if (numberRenderer != null) numberRenderer.enabled = numberRendererEnabled;
+        if (plateCollider != null) plateCollider.enabled = plateColliderEnabled;
     }
 
     void Update()
@@ -151,9 +178,7 @@ public class YJ_Script_RoulettePhysicsController : MonoBehaviour
         yield return new WaitForSeconds(5.0f);
 
         Debug.Log("룰렛 판 다시 생성.");
-        if (plateRenderer != null) plateRenderer.enabled = true;
-        if (numberRenderer != null) numberRenderer.enabled = true;
-        if (plateCollider != null) plateCollider.enabled = true;
+        RestorePlate();
 
         isSlowingDown = false;
     }
