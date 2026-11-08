@@ -1,188 +1,193 @@
+using System;
 using System.Collections;
+using TMPro;
 using UnityEngine;
-using UnityEngine.UI; // Toggle을 사용하기 위해 추가
-using UnityEngine.EventSystems; // 마우스 이벤트를 감지하기 위해 추가
+using UnityEngine.EventSystems;
+using UnityEngine.SceneManagement;
+using UnityEngine.UI;
 
-// 1. 마우스 이벤트 감지를 위해 인터페이스 2개 추가
-public class PSH_Script_QuickChoiceOnOff : MonoBehaviour, IPointerEnterHandler, IPointerExitHandler
+// A read-only drawer: opening it never owns pause, camera or cursor state.
+public class PSH_Script_QuickChoiceOnOff : MonoBehaviour
 {
-    private RectTransform rectTransform;
-
     [Header("Slide")]
     public float duration = 0.5f;
-    private float originalX;
-    private readonly float hiddenXOffset = -460f;
-
     [Header("Inventory Hook")]
     [SerializeField] private CJS_Script_ChoiceInventoryUI inventoryUI;
-    [SerializeField] private bool rebuildOnEveryOpen = true;
-
     [Header("Arrow Settings")]
     [SerializeField] private RectTransform arrowRectTransform;
     [SerializeField] private float arrowRotationOn = 180f;
-    [SerializeField] private float arrowRotationOff = 0f;
+    [SerializeField] private float arrowRotationOff;
+    [SerializeField] private Toggle controllingToggle;
 
-    // ▼▼▼ 자동 닫기 기능 추가 ▼▼▼
-    [Header("Auto Close")]
-    [Tooltip("이 패널을 제어하는 Toggle을 여기에 연결해야 합니다.")]
-    [SerializeField] private Toggle controllingToggle; // 닫기 위해 상태를 변경할 Toggle
-    [SerializeField] private float autoCloseDelay = 3f; // 자동 닫기 지연 시간
+    private const float HiddenXOffset = -460f;
+    private RectTransform rectTransform;
+    private float originalX;
+    private Coroutine moveCoroutine;
+    private GameObject hint;
+    private bool gameEnded;
+    private bool monitorActive;
+    private int blockedFrame = -1;
+    public bool IsOpen { get; private set; }
+    public event Action<bool> OpenStateChanged;
+    public RectTransform StatusHost => transform.Find("Image_QuickChoice_Bg") as RectTransform ?? rectTransform;
+    private bool IsTutorialScene => gameObject.scene.name.IndexOf("Tutorial", StringComparison.OrdinalIgnoreCase) >= 0;
 
-    private Coroutine moveCoroutine; // MoveUI 코루틴 참조
-    private Coroutine autoCloseCoroutine; // 자동 닫기 타이머 코루틴 참조
-    private bool isPanelOpen = false; // 패널의 현재 열림/닫힘 상태
-    // ▲▲▲ 여기까지 ▲▲▲
-
-    void Awake()
+    private void Awake()
     {
-        rectTransform = GetComponent<RectTransform>();
+        rectTransform = (RectTransform)transform;
         originalX = rectTransform.anchoredPosition.x;
-
-        // start hidden
-        var pos = rectTransform.anchoredPosition;
-        pos.x = originalX + hiddenXOffset;
-        rectTransform.anchoredPosition = pos;
-
-        // 처음엔 안 보이는 상태로 통지
+        if (!inventoryUI) inventoryUI = GetComponentInChildren<CJS_Script_ChoiceInventoryUI>(true);
+        if (!controllingToggle) controllingToggle = GetComponentInChildren<Toggle>(true);
+        if (controllingToggle) controllingToggle.SetIsOnWithoutNotify(false);
+        SetPosition(false);
         inventoryUI?.SetVisible(false);
-        isPanelOpen = false; // 초기 상태는 닫힘
-
-        if (arrowRectTransform != null)
-        {
-            arrowRectTransform.localRotation = Quaternion.Euler(0, 0, arrowRotationOff);
-        }
+        CreateHint();
     }
 
-    public void OnToggleValueChanged(bool isToggledOn)
+    private void OnEnable()
     {
-        isPanelOpen = isToggledOn; // 패널 상태 갱신
-
-        // 가시성 먼저 통지
-        inventoryUI?.SetVisible(isToggledOn);
-
-        // 열릴 때 최신 상태로
-        if (isToggledOn && rebuildOnEveryOpen)
-            inventoryUI?.RebuildAll();
-
-        float targetX = isToggledOn ? originalX : originalX + hiddenXOffset;
-        float targetRotationZ = isToggledOn ? arrowRotationOn : arrowRotationOff;
-
-        // ▼▼▼ 수정: StopAllCoroutines() 대신 특정 코루틴 중지 ▼▼▼
-        if (moveCoroutine != null)
-        {
-            StopCoroutine(moveCoroutine);
-        }
-        moveCoroutine = StartCoroutine(MoveUI(targetX, targetRotationZ));
-        // ▲▲▲ 여기까지 ▲▲▲
-
-        // ▼▼▼ 추가: 자동 닫기 타이머 관리 ▼▼▼
-        if (isToggledOn)
-        {
-            // 패널이 열리면, 3초 타이머 시작 (마우스가 안 올라와 있을 수 있으므로)
-            StartAutoCloseTimer();
-        }
-        else
-        {
-            // 패널이 닫히면, 타이머 중지
-            StopAutoCloseTimer();
-        }
-        // ▲▲▲ 여기까지 ▲▲▲
+        KHS_Script_ScoreManager.OnGameOver += OnGameEnded;
+        KHS_Script_ScoreManager.OnGameClear += OnGameEnded;
+        KHS_Script_ResetController.OnReset += OnReset;
+        KHS_Script_CameraManager.MonitorEvt += OnMonitor;
+        SceneManager.activeSceneChanged += OnSceneChanged;
+        UpdateHintVisibility();
     }
 
-    private IEnumerator MoveUI(float targetX, float targetRotationZ)
+    private void OnDisable()
     {
-        float t = 0f;
+        KHS_Script_ScoreManager.OnGameOver -= OnGameEnded;
+        KHS_Script_ScoreManager.OnGameClear -= OnGameEnded;
+        KHS_Script_ResetController.OnReset -= OnReset;
+        KHS_Script_CameraManager.MonitorEvt -= OnMonitor;
+        SceneManager.activeSceneChanged -= OnSceneChanged;
+        CloseImmediately();
+        if (hint) hint.SetActive(false);
+    }
+
+    private void OnDestroy() { if (hint) Destroy(hint); }
+    private void Update()
+    {
+        if (!Input.GetKeyDown(KeyCode.Tab)) return;
+        TryHandleTabInput(true,
+            Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift),
+            Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl),
+            Input.GetKey(KeyCode.LeftAlt) || Input.GetKey(KeyCode.RightAlt));
+    }
+    public bool TryHandleTabInput(bool pressed, bool shift, bool control, bool alt)
+        => pressed && !shift && !control && !alt && TryTogglePanel();
+    private void LateUpdate()
+    {
+        UpdateHintVisibility();
+        if (IsOpen && !CanOpen()) CloseImmediately();
+    }
+    private void UpdateHintVisibility()
+    {
+        if (!hint) return;
+        bool visible = isActiveAndEnabled && !IsTutorialScene && !(KHS_Script_ScoreManager.Instance?.IsTutorialRun ?? false);
+        if (hint.activeSelf != visible) hint.SetActive(visible);
+    }
+    private void OnGameEnded() { gameEnded = true; CloseImmediately(); }
+    private void OnReset() { gameEnded = false; monitorActive = false; CloseImmediately(); }
+    private void OnMonitor(bool active) { monitorActive = active; if (active) CloseImmediately(); }
+    private void OnSceneChanged(Scene previous, Scene next) => CloseImmediately();
+
+    private bool CanOpen()
+    {
+        var score = KHS_Script_ScoreManager.Instance;
+        if (!isActiveAndEnabled || gameEnded || monitorActive || blockedFrame == Time.frameCount || Time.timeScale <= 0f
+            || PSH_Script_SettingController.BlocksDialogueKeyboardInput
+            || IsTutorialScene || score == null || score.HasEnded || score.IsTutorialRun || !score.IsPlaying) return false;
+        var selected = EventSystem.current != null ? EventSystem.current.currentSelectedGameObject : null;
+        return selected == null || (selected.GetComponent<TMP_InputField>() == null && selected.GetComponent<InputField>() == null);
+    }
+
+    public bool TryTogglePanel()
+    {
+        if (IsOpen) { SetOpen(false, false); return true; }
+        if (!CanOpen()) return false;
+        SetOpen(true, false);
+        return true;
+    }
+
+    // Existing serialized Toggle callbacks follow exactly the same guard as Tab.
+    public void OnToggleValueChanged(bool open)
+    {
+        if (open && !CanOpen()) { if (controllingToggle) controllingToggle.SetIsOnWithoutNotify(false); return; }
+        SetOpen(open, false);
+    }
+
+    public void CloseImmediately()
+    {
+        blockedFrame = Time.frameCount;
+        SetOpen(false, true);
+    }
+
+    private void SetOpen(bool open, bool immediate)
+    {
+        bool changed = IsOpen != open;
+        IsOpen = open;
+        if (controllingToggle) controllingToggle.SetIsOnWithoutNotify(open);
+        if (!inventoryUI) inventoryUI = GetComponentInChildren<CJS_Script_ChoiceInventoryUI>(true);
+        inventoryUI?.SetVisible(open);
+        if (moveCoroutine != null) { StopCoroutine(moveCoroutine); moveCoroutine = null; }
+        if (rectTransform != null)
+        {
+            if (immediate || duration <= 0f || !isActiveAndEnabled) SetPosition(open);
+            else moveCoroutine = StartCoroutine(MoveUI(open));
+        }
+        if (changed) OpenStateChanged?.Invoke(open);
+    }
+
+    private void SetPosition(bool open)
+    {
+        if (rectTransform == null) return;
+        var position = rectTransform.anchoredPosition;
+        position.x = originalX + (open ? 0f : HiddenXOffset);
+        rectTransform.anchoredPosition = position;
+        if (arrowRectTransform) arrowRectTransform.localRotation = Quaternion.Euler(0, 0, open ? arrowRotationOn : arrowRotationOff);
+    }
+
+    private IEnumerator MoveUI(bool open)
+    {
         var start = rectTransform.anchoredPosition;
-        var end = new Vector2(targetX, start.y);
-
-        Quaternion startRotation = arrowRectTransform != null ? arrowRectTransform.localRotation : Quaternion.identity;
-        Quaternion endRotation = Quaternion.Euler(0, 0, targetRotationZ);
-
-        while (t < duration)
+        var end = new Vector2(originalX + (open ? 0f : HiddenXOffset), start.y);
+        var startRotation = arrowRectTransform ? arrowRectTransform.localRotation : Quaternion.identity;
+        var endRotation = Quaternion.Euler(0, 0, open ? arrowRotationOn : arrowRotationOff);
+        for (float elapsed = 0; elapsed < duration; elapsed += Time.unscaledDeltaTime)
         {
-            float normalizedTime = t / duration;
-            rectTransform.anchoredPosition = Vector2.Lerp(start, end, normalizedTime);
-
-            if (arrowRectTransform != null)
-            {
-                arrowRectTransform.localRotation = Quaternion.Lerp(startRotation, endRotation, normalizedTime);
-            }
-
-            t += Time.deltaTime;
+            float t = elapsed / duration;
+            rectTransform.anchoredPosition = Vector2.Lerp(start, end, t);
+            if (arrowRectTransform) arrowRectTransform.localRotation = Quaternion.Lerp(startRotation, endRotation, t);
             yield return null;
         }
-
-        rectTransform.anchoredPosition = end;
-        if (arrowRectTransform != null)
-        {
-            arrowRectTransform.localRotation = endRotation;
-        }
-
-        moveCoroutine = null; // 코루틴이 끝났으므로 참조 비우기
+        SetPosition(open);
+        moveCoroutine = null;
     }
 
-    // ▼▼▼ 3초 자동 닫기를 위한 새 함수들 ▼▼▼
-
-    /// <summary>
-    /// 마우스가 패널 영역에 들어왔을 때 호출됩니다.
-    /// </summary>
-    public void OnPointerEnter(PointerEventData eventData)
+    private void CreateHint()
     {
-        if (isPanelOpen)
-        {
-            // 마우스가 올라왔으므로, 자동 닫기 타이머 중지
-            StopAutoCloseTimer();
-        }
+        if (IsTutorialScene) return;
+        // Resolve an authored font before adding our label, otherwise the search
+        // can select that new label's default Latin-only font.
+        var template = GetComponentInChildren<TMP_Text>(true);
+        var canvas = GetComponentInParent<Canvas>();
+        if (template == null && canvas != null) template = canvas.GetComponentInChildren<TMP_Text>(true);
+        var hintFont = template != null ? template.font : TMP_Settings.defaultFontAsset;
+        hint = new GameObject("QuickChoiceTabHint", typeof(RectTransform));
+        hint.layer = gameObject.layer;
+        var rect = (RectTransform)hint.transform;
+        rect.SetParent(transform.parent, false);
+        rect.anchorMin = rect.anchorMax = rect.pivot = new Vector2(0, 1);
+        rect.anchoredPosition = new Vector2(12, -72);
+        rect.sizeDelta = new Vector2(250, 26);
+        var label = hint.AddComponent<TextMeshProUGUI>();
+        label.font = hintFont;
+        label.fontSize = 18;
+        label.color = new Color32(190, 242, 176, 255);
+        label.alignment = TextAlignmentOptions.MidlineLeft;
+        label.raycastTarget = false;
+        label.textWrappingMode = TextWrappingModes.NoWrap;
+        hint.AddComponent<PSH_Script_LocalizedText>().SetKey("QuickChoice_TabHint");
     }
-
-    /// <summary>
-    /// 마우스가 패널 영역에서 나갔을 때 호출됩니다.
-    /// </summary>
-    public void OnPointerExit(PointerEventData eventData)
-    {
-        if (isPanelOpen)
-        {
-            // 마우스가 나갔으므로, 자동 닫기 타이머 시작
-            StartAutoCloseTimer();
-        }
-    }
-
-    /// <summary>
-    /// 자동 닫기 타이머를 (재)시작합니다.
-    /// </summary>
-    private void StartAutoCloseTimer()
-    {
-        StopAutoCloseTimer(); // 이미 실행 중인 타이머가 있다면 중지
-        autoCloseCoroutine = StartCoroutine(AutoCloseTimerCoroutine());
-    }
-
-    /// <summary>
-    /// 자동 닫기 타이머를 중지합니다.
-    /// </summary>
-    private void StopAutoCloseTimer()
-    {
-        if (autoCloseCoroutine != null)
-        {
-            StopCoroutine(autoCloseCoroutine);
-            autoCloseCoroutine = null;
-        }
-    }
-
-    /// <summary>
-    /// 3초를 기다린 후 토글을 끄는 코루틴입니다.
-    /// </summary>
-    private IEnumerator AutoCloseTimerCoroutine()
-    {
-        yield return new WaitForSeconds(autoCloseDelay);
-
-        // 3초가 지났을 때, 패널이 여전히 열려있고 토글이 연결되어 있다면
-        if (isPanelOpen && controllingToggle != null)
-        {
-            // 토글을 끔으로써 패널을 닫습니다.
-            // (이 코드는 OnToggleValueChanged(false)를 자동으로 호출합니다)
-            controllingToggle.isOn = false;
-        }
-        autoCloseCoroutine = null; // 코루틴이 끝나면 참조 비우기
-    }
-    // ▲▲▲ 여기까지 ▲▲▲
 }

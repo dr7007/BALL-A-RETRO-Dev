@@ -9,3 +9,10 @@ public sealed class BallARetroDemoRun
     public bool IsEnabled, LastBallActive;
     public static void Notify() => Changed?.Invoke();
 }
+
+// The UI observes this production camera event without controlling the camera.
+public static class KHS_Script_CameraManager
+{
+    public static event Action<bool> MonitorEvt;
+    public static void SetMonitor(bool active) => MonitorEvt?.Invoke(active);
+}
