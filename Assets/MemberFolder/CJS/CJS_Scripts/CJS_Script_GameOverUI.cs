@@ -42,6 +42,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     private bool _rankPanelOpen;
     private float _refreshElapsed;
     private PSH_Script_WorldRankingUI worldRanking;
+    private BallARetroDemoPresentation demoPresentation;
 
     // ─────────────────────────────────────────────────────────────────────────
     #region Lifecycle & Wiring
@@ -49,6 +50,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     void Awake()
     {
         TryWireService();
+        EnsureDemoPresentation();
 
         if (panelGameEnd == null) panelGameEnd = gameObject;
 
@@ -84,7 +86,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     }
     private void RefreshLanguage(Locale _)
     {
-        if (textResult) textResult.text = BallARetroPlatform.IsSteamBuild
+        if (textResult) textResult.text = BallARetroPlatform.UsesSteamLeaderboards && !BallARetroPlatform.IsDemoBuild
             ? PSH_Script_Localization.Text(statusKey, statusArguments) : string.Empty;
     }
 
@@ -163,6 +165,7 @@ public class CJS_Script_GameOverUI : MonoBehaviour
     public void Show(int finalScore)
     {
         _finalScore = finalScore;
+        EnsureDemoPresentation();
 
         if (textFinalScore) textFinalScore.text = _finalScore.ToString("N0");
         SetStatus("Rank_Ready");
@@ -183,11 +186,13 @@ public class CJS_Script_GameOverUI : MonoBehaviour
             {
                 if (!this) return;
                 _lastSubmit = resp;
+                if (demoPresentation != null) demoPresentation.SetSubmissionState(resp.local_only);
 
-                SetStatus("Rank_Saved", resp.your_score, resp.rank);
+                if (BallARetroPlatform.IsDemoBuild && resp.local_only) SetStatus("Demo_SavedLocally");
+                else SetStatus("Rank_Saved", resp.your_score, resp.rank);
 
                 // 1) 낙관적 업데이트: 서버가 돌려준 스냅샷 먼저 표시
-                RefreshLeaderboardUI(resp.top10);
+                RefreshLeaderboardUI(BallARetroPlatform.IsDemoBuild && resp.local_only ? Array.Empty<ScoreRow>() : resp.top10);
 
                 // 2) 확정 동기화: 방금 저장된 내용이 Top10에 반영됐는지 서버에서 "다시" 받아서 갱신
                 FetchFreshLeaderboardAndDraw();
@@ -216,6 +221,12 @@ public class CJS_Script_GameOverUI : MonoBehaviour
         Debug.Log("[GameOverUI] OnClickOpenRank");
         _rankPanelOpen = true;
         _refreshElapsed = 0f;
+    }
+
+    private void EnsureDemoPresentation()
+    {
+        if (demoPresentation == null) demoPresentation = BallARetroDemoPresentation.InstallResult(this);
+        if (demoPresentation != null) demoPresentation.Refresh();
     }
 
     public void OnClickCloseRank()

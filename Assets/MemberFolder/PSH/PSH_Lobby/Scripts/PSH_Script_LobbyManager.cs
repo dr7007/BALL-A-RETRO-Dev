@@ -50,6 +50,7 @@ namespace PSH
             if (RnakingPanel != null) RnakingPanel.SetActive(false);
             var label = GetComponentInChildren<TMP_Text>(true);
             worldRanking = PSH_Script_WorldRankingUI.Install(transform, label != null ? label.font : null, true, rankingIcon);
+            BallARetroDemoPresentation.InstallLobby(transform, label != null ? label.font : null);
         }
 
         private void Start()

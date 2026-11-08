@@ -84,13 +84,19 @@ public class LobbyFlowTests
         for(var t=ending.transform;t!=null;t=t.parent)t.gameObject.SetActive(true);
         ending.panelGameEnd.SetActive(true);yield return null;
         var entry=result.GetComponentsInChildren<Transform>(true).Single(t=>t.name=="Image_Rank_bg");
-        Assert.That(entry.gameObject.activeInHierarchy,Is.True);
+        if (BallARetroPlatform.IsDemoBuild)
+        {
+            Assert.That(entry.gameObject.activeSelf, Is.False);
+            Assert.That(ending.GetComponentsInChildren<BallARetroDemoPresentation>(true).Any(t => t.name == "DemoResult"), Is.True);
+        }
+        else Assert.That(entry.gameObject.activeInHierarchy,Is.True);
         Time.timeScale=0;
         Click(result.GetComponentsInChildren<Button>().Single(b=>b.name=="Image_RankOpen"));
         yield return null; // The dynamically created Canvas registers its graphics for this frame.
         var ui=result.GetComponentInChildren<PSH_Script_WorldRankingUI>();
         Assert.That(ui,Is.Not.Null);
-        Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,Is.EqualTo("SCORE  RANKING"));
+        Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,
+            Is.EqualTo(BallARetroPlatform.IsDemoBuild ? PSH_Script_Localization.Text("Demo_RankingTitle") : "SCORE  RANKING"));
         if(!BallARetroPlatform.IsSteamBuild)
             Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Status").text,Is.EqualTo(PSH_Script_Localization.Text("Rank_SteamOnly")));
         Click(ui.GetComponentsInChildren<Button>().Single(b=>b.name=="Close"));
@@ -98,7 +104,7 @@ public class LobbyFlowTests
         Assert.That(ending.panelGameEnd.activeInHierarchy,Is.True);
         Assert.That(Time.timeScale,Is.Zero);
     }
-#if BALLARETRO_STEAM
+#if BALLARETRO_STEAM && !BALLARETRO_DEMO
     [UnityTest] public IEnumerator WorldRankingRendersInThreeLanguages_AndClosesWithTheMouse()
     {
         Steamworks.LeaderboardFixture.Rows=Enumerable.Range(1,10).Select(i=>new Steamworks.LeaderboardEntry_t{

@@ -18,6 +18,7 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     private int requestVersion;
     private RectTransform personalRow;
     private float pulseTime;
+    private TMP_Text demoBest;
     // Match the orange dialogue text in Canvas_Dialogue.
     private static readonly Color PersonalColor = new Color32(255, 171, 0, 255);
     public event Action Closed;
@@ -41,6 +42,7 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     private void RefreshLanguage(Locale _)
     {
         if (status != null) status.text = string.IsNullOrEmpty(statusKey) ? "" : PSH_Script_Localization.Text(statusKey);
+        if (demoBest != null) demoBest.text = BallARetroDemoPresentation.PersonalBestText();
     }
     private void SetStatus(string key) { statusKey = key; RefreshLanguage(null); }
 
@@ -83,13 +85,25 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
         var card = Rect("Card", backdrop, Vector2.zero, new Vector2(1600, 900));
         Frame(card, new Vector2(1600, 900));
         Frame(card, new Vector2(1580, 880));
-        Literal("Title", card, "SCORE  RANKING", new Vector2(0, 350), new Vector2(1100, 64), 44, Color.magenta);
+        if (BallARetroPlatform.IsDemoBuild)
+        {
+            var title = Label("Title", card, "Demo_RankingTitle", new Vector2(0, 360), new Vector2(1400, 64), 44);
+            title.color = Color.magenta;
+            Label("Scope", card, "Demo_RankingScope", new Vector2(0, 310), new Vector2(1400, 28), 22);
+        }
+        else Literal("Title", card, "SCORE  RANKING", new Vector2(0, 350), new Vector2(1100, 64), 44, Color.magenta);
         Literal("Rank", card, "RANK", new Vector2(-520, 260), new Vector2(180, 48), 34, Color.white);
         Literal("Name", card, "NAME", new Vector2(-190, 260), new Vector2(430, 48), 34, Color.white);
         Literal("Step", card, "STEP", new Vector2(130, 260), new Vector2(160, 48), 34, Color.white);
         Literal("Score", card, "SCORE", new Vector2(460, 260), new Vector2(360, 48), 34, Color.white);
         rows = Rect("Rows", card, Vector2.zero, new Vector2(1300, 510));
-        Literal("Logo", card, "BALL A-RETRO", new Vector2(0, -325), new Vector2(700, 48), 28, new Color32(0, 240, 104, 255));
+        if (BallARetroPlatform.IsDemoBuild)
+        {
+            demoBest = Label("PersonalBest", card, "", new Vector2(0, -325), new Vector2(1100, 48), 28);
+            demoBest.enableAutoSizing = true; demoBest.fontSizeMin = 20; demoBest.fontSizeMax = 28;
+            demoBest.color = PersonalColor;
+        }
+        else Literal("Logo", card, "BALL A-RETRO", new Vector2(0, -325), new Vector2(700, 48), 28, new Color32(0, 240, 104, 255));
         status = Label("Status", card, "", new Vector2(0, -390), new Vector2(800, 70), 23);
         status.enableAutoSizing = true;
         status.fontSizeMin = 18;
@@ -97,7 +111,13 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
         status.textWrappingMode = TextWrappingModes.Normal;
         refresh = Button("Refresh", card, "", new Vector2(-615, -385), new Vector2(220, 60), Refresh);
         refresh.GetComponentInChildren<TMP_Text>().text = "REFRESH";
-        Button("Close", card, "", new Vector2(615, -385), new Vector2(220, 60), Close).GetComponentInChildren<TMP_Text>().text = "CLOSE";
+        var close = Button("Close", card, "", new Vector2(615, -385), new Vector2(220, 60), Close);
+        close.GetComponentInChildren<TMP_Text>().text = "CLOSE";
+        if (BallARetroPlatform.IsDemoBuild)
+        {
+            refresh.GetComponentInChildren<TMP_Text>().gameObject.AddComponent<PSH_Script_LocalizedText>().SetKey("Button_Refresh");
+            close.GetComponentInChildren<TMP_Text>().gameObject.AddComponent<PSH_Script_LocalizedText>().SetKey("Button_Close");
+        }
         panel.SetActive(false);
     }
 
@@ -119,7 +139,13 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
     {
         int request = ++requestVersion;
         ClearRows();
-        if (!BallARetroPlatform.IsSteamBuild)
+        if (BallARetroPlatform.IsDemoBuild && !SteamManager.TryGetExistingLoggedInPlayer(out _, out _))
+        {
+            SetStatus("Demo_RankingOffline");
+            refresh.interactable = true;
+            return;
+        }
+        if (!BallARetroPlatform.UsesSteamLeaderboards)
         {
             SetStatus("Rank_SteamOnly");
             refresh.interactable = false;
@@ -132,13 +158,20 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
             {
                 if (!this || request != requestVersion || !panel.activeInHierarchy) return;
                 refresh.interactable = true;
+                if (BallARetroPlatform.IsDemoBuild && result.local_only)
+                {
+                    SetStatus(SteamManager.TryGetExistingLoggedInPlayer(out _, out _) ? "Rank_LoadFailed" : "Demo_RankingOffline");
+                    return;
+                }
                 DrawRows(result.top10 ?? Array.Empty<ScoreRow>(), result.personal);
             },
             error =>
             {
                 if (!this || request != requestVersion || !panel.activeInHierarchy) return;
                 refresh.interactable = true;
-                SetStatus(SteamManager.TryGetLoggedInPlayer(out _, out _) ? "Rank_LoadFailed" : "Nickname_Steam");
+                if (BallARetroPlatform.IsDemoBuild)
+                    SetStatus(SteamManager.TryGetExistingLoggedInPlayer(out _, out _) ? "Rank_LoadFailed" : "Demo_RankingOffline");
+                else SetStatus(SteamManager.TryGetLoggedInPlayer(out _, out _) ? "Rank_LoadFailed" : "Nickname_Steam");
             });
     }
     private void ClearRows()

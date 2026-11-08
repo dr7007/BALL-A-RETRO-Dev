@@ -7,12 +7,14 @@ param(
     [switch]$IncludeEffects,
     [switch]$IncludePersonalRecords,
     [switch]$IncludeSteamLogin,
+    [switch]$IncludeSteamDemo,
     [switch]$Baseline,
     [string]$TestFilter = '',
     [string]$PythonPath = 'python',
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe'
 )
 $ErrorActionPreference = 'Stop'
+if ($IncludeSteamDemo) { $IncludeSteamLogin = $true }
 if ($IncludePersonalRecords -and $IncludeSteamLogin) { throw 'Run STOVE and Steam configurations in separate test projects.' }
 $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
 $outputPath = [IO.Path]::GetFullPath($OutputRoot)
@@ -81,13 +83,18 @@ if ($IncludePersonalRecords) {
 }
 if ($IncludeSteamLogin) {
     Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_SteamNickLoader.cs", "$sourceRoot/Tests/SteamLogin/SteamApiStub.cs", "$sourceRoot/Tests/SteamLogin/SteamLeaderboardStub.cs", "$sourceRoot/Assets/Public/Platform/BallARetroSteamSettings.cs.meta" -Destination "$outputPath/Assets/Runtime"
-    Copy-Item -LiteralPath "$sourceRoot/Tests/SteamLogin/SteamIdentityTests.cs" -Destination "$outputPath/Assets/Tests"
+    Copy-Item -LiteralPath "$sourceRoot/Tests/SteamLogin/SteamIdentityTests.cs", "$sourceRoot/Tests/SteamLogin/SteamLeaderboardTests.cs" -Destination "$outputPath/Assets/Tests"
     $null = New-Item -ItemType Directory -Force -Path "$outputPath/Assets/Resources/Release", "$outputPath/Assets/Editor"
     # A synthetic ID is used exclusively with the fake Steam client, outside the game project.
-    (Get-Content -LiteralPath "$sourceRoot/Assets/Resources/Release/SteamSettings.asset" -Raw) -replace 'steamAppId: \d+', 'steamAppId: 123456' | Set-Content -LiteralPath "$outputPath/Assets/Resources/Release/SteamSettings.asset" -Encoding utf8
+    (Get-Content -LiteralPath "$sourceRoot/Assets/Resources/Release/SteamSettings.asset" -Raw) -replace 'steamAppId: \d+', 'steamAppId: 123456' -replace 'demoAppId: \d+', 'demoAppId: 654321' | Set-Content -LiteralPath "$outputPath/Assets/Resources/Release/SteamSettings.asset" -Encoding utf8
     Copy-Item -LiteralPath "$sourceRoot/Assets/Editor/BallARetroReleaseBuild.cs" -Destination "$outputPath/Assets/Editor"
-    '-define:BALLARETRO_STEAM' | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8
-    $filter += ';SteamIdentityTests'
+    $(if ($IncludeSteamDemo) { '-define:BALLARETRO_STEAM,BALLARETRO_DEMO' } else { '-define:BALLARETRO_STEAM' }) | Set-Content -LiteralPath "$outputPath/Assets/csc.rsp" -Encoding utf8
+    $filter += ';SteamIdentityTests;SteamLeaderboardTests'
+    if ($IncludeSteamDemo) {
+        Copy-Item -LiteralPath "$sourceRoot/Tests/SteamLogin/SteamDemoPlatformTests.cs" -Destination "$outputPath/Assets/Tests"
+        Copy-Item -LiteralPath "$sourceRoot/Assets/Resources/Demo" -Destination "$outputPath/Assets/Resources/Demo" -Recurse
+        $filter += ';SteamDemoPlatformTests'
+    }
 }
 if ($IncludeLocalization) {
     if (!$IncludeEffects) { throw 'Localization UI checks include the effects dialog; pass -IncludeEffects.' }
@@ -123,18 +130,21 @@ if ($IncludeLobby) {
     Copy-Item "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_GameOverUI.cs.meta", "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/CJS_Script_LeaderboardList.cs" "$outputPath/Assets/Runtime"
     @('Assets/MemberFolder/PSH/PSH_Lobby/Scripts/PSH_Script_LobbyManager.cs',
       'Assets/Public/Main_Lobby/UI_Lobby/Scripts/PSH_Script_StartButton.cs',
+      'Assets/Public/UI_Public/Scripts/BallARetroDemoPresentation.cs',
       'Assets/Public/UI_Public/Scripts/PSH_Script_WorldRankingUI.cs') | ForEach-Object {
         Copy-Item "$sourceRoot/$_", "$sourceRoot/$_.meta" "$outputPath/Assets/Runtime"
     }
     Copy-Item "$sourceRoot/Tests/UISettings/LobbySceneLoaderStub.cs" "$outputPath/Assets/Runtime"
+    Copy-Item "$sourceRoot/Tests/UISettings/DemoRunPresentationFixture.cs" "$outputPath/Assets/Runtime"
+    Copy-Item "$sourceRoot/Tests/UISettings/DemoPresentationTests.cs" "$outputPath/Assets/Tests"
     Copy-Item "$sourceRoot/Tests/UISettings/LobbyFlowTests.cs" "$outputPath/Assets/Tests"
     & $PythonPath "$sourceRoot/Tests/Localization/Extract-UI.py" $sourceRoot $outputPath --interactions --lobby
     if ($LASTEXITCODE -ne 0) { throw 'Lobby UI extraction failed.' }
-    $filter = 'LobbyFlowTests'
+    $filter = 'LobbyFlowTests;DemoPresentationTests'
     if ($IncludeSteamLogin) {
-        Copy-Item "$sourceRoot/Tests/SteamLogin/SteamLeaderboardTests.cs" "$outputPath/Assets/Tests"
         $filter += ';SteamIdentityTests;SteamLeaderboardTests'
     }
+    if ($IncludeSteamDemo) { $filter += ';SteamIdentityTests;SteamDemoPlatformTests' }
     if ($IncludePersonalRecords) { $filter += ';PersonalRecordTests' }
 }
 if ($Baseline) {
