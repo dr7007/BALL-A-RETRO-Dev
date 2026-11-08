@@ -92,9 +92,71 @@ public class BallARetroSceneProbe : MonoBehaviour
     }
     IEnumerator Run()
     {
+        var notice = Object.FindFirstObjectByType<BallARetroStartupNotice>();
+        Check(notice != null && BallARetroStartupNotice.IsVisible, "Startup notice appears before lobby input");
+        var proceed = notice.transform.Find("Notice/Continue").GetComponent<UnityEngine.UI.Button>();
+        Check(!proceed.interactable, "Startup notice initially prevents accidental dismissal");
+        Check(UnityEngine.EventSystems.EventSystem.current.currentSelectedGameObject == proceed.gameObject,
+            "Startup notice captures keyboard selection before its reading delay");
+        UnityEngine.EventSystems.ExecuteEvents.Execute(proceed.gameObject,
+            new UnityEngine.EventSystems.BaseEventData(UnityEngine.EventSystems.EventSystem.current),
+            UnityEngine.EventSystems.ExecuteEvents.submitHandler);
+        proceed.onClick.Invoke();
+        Check(BallARetroStartupNotice.IsVisible, "Startup notice rejects dismissal before the reading delay");
         yield return new WaitForSecondsRealtime(3);
         Check(!BallARetroPlatform.IsSteamBuild && !SteamManager.Initialized, "STOVE starts without Steam initialization");
         yield return LocalizationSettings.InitializationOperation;
+        yield return new WaitForSecondsRealtime(2.2f);
+        Check(proceed.interactable, "Startup notice becomes actionable using unscaled time");
+        var startupSelectors = LocalizationSettings.StartupLocaleSelectors.Select(s => s.GetType().Name).ToArray();
+        Check(Array.IndexOf(startupSelectors, "PlayerPrefLocaleSelector") < Array.IndexOf(startupSelectors, "SystemLocaleSelector")
+            && Array.IndexOf(startupSelectors, "SystemLocaleSelector") < Array.IndexOf(startupSelectors, "SpecificLocaleSelector"),
+            "Startup locale prefers saved language, then OS language, then English fallback");
+        var backdrop = notice.transform.Find("Backdrop").GetComponent<UnityEngine.UI.Image>();
+        Check(backdrop.color.a == 1 && backdrop.raycastTarget && notice.GetComponent<Canvas>().sortingOrder == 30000,
+            "Static startup notice fully covers and blocks the underlying menu");
+        Check(AudioListener.pause, "Startup notice pauses background audio");
+        var blockedSettings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
+        blockedSettings.ToggleMenu();
+        Check(!PSH_Script_SettingController.IsMenuOpen, "Startup notice blocks the settings shortcut");
+        foreach (string code in new[] { "ko", "en", "ja" })
+        {
+            LocalizationSettings.SelectedLocale = LocalizationSettings.AvailableLocales.GetLocale(code);
+            yield return null;
+            Canvas.ForceUpdateCanvases();
+            var labels = notice.GetComponentsInChildren<TMPro.TMP_Text>();
+            foreach (var label in labels) label.ForceMeshUpdate();
+            Check(labels.All(label => !string.IsNullOrWhiteSpace(label.text) && !label.text.StartsWith("Startup_")
+                && !label.isTextOverflowing), "Startup notice is translated and unclipped: " + code);
+            CaptureFrame("startup-notice-" + code);
+            if (code == "en") CaptureFrame("startup-notice-en-1280x720", width: 1280, height: 720);
+            if (code == "ja") CaptureFrame("startup-notice-ja-1024x768", width: 1024, height: 768);
+        }
+        var startupPointer = new UnityEngine.EventSystems.PointerEventData(UnityEngine.EventSystems.EventSystem.current)
+        {
+            position = RectTransformUtility.WorldToScreenPoint(null, proceed.transform.position)
+        };
+        var startupHits = new List<UnityEngine.EventSystems.RaycastResult>();
+        UnityEngine.EventSystems.EventSystem.current.RaycastAll(startupPointer, startupHits);
+        Check(startupHits.Count > 0 && startupHits[0].gameObject.GetComponentInParent<UnityEngine.UI.Button>() == proceed,
+            "Startup continue button receives the pointer above the lobby");
+        bool[] effectsBefore = Enum.GetValues(typeof(PSH_Script_EffectSettings.Effect)).Cast<PSH_Script_EffectSettings.Effect>()
+            .Select(effect => PSH_Script_EffectSettings.Get(effect)).ToArray();
+        UnityEngine.EventSystems.ExecuteEvents.ExecuteHierarchy(startupHits[0].gameObject, startupPointer,
+            UnityEngine.EventSystems.ExecuteEvents.pointerClickHandler);
+        yield return null;
+        Check(!BallARetroStartupNotice.IsVisible && !AudioListener.pause, "Startup continue dismisses the notice and restores audio");
+        Check(Enum.GetValues(typeof(PSH_Script_EffectSettings.Effect)).Cast<PSH_Script_EffectSettings.Effect>()
+            .Select(effect => PSH_Script_EffectSettings.Get(effect)).SequenceEqual(effectsBefore),
+            "Continue preserves the player's effect settings");
+        // Exercise the alternate real UI action without changing the default startup behavior.
+        notice = Object.Instantiate(Resources.Load<GameObject>("Release/StartupNotice")).GetComponent<BallARetroStartupNotice>();
+        yield return new WaitForSecondsRealtime(2.2f);
+        notice.transform.Find("Notice/ReduceAndContinue").GetComponent<UnityEngine.UI.Button>().onClick.Invoke();
+        yield return null;
+        Check(!BallARetroStartupNotice.IsVisible && !PSH_Script_EffectSettings.IsEnabled,
+            "Reduce effects and continue disables every supported effect before revealing the lobby");
+        for (int i = 0; i < effectsBefore.Length; i++) PSH_Script_EffectSettings.Set((PSH_Script_EffectSettings.Effect)i, effectsBefore[i]);
         var lobby = Object.FindFirstObjectByType<PSH.PSH_Script_LobbyUIManager>();
         Check(lobby != null, "Full lobby scene initializes");
         Canvas.ForceUpdateCanvases();
@@ -287,6 +349,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         while (SceneManager.GetActiveScene().name != "Main_Scene_Lobby") yield return null;
         yield return new WaitForSecondsRealtime(2);
         Check(gameChoices == null && CJS_Script_ChoiceState.I == null, "Game choice history is released on return to lobby");
+        Check(!BallARetroStartupNotice.IsVisible, "Startup notice does not repeat when returning to the lobby");
         Check(BallARetroPersonalRecordStore.Read("Reviewer", "ReleaseSmoke", 1)[0].score == 9000, "Personal best survives all scene transitions");
         Check(!SteamManager.Initialized, "Steam remains disabled after scene transitions");
     }
@@ -317,7 +380,7 @@ public class BallARetroSceneProbe : MonoBehaviour
             Object.Destroy(cameraObject);
         }
     }
-    void CaptureFrame(string name, Camera previewCamera = null)
+    void CaptureFrame(string name, Camera previewCamera = null, int width = 1920, int height = 1080)
     {
         var camera = previewCamera != null ? previewCamera : Camera.main;
         if (camera == null) throw new Exception("No main camera for " + name);
@@ -326,7 +389,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         var overlays = Object.FindObjectsByType<Canvas>(FindObjectsSortMode.None)
             .Where(c => previewCamera == null && c.isRootCanvas && c.renderMode == RenderMode.ScreenSpaceOverlay)
             .Select(c => (canvas: c, camera: c.worldCamera, distance: c.planeDistance)).ToArray();
-        var target = RenderTexture.GetTemporary(1920, 1080, 24);
+        var target = RenderTexture.GetTemporary(width, height, 24);
         var previous = RenderTexture.active;
         var previousTarget = camera.targetTexture;
         float previousAspect = camera.aspect;
@@ -337,7 +400,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         {
             if (previewCamera == null) camera.cullingMask |= 1 << 5;
             camera.targetTexture = target;
-            camera.aspect = 1920f / 1080f;
+            camera.aspect = (float)width / height;
             foreach (var item in overlays)
             {
                 item.canvas.renderMode = RenderMode.ScreenSpaceCamera;

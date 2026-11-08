@@ -71,7 +71,7 @@ public class PSH_Script_SettingController : MonoBehaviour
     }
     public void ToggleMenu()
     {
-        if (isLeaving) return;
+        if (isLeaving || BallARetroStartupNotice.IsVisible) return;
         if (isSettingOpen && panelWarning != null && panelWarning.activeSelf)
         {
             panelWarning.SetActive(false);

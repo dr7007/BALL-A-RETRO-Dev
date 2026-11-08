@@ -31,9 +31,11 @@ $errors = @($text -split "`n" | Where-Object {
 })
 $lobby = $text -match 'Main_Scene_Lobby'
 $graphics = $text -match 'Direct3D:|Renderer:'
-$success = $alive -and $lobby -and $graphics -and !$errors.Count -and !$steamModules.Count
+$noticeReady = $text -match '\[Startup\] Photosensitivity notice ready: (ko|en|ja)'
+$success = $alive -and $lobby -and $graphics -and $noticeReady -and !$errors.Count -and !$steamModules.Count
 @{ success = $success; aliveAfter30Seconds = $alive; lobbyLoaded = $lobby; graphicsInitialized = $graphics;
+    localizedStartupNoticeReady = $noticeReady;
     steamModules = $steamModules; errors = $errors; termination = 'Harness stopped its own process after the startup observation window.' } |
     ConvertTo-Json -Depth 4 | Set-Content -LiteralPath "$evidence/result.json" -Encoding utf8
 if (!$success) { throw "Player startup check failed; see $evidence/result.json and player.log" }
-Write-Output 'Player stayed alive for 30 seconds, loaded the lobby and Direct3D, with no detected startup exceptions or Steam runtime module.'
+Write-Output 'Player stayed alive for 30 seconds, loaded the lobby, Direct3D and localized startup notice, with no detected startup exceptions or Steam runtime module.'

@@ -10,8 +10,9 @@ $forbidden = $report.assets | Where-Object {
     $_.path -match '/ReleaseValidation/' -or
     ($_.path -match '/(Hovl Studio|VisualX_Studio|Cool Visual Effects - Part 1)/' -and $_.path -notmatch '\.cs$')
 }
-foreach ($path in @('Assets/Public/OriginalVfx/PixelParticle.mat', 'Assets/Public/UI_Public/Shaders/BallARetroPixelParticle.shader')) {
-    if ($path -notin $report.assets.path) { throw "Required original effect asset missing: $path" }
+foreach ($path in @('Assets/Public/OriginalVfx/PixelParticle.mat', 'Assets/Public/UI_Public/Shaders/BallARetroPixelParticle.shader',
+    'Assets/Resources/Release/StartupNotice.prefab')) {
+    if ($path -notin $report.assets.path) { throw "Required release asset missing: $path" }
 }
 if ($forbidden) { throw "Unwanted release assets: $($forbidden.path -join ', ')" }
 foreach ($table in @('DialogueTable','UITable')) {
