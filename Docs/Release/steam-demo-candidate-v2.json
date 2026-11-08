@@ -1,0 +1,151 @@
+{
+  "candidate": "SteamDemo candidate-v2",
+  "createdAt": "2026-11-09T03:08:14.1302525+09:00",
+  "sourceCommit": "d84a4d41757624ceb65db38bb48ebe87a10766b5",
+  "branch": "PSH_ALPHA",
+  "testHarnessCommit": "b7afe1a23ef25073d568ea944c3e6d3d350ec370",
+  "includesUncommittedUserAssets": true,
+  "protectedAssets": [
+    {
+      "path": "Assets/Public/Font/Galmuri11 SDF_dialogue.asset",
+      "sha256": "C9A06E901745F38300287F82458BB8692E403C1B004C86AE155E9E26B97E04D4",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/Public/Font/Galmuri11-Bold SDF.asset",
+      "sha256": "16A0A6E39D8D3F159BEF07ABBBF4DA0F2F9D01A28525195847E5A656EAB657D7",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/MemberFolder/KHS/KHS_Materials/KHS_Mat_Ball.mat",
+      "sha256": "9F42CBFBBF197F5D0AA7BD07CE3BDFD2AAD13E4B6730F214C12A77AFA419F4D4",
+      "preserved": true,
+      "committed": false
+    },
+    {
+      "path": "Assets/Public/Font/Galmuri11 SDF.asset",
+      "sha256": "B27648E60457736A9C43FE9F299A53AEF19FF75471802C3500CD0664B18DB858",
+      "preserved": true,
+      "committed": false
+    }
+  ],
+  "changes": [
+    "Tab toggles the default-closed left upgrade-history drawer. Persistent upper demo bonus HUD is removed; bonus status belongs to the open drawer.",
+    "Drawer preserves camera, cursor and time; modal, end, reset and scene transitions close it. Modified Tab combinations are ignored.",
+    "Korean, English and Japanese dealer tutorial explains Tab; actual HUD font is explicitly supplied to the localized hint.",
+    "Round count and choice count remain three in this UI candidate."
+  ],
+  "steam": {
+    "parentAppId": 5193980,
+    "appId": 5585210,
+    "depotId": 5585211,
+    "uploadState": "complete",
+    "branchApplied": true,
+    "releaseState": "unavailable",
+    "publiclyReleased": false,
+    "newClientKeyboardTest": "pending user validation of this new candidate",
+    "fiveMinutePlaytimeCheck": "Steamworks app checklist confirmed checked after candidate-v1 play",
+    "previousClientValidation": "Docs/Release/steam-demo-client-validation.json",
+    "buildId": 26524160,
+    "manifestId": "7888680335241741121",
+    "branch": "default",
+    "observedAt": "2026-11-09T03:09:44.4758855+09:00",
+    "buildDetailsUrl": "https://partner.steamgames.com/apps/builddetails/5585210/26524160",
+    "downloadMegabytes": 126.2,
+    "diskMegabytes": 385.4
+  },
+  "artifact": {
+    "zip": "D:\\ball-a-retro-validation\\steam-demo-20261109/candidate-v2/BALL-A-RETRO_SteamDemo_0.1.0_d84a4d4_Win64.zip",
+    "bytes": 137674991,
+    "sha256": "E6323C1660293AE7A5C292D4BA2B7B280BFCC38C6C541665E37B277B1E73FB66",
+    "fileCount": 304,
+    "uncompressedBytes": 385368282,
+    "uploadDirectory": "D:\\ball-a-retro-validation\\steam-demo-20261109/candidate-v2/upload",
+    "archiveEntriesMatchPlayer": true,
+    "extractedFilesVerified": true
+  },
+  "validation": {
+    "root": "D:\\ball-a-retro-validation\\steam-demo-20261109",
+    "automatedSuites": [
+      {
+        "report": "tab-tutorial-v1/results.xml",
+        "passed": 36,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "tab-dialogue-v1/results.xml",
+        "passed": 31,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "tab-localization-v1/results.xml",
+        "passed": 8,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "ui-v1/results-ui-tab-final.xml",
+        "passed": 15,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "ui-v1/results-ui-tab-font-fixed.xml",
+        "passed": 6,
+        "failed": 0,
+        "skipped": 0
+      },
+      {
+        "report": "runprogression-tab-compat-v1/results.xml",
+        "passed": 49,
+        "failed": 0,
+        "skipped": 0
+      }
+    ],
+    "suiteNote": "Six-case final font/input subset reruns previously covered behavior after the font handoff correction; counts are not distinct scenarios.",
+    "playerAuditPassed": true,
+    "packedAssetCount": 3417,
+    "demoAtlas": {
+      "success": true,
+      "atlas": "Assets/Resources/Demo/DemoChoiceIcons.spriteatlasv2",
+      "sprites": 2,
+      "textures": 1,
+      "width": 2048,
+      "height": 512,
+      "format": "BC7"
+    },
+    "realSceneFlow": {
+      "passed": true,
+      "checks": 108,
+      "report": "candidate-v2/evidence/demo-scene-tab-v1/demo-scene-audit.json",
+      "scope": "Real release scenes/prefabs, serialized callbacks, intro/banner/retry coroutines. Ball held stationary; real accepted bumper-trigger callbacks drive round scoring. Steam SDK disabled only in this editor audit; not a manual physics or client authentication test."
+    },
+    "snapshotRestoration": {
+      "steamManagerRestored": true,
+      "projectSettingsRestored": true,
+      "probeRemoved": true
+    },
+    "visualInspection": [
+      "demo-tab-closed.png",
+      "demo-tab-open-ko.png",
+      "demo-tab-open-en.png",
+      "demo-tab-open-ja.png"
+    ],
+    "protectedAssetsUnchanged": true
+  },
+  "knownLimits": [
+    "Actual keyboard and Steam overlay behavior in the newly uploaded player still need a manual client check; automated input tests and scene callbacks are not native keyboard automation.",
+    "The scene probe holds the ball stationary and invokes accepted scoring callbacks; it is not a manual physics playthrough.",
+    "Offscreen PNG capture temporarily routes Overlay canvases through a camera; original runtime canvas modes are recorded separately.",
+    "Clean Windows installation has not been tested. Store assets, content survey and Steam review remain incomplete."
+  ],
+  "buildPreparation": {
+    "resumedBeforeFirstUnityCompile": true,
+    "reason": "An owned snapshot copy was interrupted before compilation to include the final multilingual hint-font fix.",
+    "sourceEvidence": "candidate-v2/evidence/source.json"
+  }
+}

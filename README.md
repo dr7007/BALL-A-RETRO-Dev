@@ -136,9 +136,16 @@ Steam을 실행하지 않은 환경의 시작 검사는 `Tests/Release/Run-Steam
 2026-11-09 후보 `aca6470`은 Steam 빌드 `26523575`로 업로드해 미출시 데모의 `default`에 적용했습니다.
 ZIP 304개 파일 무결성, 3,417개 포함 자산, 오프라인 시작, 실제 씬 흐름 70개 및 결과 상태 29개 검사를 통과했습니다.
 실제 Steam 설치본 304개 파일이 원본과 일치하고, 사용자 설치·실행·랭킹 확인 및 Steamworks 서버의
-데모 랭킹 7,150점 등록까지 확인했습니다. 5분 실행 체크 항목과 오버레이는 별도 확인 대상입니다.
+데모 랭킹 7,150점 등록까지 확인했습니다. 이후 Steamworks의 5분 실행 항목 및 데모 빌드 체크리스트 완료를
+확인했습니다. 오버레이의 실제 조작은 별도 확인 대상입니다.
 클라이언트 증거와 사용자 확인 범위는 [`steam-demo-client-validation.json`](Docs/Release/steam-demo-client-validation.json)에 기록했습니다.
 해시·보존 자산·검사 범위와 제한은 [`steam-demo-candidate-v1.json`](Docs/Release/steam-demo-candidate-v1.json)에 기록했습니다.
+
+Tab 선택 내역과 3개 언어 튜토리얼 안내를 반영한 후보 `d84a4d4`는 Steam 빌드 `26524160`으로
+미출시 데모의 `default`에 적용했습니다. 실제 씬에서 내역·모달·재시작·결과 흐름 108개 검사와
+304개 업로드 파일 무결성 검사를 통과했습니다. 라운드·선택 횟수는 기존 3회로 유지합니다.
+새 설치본에서의 직접 Tab/Steam 오버레이 조작은 사용자 확인 대상이며, 빌드·검사 증거는
+[`steam-demo-candidate-v2.json`](Docs/Release/steam-demo-candidate-v2.json)에 기록했습니다.
 
 Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현재 계정에서 읽습니다.
 로비 오른쪽 아래 기존 랭킹 아이콘과 게임 결과의 기존 랭킹 버튼이 같은 랭킹 화면을 엽니다.

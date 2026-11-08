@@ -22,7 +22,11 @@
     "installDirectory": "BALL A RETRO Demo",
     "depotOs": "windows",
     "depotLanguages": "all",
-    "baseLanguages": ["english", "japanese", "koreana"],
+    "baseLanguages": [
+      "english",
+      "japanese",
+      "koreana"
+    ],
     "commonRedistributables": "none required",
     "commonRedistributablesPublished": true,
     "runtimeDependencyEvidence": "candidate-v1/evidence/native-comparison.json: all eight native binaries match the audited Unity 6000.0.60f1 Win64 Mono player"
@@ -34,17 +38,24 @@
     "mode": "Standard"
   },
   "uploadedCandidate": {
-    "sourceCommit": "aca6470fdaed384da39268b52008bde9d278fb7f",
-    "buildId": 26523575,
-    "manifestId": "7086458617997461246",
+    "sourceCommit": "d84a4d41757624ceb65db38bb48ebe87a10766b5",
+    "buildId": 26524160,
+    "manifestId": "7888680335241741121",
     "branch": "default",
     "applied": true,
     "downloadMegabytesReportedBySteam": 126.2,
     "diskMegabytesReportedBySteam": 385.4,
-    "receipt": "Docs/Release/steam-demo-candidate-v1.json"
+    "receipt": "Docs/Release/steam-demo-candidate-v2.json"
+  },
+  "clientChecklist": {
+    "observedAt": "2026-11-09",
+    "url": "https://partner.steamgames.com/apps/landing/5585210",
+    "playedThroughSteamForFiveMinutes": true,
+    "demoBuildChecklistComplete": true,
+    "storeChecklistComplete": false,
+    "scope": "Steamworks app checklist after user-confirmed candidate-v1 client play; does not certify subsequent candidate builds or manual overlay behavior."
   },
   "remainingBeforePublicRelease": [
-    "Confirm the Steamworks five-minute playtime checklist after the completed client installation/play/leaderboard test.",
     "Finish store assets and the content survey, including pre-generated AI icon disclosure.",
     "Complete required Steam reviews and base-game Coming Soon requirements."
   ]
