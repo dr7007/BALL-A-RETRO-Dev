@@ -43,6 +43,8 @@ public static class BallARetroReleaseBuild
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
             throw new BuildFailedException("Exit Play Mode before building.");
+        if (!PlayerSettings.GetStaticBatchingForPlatform(BuildTarget.StandaloneWindows64))
+            throw new BuildFailedException("Enable Windows Static Batching before building; the fixed board pipes rely on it.");
         if (steam && !BallARetroSteamSettings.TryGetAppId(out _))
             throw new BuildFailedException("Set this game's real App ID in Assets/Resources/Release/SteamSettings.asset. Test App ID 480 is not accepted.");
         if (!Path.IsPathRooted(file) || !file.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
