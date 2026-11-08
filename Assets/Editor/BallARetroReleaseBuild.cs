@@ -1,13 +1,17 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using UnityEditor;
 using UnityEditor.Build;
 using UnityEditor.Build.Reporting;
+using UnityEditor.U2D;
 using UnityEngine;
+using UnityEngine.U2D;
 
 public static class BallARetroReleaseBuild
 {
+    public const string DemoProductName = "Ball-A-Retro Demo";
     internal static string ActiveEvidenceDirectory { get; private set; }
     private static readonly string[] ReleaseScenes = {
         "Assets/MainScenes/Main_Scene_Lobby.unity",
@@ -24,6 +28,7 @@ public static class BallARetroReleaseBuild
     // Run only on an isolated project copy when the development editor is open.
     public static void BuildStoveBatch() => Build(false, ReadBatchOutput());
     public static void BuildSteamBatch() => Build(true, ReadBatchOutput());
+    public static void BuildSteamDemoBatch() => Build(true, ReadBatchOutput(), true);
 
     private static string ReadBatchOutput()
     {
@@ -40,14 +45,19 @@ public static class BallARetroReleaseBuild
         if (!string.IsNullOrEmpty(file)) Build(steam, file);
     }
 
-    private static void Build(bool steam, string file)
+    private static void Build(bool steam, string file, bool demo = false)
     {
         if (EditorApplication.isPlayingOrWillChangePlaymode)
             throw new BuildFailedException("Exit Play Mode before building.");
         if (!PlayerSettings.GetStaticBatchingForPlatform(BuildTarget.StandaloneWindows64))
             throw new BuildFailedException("Enable Windows Static Batching before building; the fixed board pipes rely on it.");
-        if (steam && !BallARetroSteamSettings.TryGetAppId(out _))
-            throw new BuildFailedException("Set this game's real App ID in Assets/Resources/Release/SteamSettings.asset. Test App ID 480 is not accepted.");
+        uint configuredAppId = 0;
+        if (steam && !BallARetroSteamSettings.TryGetAppId(demo, out configuredAppId))
+            throw new BuildFailedException("Configure real, separate full-game/demo App IDs in SteamSettings. IDs 0 and 480 are not accepted.");
+        if (demo && (!steam || PlayerSettings.productName != DemoProductName))
+            throw new BuildFailedException("Build Steam demos through Build-SteamDemoReview.ps1 in an isolated snapshot with product name 'Ball-A-Retro Demo'.");
+        if (!demo && PlayerSettings.productName == DemoProductName)
+            throw new BuildFailedException("A full-game build cannot use the demo save-data namespace.");
         if (!Path.IsPathRooted(file) || !file.EndsWith(".exe", StringComparison.OrdinalIgnoreCase))
             throw new BuildFailedException("Choose an absolute Windows .exe output path.");
         file = Path.GetFullPath(file);
@@ -65,6 +75,8 @@ public static class BallARetroReleaseBuild
             .Split(';');
         if (steam && defines.Contains("BALLARETRO_STOVE"))
             throw new BuildFailedException("Remove the global BALLARETRO_STOVE define before a Steam build. These menu commands choose the platform per build.");
+        if (defines.Contains("BALLARETRO_DEMO"))
+            throw new BuildFailedException("Remove the global BALLARETRO_DEMO define. Demo selection is per build only.");
         // This is a per-build filter: no plugin .meta or project defines are changed.
         var steamPlugins = PluginImporter.GetAllImporters().Where(p =>
             p.isNativePlugin && (Path.GetFileName(p.assetPath).StartsWith("steam_api", StringComparison.OrdinalIgnoreCase)
@@ -84,12 +96,14 @@ public static class BallARetroReleaseBuild
         try
         {
             ActiveEvidenceDirectory = Path.Combine(Path.GetDirectoryName(output), "evidence");
+            if (demo) VerifyDemoAtlas(ActiveEvidenceDirectory);
             report = BuildPipeline.BuildPlayer(new BuildPlayerOptions
             {
                 scenes = scenes,
                 locationPathName = file, target = BuildTarget.StandaloneWindows64,
                 options = BuildOptions.DetailedBuildReport,
-                extraScriptingDefines = new[] { steam ? "BALLARETRO_STEAM" : "BALLARETRO_STOVE" }
+                extraScriptingDefines = demo ? new[] { "BALLARETRO_STEAM", "BALLARETRO_DEMO" }
+                    : new[] { steam ? "BALLARETRO_STEAM" : "BALLARETRO_STOVE" }
             });
         }
         finally
@@ -100,23 +114,66 @@ public static class BallARetroReleaseBuild
         }
         if (report.summary.result != BuildResult.Succeeded)
             throw new BuildFailedException("Build failed. See the Unity Console and build report.");
-        WriteAssetReport(report, file, scenes);
+        WriteAssetReport(report, file, scenes, steam, demo, configuredAppId);
         if (!steam && Directory.EnumerateFiles(output, "*", SearchOption.AllDirectories).Any(p =>
             Path.GetFileName(p).StartsWith("steam_api", StringComparison.OrdinalIgnoreCase)
             || Path.GetFileName(p).StartsWith("libsteam_api", StringComparison.OrdinalIgnoreCase)))
             throw new BuildFailedException("STOVE output contains Steam runtime files. Do not submit this build.");
-        Debug.Log($"[Release] {(steam ? "Steam" : "STOVE")} Windows build succeeded: {file}; {report.summary.totalSize} bytes.");
+        Debug.Log($"[Release] {(demo ? "SteamDemo" : steam ? "Steam" : "STOVE")} Windows build succeeded: {file}; {report.summary.totalSize} bytes.");
     }
 
     [Serializable] private class AssetEntry { public string path; public long packedBytes; }
+    [Serializable] private class DemoAtlasReport
+    {
+        public bool success;
+        public string atlas;
+        public int sprites;
+        public int textures;
+        public int width;
+        public int height;
+        public string format;
+    }
+
+    private static void VerifyDemoAtlas(string evidence)
+    {
+        const string atlasPath = "Assets/Resources/Demo/DemoChoiceIcons.spriteatlasv2";
+        var atlas = AssetDatabase.LoadAssetAtPath<SpriteAtlas>(atlasPath);
+        var importer = AssetImporter.GetAtPath(atlasPath) as SpriteAtlasImporter;
+        var originals = new[] { "Choice_Capacitor", "Choice_LastBall" }.Select(name =>
+            AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Resources/Demo/" + name + ".png")).ToArray();
+        if (atlas == null || importer == null || !importer.includeInBuild || originals.Any(sprite => sprite == null))
+            throw new BuildFailedException("Demo choice icons and included atlas must be present.");
+        SpriteAtlasUtility.PackAtlases(new[] { atlas }, BuildTarget.StandaloneWindows64, false);
+        // In edit mode GetSprites returns sprites whose texture pointers still
+        // reference their source PNGs. Use the same packed-page accessor as the
+        // Unity 6000.0 SpriteAtlas inspector, and fail closed if that API changes.
+        var preview = typeof(SpriteAtlasExtensions).GetMethod("GetPreviewTextures", BindingFlags.Static | BindingFlags.NonPublic,
+            null, new[] { typeof(SpriteAtlas) }, null);
+        if (preview == null) throw new BuildFailedException("This Unity version cannot validate packed demo atlas pages.");
+        var textures = preview.Invoke(null, new object[] { atlas }) as Texture2D[] ?? Array.Empty<Texture2D>();
+        bool valid = atlas.spriteCount == 2 && textures.Length == 1 && textures[0] != null
+            && originals.All(sprite => atlas.CanBindTo(sprite));
+        Directory.CreateDirectory(evidence);
+        File.WriteAllText(Path.Combine(evidence, "demo-atlas.json"), JsonUtility.ToJson(new DemoAtlasReport {
+            success = valid, atlas = atlasPath, sprites = atlas.spriteCount, textures = textures.Length,
+            width = textures.FirstOrDefault() != null ? textures[0].width : 0,
+            height = textures.FirstOrDefault() != null ? textures[0].height : 0,
+            format = textures.FirstOrDefault() != null ? textures[0].format.ToString() : "missing"
+        }, true));
+        if (!valid) throw new BuildFailedException("Both demo choice icons must bind to one atlas texture. Increase atlas max size if padding creates another page.");
+    }
+
     [Serializable] private class AssetReport
     {
+        public string platform;
+        public uint appId;
+        public string productName;
         public string[] scenes;
         public AssetEntry[] assets;
         public string[] resources;
     }
 
-    private static void WriteAssetReport(BuildReport report, string file, string[] scenes)
+    private static void WriteAssetReport(BuildReport report, string file, string[] scenes, bool steam, bool demo, uint appId)
     {
         var entries = report.packedAssets.SelectMany(p => p.contents)
             .GroupBy(p => p.sourceAssetPath ?? "")
@@ -129,6 +186,7 @@ public static class BallARetroReleaseBuild
         string evidence = Path.Combine(Path.GetDirectoryName(Path.GetDirectoryName(file)), "evidence");
         Directory.CreateDirectory(evidence);
         File.WriteAllText(Path.Combine(evidence, "packed-assets.json"), JsonUtility.ToJson(new AssetReport {
+            platform = demo ? "SteamDemo" : steam ? "Steam" : "STOVE", appId = appId, productName = PlayerSettings.productName,
             scenes = scenes, assets = entries,
             resources = entries.Where(e => e.path.Contains("/Resources/")).Select(e => e.path).ToArray()
         }, true));

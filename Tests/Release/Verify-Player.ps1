@@ -2,16 +2,23 @@ param(
     [Parameter(Mandatory = $true)][string]$PlayerRoot,
     [Parameter(Mandatory = $true)][string]$EvidencePath,
     [string]$CecilPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Data\Managed\Unity.Cecil.dll',
-    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
+    [ValidateSet('STOVE', 'Steam', 'SteamDemo')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $PlayerRoot).Path
+$appInfoPath = Join-Path $root 'BALL-A-RETRO_Data/app.info'
+if (!(Test-Path -LiteralPath $appInfoPath)) { throw 'Player application identity is missing.' }
+$appInfo = @(Get-Content -LiteralPath $appInfoPath | Where-Object { ![string]::IsNullOrWhiteSpace($_) })
+$expectedProductName = if ($Platform -eq 'SteamDemo') { 'Ball-A-Retro Demo' } else { 'Ball-A-Retro' }
+if ($appInfo.Count -ne 2 -or $appInfo[0] -ne 'G-PIN' -or $appInfo[1] -ne $expectedProductName) {
+    throw "Player company/product identity does not match $Platform save-data namespace."
+}
 $forbidden = @(Get-ChildItem -LiteralPath $root -Recurse -File |
     Where-Object { $_.Name -match '^(steam_appid\.txt|(?:lib)?steam_api.*)$' })
 if ($Platform -eq 'STOVE' -and $forbidden) { throw 'Steam native runtime/development appid found in STOVE player.' }
 if ($forbidden | Where-Object Name -eq 'steam_appid.txt') { throw 'Development App ID file must not be shipped.' }
 $steamNative = @()
-if ($Platform -eq 'Steam') {
+if ($Platform -ne 'STOVE') {
     $steamNative = @($forbidden | Where-Object Name -eq 'steam_api64.dll')
     if ($steamNative.Count -ne 1 -or $forbidden.Count -ne 1) { throw 'Steam Win64 player must contain exactly one steam_api64.dll and no other Steam native variants.' }
     $nativeSource = Join-Path $PSScriptRoot '../../Assets/com.rlabrecque.steamworks.net/Plugins/steam_api64.dll'
@@ -23,6 +30,7 @@ Add-Type -Path $CecilPath
 $assemblyPath = Join-Path $root 'BALL-A-RETRO_Data/Managed/Assembly-CSharp.dll'
 $assembly = [Mono.Cecil.AssemblyDefinition]::ReadAssembly($assemblyPath)
 $checks = [Collections.Generic.List[string]]::new()
+$checks.Add("Player product name isolates the expected save-data namespace: $expectedProductName")
 try {
     $types = $assembly.MainModule.Types
     foreach ($name in @('CJS_Script_SubmitOnKey', 'KHS_Script_ResetController')) {
@@ -41,13 +49,34 @@ try {
         $checks.Add("No debug impulse input: $name")
     }
     $platformGetter = ($types | Where-Object Name -eq 'BallARetroPlatform').Methods | Where-Object Name -eq 'get_IsSteamBuild'
-    $expectedConstant = if ($Platform -eq 'Steam') { 'ldc.i4.1' } else { 'ldc.i4.0' }
-    $unexpectedConstant = if ($Platform -eq 'Steam') { 'ldc.i4.0' } else { 'ldc.i4.1' }
+    $expectedConstant = if ($Platform -ne 'STOVE') { 'ldc.i4.1' } else { 'ldc.i4.0' }
+    $unexpectedConstant = if ($Platform -ne 'STOVE') { 'ldc.i4.0' } else { 'ldc.i4.1' }
     if (!$platformGetter -or !$platformGetter.HasBody -or !@($platformGetter.Body.Instructions | Where-Object { $_.OpCode.Name -eq $expectedConstant }).Count -or
         @($platformGetter.Body.Instructions | Where-Object { $_.OpCode.Name -eq $unexpectedConstant }).Count) {
         throw "Player was not compiled for $Platform."
     }
     $checks.Add("Compiled platform flag is $Platform")
+    $demoGetter = ($types | Where-Object Name -eq 'BallARetroPlatform').Methods | Where-Object Name -eq 'get_IsDemoBuild'
+    $expectedDemoConstant = if ($Platform -eq 'SteamDemo') { 'ldc.i4.1' } else { 'ldc.i4.0' }
+    $unexpectedDemoConstant = if ($Platform -eq 'SteamDemo') { 'ldc.i4.0' } else { 'ldc.i4.1' }
+    if ($demoGetter) {
+        if (!$demoGetter.HasBody -or !@($demoGetter.Body.Instructions | Where-Object { $_.OpCode.Name -eq $expectedDemoConstant }).Count -or
+            @($demoGetter.Body.Instructions | Where-Object { $_.OpCode.Name -eq $unexpectedDemoConstant }).Count) {
+            throw "Player demo flag does not match $Platform."
+        }
+        $checks.Add("Compiled demo flag matches $Platform")
+    } elseif ($Platform -eq 'SteamDemo') { throw 'Demo edition flag is missing.' }
+    if ($Platform -eq 'SteamDemo') {
+        $backend = $types | Where-Object Name -eq 'BallARetroSteamLeaderboard'
+        if (!$backend -or @($backend.Methods | Where-Object Name -in @('FindBoard', 'FetchRoutine', 'SubmitRoutine')).Count -ne 3) {
+            throw 'Demo-scoped online leaderboard implementation is missing.'
+        }
+        $recordKey = ($types | Where-Object Name -eq 'BallARetroPersonalRecordStore').Methods | Where-Object Name -eq 'StorageKey'
+        if (!$recordKey -or !@($recordKey.Body.Instructions | Where-Object { $_.OpCode.Name -eq 'ldstr' -and $_.Operand -eq 'BallARetro.SteamDemo.Best.v1.' }).Count) {
+            throw 'Demo personal-record namespace is missing.'
+        }
+        $checks.Add('Demo has separate personal records and its Steam App ID scoped leaderboard implementation')
+    }
     $pinvoke = @($types | ForEach-Object Methods | Where-Object { $_.IsPInvokeImpl -and $_.PInvokeInfo.Module.Name -match 'steam_api' })
     if ($Platform -eq 'STOVE') {
         if ($pinvoke.Count) { throw 'Steam native API imports found in game assembly.' }

@@ -1,7 +1,8 @@
 param(
     [Parameter(Mandatory = $true)][string]$PlayerRoot,
     [Parameter(Mandatory = $true)][string]$EvidenceRoot,
-    [uint32]$AppId = 0
+    [uint32]$AppId = 0,
+    [ValidateSet('Steam', 'SteamDemo')][string]$Platform = 'Steam'
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $PlayerRoot).Path.TrimEnd('\', '/')
@@ -50,10 +51,18 @@ function Test-ManifestsEqual($Expected, $Actual) {
 # The original depot remains untouched. The development App ID file exists only
 # in an ordinary file copy, never in the release player or its upload folder.
 $settingsPath = Join-Path $PSScriptRoot '../../Assets/Resources/Release/SteamSettings.asset'
-$idMatches = [regex]::Matches((Get-Content -LiteralPath $settingsPath -Raw), '(?m)^\s*steamAppId:\s*(\d+)\s*$')
+$idField = if ($Platform -eq 'SteamDemo') { 'demoAppId' } else { 'steamAppId' }
+$settingsText = Get-Content -LiteralPath $settingsPath -Raw
+$idMatches = [regex]::Matches($settingsText, "(?m)^\s*${idField}:\s*(\d+)\s*$")
 if ($idMatches.Count -ne 1) { throw 'Could not read one configured Steam App ID.' }
 $configuredId = [uint32]::Parse($idMatches[0].Groups[1].Value)
 if ($configuredId -in @(0, 480)) { throw 'A real configured App ID is required.' }
+if ($Platform -eq 'SteamDemo') {
+    $fullMatches = [regex]::Matches($settingsText, '(?m)^\s*steamAppId:\s*(\d+)\s*$')
+    if ($fullMatches.Count -ne 1 -or [uint32]::Parse($fullMatches[0].Groups[1].Value) -in @(0, 480, $configuredId)) {
+        throw 'The demo App ID must be separate from the real full-game App ID.'
+    }
+}
 if ($PSBoundParameters.ContainsKey('AppId') -and $AppId -ne $configuredId) {
     throw 'Explicit AppId must match the source SteamSettings asset.'
 }
@@ -78,7 +87,7 @@ $ownProcessId = $null
 $termination = 'No player process started.'
 
 try {
-    & "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot $root -EvidencePath "$evidence/player-audit.json" -Platform Steam
+    & "$PSScriptRoot/Verify-Player.ps1" -PlayerRoot $root -EvidencePath "$evidence/player-audit.json" -Platform $Platform
     $before = @(Get-PlayerManifest $root)
     $before | ConvertTo-Json -Depth 4 | Set-Content -LiteralPath "$evidence/source-files-before.json" -Encoding utf8
     $null = New-Item -ItemType Directory -Path $copy
@@ -165,7 +174,7 @@ $success = !$failureReason -and $copyVerified -and $sourceUnchanged -and $alive 
     $noticeReady -and $nativeValid -and $expectedSteamFailure -and !$errors.Count -and !$unexpectedClients.Count
 @{
     success = $success; scope = 'Local offline startup only; Steam client intentionally absent.';
-    appId = $AppId; sourcePlayer = $root; disposableCopy = $copy; sourcePlayerUnchanged = $sourceUnchanged;
+    platform = $Platform; appId = $AppId; sourcePlayer = $root; disposableCopy = $copy; sourcePlayerUnchanged = $sourceUnchanged;
     copyHashesVerifiedBeforeDevelopmentAppId = $copyVerified; developmentAppIdFile = "$copy/steam_appid.txt";
     processId = $ownProcessId; observedSeconds = $elapsedSeconds; aliveAfter30Seconds = $alive;
     lobbyLoaded = $lobby; graphicsInitialized = $graphics; localizedStartupNoticeReady = $noticeReady;
@@ -173,7 +182,8 @@ $success = !$failureReason -and $copyVerified -and $sourceUnchanged -and $alive 
     nativeModules = $observedModules; unexpectedSteamProcesses = $unexpectedClients; errors = $errors;
     failureReason = $failureReason; termination = $termination;
     authenticatedSteam = 'untested'; clientInstallAndLaunch = 'untested'; leaderboard = 'untested'; overlay = 'untested';
-    demoConfiguration = 'untested'; userPreferences = 'No settings interaction; normal Windows user preferences are shared.'
+    demoConfiguration = $(if ($Platform -eq 'SteamDemo') { 'Demo compile flag and separate configured ID checked; authenticated demo launch remains untested.' } else { 'Full-game edition.' });
+    userPreferences = $(if ($Platform -eq 'SteamDemo') { 'No settings interaction; demo product name isolates Windows preferences from the full game.' } else { 'No settings interaction; normal Windows user preferences are shared.' })
 } | ConvertTo-Json -Depth 6 | Set-Content -LiteralPath "$evidence/result.json" -Encoding utf8
 if (!$success) { throw "Offline startup check failed; see $evidence/result.json and player.log" }
 Write-Output 'Offline startup passed: 30 seconds, lobby, Direct3D, localized notice and matching Steam native module. Steam authentication, client launch, leaderboards and overlay remain untested.'

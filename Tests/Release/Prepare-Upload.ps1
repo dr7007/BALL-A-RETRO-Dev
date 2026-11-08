@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory=$true)][string]$ArchivePath,
     [Parameter(Mandatory=$true)][string]$OutputDirectory,
-    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
+    [ValidateSet('STOVE', 'Steam', 'SteamDemo')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $archivePath = (Resolve-Path -LiteralPath $ArchivePath).Path

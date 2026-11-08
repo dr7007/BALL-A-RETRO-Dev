@@ -1,7 +1,7 @@
 param(
     [Parameter(Mandatory = $true)][string]$PlayerRoot,
     [Parameter(Mandatory = $true)][string]$OutputZip,
-    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
+    [ValidateSet('STOVE', 'Steam', 'SteamDemo')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $root = (Resolve-Path -LiteralPath $PlayerRoot).Path.TrimEnd('\', '/')

@@ -2,7 +2,7 @@ param(
     [Parameter(Mandatory = $true)][string]$OutputRoot,
     [string]$UnityPath = 'C:\Program Files\Unity\Hub\Editor\6000.0.60f1\Editor\Unity.exe',
     [string]$CacheProjectRoot,
-    [ValidateSet('STOVE', 'Steam')][string]$Platform = 'STOVE'
+    [ValidateSet('STOVE', 'Steam', 'SteamDemo')][string]$Platform = 'STOVE'
 )
 $ErrorActionPreference = 'Stop'
 $sourceRoot = (Resolve-Path (Join-Path $PSScriptRoot '../..')).Path
@@ -35,7 +35,11 @@ foreach ($folder in @('Assets', 'Packages', 'ProjectSettings', 'Library')) {
 }
 & "$PSScriptRoot/Prepare-StoveSnapshot.ps1" -ProjectRoot "$releaseRoot/project" -Platform $Platform
 Write-Output "Snapshot ready: $releaseRoot/project"
-$buildMethod = if ($Platform -eq 'Steam') { 'BallARetroReleaseBuild.BuildSteamBatch' } else { 'BallARetroReleaseBuild.BuildStoveBatch' }
+$buildMethod = switch ($Platform) {
+    'SteamDemo' { 'BallARetroReleaseBuild.BuildSteamDemoBatch' }
+    'Steam' { 'BallARetroReleaseBuild.BuildSteamBatch' }
+    default { 'BallARetroReleaseBuild.BuildStoveBatch' }
+}
 $arguments = @('-batchmode', '-quit', '-projectPath', "`"$releaseRoot/project`"",
     '-buildTarget', 'Win64', '-executeMethod', $buildMethod,
     '-ballARetroOutput', "`"$releaseRoot/player/BALL-A-RETRO.exe`"", '-logFile', "`"$releaseRoot/evidence/build.log`"")

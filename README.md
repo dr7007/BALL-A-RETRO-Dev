@@ -83,8 +83,8 @@ Editor에서 Steam을 시험할 때만 `BALLARETRO_STEAM` define과 실제 ID를
 
 공통 패키징 스크립트의 기본 플랫폼은 기존대로 STOVE입니다. Steam에서는
 `Assets/Resources/Release/SteamSettings.asset`를 포함하고 샘플 IAP 설정은 제외합니다.
-이 빌드는 현재 본편 App ID와 전체 콘텐츠를 사용합니다. 별도 Demo App ID와 콘텐츠 범위를
-설정하기 전에는 Steam 데모로 취급하지 않습니다. 자동 검사는 실제 Steam 계정 인증,
+`Build-SteamReview.ps1`은 본편 App ID와 전체 콘텐츠를 사용합니다. 데모는 아래의 별도
+빌드 명령을 사용합니다. 자동 검사는 실제 Steam 계정 인증,
 클라이언트 설치·실행, 오버레이와 서버 리더보드 검증을 대신하지 않습니다.
 
 Steam을 실행하지 않은 환경의 시작 검사는 `Tests/Release/Run-SteamOfflineSmoke.ps1`
@@ -97,7 +97,37 @@ Steam을 실행하지 않은 환경의 시작 검사는 `Tests/Release/Run-Steam
 자동 회귀 검사 28개, 배포 파일 304개 해시 및 30초 오프라인 시작 검사를 통과했습니다.
 상세 경로와 SHA-256, 검증 범위 및 남은 항목은
 [`Docs/Release/steam-candidate-v1.json`](Docs/Release/steam-candidate-v1.json)에 기록했습니다.
-현재 본편 콘텐츠의 내부 검증 후보이며 Steam 업로드·공개와 데모 생성은 진행하지 않았습니다.
+이 후보는 본편 콘텐츠의 내부 검증용이며 데모 빌드가 아닙니다.
+
+### Steam 무료 데모
+
+본편 `5193980`에 연결한 데모 App ID는 `5585210`, 콘텐츠 디포는 `5585211`입니다.
+데모는 3라운드와 누적 목표 2,000 → 4,000 → 6,000점, 라운드당 기본 공 2개로 구성합니다.
+처음 발사하기 전과 1·2라운드 완료 후 각각 한 번씩, 총 세 번 강화합니다.
+남은 공이 많아도 강화 선택 횟수는 늘어나지 않습니다.
+
+- 블랙홀 축전기: 범퍼 적중당 100점 충전, 한도 600점/강화 시 1,000점. 블랙홀 진입으로 정산합니다.
+- 마지막 공 역전: 마지막 공에서 직접 획득하는 점수에 +50%/강화 시 +75%. 충전 정산에는 배율을 적용하지 않습니다.
+- 보조 강화: 플리퍼 강화 또는 현재·이후 라운드의 기본 공 +1.
+- 데모의 블랙홀 기본 보상은 500점이며, 본편 규칙과 튜토리얼은 유지합니다.
+
+데모 빌드에만 `BALLARETRO_STEAM;BALLARETRO_DEMO`를 적용하고, 격리 복사본의 제품명을
+`Ball-A-Retro Demo`로 설정합니다. 설정·저장 경로와 개인 최고점 키는 본편과 분리하며,
+데모에는 전용 온라인 랭킹과 이 PC의 개인 최고점을 함께 제공합니다. 온라인 랭킹은
+데모 App ID로 조회·제출하므로 본편 기록과 섞이지 않으며, 개인 최고점은 온라인 연결과
+무관하게 먼저 저장합니다. 본편 찜하기 버튼은 본편 상점 주소를 엽니다.
+새 카드 두 장은 `Assets/Resources/Demo`의 아틀라스에 묶으며 본편/STOVE 복사본에서 제외합니다.
+생성 도구와 프롬프트는 [`demo-icons-generation.json`](Docs/Release/demo-icons-generation.json)에 기록합니다.
+
+```powershell
+./Tests/Release/Build-SteamDemoReview.ps1 -OutputRoot D:/ball-a-retro-validation/demo-new -CacheProjectRoot <같은 Unity 버전의 이전 격리 프로젝트>
+./Tests/Release/Package-StoveReview.ps1 -Platform SteamDemo -PlayerRoot D:/ball-a-retro-validation/demo-new/player -OutputZip D:/ball-a-retro-validation/demo-new/BALL-A-RETRO_SteamDemo_Win64.zip
+./Tests/Release/Prepare-Upload.ps1 -Platform SteamDemo -ArchivePath D:/ball-a-retro-validation/demo-new/BALL-A-RETRO_SteamDemo_Win64.zip -OutputDirectory D:/ball-a-retro-validation/demo-new/upload
+```
+
+`CacheProjectRoot`는 선택 사항입니다. 빌드는 새 폴더에서 수행하며 원본의 볼 머테리얼과
+폰트 변경을 복사하되 원본을 저장하거나 수정하지 않습니다. 실제 Steam 클라이언트 설치·실행,
+물리 플레이와 재미·난이도 평가는 별도이며, 이 절차만으로 공개 출시나 심사 신청을 하지 않습니다.
 
 Steam 닉네임은 로그인 상태와 유효한 Steam ID를 확인한 뒤 현재 계정에서 읽습니다.
 로비 오른쪽 아래 기존 랭킹 아이콘과 게임 결과의 기존 랭킹 버튼이 같은 **SCORE RANKING** 화면을 엽니다.
