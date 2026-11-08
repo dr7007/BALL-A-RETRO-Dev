@@ -52,7 +52,10 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
 #if BALLARETRO_STEAM && !BALLARETRO_STOVE
     private bool LoggedIn(Action<string> failed)
     {
-        if (SteamManager.TryGetLoggedInPlayer(out _, out _)) return true;
+        bool ready = BallARetroPlatform.IsDemoBuild
+            ? SteamManager.TryGetExistingLoggedInPlayer(out _, out _)
+            : SteamManager.TryGetLoggedInPlayer(out _, out _);
+        if (ready) return true;
         failed?.Invoke("Steam login required");
         return false;
     }

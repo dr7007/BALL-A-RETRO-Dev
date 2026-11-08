@@ -13,6 +13,9 @@ public class SteamLeaderboardTests
     {
         Fixture.Reset();LeaderboardFixture.Reset();
         typeof(SteamManager).GetMethod("InitOnPlayMode",BindingFlags.Static|BindingFlags.NonPublic).Invoke(null,null);
+        // Demo requests reuse startup authentication and never create a client from ranking UI.
+        if (BallARetroPlatform.IsDemoBuild)
+            Assert.That(SteamManager.TryGetLoggedInPlayer(out _, out _), Is.True);
         serviceObject=new GameObject("Steam leaderboard");backend=serviceObject.AddComponent<BallARetroSteamLeaderboard>();
     }
     [TearDown] public void Cleanup()
