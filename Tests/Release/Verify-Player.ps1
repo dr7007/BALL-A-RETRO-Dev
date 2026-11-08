@@ -38,7 +38,7 @@ try {
     $pinvoke = @($types | ForEach-Object Methods | Where-Object { $_.IsPInvokeImpl -and $_.PInvokeInfo.Module.Name -match 'steam_api' })
     if ($pinvoke.Count) { throw 'Steam native API imports found in game assembly.' }
     $checks.Add('No Steam native runtime files or API imports')
-    if (@($types | Where-Object { $_.Name -match '^BallARetro(Scene(Audit|Probe)|RenderProbe)$' }).Count) {
+    if (@($types | Where-Object { $_.Name -match '^BallARetro(Scene(Audit(Runner)?|Probe)|RenderProbe|ChoiceIcon(Preparation|Probe|Audit(Runner)?))$' }).Count) {
         throw 'Editor scene audit leaked into player.'
     }
     $checks.Add('No editor scene audit code in player')
