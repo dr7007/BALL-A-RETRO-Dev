@@ -182,6 +182,7 @@ public class BallARetroSceneProbe : MonoBehaviour
             UnityEngine.EventSystems.ExecuteEvents.pointerClickHandler);
         Check(quitRequests == 1, "Lobby top-right X invokes the application quit callback once");
         CaptureFrame("lobby");
+        yield return BallARetroRenderProbe.Measure(output, "lobby");
         // Reproduce the real scene's manager-before-LED Start order deterministically.
         var earlyLed = GameObject.CreatePrimitive(PrimitiveType.Cube);
         earlyLed.SetActive(false);
@@ -278,6 +279,7 @@ public class BallARetroSceneProbe : MonoBehaviour
             && targetHUD.GetComponent<TMPro.TMP_Text>().text.Replace(" ", "") == "/1000", "Tutorial HUD displays the actual 1000-point goal before launch");
         yield return null;
         CaptureFrame("tutorial");
+        yield return BallARetroRenderProbe.Measure(output, "tutorial");
         settings = Object.FindFirstObjectByType<PSH_Script_SettingController>();
         settings.ToggleMenu();
         settings.OnClickGoToLobby();
@@ -305,6 +307,25 @@ public class BallARetroSceneProbe : MonoBehaviour
         Object.FindFirstObjectByType<PSH.PSH_Script_DialogueUI>().SkipDialogue();
         yield return new WaitForSecondsRealtime(3);
         var portals = Object.FindObjectsByType<BallARetroPortalVfx>(FindObjectsInactive.Include, FindObjectsSortMode.None);
+        yield return BallARetroRenderProbe.Measure(output, "game");
+        if (Environment.GetCommandLineArgs().Contains("-measureRendering"))
+        {
+            var managerForRendering = Object.FindFirstObjectByType<KHS_Script_CameraManager>();
+            managerForRendering.SubCamOn(1);
+            yield return null;
+            yield return BallARetroRenderProbe.Measure(output, "game-bonus", managerForRendering.cameraGos[1].GetComponent<Camera>());
+            CaptureFrame("game-bonus", managerForRendering.cameraGos[1].GetComponent<Camera>());
+            managerForRendering.MainCamOn();
+            yield return null;
+            var mainForRendering = managerForRendering.cameraGos[0].GetComponent<Camera>();
+            int originalMask = mainForRendering.cullingMask;
+            try
+            {
+                mainForRendering.cullingMask |= 1 << LayerMask.NameToLayer("2F");
+                yield return BallARetroRenderProbe.Measure(output, "game-floor-visible", mainForRendering);
+            }
+            finally { mainForRendering.cullingMask = originalMask; }
+        }
         Check(portals.Length == 9, "All nine portal effects use the original particle implementation");
         Check(Object.FindObjectsByType<UnityEngine.VFX.VisualEffect>(FindObjectsInactive.Include, FindObjectsSortMode.None).Length == 0,
             "No borrowed VFX Graph portal remains in the game scene");
