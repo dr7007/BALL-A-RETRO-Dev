@@ -16,8 +16,13 @@ public class CJS_Script_ChoiceState : MonoBehaviour
     {
         if (I != null && I != this) { Destroy(gameObject); return; }
         I = this;
-        DontDestroyOnLoad(gameObject);
+        // Choice history belongs to this run and is released with its scene.
         picked.Clear(); // 첫 진입 시 초기화
+    }
+
+    void OnDestroy()
+    {
+        if (I == this) I = null;
     }
 
     /// 새 런/로비 복귀/닉네임 재설정 등에서 호출

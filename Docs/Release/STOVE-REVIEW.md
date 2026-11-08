@@ -78,13 +78,16 @@ STOVE GUI 업로더에는 디버그 파일을 제외한 ZIP을 검증·추출한
 Assets/ReleaseValidation에만 복사한다. `-batchmode -executeMethod BallARetroSceneAudit.Run
 -auditOutput <새 증거 폴더>`로 실행하며 `-quit`는 붙이지 않는다. 완료되면 자동 종료한다.
 로비 설정, 세 언어, 오프라인 기록, 튜토리얼·게임 씬 이동 및 로비 복귀를 검사한다.
-목표 HUD와 초기화 순서 재현을 포함하여 24개 항목을 검사한다. 배치 에디터에는 Game View가 없으므로,
+목표 HUD, 초기화 순서, 튜토리얼·본게임 선택 기록의 유지 및 씬 종료 시 정리를 포함하여
+30개 항목을 검사한다. 잘못된 DontDestroyOnLoad 경고도 실패로 처리한다. 배치 에디터에는 Game View가 없으므로,
 원래 씬 카메라에 UI를 임시 연결하여 1920×1080 렌더링 5장을 기록한 뒤 UI 연결을 복원한다.
 이 이미지는 렌더링 검증 자료이며, STOVE 클라이언트의 실제 플레이 영상과 구별한다.
 
 2026-11-08 검증 증거 루트: `D:/ball-a-retro-validation/stove-release-20261108`.
 `evidence/regression-results.json`에 6개 회귀 테스트 모음의 167개 통과 결과,
 `full-scene-approved/scene-audit.json`에 최종 24개 통과 및 오류 0건을 기록했다.
+클라이언트 시험 후 확장한 검사는 `choice-lifecycle-after/scene-audit.json`에 30개 통과,
+오류 및 잘못된 DontDestroyOnLoad 경고 0건으로 기록했다.
 음량 복원·음소거, 임의 점수 제출 단축키, 씬 초기화, 셰이더 키워드 충돌,
 튜토리얼 목표 HUD 문제를 기능별 커밋으로 수정했다.
 

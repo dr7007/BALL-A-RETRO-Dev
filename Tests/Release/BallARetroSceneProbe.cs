@@ -62,7 +62,8 @@ public class BallARetroSceneProbe : MonoBehaviour
     }
     void OnLog(string message, string trace, LogType type)
     {
-        if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert)
+        if (type == LogType.Error || type == LogType.Exception || type == LogType.Assert
+            || (type == LogType.Warning && message.Contains("DontDestroyOnLoad only works for root")))
             errors.Add(message + "\n" + trace);
     }
     void Update()
@@ -149,6 +150,11 @@ public class BallARetroSceneProbe : MonoBehaviour
         var tutorial = Object.FindFirstObjectByType<CJS_TutorialDirector>();
         Check(tutorial != null && tutorial.scoreManager != null && tutorial.plunger != null, "Full tutorial scene initializes with score and plunger");
         Check(tutorial.tutorialTargetScore == 1000 && !tutorial.resultPanel.activeSelf, "Tutorial goal and initial result state");
+        var tutorialChoices = CJS_Script_ChoiceState.I;
+        Check(tutorialChoices != null && tutorialChoices.gameObject.scene == SceneManager.GetActiveScene()
+            && tutorialChoices.Picked.Count == 0, "Tutorial choice history starts empty in its own scene");
+        tutorialChoices.Add(new CJS_ChoiceData { name = "Scene audit tutorial choice" });
+        Check(tutorialChoices.Picked.Count == 1, "Tutorial choice history retains the current run selection");
         var targetHUD = Object.FindFirstObjectByType<KHS_Script_UIToTScore>();
         Check(tutorial.scoreManager.targetScore == 1000 && targetHUD != null
             && targetHUD.GetComponent<TMPro.TMP_Text>().text.Replace(" ", "") == "/1000", "Tutorial HUD displays the actual 1000-point goal before launch");
@@ -162,11 +168,17 @@ public class BallARetroSceneProbe : MonoBehaviour
         settings.ConfirmExit();
         while (SceneManager.GetActiveScene().name != "Main_Scene_Lobby") yield return null;
         yield return new WaitForSecondsRealtime(2);
+        Check(tutorialChoices == null && CJS_Script_ChoiceState.I == null, "Tutorial choice history is released on return to lobby");
         lobby = Object.FindFirstObjectByType<PSH.PSH_Script_LobbyUIManager>();
         lobby.OnClick_StartGame();
         while (SceneManager.GetActiveScene().name != "Main_Scene_Game") yield return null;
         yield return new WaitForSecondsRealtime(4);
         Check(Object.FindFirstObjectByType<KHS_Script_ScoreManager>() != null, "Full game scene initializes");
+        var gameChoices = CJS_Script_ChoiceState.I;
+        Check(gameChoices != null && gameChoices.gameObject.scene == SceneManager.GetActiveScene()
+            && gameChoices.Picked.Count == 0, "Game starts with fresh choice history after tutorial");
+        gameChoices.Add(new CJS_ChoiceData { name = "Scene audit game choice" });
+        Check(gameChoices.Picked.Count == 1, "Game choice history retains the current run selection");
         targetHUD = Object.FindFirstObjectByType<KHS_Script_UIToTScore>();
         Check(targetHUD != null && targetHUD.GetComponent<TMPro.TMP_Text>().text.Replace(" ", "") == "/" + KHS_Script_ScoreManager.Instance.targetScore,
             "Game HUD displays the initialized round target");
@@ -180,6 +192,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         settings.ConfirmExit();
         while (SceneManager.GetActiveScene().name != "Main_Scene_Lobby") yield return null;
         yield return new WaitForSecondsRealtime(2);
+        Check(gameChoices == null && CJS_Script_ChoiceState.I == null, "Game choice history is released on return to lobby");
         Check(BallARetroPersonalRecordStore.Read("Reviewer", "ReleaseSmoke", 1)[0].score == 9000, "Personal best survives all scene transitions");
         Check(!SteamManager.Initialized, "Steam remains disabled after scene transitions");
     }
