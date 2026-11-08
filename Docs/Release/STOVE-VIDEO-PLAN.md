@@ -1,10 +1,10 @@
 # BALL-A-RETRO 심의 영상 촬영표
 
-대상: 새 제출 후보 **submission-v5**, Windows 64비트 0.1.0. 새 STOVE 빌드 ID는 아직 미정이다.
-확정 소스 커밋은 `D:/ball-a-retro-validation/stove-release-20261108/submission-v5/evidence/source.json`에 기록한다.
+대상: 새 제출 후보 **submission-v6**, Windows 64비트 0.1.0. 새 STOVE 빌드 ID는 아직 미정이다.
+확정 소스 커밋은 `D:/ball-a-retro-validation/stove-release-20261108/submission-v6/evidence/source.json`에 기록한다.
 기존 STOVE 빌드 **53114** / 소스 `59cdfe7`에는 새 워프·로딩 효과, 시작 시 광과민성 안내,
 로비 종료 버튼·영문 체크리스트 수정이 포함되어 있지 않으므로 이번 제출 영상의 촬영 대상으로 사용하지 않는다.
-**v5 업로드 → DRM 적용 완료 → STOVE 클라이언트 설치·실행 시험 통과** 후 새 빌드 ID를 기록하고 촬영한다.
+**v6 업로드 → DRM 적용 완료 → STOVE 클라이언트 설치·실행 시험 통과** 후 새 빌드 ID를 기록하고 촬영한다.
 이 문서는 촬영 준비 자료이며, 아직 실제 녹화본은 없다. 실제 촬영·내용 검토 전에는 영상 준비 완료로 표시하지 않는다.
 
 ## 제출 요건과 촬영 기준
@@ -21,7 +21,7 @@
 
 ## 녹화 준비
 
-1. v5 업로드·DRM 적용·클라이언트 시험이 끝났는지 확인하고, 새 STOVE 빌드 ID와
+1. v6 업로드·DRM 적용·클라이언트 시험이 끝났는지 확인하고, 새 STOVE 빌드 ID와
    `evidence/source.json`의 소스 커밋을 촬영 기록에 남긴다. STOVE 스튜디오 테스트에서 해당 빌드를 실행한다.
 2. 설정에서 한국어, 화면 해상도, 들을 수 있는 게임 음량을 확인한다. 제출 촬영은 게임에 포함된
    시각 효과를 보여주도록 **전체 효과를 켠 상태**를 기본으로 한다. 시작 안내에서는 `계속하기`를 선택하고
@@ -74,7 +74,7 @@
 
 ## 후처리와 검증
 
-작업 폴더: `D:/ball-a-retro-validation/stove-release-20261108/submission-v5/review-video`.
+작업 폴더: `D:/ball-a-retro-validation/stove-release-20261108/submission-v6/review-video`.
 `raw`는 원본 복사본, `submission`은 검증 후 제출할 MP4, `evidence`는 검사 결과다.
 
 `Tests/Release/Review-Video.py`는 실제 영상의 구간 추출, 전체 디코딩 검사, 해상도·음성·분량

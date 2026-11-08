@@ -92,6 +92,12 @@ public class BallARetroSceneProbe : MonoBehaviour
     }
     IEnumerator Run()
     {
+        var dependencies = AssetDatabase.GetDependencies(new[] { "Assets/MainScenes/Main_Scene_Lobby.unity",
+            "Assets/MainScenes/Main_Scene_Tutorial.unity", "Assets/MainScenes/Main_Scene_Game.unity" }, true);
+        // Editor dependency graphs include overridden/removed prefab sources. Keep
+        // this diagnostic; the packed-assets gate verifies actual shipped resources.
+        File.WriteAllLines(Path.Combine(output, "editor-vendor-dependencies.txt"),
+            dependencies.Where(IsReplacedVendorVisual));
         var notice = Object.FindFirstObjectByType<BallARetroStartupNotice>();
         Check(notice != null && BallARetroStartupNotice.IsVisible, "Startup notice appears before lobby input");
         var proceed = notice.transform.Find("Notice/Continue").GetComponent<UnityEngine.UI.Button>();
@@ -238,6 +244,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         yield return new WaitForSecondsRealtime(4);
         var tutorial = Object.FindFirstObjectByType<CJS_TutorialDirector>();
         Check(tutorial != null && tutorial.scoreManager != null && tutorial.plunger != null, "Full tutorial scene initializes with score and plunger");
+        CheckSceneVisualReferences("tutorial");
         Check(tutorial.tutorialTargetScore == 1000 && !tutorial.resultPanel.activeSelf, "Tutorial goal and initial result state");
         var tutorialChoices = CJS_Script_ChoiceState.I;
         Check(tutorialChoices != null && tutorialChoices.gameObject.scene == SceneManager.GetActiveScene()
@@ -263,6 +270,7 @@ public class BallARetroSceneProbe : MonoBehaviour
         while (SceneManager.GetActiveScene().name != "Main_Scene_Game") yield return null;
         yield return new WaitForSecondsRealtime(4);
         Check(Object.FindFirstObjectByType<KHS_Script_ScoreManager>() != null, "Full game scene initializes");
+        CheckSceneVisualReferences("game");
         var gameChoices = CJS_Script_ChoiceState.I;
         Check(gameChoices != null && gameChoices.gameObject.scene == SceneManager.GetActiveScene()
             && gameChoices.Picked.Count == 0, "Game starts with fresh choice history after tutorial");
@@ -352,6 +360,20 @@ public class BallARetroSceneProbe : MonoBehaviour
         Check(!BallARetroStartupNotice.IsVisible, "Startup notice does not repeat when returning to the lobby");
         Check(BallARetroPersonalRecordStore.Read("Reviewer", "ReleaseSmoke", 1)[0].score == 9000, "Personal best survives all scene transitions");
         Check(!SteamManager.Initialized, "Steam remains disabled after scene transitions");
+    }
+    static bool IsReplacedVendorVisual(string path) => !path.EndsWith(".cs") && (path.Contains("/Hovl Studio/")
+        || path.Contains("/VisualX_Studio/") || path.Contains("/Cool Visual Effects - Part 1/"));
+    void CheckSceneVisualReferences(string scene)
+    {
+        var materials = Object.FindObjectsByType<Renderer>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+            .SelectMany(renderer => renderer.sharedMaterials).Where(material => material != null).Distinct().ToArray();
+        Check(!materials.Any(material => IsReplacedVendorVisual(AssetDatabase.GetAssetPath(material))
+            || material.GetTexturePropertyNames().Any(name => IsReplacedVendorVisual(AssetDatabase.GetAssetPath(material.GetTexture(name)))))
+            && !Object.FindObjectsByType<UnityEngine.UI.Image>(FindObjectsInactive.Include, FindObjectsSortMode.None)
+                .Any(img => IsReplacedVendorVisual(AssetDatabase.GetAssetPath(img.sprite))),
+            "No replaced vendor material, texture or UI sprite is assigned in " + scene);
+        var trail = materials.FirstOrDefault(material => material.shader != null && material.shader.name == "BALL-A-RETRO/Original Pixel Trail");
+        Check(trail != null && trail.shader.isSupported, "Original trail shader is assigned and supported in " + scene);
     }
     static void EmitUI(ScriptableRenderContext context, Camera camera) => ScriptableRenderContext.EmitGeometryForCamera(camera);
     void CapturePortal(BallARetroPortalVfx portal)

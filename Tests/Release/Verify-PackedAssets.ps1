@@ -11,6 +11,7 @@ $forbidden = $report.assets | Where-Object {
     ($_.path -match '/(Hovl Studio|VisualX_Studio|Cool Visual Effects - Part 1)/' -and $_.path -notmatch '\.cs$')
 }
 foreach ($path in @('Assets/Public/OriginalVfx/PixelParticle.mat', 'Assets/Public/UI_Public/Shaders/BallARetroPixelParticle.shader',
+    'Assets/Public/OriginalVfx/PixelTrail.mat', 'Assets/Public/UI_Public/Shaders/BallARetroPixelTrail.shader',
     'Assets/Resources/Release/StartupNotice.prefab')) {
     if ($path -notin $report.assets.path) { throw "Required release asset missing: $path" }
 }
