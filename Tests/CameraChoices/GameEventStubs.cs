@@ -20,11 +20,14 @@ public static class KHS_Script_BallOutController
 }
 public class KHS_Script_ScoreManager : MonoBehaviour
 {
-    public static KHS_Script_ScoreManager Instance => null;
+    public static KHS_Script_ScoreManager Instance { get; private set; }
+    public int Round = 1;
+    void Awake() => Instance = this;
+    void OnDestroy() { if (Instance == this) Instance = null; }
     public static event Action OnGameClear, OnGameOver, Round_Clear;
     public static void RaiseGameOver() => OnGameOver?.Invoke();
     public static void RaiseRoundClear() => Round_Clear?.Invoke();
-    public int RoundRespone() => 1;
+    public int RoundRespone() => Round;
 }
 public class KHS_Script_UIImgFunc : MonoBehaviour
 {

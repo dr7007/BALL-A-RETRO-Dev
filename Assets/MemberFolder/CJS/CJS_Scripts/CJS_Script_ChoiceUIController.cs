@@ -39,7 +39,9 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private bool fullScreenCompleted;
     private readonly List<int> offerIds = new List<int>(3);
     private List<CJS_ChoiceData> currentOffer;
+    private readonly List<Button> entryButtons = new List<Button>();
     private int RerollLimit => BallARetroPlatform.IsDemoBuild ? maxReroll : 3;
+    public bool CanOpenFullScreen => !gameEnded && (fullScreenRound != CurrentRound() || !fullScreenCompleted);
 
     [SerializeField]
     private YJ_Script_BallController ballCon;
@@ -84,6 +86,12 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         usedReroll = 0;
         isOpen = false;
         busy = false;
+
+        if (!BallARetroPlatform.IsDemoBuild)
+            foreach (var button in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
+                for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
+                    if (button.onClick.GetPersistentTarget(i) == this && button.onClick.GetPersistentMethodName(i) == nameof(ShowChoices))
+                    { entryButtons.Add(button); break; }
 
         SetChoiceButtonsVisible(false);
         UpdateRerollUI();
@@ -186,6 +194,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (picks.Count == 0 && !BallARetroPlatform.IsDemoBuild)
         {
             fullScreenCompleted = true;
+            SetEntryButtons(false);
             Hide();
             gameUIFuncInsert();
         }
@@ -214,7 +223,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
         if (pickCount <= 1)
         {
-            if (!BallARetroPlatform.IsDemoBuild) fullScreenCompleted = true;
+            if (!BallARetroPlatform.IsDemoBuild) { fullScreenCompleted = true; SetEntryButtons(false); }
             Hide();
             gameUIFuncInsert();
         }
@@ -251,6 +260,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (!isOpen || busy) return;
         if (BallARetroDemoRun.Current?.IsEnabled == true) return;
         fullScreenCompleted = true;
+        SetEntryButtons(false);
         Hide();
     }
 
@@ -278,6 +288,12 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     {
         Debug.LogWarning("Round_Clear 이벤트 발생");
         pickCount = BallARetroDemoRun.Current?.IsEnabled == true ? 1 : ballCon.GetBallCount();
+        if (!BallARetroPlatform.IsDemoBuild) SetEntryButtons(true);
+    }
+
+    private void SetEntryButtons(bool enabled)
+    {
+        foreach (var button in entryButtons) if (button != null) button.interactable = enabled;
     }
 
     private int CurrentRound() => KHS_Script_ScoreManager.Instance != null

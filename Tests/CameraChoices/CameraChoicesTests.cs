@@ -42,6 +42,7 @@ public class CameraChoicesTests
         oldCursorVisible = Cursor.visible;
         oldCursorLock = Cursor.lockState;
         Time.timeScale = 1f;
+        Make("Score state").AddComponent<KHS_Script_ScoreManager>();
         ball = Make("Ball").transform;
         ball.position = new Vector3(0f, 0f, 6f);
         var ballController = ball.gameObject.AddComponent<YJ_Script_BallController>();
@@ -177,12 +178,29 @@ public class CameraChoicesTests
     {
         for (int i = 0; i < 3; ++i)
         {
+            KHS_Script_ScoreManager.Instance.Round = i + 1;
             ball.position += Vector3.forward * 3f;
             yield return new WaitForSecondsRealtime(0.15f);
             yield return OpenChoices();
             skip.onClick.Invoke();
             yield return FinishReturnWhileBallMoves();
         }
+    }
+
+    [UnityTest]
+    public IEnumerator CompletedChoiceScreenCannotMoveCameraOrPauseAgain()
+    {
+        yield return OpenChoices();
+        content.GetComponentInChildren<Button>().onClick.Invoke();
+        yield return FinishReturnWhileBallMoves();
+        Assert.That(choices.CanOpenFullScreen, Is.False);
+        manager.MonitorOnButton();
+        choices.ShowChoices();
+        yield return new WaitForSecondsRealtime(.25f);
+        AssertOnlyCamera(0);
+        Assert.That(Time.timeScale, Is.EqualTo(1f));
+        AssertGameplayCursor();
+        Assert.That(roller.Picks, Is.EqualTo(1));
     }
 
     [UnityTest]

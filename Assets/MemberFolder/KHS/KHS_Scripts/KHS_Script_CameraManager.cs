@@ -313,6 +313,11 @@ public class KHS_Script_CameraManager : MonoBehaviour
         if (gameEnded) return;
         var demo = BallARetroDemoRun.Current;
         if (demo != null && demo.IsEnabled && !demo.CanChoose(scoreManager != null ? scoreManager.RoundRespone() : 1)) return;
+        if (!BallARetroPlatform.IsDemoBuild)
+        {
+            var choices = FindAnyObjectByType<CJS_Script_ChoiceUIController>();
+            if (choices != null && !choices.CanOpenFullScreen) return;
+        }
         Cursor.visible = true;
 
         Cursor.lockState = CursorLockMode.None;
