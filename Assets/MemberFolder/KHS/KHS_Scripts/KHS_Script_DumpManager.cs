@@ -110,5 +110,8 @@ public class KHS_Script_DumpManager : MonoBehaviour
         // Only the table's actual illuminated bumpers charge this upgrade.
         if (demo != null && demo.IsEnabled && GetComponent<KHS_Script_BumperEffect>() != null)
             demo.RecordBumperHit();
+        var build = BallARetroRunBuild.Current;
+        if (build != null && build.IsEnabled && GetComponent<KHS_Script_BumperEffect>() != null)
+            build.RecordBumperHit();
     }
 }

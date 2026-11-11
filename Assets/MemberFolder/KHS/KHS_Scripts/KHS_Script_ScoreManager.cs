@@ -562,6 +562,8 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (flipperController == null) flipperController = FindAnyObjectByType<KHS_Script_FliperController>();
         if (BallARetroPlatform.IsDemoBuild && GetComponent<BallARetroDemoRun>() == null)
             gameObject.AddComponent<BallARetroDemoRun>();
+        if (!BallARetroPlatform.IsDemoBuild && GetComponent<BallARetroRunBuild>() == null)
+            gameObject.AddComponent<BallARetroRunBuild>();
     }
 
     void Start()
@@ -627,6 +629,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         if (currentState != RoundState.Playing)
             return;
+        if (!BallARetroPlatform.IsDemoBuild && !IsTutorialRun && Time.timeScale <= 0f) return;
 
         ApplyDirectScore(value, worldPos, 0);
     }
@@ -634,9 +637,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     public void AddBlackholeScoreAt(int value, Vector3 worldPos)
     {
         if (currentState != RoundState.Playing) return;
+        if (!BallARetroPlatform.IsDemoBuild && !IsTutorialRun && Time.timeScale <= 0f) return;
         var demo = BallARetroDemoRun.Current;
         bool demoRun = demo != null && demo.IsEnabled;
-        int charge = demoRun ? demo.ConsumeCharge() : 0;
+        int charge = demoRun ? demo.ConsumeCharge() : BallARetroRunBuild.Current?.ConsumeCharge() ?? 0;
         // The charge is a flat payout, separate from both table and last-ball
         // multipliers. One transaction prevents a round boundary losing it.
         ApplyDirectScore(demoRun ? 500 : value, worldPos, charge);
@@ -646,10 +650,13 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     {
         int awardedBase = Mathf.RoundToInt(value * multiplier * (1f + runScoreMultiplierBonus));
         var demo = BallARetroDemoRun.Current;
-        int lastBallBonus = demo != null && demo.IsEnabled ? demo.CalculateLastBallBonus(awardedBase) : 0;
+        var build = BallARetroRunBuild.Current;
+        int lastBallBonus = demo != null && demo.IsEnabled ? demo.CalculateLastBallBonus(awardedBase)
+            : build != null && build.IsEnabled ? build.CalculateLastBallBonus(awardedBase) : 0;
         int finalScore = awardedBase + charge + lastBallBonus;
         curScore += finalScore;
         if (demo != null && demo.IsEnabled) demo.RecordAwarded(charge, lastBallBonus);
+        if (build != null && build.IsEnabled) build.RecordAwarded(charge, lastBallBonus);
         OnScoreChanged?.Invoke(curScore);
 
         OnScoreGained?.Invoke(finalScore);
@@ -732,6 +739,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (currentState != RoundState.Playing)
             return;
 
+        BallARetroRunBuild.Current?.LoseUnpaidCharge();
         int remain = Mathf.Max(0, ball.GetBallCount() - 1);
         ball.SetBallCount(remain);
 

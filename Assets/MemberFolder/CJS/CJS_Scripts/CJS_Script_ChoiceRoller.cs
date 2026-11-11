@@ -124,6 +124,12 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     public void PushPicked(CJS_ChoiceData picked)
     {
         if (picked == null) return;
+        var build = BallARetroRunBuild.Current;
+        if (build != null && build.IsEnabled && (picked.funcIdx == 9 || picked.funcIdx == 10))
+        {
+            build.ApplyUpgrade(picked.funcIdx);
+            return;
+        }
         var demo = BallARetroDemoRun.Current;
         if (demo != null && demo.IsEnabled
             && (picked.funcIdx == BallARetroDemoRun.CapacitorChoiceId || picked.funcIdx == BallARetroDemoRun.LastBallChoiceId))
@@ -144,7 +150,20 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
             if (c == null) continue;
             if (!c.isEnabled) continue;
             if (c.weight <= 0f) continue;
-            pool.Add(c);
+            if (!BallARetroPlatform.IsDemoBuild && c.funcIdx == 4)
+                pool.Add(new CJS_ChoiceData { funcIdx = c.funcIdx, localizationKey = "Build_ScoreBoost",
+                    name = c.name, description = c.description, icon = c.icon, rarity = c.rarity,
+                    weight = c.weight, roguelike = c.roguelike });
+            else pool.Add(c);
+        }
+
+        var build = BallARetroRunBuild.Current;
+        if (build != null && build.IsEnabled)
+        {
+            if (build.CapacitorLevel < 2) pool.Add(DemoChoice(9,
+                build.CapacitorLevel == 0 ? "Build_Capacitor" : "Build_CapacitorUpgrade", FindChoice(5)?.icon));
+            if (build.LastBallLevel < 2) pool.Add(DemoChoice(10,
+                build.LastBallLevel == 0 ? "Build_LastBall" : "Build_LastBallUpgrade", FindChoice(8)?.icon));
         }
 
         if (pool.Count == 0)

@@ -90,6 +90,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
         KHS_Script_ScoreManager.OnGameOver += EndCapture;
         KHS_Script_ScoreManager.OnGameClear += EndCapture;
         BallARetroDemoRun.Changed += RefreshDemoActivation;
+        BallARetroRunBuild.Changed += RefreshDemoActivation;
     }
 
     private void OnDisable()
@@ -100,6 +101,7 @@ public class YJ_Script_BlackholeController : MonoBehaviour
         KHS_Script_ScoreManager.OnGameOver -= EndCapture;
         KHS_Script_ScoreManager.OnGameClear -= EndCapture;
         BallARetroDemoRun.Changed -= RefreshDemoActivation;
+        BallARetroRunBuild.Changed -= RefreshDemoActivation;
         CancelCapture();
     }
 
@@ -139,6 +141,10 @@ public class YJ_Script_BlackholeController : MonoBehaviour
     {
         var demo = BallARetroDemoRun.Current;
         if (demo != null && demo.IsEnabled && demo.Charge > 0 && !isBallCaptured
+            && scoreManager != null && !scoreManager.HasEnded)
+            SetActivated(true);
+        var build = BallARetroRunBuild.Current;
+        if (build != null && build.IsEnabled && build.Charge > 0 && !isBallCaptured
             && scoreManager != null && !scoreManager.HasEnded)
             SetActivated(true);
     }

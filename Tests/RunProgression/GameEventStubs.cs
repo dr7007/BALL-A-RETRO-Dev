@@ -78,6 +78,10 @@ public class BallARetroDemoPresentation : MonoBehaviour
     public void Refresh() { }
     public void SetSubmissionState(bool localOnly) { }
 }
+public static class BallARetroBuildPresentation
+{
+    public static void Install(Transform owner, TMPro.TMP_FontAsset font) { }
+}
 // Drawer input, layout and font binding are covered by the production-UI fixture.
 public class PSH_Script_QuickChoiceOnOff : MonoBehaviour
 {

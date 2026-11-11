@@ -33,6 +33,7 @@ $sources = @(
     'Assets/MemberFolder/YJ/YJ_Scripts/YJ_Script_BumperComboManager.cs',
     'Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_BumperEffect.cs',
     'Assets/Public/Roguelike/BallARetroDemoRun.cs',
+    'Assets/Public/Roguelike/BallARetroRunBuild.cs',
     'Assets/Public/Platform/BallARetroPlatform.cs'
 )
 foreach ($source in $sources) {

@@ -21,6 +21,7 @@ public class PSH_Script_RunStatusUI : MonoBehaviour
         var font = resultSummaryText != null ? resultSummaryText.font : null;
         GetComponentInChildren<PSH_Script_QuickChoiceOnOff>(true)?.SetHintFont(font);
         BallARetroDemoPresentation.InstallHud(transform, font);
+        BallARetroBuildPresentation.Install(transform, font);
         KHS_Script_ScoreManager.OnRecordChallengeStarted += ShowChallenge;
         KHS_Script_ScoreManager.OnGameOver += HideNotification;
         KHS_Script_ScoreManager.OnGameClear += HideNotification;
