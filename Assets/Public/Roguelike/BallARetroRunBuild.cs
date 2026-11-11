@@ -63,18 +63,18 @@ public sealed class BallARetroRunBuild : MonoBehaviour
         return paid;
     }
     public int CalculateLastBallBonus(int awardedBase) => LastBallActive && awardedBase > 0
-        ? Mathf.RoundToInt(awardedBase * (LastBallBonusPercent / 100f)) : 0;
+        ? (int)Math.Round(awardedBase * (LastBallBonusPercent / 100d)) : 0;
     public void RecordAwarded(int chargePaid, int lastBallBonus)
     {
         if (chargePaid <= 0 && lastBallBonus <= 0) return;
-        ChargePaidTotal += Mathf.Max(0, chargePaid);
-        LastBallBonusTotal += Mathf.Max(0, lastBallBonus);
+        ChargePaidTotal = (int)Math.Min(int.MaxValue, (long)ChargePaidTotal + Mathf.Max(0, chargePaid));
+        LastBallBonusTotal = (int)Math.Min(int.MaxValue, (long)LastBallBonusTotal + Mathf.Max(0, lastBallBonus));
         NotifyStateChanged();
     }
     public void LoseUnpaidCharge()
     {
         if (!IsEnabled || !score.IsPlaying) return;
-        ChargeLostTotal += Charge;
+        ChargeLostTotal = (int)Math.Min(int.MaxValue, (long)ChargeLostTotal + Charge);
         Charge = 0;
         NotifyStateChanged();
     }

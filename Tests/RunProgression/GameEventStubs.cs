@@ -30,8 +30,16 @@ public static class KHS_Script_FliperDumpManager
 {
     public static event Action<Collision> OnFliperCollision, OffFliperCollision;
 }
+#if NEXTFEST_TESTS
+public class KHS_Script_PortalController : MonoBehaviour
+{
+    public static event Action<int> portalEvt;
+    public void PortalTempUnactive() { }
+}
+#else
 public static class KHS_Script_PortalController { public static event Action<int> portalEvt; }
 public static class KHS_Script_PlincoFunction { public static event Action ReturnPortalEvt; }
+#endif
 #if !TUTORIAL && !DEMO_GAMEPLAY
 public class KHS_Script_PlungerController : MonoBehaviour
 {

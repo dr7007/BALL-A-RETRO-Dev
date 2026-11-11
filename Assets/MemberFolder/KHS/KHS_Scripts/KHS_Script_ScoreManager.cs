@@ -522,6 +522,15 @@ public class KHS_Script_ScoreManager : MonoBehaviour
     // Permanent choices belong to the run, while the bumper combo owns multiplier.
     // Keep them separate so a combo change or a lost ball cannot erase a choice.
     private float runScoreMultiplierBonus;
+    private bool bonusSettlementPending;
+
+    public bool TryBeginBonusSettlement()
+    {
+        if (!IsPlaying || HasEnded || IsTutorialRun || Time.timeScale <= 0 || bonusSettlementPending) return false;
+        bonusSettlementPending = true;
+        return true;
+    }
+    public void EndBonusSettlement() => bonusSettlementPending = false;
 
     public void AddRunScoreMultiplier(float amount)
     {
@@ -648,13 +657,30 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
     private void ApplyDirectScore(int value, Vector3 worldPos, int charge)
     {
-        int awardedBase = Mathf.RoundToInt(value * multiplier * (1f + runScoreMultiplierBonus));
+        bool bounded = !BallARetroPlatform.IsDemoBuild && !IsTutorialRun;
+        int awardedBase = bounded
+            ? ClampFullScore(Math.Round((double)value * multiplier * (1f + runScoreMultiplierBonus)))
+            : Mathf.RoundToInt(value * multiplier * (1f + runScoreMultiplierBonus));
         var demo = BallARetroDemoRun.Current;
         var build = BallARetroRunBuild.Current;
         int lastBallBonus = demo != null && demo.IsEnabled ? demo.CalculateLastBallBonus(awardedBase)
             : build != null && build.IsEnabled ? build.CalculateLastBallBonus(awardedBase) : 0;
-        int finalScore = awardedBase + charge + lastBallBonus;
-        curScore += finalScore;
+        int finalScore;
+        if (bounded)
+        {
+            // Keep popup deltas and contribution totals equal to points actually credited.
+            int available = int.MaxValue - Mathf.Max(0, curScore);
+            int paidBase = Math.Min(available, awardedBase); available -= paidBase;
+            charge = Math.Min(available, charge); available -= charge;
+            lastBallBonus = Math.Min(available, lastBallBonus);
+            finalScore = paidBase + charge + lastBallBonus;
+            curScore = ClampFullScore((long)curScore + finalScore);
+        }
+        else
+        {
+            finalScore = awardedBase + charge + lastBallBonus;
+            curScore += finalScore;
+        }
         if (demo != null && demo.IsEnabled) demo.RecordAwarded(charge, lastBallBonus);
         if (build != null && build.IsEnabled) build.RecordAwarded(charge, lastBallBonus);
         OnScoreChanged?.Invoke(curScore);
@@ -673,8 +699,10 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         if (currentState != RoundState.Playing)
             return;
 
+        bool bounded = !BallARetroPlatform.IsDemoBuild && !IsTutorialRun;
+        if (bounded && (Time.timeScale <= 0 || value < 1)) return;
         int before = curScore;
-        curScore *= value;
+        curScore = bounded ? ClampFullScore((long)curScore * value) : curScore * value;
         OnScoreChanged?.Invoke(curScore);
         int delta = Mathf.Max(0, curScore - before);
 
@@ -690,6 +718,11 @@ public class KHS_Script_ScoreManager : MonoBehaviour
 
         EvaluateTarget();
     }
+
+    // The native leaderboard stores Int32 scores. Saturation preserves ordering at
+    // that boundary instead of wrapping a successful record attempt below zero.
+    private static int ClampFullScore(double value)
+        => double.IsNaN(value) || value <= 0 ? 0 : value >= int.MaxValue ? int.MaxValue : (int)value;
 
     private void EvaluateTarget()
     {
@@ -716,6 +749,7 @@ public class KHS_Script_ScoreManager : MonoBehaviour
         curScore = 0;
         numOfBounce = 0;
         runScoreMultiplierBonus = 0f;
+        bonusSettlementPending = false;
         IsRecordChallenge = false;
         EndReason = GameOverReason.None;
         OnScoreChanged?.Invoke(curScore);

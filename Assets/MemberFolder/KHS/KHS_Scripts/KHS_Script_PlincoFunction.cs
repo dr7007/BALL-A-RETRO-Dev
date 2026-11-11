@@ -21,6 +21,33 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
 
 
     private KHS_Script_ScoreManager scoreManager;
+    private bool ownsSettlement;
+    private Coroutine settlement;
+
+    private void OnEnable()
+    {
+        KHS_Script_BallOutController.BallOutEvt += CancelSettlement;
+        KHS_Script_ResetController.OnReset += CancelSettlement;
+        KHS_Script_ScoreManager.OnGameOver += CancelSettlement;
+        KHS_Script_ScoreManager.OnGameClear += CancelSettlement;
+    }
+    private void OnDisable()
+    {
+        KHS_Script_BallOutController.BallOutEvt -= CancelSettlement;
+        KHS_Script_ResetController.OnReset -= CancelSettlement;
+        KHS_Script_ScoreManager.OnGameOver -= CancelSettlement;
+        KHS_Script_ScoreManager.OnGameClear -= CancelSettlement;
+        CancelSettlement();
+    }
+    private void CancelSettlement()
+    {
+        // Demo and tutorial retain their original coroutine behavior.
+        if (!ownsSettlement) return;
+        if (settlement != null) StopCoroutine(settlement);
+        settlement = null;
+        ownsSettlement = false;
+        if (scoreManager != null) scoreManager.EndBonusSettlement();
+    }
 
     // Start is called once before the first execution of Update after the MonoBehaviour is created
     void Start()
@@ -38,7 +65,13 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
     {
         if(other.CompareTag("Ball"))
         {
-            StartCoroutine(ScoreMultipleAndTeleportCoroutine(other));
+            if (!BallARetroPlatform.IsDemoBuild && scoreManager != null && !scoreManager.IsTutorialRun)
+            {
+                if (!isActiveAndEnabled || portalCon == null || other.attachedRigidbody == null
+                    || !scoreManager.TryBeginBonusSettlement()) return;
+                ownsSettlement = true;
+            }
+            settlement = StartCoroutine(ScoreMultipleAndTeleportCoroutine(other));
         }
     }
 
@@ -54,7 +87,7 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
             scoreManager.MultiplyScore(scoreMulti);
         }
         yield return new WaitForSeconds(1f);
-        ReturnPortalEvt.Invoke();
+        ReturnPortalEvt?.Invoke();
         yield return new WaitForSeconds(2f);
         portalCon.PortalTempUnactive();
 
@@ -76,6 +109,12 @@ public class KHS_Script_PlincoFunction : MonoBehaviour
         rb.isKinematic = false;
         // 최종 적용
         rb.linearVelocity = randomDir.normalized * randomSpeed;
+        if (ownsSettlement)
+        {
+            ownsSettlement = false;
+            scoreManager.EndBonusSettlement();
+            settlement = null;
+        }
     }
     public int ScoreMulti_Response()
     {

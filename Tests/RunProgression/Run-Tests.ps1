@@ -107,7 +107,10 @@ if ($IncludeDemo -or $IncludeNextFest) {
         Copy-Item -LiteralPath "$sourceRoot/Assets/MemberFolder/CJS/CJS_Scripts/$_" -Destination "$outputPath/Assets/Runtime"
     }
     if ($IncludeDemo) { Copy-Item -LiteralPath "$sourceRoot/Tests/DemoGameplay/DemoGameplayTests.cs" -Destination "$outputPath/Assets/Tests" }
-    if ($IncludeNextFest) { Copy-Item "$sourceRoot/Tests/NextFest/*Tests.cs" -Destination "$outputPath/Assets/Tests" }
+    if ($IncludeNextFest) {
+        Copy-Item "$sourceRoot/Tests/NextFest/*Tests.cs" -Destination "$outputPath/Assets/Tests"
+        Copy-Item "$sourceRoot/Assets/MemberFolder/KHS/KHS_Scripts/KHS_Script_PlincoFunction.cs" -Destination "$outputPath/Assets/Runtime"
+    }
 }
 if ($IncludeBallRescue) {
     if ($Baseline) { throw 'Ball rescue requires the current run state API.' }
