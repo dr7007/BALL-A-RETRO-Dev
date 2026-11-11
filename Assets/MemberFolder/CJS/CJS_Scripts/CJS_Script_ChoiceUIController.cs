@@ -88,10 +88,21 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         busy = false;
 
         if (!BallARetroPlatform.IsDemoBuild)
+        {
             foreach (var button in FindObjectsByType<Button>(FindObjectsInactive.Include, FindObjectsSortMode.None))
                 for (int i = 0; i < button.onClick.GetPersistentEventCount(); i++)
                     if (button.onClick.GetPersistentTarget(i) == this && button.onClick.GetPersistentMethodName(i) == nameof(ShowChoices))
                     { entryButtons.Add(button); break; }
+            // The Japanese action and remaining-count labels need one readable line.
+            if (btnReroll != null)
+            {
+                ((RectTransform)btnReroll.transform).SetSizeWithCurrentAnchors(RectTransform.Axis.Horizontal, 320);
+                var layout = btnReroll.GetComponent<LayoutElement>() ?? btnReroll.gameObject.AddComponent<LayoutElement>();
+                layout.minWidth = layout.preferredWidth = 320;
+                foreach (var text in btnReroll.GetComponentsInChildren<TMP_Text>(true))
+                    text.textWrappingMode = TextWrappingModes.NoWrap;
+            }
+        }
 
         SetChoiceButtonsVisible(false);
         UpdateRerollUI();
