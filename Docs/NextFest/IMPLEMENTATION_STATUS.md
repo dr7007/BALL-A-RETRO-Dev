@@ -11,7 +11,7 @@
 
 - 초기 미커밋 사용자 변경: `Assets/Public/Font/Galmuri11 SDF.asset`, `Galmuri11 SDF_dialogue.asset`, `Galmuri11-Bold SDF.asset`, `Assets/MemberFolder/KHS/KHS_Materials/KHS_Mat_Ball.mat`.
 - 보호 파일과 참고 출시 기록의 시작 SHA-256: `D:/ball-a-retro-validation/nextfest-20261111/protected-before.json`.
-- 데모 코드 기준: 3라운드/총 3선택, 9효과+2전략에서 유효 3개 추첨, Tab, 3언어, 별도 Steam/개인 기록 확인. 실제 실행 회귀 결과는 아래에 추가한다.
+- 데모 코드 기준: 3라운드/총 3선택, 9효과+2전략에서 유효 3개 추첨, Tab, 3언어, 별도 Steam/개인 기록 확인. 회귀 결과는 아래 표와 증거 항목에 기록했다.
 - 2026-11-11 Steamworks 데모 페이지 실조회: 상점 및 빌드 모두 Review queue, Submitted on 8 Nov, Unavailable. 심사 완료나 공개 출시로 간주하지 않는다.
 - 관찰 URL: https://partner.steamgames.com/apps/landing/5585210 . 출시 담당으로부터도 동일 상태 및 default `26525930`, Next Fest 미등록이라는 관찰을 전달받았다. 출시 기록은 이 작업에서 수정하지 않는다.
 
@@ -54,7 +54,7 @@
 - 원본 사용자 폰트 3개와 공 머티리얼 모두 시작 해시와 일치(`protected-after.json`). 커밋 범위에서 제외했다. QA·출시 문서의 병렬 변경도 커밋하지 않았다.
 - Steam 본편의 비공개 테스트 경로에서 설치한 DLL 해시를 대조하고, v2 보드 제출/조회와 이전 보드 보존을 확인하는 것이 다음 인수 항목이다. 이 빌드의 Steam 서버 로그인·업로드 검증은 아직 하지 않았다. 현행 데모 default는 `26525930`을 유지한다.
 
-P0 구현과 자동 검증을 완료했다. 다음 확장은 자연스러운 물리 플레이에서 충전 정산/소실 선택과 보너스 맵 곱셈의 우위를 비교한 뒤 결정한다. 카드·라운드·영구 성장은 추가하지 않았다.
+P0 구현과 자동 검증을 완료했다. 다음 확장은 자연스러운 물리 플레이에서 충전 정산/소실 선택과 보너스 맵 곱셈의 우위를 비교한 뒤 결정한다. 이번 두 전략 외의 카드 확충, 라운드 확대, 영구 성장 도입은 보류했다.
 
 ## 알려진 문제 / 아직 주장하지 않는 것
 
