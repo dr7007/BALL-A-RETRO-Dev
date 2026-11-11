@@ -29,11 +29,13 @@ public class NextFestPerformanceTests
         score.targetScores = new[] { int.MaxValue };
         Set(score, "goalRound", 1); Set(score, "currentgameScores", new int[1]); Set(score, "camHolder", camera);
         go.SetActive(true);
-        roller = New("Roller").AddComponent<CJS_Script_ChoiceRoller>();
+        var rollObject = New("Roller");
+        var dispatcher = rollObject.AddComponent<KHS_Script_RogueLikeManager>();
+        roller = rollObject.AddComponent<CJS_Script_ChoiceRoller>();
         roller.allChoices.Clear();
         string[] rarities = { "Common", "Rare", "Epic", "Legendary" };
         for (int i = 0; i < 9; i++) roller.allChoices.Add(new CJS_ChoiceData {
-            funcIdx = i, rarity = rarities[i % 4], weight = i + 1, localizationKey = "Choice_" + i });
+            funcIdx = i, rarity = rarities[i % 4], weight = i + 1, localizationKey = "Choice_" + i, roguelike = dispatcher });
         Set(roller, "rnd", new System.Random(271828));
         yield return null; yield return null; yield return null;
     }

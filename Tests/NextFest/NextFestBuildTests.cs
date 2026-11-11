@@ -6,9 +6,10 @@ using System.Reflection;
 using NUnit.Framework;
 using UnityEngine;
 using UnityEngine.TestTools;
+using UnityEngine.UI;
 using Object = UnityEngine.Object;
 
-public class NextFestBuildTests
+public partial class NextFestBuildTests
 {
     readonly List<GameObject> objects = new List<GameObject>();
     KHS_Script_ScoreManager score;
@@ -112,6 +113,116 @@ public class NextFestBuildTests
         Assert.That(Run.CapacitorLevel + Run.LastBallLevel + Run.Charge + Run.ChargeLostTotal, Is.Zero);
         score.ConfigureTutorial(1000); Assert.That(Run.ApplyUpgrade(9), Is.False);
     }
+    [Test] public void RarityDistributionUsesDocumentedPerCardWeights()
+    {
+        MaxStrategies();
+        var roller = MakeRoller(4, 5, 6, 8);
+        string[] rarity = { "Common", "Rare", "Epic", "Legendary" };
+        for (int i = 0; i < 4; i++) roller.allChoices[i].rarity = rarity[i];
+        int[] counts = new int[4];
+        for (int i = 0; i < 20000; i++)
+        {
+            var offer = roller.Roll3(out var chance);
+            int index = roller.allChoices.FindIndex(c => c.funcIdx == offer[0].funcIdx);
+            counts[index]++;
+            Assert.That(chance[offer[0]], Is.EqualTo(new[] { 60, 30, 9, 1 }[index]).Within(.001f));
+            Assert.That(offer.Select(c => c.funcIdx).Distinct().Count(), Is.EqualTo(3));
+        }
+        for (int i = 0; i < 4; i++)
+            Assert.That(counts[i] / 200f, Is.EqualTo(new[] { 60, 30, 9, 1 }[i]).Within(1.2f));
+        TestContext.WriteLine("20,000 first draws: " + string.Join(",", counts));
+    }
+    [Test] public void InvalidDisabledConsumedAndMaxedEffectsNeverReturn()
+    {
+        MaxStrategies(); var roller = MakeRoller(0, 1, 2, 3, 4, 5, 6, 7, 8);
+        roller.UnActiveChoices(5); roller.UnActiveChoices(7);
+        roller.allChoices[0].weight = 0; roller.allChoices[1].weight = float.NaN;
+        roller.allChoices[2].weight = float.PositiveInfinity; roller.allChoices[3].rarity = "invalid";
+        roller.allChoices.Add(new CJS_ChoiceData { funcIdx = 99, weight = 10 });
+        roller.allChoices.Add(roller.allChoices[6]);
+        for (int i = 0; i < 50; i++)
+            CollectionAssert.AreEquivalent(new[] { 4, 6, 8 }, roller.Roll3(out _).Select(c => c.funcIdx));
+        foreach (var choice in roller.allChoices) choice.weight = 0;
+        Assert.That(roller.Roll3(out _), Is.Empty);
+    }
+    [Test] public void RerollChangesAnOfferWhenAlternativesExistAndHandlesSmallPool()
+    {
+        var roller = MakeRoller(0, 1, 2, 3, 4, 5, 6, 7, 8);
+        var prior = roller.Roll3(out _).Select(c => c.funcIdx).ToArray();
+        for (int i = 0; i < 100; i++)
+        {
+            var offer = roller.Reroll3(prior, out _);
+            Assert.That(offer.Count, Is.EqualTo(3));
+            Assert.That(offer.Count(c => c.funcIdx <= 3), Is.LessThanOrEqualTo(1));
+            Assert.That(offer.Any(c => !prior.Contains(c.funcIdx)), Is.True);
+            prior = offer.Select(c => c.funcIdx).ToArray();
+        }
+        MaxStrategies(); roller.allChoices.Clear();
+        Assert.That(roller.Reroll3(prior, out _), Is.Empty);
+        roller = MakeRoller(6);
+        Assert.That(roller.Reroll3(new[] { 6 }, out _).Single().funcIdx, Is.EqualTo(6));
+    }
+    [UnityTest] public IEnumerator RerollBudgetPersistsAcrossReopenAndPickButRenewsNextRound()
+    {
+        var ui = MakeUI(out var roller, out var reroll);
+        ui.ShowChoices();
+        var stale = Cards(ui)[0].GetComponent<Button>();
+        for (int i = 0; i < 3; i++)
+        {
+            reroll.onClick.Invoke(); reroll.onClick.Invoke();
+            Assert.That(Read<int>(ui, "usedReroll"), Is.EqualTo(i + 1));
+            stale.onClick.Invoke();
+            Assert.That(CJS_Script_ChoiceState.I.Picked, Is.Empty);
+            yield return new WaitForSecondsRealtime(.22f);
+        }
+        reroll.onClick.Invoke(); Assert.That(Read<int>(ui, "usedReroll"), Is.EqualTo(3));
+        Assert.That(reroll.interactable, Is.False);
+        var before = Cards(ui).Select(c => Read<CJS_ChoiceData>(c, "data").funcIdx).ToArray();
+        ui.Hide(); ui.ShowChoices();
+        CollectionAssert.AreEqual(before, Cards(ui).Select(c => Read<CJS_ChoiceData>(c, "data").funcIdx));
+        Assert.That(Read<int>(ui, "usedReroll"), Is.EqualTo(3));
+        Cards(ui)[0].GetComponent<Button>().onClick.Invoke();
+        Assert.That(CJS_Script_ChoiceState.I.Picked.Count, Is.EqualTo(1));
+        Assert.That(Read<int>(ui, "usedReroll"), Is.EqualTo(3));
+        ui.Hide(); Set(score, "currentRound", 2); ui.ShowChoices();
+        Assert.That(Read<int>(ui, "usedReroll"), Is.Zero);
+        Assert.That(reroll.interactable, Is.True);
+    }
+    [UnityTest] public IEnumerator EmptyPoolAndCompletedScreenCannotTrapOrGrantMorePicks()
+    {
+        MaxStrategies(); ball.SetBallCount(1);
+        var ui = MakeUI(out var roller, out _);
+        roller.allChoices.Clear(); ui.ShowChoices();
+        Assert.That(Read<bool>(ui, "isOpen"), Is.False); Assert.That(Time.timeScale, Is.EqualTo(1));
+        ui.ShowChoices(); Assert.That(Read<bool>(ui, "isOpen"), Is.False);
+        yield return null;
+    }
+
+    CJS_Script_ChoiceRoller MakeRoller(params int[] ids)
+    {
+        var go = New("Roller"); var dispatcher = go.AddComponent<KHS_Script_RogueLikeManager>();
+        var roller = go.AddComponent<CJS_Script_ChoiceRoller>(); roller.allChoices.Clear();
+        foreach (int id in ids) roller.allChoices.Add(new CJS_ChoiceData { funcIdx = id, weight = 1, roguelike = dispatcher });
+        Set(roller, "rnd", new System.Random(271828)); return roller;
+    }
+    CJS_Script_ChoiceUIController MakeUI(out CJS_Script_ChoiceRoller roller, out Button reroll)
+    {
+        New("History").AddComponent<CJS_Script_ChoiceState>();
+        roller = MakeRoller(4, 5, 6, 7, 8);
+        var go = New("UI"); go.SetActive(false);
+        var panel = New("Panel", typeof(RectTransform));
+        var content = New("Content", typeof(RectTransform)); content.transform.SetParent(panel.transform, false);
+        var template = New("Card", typeof(RectTransform), typeof(Button)); template.SetActive(false);
+        var card = template.AddComponent<CJS_Script_ChoiceCard>(); Set(card, "btn", template.GetComponent<Button>()); template.SetActive(true);
+        reroll = New("Reroll", typeof(RectTransform), typeof(Button)).GetComponent<Button>();
+        var ui = go.AddComponent<CJS_Script_ChoiceUIController>();
+        Set(ui, "rollerBehaviour", roller); Set(ui, "panelRoot", panel); Set(ui, "content", content.transform);
+        Set(ui, "cardPrefab", card); Set(ui, "ballCon", ball); Set(ui, "btnReroll", reroll);
+        go.SetActive(true); return ui;
+    }
+    void MaxStrategies() { Run.ApplyUpgrade(9); Run.ApplyUpgrade(9); Run.ApplyUpgrade(10); Run.ApplyUpgrade(10); }
+    static List<CJS_Script_ChoiceCard> Cards(object ui) => Read<List<CJS_Script_ChoiceCard>>(ui, "liveCards");
+    static T Read<T>(object target, string field) => (T)target.GetType().GetField(field, BindingFlags.Instance | BindingFlags.NonPublic).GetValue(target);
     [UnityTest] public IEnumerator RealBlackholeCapturePaysOnlyOnceAndDrainCancelsPendingPayout()
     {
         Run.ApplyUpgrade(9); Hit(1);

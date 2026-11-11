@@ -1,7 +1,7 @@
 using System.Collections.Generic;
 using UnityEngine;
 
-public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
+public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceReroller
 {
     public enum ChanceDisplayMode
     {
@@ -29,7 +29,7 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     {
         rnd = (seed == 0) ? new System.Random() : new System.Random(seed);
 
-        if (allChoices.Count == 0)
+        if (allChoices.Count == 0 && BallARetroPlatform.IsDemoBuild)
         {
             allChoices.Add(new CJS_ChoiceData { name = "범퍼 점수 +100", description = "범퍼 기본 점수 100 증가", rarity = "Common", weight = 5f, isEnabled = true });
             allChoices.Add(new CJS_ChoiceData { name = "반발 계수 +10%", description = "반발 계수 10% 증가", rarity = "Rare", weight = 3f, isEnabled = true });
@@ -59,68 +59,61 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     {
         var demo = BallARetroDemoRun.Current;
         if (demo != null && demo.IsEnabled) return RollDemoChoices(demo, out rollChances);
-        // 1) 실제 추첨 풀 구성(활성 + weight>0). 하나도 없으면 활성만 허용
+        return RollFullChoices(null, out rollChances);
+    }
+
+    public List<CJS_ChoiceData> Reroll3(IReadOnlyCollection<int> previousIds,
+        out Dictionary<CJS_ChoiceData, float> rollChances)
+    {
+        if (BallARetroPlatform.IsDemoBuild) return Roll3(out rollChances);
+        return RollFullChoices(previousIds, out rollChances);
+    }
+
+    private List<CJS_ChoiceData> RollFullChoices(IReadOnlyCollection<int> previousIds,
+        out Dictionary<CJS_ChoiceData, float> chances)
+    {
         var pool = BuildPoolFromAllChoices();
-
-        // 2) "인스펙터와 동일한" 표시 확률 테이블(전체 풀 기준 정규화) 미리 계산
-        var normalizedMap = ComputeNormalizedPercentMap(pool);
-
-        // 3) 비복원 가중치 추첨(로직 동일). 다만 UI에 넘길 확률은 displayMode에 따라 선택
-        rollChances = new Dictionary<CJS_ChoiceData, float>();
-        var result = new List<CJS_ChoiceData>(capacity: 3);
-
-        // 작업용 리스트
-        var work = new List<CJS_ChoiceData>(pool);
-
-        for (int i = 0; i < 3 && work.Count > 0; i++)
+        var result = new List<CJS_ChoiceData>(3);
+        chances = new Dictionary<CJS_ChoiceData, float>();
+        // Guarantee a changed offer when any eligible unseen effect exists.
+        var unseen = previousIds == null ? null : pool.FindAll(c => !ContainsId(previousIds, c.funcIdx));
+        while (result.Count < 3 && pool.Count > 0)
         {
-            float sum = SumWeights(work);
-            CJS_ChoiceData picked;
-
-            if (sum <= 0f)
+            var candidates = result.Count == 0 && unseen != null && unseen.Count > 0 ? unseen : pool;
+            float sum = SumWeights(candidates);
+            double ticket = rnd.NextDouble() * sum;
+            var picked = candidates[candidates.Count - 1];
+            foreach (var candidate in candidates)
             {
-                // 모든 weight가 0이거나 음수인 비정상 케이스: 균등 랜덤 폴백
-                int idx = rnd.Next(0, work.Count);
-                picked = work[idx];
+                ticket -= candidate.weight;
+                if (ticket < 0) { picked = candidate; break; }
             }
-            else
-            {
-                // 누적 분포 표본추출
-                double ticket = rnd.NextDouble() * sum;
-                float acc = 0f;
-                picked = work[0];
-                for (int k = 0; k < work.Count; k++)
-                {
-                    acc += Mathf.Max(0f, work[k].weight);
-                    if (ticket <= acc)
-                    {
-                        picked = work[k];
-                        break;
-                    }
-                }
-            }
-
             result.Add(picked);
-
-            float displayPercent = 0f;
-            if (displayMode == ChanceDisplayMode.PerDraw)
-            {
-                float localSum = Mathf.Max(0.00001f, sum);
-                displayPercent = Mathf.Max(0f, picked.weight) / localSum * 100f;
-            }
-            else // NormalizedPool
-            {
-                if (!normalizedMap.TryGetValue(picked, out displayPercent))
-                    displayPercent = 0f;
-            }
-            rollChances[picked] = displayPercent;
-
-            work.Remove(picked);
+            // Conditional draw probability, not whole-offer inclusion probability.
+            chances[picked] = picked.weight / sum * 100f;
+            pool.Remove(picked);
+            if (IsBonusMapChoice(picked)) pool.RemoveAll(IsBonusMapChoice);
         }
-
         return result;
     }
 
+    private static bool ContainsId(IReadOnlyCollection<int> ids, int id)
+    {
+        foreach (int value in ids) if (value == id) return true;
+        return false;
+    }
+
+    public static float RarityWeight(string rarity)
+    {
+        switch ((rarity ?? "").ToLowerInvariant())
+        {
+            case "common": case "normal": return 60;
+            case "rare": return 30;
+            case "epic": return 9;
+            case "legendary": return 1;
+            default: return 0;
+        }
+    }
     public void PushPicked(CJS_ChoiceData picked)
     {
         if (picked == null) return;
@@ -144,39 +137,33 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
     private List<CJS_ChoiceData> BuildPoolFromAllChoices()
     {
         var pool = new List<CJS_ChoiceData>();
-        for (int i = 0; i < allChoices.Count; i++)
+        var ids = new HashSet<int>();
+        foreach (var c in allChoices)
         {
-            var c = allChoices[i];
-            if (c == null) continue;
-            if (!c.isEnabled) continue;
-            if (c.weight <= 0f) continue;
-            if (!BallARetroPlatform.IsDemoBuild && c.funcIdx == 4)
-                pool.Add(new CJS_ChoiceData { funcIdx = c.funcIdx, localizationKey = "Build_ScoreBoost",
-                    name = c.name, description = c.description, icon = c.icon, rarity = c.rarity,
-                    weight = c.weight, roguelike = c.roguelike });
-            else pool.Add(c);
+            if (c == null || !c.isEnabled || c.weight <= 0 || float.IsNaN(c.weight) || float.IsInfinity(c.weight)
+                || c.funcIdx < 0 || c.funcIdx > 8 || RarityWeight(c.rarity) <= 0 || !ids.Add(c.funcIdx)) continue;
+            if (Application.isPlaying && c.roguelike == null) continue;
+            pool.Add(new CJS_ChoiceData {
+                funcIdx = c.funcIdx, localizationKey = c.funcIdx == 4 ? "Build_ScoreBoost" : c.localizationKey,
+                name = c.name, description = c.description, icon = c.icon, rarity = c.rarity,
+                weight = RarityWeight(c.rarity), roguelike = c.roguelike
+            });
         }
-
         var build = BallARetroRunBuild.Current;
         if (build != null && build.IsEnabled)
         {
-            if (build.CapacitorLevel < 2) pool.Add(DemoChoice(9,
+            if (build.CapacitorLevel < 2) pool.Add(FullChoice(9,
                 build.CapacitorLevel == 0 ? "Build_Capacitor" : "Build_CapacitorUpgrade", FindChoice(5)?.icon));
-            if (build.LastBallLevel < 2) pool.Add(DemoChoice(10,
+            if (build.LastBallLevel < 2) pool.Add(FullChoice(10,
                 build.LastBallLevel == 0 ? "Build_LastBall" : "Build_LastBallUpgrade", FindChoice(8)?.icon));
-        }
-
-        if (pool.Count == 0)
-        {
-            for (int i = 0; i < allChoices.Count; i++)
-            {
-                var c = allChoices[i];
-                if (c != null && c.isEnabled) pool.Add(c);
-            }
         }
         return pool;
     }
 
+    private CJS_ChoiceData FullChoice(int id, string key, Sprite icon) => new CJS_ChoiceData {
+        funcIdx = id, localizationKey = key, name = key, description = key,
+        rarity = "Rare", icon = icon, weight = RarityWeight("Rare")
+    };
     private List<CJS_ChoiceData> RollDemoChoices(BallARetroDemoRun demo, out Dictionary<CJS_ChoiceData, float> chances)
     {
         // Include the real run upgrades as well as the two demo strategies.
@@ -284,7 +271,8 @@ public class CJS_Script_ChoiceRoller : MonoBehaviour, CJS_IChoiceRoller
                 continue;
             }
 
-            if (normalizedMap.TryGetValue(c, out float p))
+            var previewChoice = pool.Find(candidate => candidate.funcIdx == c.funcIdx);
+            if (c.isEnabled && c.weight > 0 && previewChoice != null && normalizedMap.TryGetValue(previewChoice, out float p))
                 previewPercents.Add($"{c.name}: {p:0.0}%");
             else
                 previewPercents.Add($"{c.name}: 0.0%");

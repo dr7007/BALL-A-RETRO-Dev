@@ -35,6 +35,11 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private bool busy;
     private bool gameEnded;
     private bool starterQueued;
+    private int fullScreenRound = -1;
+    private bool fullScreenCompleted;
+    private readonly List<int> offerIds = new List<int>(3);
+    private List<CJS_ChoiceData> currentOffer;
+    private int RerollLimit => BallARetroPlatform.IsDemoBuild ? maxReroll : 3;
 
     [SerializeField]
     private YJ_Script_BallController ballCon;
@@ -97,6 +102,9 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         if (isOpen || gameEnded) return;
         var demo = BallARetroDemoRun.Current;
         if (demo != null && demo.IsEnabled && !demo.CanChoose(CurrentRound())) return;
+        bool fullRun = !BallARetroPlatform.IsDemoBuild;
+        bool newScreen = fullScreenRound != CurrentRound();
+        if (fullRun && fullScreenRound == CurrentRound() && fullScreenCompleted) return;
         if (roller == null)
         {
             Debug.LogError("CJS_IChoiceRoller가 연결되지 않았습니다.", this);
@@ -109,7 +117,16 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         }
 
         isOpen = true;
-        usedReroll = 0;
+        if (!fullRun || fullScreenRound != CurrentRound())
+        {
+            usedReroll = 0;
+            if (fullRun)
+            {
+                fullScreenRound = CurrentRound();
+                fullScreenCompleted = false;
+                pickCount = Mathf.Max(1, ballCon != null ? ballCon.GetBallCount() : 1);
+            }
+        }
         if (demo != null && demo.IsEnabled && gameUICanvasGo) gameUICanvasGo.SetActive(false);
 
         if (panelRoot != null) panelRoot.SetActive(true);
@@ -118,10 +135,9 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         Cursor.visible = true;
 
         if (demo != null && demo.IsEnabled) pickCount = 1;
-        else PickCountBonusFunc();
         SetChoiceButtonsVisible(true);
         UpdateRerollUI();
-        RefreshCards();
+        RefreshCards(reuse: fullRun && !newScreen);
 
         if (liveCards.Count > 0)
         {
@@ -147,23 +163,31 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     private void OnGameEnded() => gameEnded = true;
 
-    private void RefreshCards()
+    private void RefreshCards(bool reroll = false, bool reuse = false)
     {
         ClearCards();
 
-        Dictionary<CJS_ChoiceData, float> chanceMap;
-        List<CJS_ChoiceData> picks = roller.Roll3(out chanceMap);
+        List<CJS_ChoiceData> picks = reuse && currentOffer != null ? currentOffer
+            : reroll && roller is CJS_IChoiceReroller reroller
+                ? reroller.Reroll3(offerIds, out _) : roller.Roll3(out _);
+        currentOffer = picks;
+        offerIds.Clear();
 
         for (int i = 0; i < picks.Count; i++)
         {
             var card = Instantiate(cardPrefab, content);
-            float chance = 0f;
-            if (chanceMap != null && chanceMap.TryGetValue(picks[i], out float p))
-                chance = p;
-
-            card.BindWithChance(picks[i], picked => { if (liveCards.Contains(card)) OnPickCard(picked); },
-                BallARetroDemoRun.Current?.IsEnabled == true ? (float?)null : chance);
+            // A conditional draw probability is not whole-offer inclusion probability.
+            card.BindWithChance(picks[i], picked => { if (liveCards.Contains(card)) OnPickCard(picked); }, null);
             liveCards.Add(card);
+            offerIds.Add(picks[i].funcIdx);
+        }
+        if (liveCards.Count > 0)
+            EventSystem.current?.SetSelectedGameObject(liveCards[0].GetComponent<Button>()?.gameObject);
+        if (picks.Count == 0 && !BallARetroPlatform.IsDemoBuild)
+        {
+            fullScreenCompleted = true;
+            Hide();
+            gameUIFuncInsert();
         }
     }
 
@@ -190,6 +214,7 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
         if (pickCount <= 1)
         {
+            if (!BallARetroPlatform.IsDemoBuild) fullScreenCompleted = true;
             Hide();
             gameUIFuncInsert();
         }
@@ -203,12 +228,13 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
 
     private void OnClickReroll()
     {
-        if (!isOpen || busy) return;
-        if (usedReroll >= maxReroll) return;
+        if (!isOpen || busy || gameEnded || BallARetroPlatform.IsDemoBuild) return;
+        if (usedReroll >= RerollLimit) return;
 
+        busy = true;
         usedReroll++;
         UpdateRerollUI();
-        RefreshCards();
+        RefreshCards(true);
         StartCoroutine(RerollCooldown());
     }
 
@@ -217,12 +243,14 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
         busy = true;
         yield return new WaitForSecondsRealtime(0.2f);
         busy = false;
+        UpdateRerollUI();
     }
 
     private void OnClickSkip()
     {
         if (!isOpen || busy) return;
         if (BallARetroDemoRun.Current?.IsEnabled == true) return;
+        fullScreenCompleted = true;
         Hide();
     }
 
@@ -231,10 +259,10 @@ public class CJS_Script_ChoiceUIController : MonoBehaviour
     private void UpdateRerollUI()
     {
         if (txtRerollInfo != null)
-            txtRerollInfo.text = PSH_Script_Localization.Text("Choice_Remaining", Mathf.Max(0, maxReroll - usedReroll));
+            txtRerollInfo.text = PSH_Script_Localization.Text("Choice_Remaining", Mathf.Max(0, RerollLimit - usedReroll));
 
         if (btnReroll != null)
-            btnReroll.interactable = isOpen && (usedReroll < maxReroll);
+            btnReroll.interactable = isOpen && !busy && !gameEnded && (usedReroll < RerollLimit);
 
         if (btnSkip != null)
             btnSkip.interactable = isOpen;
