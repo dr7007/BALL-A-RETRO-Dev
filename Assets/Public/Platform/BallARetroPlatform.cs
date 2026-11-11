@@ -25,4 +25,5 @@ public static class BallARetroPlatform
     }
     public static bool UsesSteamLeaderboards => IsSteamBuild;
     public static bool UsesPersonalRecords => !IsSteamBuild || IsDemoBuild;
+    public static int ScoreRulesVersion => IsDemoBuild ? 1 : 2;
 }

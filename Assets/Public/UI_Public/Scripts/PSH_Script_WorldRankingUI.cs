@@ -91,7 +91,7 @@ public sealed class PSH_Script_WorldRankingUI : MonoBehaviour
             title.color = Color.magenta;
             Label("Scope", card, "Demo_RankingScope", new Vector2(0, 310), new Vector2(1400, 28), 22);
         }
-        else Literal("Title", card, "SCORE  RANKING", new Vector2(0, 350), new Vector2(1100, 64), 44, Color.magenta);
+        else Literal("Title", card, "SCORE  RANKING  v2", new Vector2(0, 350), new Vector2(1100, 64), 44, Color.magenta);
         Literal("Rank", card, "RANK", new Vector2(-520, 260), new Vector2(180, 48), 34, Color.white);
         Literal("Name", card, "NAME", new Vector2(-190, 260), new Vector2(430, 48), 34, Color.white);
         Literal("Step", card, "STEP", new Vector2(130, 260), new Vector2(160, 48), 34, Color.white);

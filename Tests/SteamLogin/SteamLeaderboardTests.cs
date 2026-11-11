@@ -33,7 +33,7 @@ public class SteamLeaderboardTests
         LeaderboardFixture.Steps=new[]{3};
         LbResp result=null;backend.Fetch("Classic",1,r=>result=r,Assert.Fail);
         yield return Wait(()=>result!=null);
-        Assert.That(LeaderboardFixture.Board,Is.EqualTo("BALLARETRO_Classic_1"));
+        Assert.That(LeaderboardFixture.Board,Is.EqualTo(BallARetroPlatform.IsDemoBuild ? "BALLARETRO_Classic_1" : "BALLARETRO_v2_Classic_1"));
         Assert.That(LeaderboardFixture.Start,Is.EqualTo(1));Assert.That(LeaderboardFixture.End,Is.EqualTo(10));
         Assert.That(result.top10[0].nickname,Is.EqualTo("World Player 42"));
         Assert.That(result.top10[0].rank,Is.EqualTo(1));Assert.That(result.top10[0].score,Is.EqualTo(12000));

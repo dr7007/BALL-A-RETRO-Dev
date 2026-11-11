@@ -18,7 +18,8 @@ public sealed class BallARetroSteamLeaderboard : MonoBehaviour
         if (string.IsNullOrWhiteSpace(mode)) mode = "Classic";
         // Keep mode/level partitions deterministic without silently merging their names.
         if (mode.Length > 64) throw new ArgumentException("Game mode is too long.");
-        return "BALLARETRO_" + Uri.EscapeDataString(mode.Trim()) + "_" + Mathf.Max(1, level);
+        return (BallARetroPlatform.IsDemoBuild ? "BALLARETRO_" : "BALLARETRO_v2_")
+            + Uri.EscapeDataString(mode.Trim()) + "_" + Mathf.Max(1, level);
     }
 
     private void OnDisable()

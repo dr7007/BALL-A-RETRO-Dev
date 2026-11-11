@@ -96,7 +96,7 @@ public class LobbyFlowTests
         var ui=result.GetComponentInChildren<PSH_Script_WorldRankingUI>();
         Assert.That(ui,Is.Not.Null);
         Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,
-            Is.EqualTo(BallARetroPlatform.IsDemoBuild ? PSH_Script_Localization.Text("Demo_RankingTitle") : "SCORE  RANKING"));
+            Is.EqualTo(BallARetroPlatform.IsDemoBuild ? PSH_Script_Localization.Text("Demo_RankingTitle") : "SCORE  RANKING  v2"));
         if(!BallARetroPlatform.IsSteamBuild)
             Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Status").text,Is.EqualTo(PSH_Script_Localization.Text("Rank_SteamOnly")));
         Click(ui.GetComponentsInChildren<Button>().Single(b=>b.name=="Close"));
@@ -130,7 +130,7 @@ public class LobbyFlowTests
             foreach(var code in new[]{"ko","en","ja"})
             {
                 LocaleTestContext.Select(code);yield return LocalizationSettings.InitializationOperation;yield return null;
-                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,Is.EqualTo("SCORE  RANKING"));
+                Assert.That(ui.GetComponentsInChildren<TMP_Text>().Single(t=>t.name=="Title").text,Is.EqualTo("SCORE  RANKING  v2"));
                 Assert.That(ui.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Position").text,Is.EqualTo("1ST"));
                 Assert.That(ui.GetComponentsInChildren<TMP_Text>().First(t=>t.name=="Player").color,Is.EqualTo(Color.red));
                 Assert.That(ui.GetComponentsInChildren<TMP_Text>().Count(t=>t.name=="Step"&&t.text=="3"),Is.EqualTo(3));

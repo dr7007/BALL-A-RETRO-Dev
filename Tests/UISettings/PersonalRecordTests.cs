@@ -44,6 +44,20 @@ public class PersonalRecordTests
         Assert.That(BallARetroPersonalRecordStore.Read("Me", mode, 1), Is.Empty);
         Assert.That(BallARetroPersonalRecordStore.Submit("Me", 0, mode, 1).Length, Is.EqualTo(1));
     }
+    [Test] public void NewRulesPreserveLegacyBestWithoutImportingIt()
+    {
+        string current = BallARetroPersonalRecordStore.StorageKey(mode, 1);
+        string legacy = current.Replace(".v2.", ".v1.");
+        Assert.That(current, Does.Contain(".v2."));
+        PlayerPrefs.SetString(legacy, "legacy-record-sentinel");
+        try
+        {
+            Assert.That(BallARetroPersonalRecordStore.Read("Me", mode, 1), Is.Empty);
+            BallARetroPersonalRecordStore.Submit("Me", 500, mode, 1);
+            Assert.That(PlayerPrefs.GetString(legacy), Is.EqualTo("legacy-record-sentinel"));
+        }
+        finally { PlayerPrefs.DeleteKey(legacy); }
+    }
     [Test] public void InvalidSavedData_DoesNotPreventAReplacementRecord()
     {
         PlayerPrefs.SetString(BallARetroPersonalRecordStore.StorageKey(mode, 1), "broken json");
